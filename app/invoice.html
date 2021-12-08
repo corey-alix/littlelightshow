@@ -8,6 +8,7 @@
       type="text/javascript"
       src="https://identity.netlify.com/v1/netlify-identity-widget.js"
     ></script>
+    <link rel="stylesheet" href="./baseline.css" />
   </head>
   <body>
     <!-- Add a menu:
@@ -22,22 +23,12 @@
     <div data-netlify-identity-button>Login with Netlify Identity</div>
 
     <script>
-      netlifyIdentity.open();
-      netlifyIdentity.on("init", (user) => {
-        console.log(user);
-      });
+      netlifyIdentity.on("init", (user) => console.log("init", user));
+      netlifyIdentity.on("login", (user) => console.log("login", user));
+      netlifyIdentity.on("logout", () => console.log("Logged out"));
+      netlifyIdentity.on("error", (err) => console.error("Error", err));
+      netlifyIdentity.on("open", () => console.log("Widget opened"));
+      netlifyIdentity.on("close", () => console.log("Widget closed"));
     </script>
-
-    <section>
-      <div class="vspacer-1"></div>
-      <form name="contact" netlify>
-        <label class="form-label"
-          >Email or Text <input type="text" name="email" required
-        /></label>
-        <p>
-          <button type="submit">I'm Interested!</button>
-        </p>
-      </form>
-    </section>
   </body>
 </html>
