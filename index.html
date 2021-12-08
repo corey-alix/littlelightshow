@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Little Light Show</title>
     <style>
       body {
         background-color: rgb(165, 97, 97);
         padding: 2em;
       }
+
       .banner {
         background-image: url(./assets/bannerbush.PNG);
-        background-size: 50%;
+        background-size: auto;
+        background-repeat: repeat-x;
         color: white;
         padding: 1em;
         margin: 0;
-        border-top-left-radius: 0.5em;
-        border-top-right-radius: 0.5em;
+        border-radius: 0.5em;
+        font-size: 16pt;
+        height: 1em;
       }
 
       .portfolio {
@@ -25,8 +29,7 @@
       .portfolio img {
         width: 100%;
         height: auto;
-        border-bottom-left-radius: 0.5em;
-        border-bottom-right-radius: 0.5em;
+        border-radius: 0.5em;
       }
 
       .vspacer-2 {
@@ -61,25 +64,30 @@
         font-style: italic;
         font-weight: bolder;
       }
+
+      .telephone {
+        font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+        font-size: 16pt;
+      }
     </style>
   </head>
   <body>
+    <div class="centered banner">Little Light Show</div>
     <section>
-      <div class="centered banner">Little Light Show</div>
-      <div class="vspacer"></div>
-      <div class="portfolio">
-        <img class="job" src="./assets/I1.jpg" />
-      </div>
-    </section>
-    <section>
-      <div class="vspacer-2"></div>
+      <div class="vspacer-1"></div>
       <div class="centered title">Residential Christmas Decorating</div>
       <div class="centered subtitle italic">let your lights shine</div>
     </section>
     <section>
       <div class="vspacer-1"></div>
-      <div class="centered contact">Nathan Alix</div>
-      <div class="centered subtitle">864.???.????</div>
+      <div class="centered contact italic">Nathan Alix</div>
+      <div class="centered subtitle telephone">864.???.????</div>
+    </section>
+    <section>
+      <div class="vspacer-1"></div>
+      <div class="portfolio">
+        <img class="job" src="./assets/I1.jpg" />
+      </div>
     </section>
   </body>
 </html>
