@@ -3,12 +3,20 @@
   <head>
     <title>Little Light Show</title>
     <style>
+      body {
+        background-color: rgb(165, 97, 97);
+        padding: 2em;
+      }
       .banner {
-        background-color: rgb(54, 54, 199);
+        background-image: url(./assets/bannerbush.PNG);
+        background-size: 50%;
         color: white;
         padding: 1em;
         margin: 0;
+        border-top-left-radius: 0.5em;
+        border-top-right-radius: 0.5em;
       }
+
       .portfolio {
         overflow: hidden;
         width: 100%;
@@ -17,10 +25,16 @@
       .portfolio img {
         width: 100%;
         height: auto;
+        border-bottom-left-radius: 0.5em;
+        border-bottom-right-radius: 0.5em;
       }
 
       .vspacer-2 {
         height: 2em;
+      }
+
+      .vspacer {
+        height: 0.5em;
       }
 
       .vspacer-1 {
@@ -40,13 +54,19 @@
       }
 
       .subtitle {
-        font-size: 10pt;
+        font-size: 12pt;
+      }
+
+      .italic {
+        font-style: italic;
+        font-weight: bolder;
       }
     </style>
   </head>
   <body>
     <section>
       <div class="centered banner">Little Light Show</div>
+      <div class="vspacer"></div>
       <div class="portfolio">
         <img class="job" src="./assets/I1.jpg" />
       </div>
@@ -54,7 +74,7 @@
     <section>
       <div class="vspacer-2"></div>
       <div class="centered title">Residential Christmas Decorating</div>
-      <div class="centered subtitle">let your lights shine</div>
+      <div class="centered subtitle italic">let your lights shine</div>
     </section>
     <section>
       <div class="vspacer-1"></div>
