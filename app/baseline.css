@@ -25,7 +25,7 @@ hr {
 }
 
 .banner {
-  background-image: url(./assets/bannerbush.PNG);
+  background-image: url(../assets/bannerbush.PNG);
   background-size: cover;
   color: rgba(253, 244, 220, 0.9);
   padding: 1em;
