@@ -14,111 +14,64 @@
   <body>
     <div class="visible-when-noauth" data-netlify-identity-menu></div>
 
-    <section class="visible-when-auth">
-      <form>
-        <h1>Create an Invoice</h1>
-        <section class="category">
-          <label class="section-title">Client</label>
-          <section class="grid-container">
-            <label
-              >Client Name
-              <input type="text" placeholder="clientname" name="clientname"
-            /></label>
-            <label
-              >Telephone
-              <input type="tel" placeholder="telephone" name="telephone"
-            /></label>
-            <label
-              >Email <input type="email" placeholder="email" name="email"
-            /></label>
-            <label
-              >Bill To
-              <textarea
-                rows="3"
-                cols="32"
-                placeholder="billto"
-                name="billto"
-              ></textarea>
-            </label>
-          </section>
+    <form class="visible-when-auth">
+      <h1>Create an Invoice</h1>
+      <section class="category">
+        <label class="section-title">Client</label>
+        <section class="grid-container">
+          <label class="form-label"
+            >Client Name
+            <input type="text" placeholder="clientname" name="clientname"
+          /></label>
+          <label class="form-label"
+            >Telephone
+            <input type="tel" placeholder="telephone" name="telephone"
+          /></label>
+          <label class="form-label"
+            >Email <input type="email" placeholder="email" name="email"
+          /></label>
+          <label class="form-label"
+            >Bill To
+            <textarea
+              class="address"
+              placeholder="billto"
+              name="billto"
+            ></textarea>
+          </label>
         </section>
+      </section>
 
-        <div class="vspacer"></div>
+      <div class="vspacer"></div>
 
-        <section class="category">
-          <label class="section-title">Items</label>
-          <section class="grid-container">
-            <table>
-              <thead>
-                <tr>
-                  <th class="align-left">Item</th>
-                  <th class="align-right">Quantity</th>
-                  <th class="align-right">Price</th>
-                  <th class="align-right">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td class="align-left">
-                    <input type="text" value="ITEM1" />
-                  </td>
-                  <td class="align-right">
-                    <input class="quantity" type="number" value="2" required />
-                  </td>
-                  <td class="align-right">
-                    <input
-                      class="currency"
-                      type="number"
-                      value="2.22"
-                      required
-                    />
-                  </td>
-                  <td class="align-right">
-                    <input
-                      class="currency"
-                      type="number"
-                      value="4.44"
-                      readonly
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </section>
+      <section class="category">
+        <label class="section-title">Items</label>
+        <section class="line-item-grid">
+          <label class="align-left"
+            >Item
+            <input type="text" value="ITEM1" />
+          </label>
+          <label class="align-right"
+            >Quantity
+            <input class="quantity" type="number" value="2" required />
+          </label>
+          <label class="align-right"
+            >Price
+            <input class="currency" type="number" value="2.22" required />
+          </label>
+          <label class="align-right"
+            >Total
+            <input class="currency" type="number" value="4.44" readonly />
+          </label>
         </section>
-        <div class="vspacer-1"></div>
-        <button type="submit">Submit</button>
-      </form>
-    </section>
+        <button class="button">Add another item</button>
+      </section>
+      <div class="vspacer-1"></div>
+      <button class="button" type="submit">Submit</button>
+    </form>
 
-    <script>
-      netlifyIdentity.on("init", (user) => console.log("init", user));
-      netlifyIdentity.on("login", (user) => console.log("login", user));
-      netlifyIdentity.on("logout", () => console.log("Logged out"));
-      netlifyIdentity.on("error", (err) => console.error("Error", err));
-      netlifyIdentity.on("open", () => console.log("Widget opened"));
-      netlifyIdentity.on("close", () => console.log("Widget closed"));
-
-      showInvoiceForm();
-
-      netlifyIdentity.on("login", (user) => {
-        if (user.app_metadata.provider === "google") {
-          const userName = user.email;
-          showInvoiceForm({ userName });
-        }
-      });
-
-      function showInvoiceForm(auth) {
-        const { userName } = auth || { userName: "" };
-        document.querySelectorAll(".visible-when-auth").forEach((n) => {
-          console.log(n);
-          n.style.display = !!userName ? "block" : "none";
-        });
-        document.querySelectorAll(".visible-when-noauth").forEach((n) => {
-          console.log(n);
-          n.style.display = !userName ? "block" : "none";
-        });
-      }
+    <script type="module">
+      import { init } from "./invoice.js";
+      //init();
     </script>
   </body>
 </html>
