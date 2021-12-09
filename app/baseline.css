@@ -1,8 +1,16 @@
+body.dark {
+  background-color: black;
+}
+
+body.holiday {
+  background-color: rgb(0, 135, 62);
+}
+
 body {
   width: 23em;
-  background-color: rgb(0, 135, 62);
+  background-color: rgba(253, 244, 220, 0.9);
   font-family: Arial black;
-  color: white;
+  color: rgba(253, 244, 220, 0.9);
   text-shadow: 0px 0px 1px black;
   border: 1.5rem solid transparent;
   margin: 0;
