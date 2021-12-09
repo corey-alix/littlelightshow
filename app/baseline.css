@@ -4,13 +4,41 @@ body {
   padding: 2em;
 }
 
+section {
+  padding: 1em;
+}
+
+section.category {
+  border: 1px solid black;
+  padding: 0;
+}
+
+label.section-title {
+  width: 100%;
+  display: block;
+  padding: 0;
+  margin: 0;
+  background: silver;
+}
+
 .glow {
-  font-size: 80px;
   color: #fff;
   text-align: center;
-  text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px rgb(0, 135, 62),
-    0 0 40px rgb(0, 135, 62), 0 0 50px rgb(0, 135, 62), 0 0 60px rgb(0, 135, 62),
-    0 0 70px rgb(0, 135, 62);
+  text-shadow: 0 0 10px #000;
+}
+
+.button {
+  display: block;
+  width: 10em;
+  height: 2em;
+  color: rgba(253, 244, 220, 0.9);
+  background: rgb(214, 0, 28);
+  padding: 0.5em;
+  margin: 0.5em;
+  text-align: center;
+  border-radius: 5px;
+  font-weight: bold;
+  line-height: 25px;
 }
 
 hr {
@@ -19,8 +47,10 @@ hr {
   color: rgb(214, 0, 28);
 }
 
+form label,
 .form-label {
   width: 12em;
+  font-size: 12pt;
   display: inline-block;
 }
 
@@ -38,7 +68,6 @@ hr {
 
 .portfolio {
   overflow: hidden;
-  width: 100%;
 }
 
 .portfolio img {
@@ -63,6 +92,14 @@ hr {
   text-align: center;
 }
 
+.align-left {
+  text-align: left;
+}
+
+.align-right {
+  text-align: right;
+}
+
 .title {
   font-size: 20pt;
 }
@@ -83,4 +120,40 @@ hr {
 .telephone {
   font-weight: bolder;
   font-size: 16pt;
+}
+
+.message {
+  resize: none;
+  padding: 1em;
+  width: 20em;
+  height: 20em;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+}
+
+input.currency {
+  width: 6em;
+  text-align: right;
+}
+
+input.quantity {
+  width: 4em;
+  text-align: right;
+}
+
+.visible-when-auth {
+  display: none;
+}
+
+.visible-when-noauth {
+  display: none;
+}
+
+.netlify-identity-menu {
+  list-style: none;
 }

@@ -9,11 +9,17 @@
     <section>
       <form name="contact" netlify method="POST" action="../index.html">
         <label class="form-label"
-          >Email or Text <input type="text" name="email" required
-        /></label>
-        <p>
-          <button type="submit">Contact Me</button>
-        </p>
+          >Email or Text
+          <textarea
+            class="message"
+            type="text"
+            name="message"
+            placeholder="include text or email"
+            required
+          ></textarea>
+        </label>
+        <div class="spacer-1"></div>
+        <button type="submit">Contact Me</button>
       </form>
     </section>
   </body>

@@ -9,16 +9,16 @@
       src="https://identity.netlify.com/v1/netlify-identity-widget.js"
     ></script>
   </head>
-  <body>
-    <div class="centered banner glow">Little Light Show</div>
+  <body class="grid-container">
+    <section>
+      <div class="centered banner glow">Little Light Show</div>
+    </section>
     <section>
       <div class="vspacer-1"></div>
       <div class="centered title">Residential Christmas Decorating</div>
       <div class="vspacer"></div>
       <div class="centered subtitle italic">let your lights shine</div>
-    </section>
-    <hr />
-    <section>
+      <hr />
       <div class="centered contact">Nathan Alix</div>
       <div class="centered subtitle telephone">864.123.4567</div>
     </section>
@@ -28,11 +28,12 @@
         <img class="job" src="./assets/I1.jpg" />
       </div>
     </section>
-    <section>
-      <div class="vspacer-1"></div>
-      <a href="./app/contact.html"><label>Contact Nathan</label></a>
-      <div class="vspacer-1"></div>
-      <a href="./app/invoice.html"><label>Sign In</label></a>
+    <div class="vspacer-1"></div>
+    <section class="grid-container">
+      <a class="button" href="./app/contact.html"
+        ><label>Contact Nathan</label></a
+      >
+      <a class="button" href="./app/invoice.html"><label>Sign In</label></a>
     </section>
   </body>
 </html>
