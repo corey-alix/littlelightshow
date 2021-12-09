@@ -27,6 +27,7 @@ label.section-title {
   text-shadow: 0 0 10px #000;
 }
 
+.netlify-identity-item,
 .button {
   display: block;
   width: 10em;
@@ -146,14 +147,10 @@ input.quantity {
   text-align: right;
 }
 
-.visible-when-auth {
-  display: none;
-}
-
-.visible-when-noauth {
-  display: none;
-}
-
 .netlify-identity-menu {
   list-style: none;
+}
+
+a {
+  color: rgba(253, 244, 220, 0.9);
 }
