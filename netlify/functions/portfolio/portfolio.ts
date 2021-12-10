@@ -4,6 +4,7 @@ import faunadb from "faunadb";
 const q = faunadb.query;
 const client = new faunadb.Client({
   secret: process.env.FAUNADB_SECRET as string,
+  domain: "db.us.fauna.com",
 });
 
 export const handler: Handler = async (event, context) => {
