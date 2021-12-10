@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Playground</title>
+    <style>
+      body {
+        background-color: black;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Playground</h1>
+    <script type="module">
+      import { query } from "../app/services/portfolio.js";
+      query().then((response) => {
+        console.log({ response });
+      });
+    </script>
+  </body>
+</html>
