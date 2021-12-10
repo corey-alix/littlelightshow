@@ -13,3 +13,7 @@ for thoughts on modifyint netlify.toml to use esbuild
 Ideally everything would be typescript
 I'd have a unit-test suite and linter
 netlify would transpile typescript and deploy app
+
+## Links
+
+https://lightshow.netlify.app
