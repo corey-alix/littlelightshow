@@ -1,8 +1,14 @@
 export async function query() {
-  const portfolio = await fetch("/.netlify/functions/portfolio", {
-    method: "POST",
-    body: JSON.stringify({}),
-  });
+  try {
+    const portfolio = await fetch("/.netlify/functions/portfolio", {
+      method: "POST",
+      body: JSON.stringify({}),
+    });
 
-  return portfolio;
+    if (!portfolio.ok) throw `${portfolio.status}: ${portfolio.statusText}`;
+    return await portfolio.json();
+  } catch (ex) {
+    console.error(ex);
+    return { error: ex };
+  }
 }

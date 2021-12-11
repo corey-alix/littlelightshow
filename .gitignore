@@ -2,4 +2,3 @@
 .netlify
 .faunarc
 node_modules
-app/globals.js

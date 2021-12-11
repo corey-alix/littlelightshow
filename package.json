@@ -5,7 +5,7 @@
   "description": "littlelightshow",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "debug": "netlify dev --inspect"
   },
   "repository": {
     "type": "git",

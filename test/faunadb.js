@@ -1,10 +1,10 @@
 import faunadb from "faunadb";
-import { FAUNA_SECRET_KEY } from "../app/globals.js";
+import { FAUNADB_SERVER_SECRET } from "../app/globals.js";
 const { query, Client } = faunadb;
 const q = query;
 
 const client = new Client({
-  secret: FAUNA_SECRET_KEY,
+  secret: FAUNADB_SERVER_SECRET,
   domain: "db.us.fauna.com",
 });
 

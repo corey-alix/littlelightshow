@@ -13,9 +13,10 @@
     <h1>Playground</h1>
     <script type="module">
       import { query } from "../app/services/portfolio.js";
-      query().then((response) => {
+      (async function () {
+        const response = await query();
         console.log({ response });
-      });
+      })();
     </script>
   </body>
 </html>
