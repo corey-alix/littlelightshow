@@ -1,6 +1,30 @@
 declare var netlifyIdentity: any;
 
 import { CONTEXT } from "./globals.js";
+import { save } from "./services/invoices.js";
+
+function saveInvoice(model: any) {
+  save(model);
+}
+
+const inventory = JSON.parse(
+  localStorage.getItem("inventory") || "{}"
+) as Record<string, any>;
+
+function getInventoryItemByCode(code: string) {
+  if (inventory[code]) {
+    return inventory[code].price;
+  }
+  switch (code) {
+    case "test1":
+      return 11;
+    case "test2":
+      return 12;
+    case "test3":
+      return 13;
+  }
+  return Math.floor(100 * Math.random());
+}
 
 class EventBus {
   private handlers = {} as Record<string, Array<() => void>>;
@@ -49,11 +73,12 @@ function asForm(
       type?: string;
       required?: boolean;
       value?: string | number | boolean;
+      lookup?: string;
     }
   >
 ) {
   const fieldNames = Object.keys(fieldInfos);
-  const form = document.createElement("form");
+  const form = document.createElement("div");
   fieldNames.forEach((fieldName) => {
     const fieldInfo = fieldInfos[fieldName];
     const label = document.createElement("label");
@@ -62,7 +87,7 @@ function asForm(
     if (fieldInfo.readonly) input.readOnly = true;
     if (fieldInfo.required) input.required = true;
     label.appendChild(input);
-    input.id = fieldName;
+    input.name = input.id = fieldName;
     input.classList.add("field", fieldName, fieldInfo.type || "text");
     switch (fieldInfo.type) {
       case "currency":
@@ -83,37 +108,93 @@ function asForm(
       else if (typeof fieldValue == "number") input.valueAsNumber = fieldValue;
       else input.value = fieldValue;
     }
+
+    if (fieldInfo.lookup) {
+      input.setAttribute("list", fieldInfo.lookup);
+      forceDatalist(fieldInfo, form);
+    }
     form.appendChild(label);
   });
   return form;
 }
 
+function forceDatalist(
+  fieldInfo: {
+    label?: string | undefined;
+    readonly?: boolean | undefined;
+    type?: string | undefined;
+    required?: boolean | undefined;
+    value?: string | number | boolean | undefined;
+    lookup?: string | undefined;
+  },
+  form: HTMLElement
+) {
+  if (document.querySelector(`#${fieldInfo.lookup}`)) return;
+  const dataList = document.createElement("datalist");
+  dataList.id = fieldInfo.lookup!;
+  ["test1", "test2", "test3"].forEach((id) => {
+    const option = document.createElement("option");
+    option.value = id;
+    dataList.appendChild(option);
+  });
+  form.appendChild(dataList);
+}
+
 function bind(
-  form: HTMLFormElement,
-  querySelectors: string[],
+  form: HTMLElement,
+  inputQuerySelectors: string[],
+  outputQuerySelectors: string[],
   cb: (args: Array<HTMLElement>) => void
 ) {
-  const inputs = querySelectors.map(
+  const inputs = inputQuerySelectors.map(
     (qs) => form.querySelector(qs) as HTMLInputElement
   );
-  const callback = () => cb(inputs);
+  const outputs = outputQuerySelectors.map(
+    (qs) => form.querySelector(qs) as HTMLInputElement
+  );
+  const callback = () => cb([...inputs, ...outputs]);
   inputs.forEach((input) => input.addEventListener("change", callback));
 }
 
 function createItemPanel() {
   const form = asForm({
-    item: { label: "Item", required: true },
+    item: { label: "Item", required: true, lookup: "inventory-items" },
     quantity: { label: "Quantity", type: "quantity", required: true, value: 1 },
     price: { label: "Price", type: "currency", required: true },
     total: { label: "Total", type: "currency", readonly: true },
   });
 
-  const totalInput = form.querySelector("#total") as HTMLInputElement;
-  bind(form, ["#price", "#quantity"], ([price, quantity]) => {
-    totalInput.valueAsNumber =
-      (price as HTMLInputElement).valueAsNumber *
-      (quantity as HTMLInputElement).valueAsNumber;
-  });
+  form.classList.add("line-item");
+
+  bind(
+    form,
+    ["#price", "#quantity"],
+    ["#total"],
+    ([price, quantity, total]) => {
+      const ttl =
+        (price as HTMLInputElement).valueAsNumber *
+        (quantity as HTMLInputElement).valueAsNumber;
+      (total as HTMLInputElement).value = ttl.toFixed(2);
+    }
+  );
+
+  bind(
+    form,
+    ["#item"],
+    ["#price", "#quantity", "#total"],
+    ([item, price, quantity, total]) => {
+      const currentPrice = (price as HTMLInputElement).valueAsNumber;
+      const itemPrice = getInventoryItemByCode(
+        (item as HTMLInputElement).value
+      );
+      if (itemPrice && currentPrice != itemPrice)
+        (price as HTMLInputElement).value = itemPrice.toFixed(2);
+      const ttl =
+        (price as HTMLInputElement).valueAsNumber *
+        (quantity as HTMLInputElement).valueAsNumber;
+      (total as HTMLInputElement).value = ttl.toFixed(2);
+    }
+  );
   return form;
 }
 
@@ -133,14 +214,49 @@ function showInvoiceForm(auth?) {
     addAnotherItem(formDom);
   });
   addAnotherItem(formDom);
+  form.on("submit", () => {
+    if (!formDom.checkValidity()) {
+      formDom.reportValidity();
+      return false;
+    }
+    formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
+      const [itemInput, priceInput] = ["#item", "#price"].map(
+        (id) => lineItemForm.querySelector(id) as HTMLInputElement
+      );
+      persistInventoryItem({
+        code: itemInput.value,
+        price: priceInput.valueAsNumber,
+      });
+    });
+    const data = new FormData(formDom);
+    const requestModel = {
+      clientname: data.get("clientname"),
+      telephone: data.get("telephone"),
+      email: data.get("email"),
+      items: [] as Array<{ item: string }>,
+    };
+
+    let currentItem = null as any;
+    for (let [key, value] of data.entries()) {
+      if (key === "item") {
+        currentItem = {};
+        requestModel.items.push(currentItem);
+      }
+      if (currentItem) currentItem[key] = value;
+    }
+
+    console.log({ requestModel });
+    saveInvoice(requestModel);
+  });
 }
 
 function addAnotherItem(formDom: HTMLFormElement) {
   const itemPanel = createItemPanel();
   const target = formDom.querySelector(".line-items") || formDom;
-  while (itemPanel.firstChild) {
-    target.appendChild(itemPanel.firstChild);
-  }
+  target.appendChild(itemPanel);
+  // while (itemPanel.firstChild) {
+  //   target.appendChild(itemPanel.firstChild);
+  // }
 }
 
 export function init() {
@@ -166,4 +282,11 @@ export function init() {
       });
       break;
   }
+}
+function persistInventoryItem(inventoryItem: { code: string; price: number }) {
+  const inventory = JSON.parse(
+    localStorage.getItem("inventory") || "{}"
+  ) as Record<string, any>;
+  inventory[inventoryItem.code] = inventoryItem;
+  localStorage.setItem("inventory", JSON.stringify(inventory));
 }
