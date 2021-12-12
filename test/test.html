@@ -16,12 +16,14 @@
     <div id="datadump"></div>
     <script type="module">
       import { query } from "../app/services/portfolio.js";
+      import { createDatabase } from "../bin/test.js";
+      createDatabase();
 
       const runButton = document.querySelector("#run");
       const keyInput = document.querySelector("#faunadb");
       const outputArea = document.querySelector("#datadump");
 
-      keyInput.value = localStorage.getItem("dbkey");
+      keyInput.value = localStorage.getItem("FAUNADB_SERVER_SECRET");
 
       function renderItem(data) {
         const fieldNames = Object.keys(data);

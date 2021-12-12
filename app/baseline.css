@@ -31,12 +31,10 @@ section.category {
   padding: 0;
 }
 
-label.section-title {
-  width: 100%;
-  display: block;
-  padding: 0;
-  margin: 0;
+div.section-title {
+  padding: 0.5rem;
   background: silver;
+  border-radius: 0;
 }
 
 .netlify-identity-item,
@@ -152,10 +150,11 @@ form input {
   width: 100%;
   font-size: 1.5rem;
   border-radius: 0.5rem;
+  margin-left: 0.5rem;
 }
 
 input.currency {
-  width: 6rem;
+  width: 8rem;
   text-align: right;
 }
 

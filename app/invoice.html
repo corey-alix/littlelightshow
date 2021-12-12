@@ -17,10 +17,10 @@
   <body class="holiday">
     <div class="visible-when-noauth" data-netlify-identity-menu></div>
 
-    <form class="visible-when-auth">
+    <form id="invoice-form" class="visible-when-auth">
       <h1>Create an Invoice</h1>
       <section class="category">
-        <label class="section-title">Client</label>
+        <div class="section-title">Client</div>
         <section class="grid-container">
           <label class="form-label"
             >Client Name
@@ -47,33 +47,18 @@
       <div class="vspacer"></div>
 
       <section class="category">
-        <label class="section-title">Items</label>
-        <section class="line-item-grid">
-          <label class="align-left"
-            >Item
-            <input type="text" value="ITEM1" />
-          </label>
-          <label class="align-right"
-            >Quantity
-            <input class="quantity" type="number" value="2" required />
-          </label>
-          <label class="align-right"
-            >Price
-            <input class="currency" type="number" value="2.22" required />
-          </label>
-          <label class="align-right"
-            >Total
-            <input class="currency" type="number" value="4.44" readonly />
-          </label>
-        </section>
-        <button class="button">Add another item</button>
+        <div class="section-title">Items</div>
+        <section class="line-items line-item-grid"></section>
+        <button class="button" data-event="add-another-item" type="button">
+          Add item
+        </button>
       </section>
       <div class="vspacer-1"></div>
       <button class="button" type="submit">Submit</button>
     </form>
 
     <script type="module">
-      import { init } from "./invoice.js";
+      import { init } from "../bin/invoice.js";
       init();
     </script>
   </body>
