@@ -4729,10 +4729,15 @@ if ((_a = globalThis.process) == null ? void 0 : _a.env) {
 } else if (localStorage) {
   accessKeys.FAUNADB_SERVER_SECRET = localStorage.getItem("FAUNADB_SERVER_SECRET");
   accessKeys.FAUNADB_ADMIN_SECRET = localStorage.getItem("FAUNADB_ADMIN_SECRET");
+  if (!accessKeys.FAUNADB_SERVER_SECRET) {
+    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
+    accessKeys.FAUNADB_SERVER_SECRET = secret;
+    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+  }
   if (!accessKeys.FAUNADB_SERVER_SECRET)
-    throw "set FAUNADB_SERVER_SECRET in local storage";
+    console.error("set FAUNADB_SERVER_SECRET in local storage");
   if (!accessKeys.FAUNADB_ADMIN_SECRET)
-    throw "set FAUNADB_ADMIN_SECRET in local storage";
+    console.error("set FAUNADB_ADMIN_SECRET in local storage");
 }
 function isNetlifyBuildContext() {
   var _a2;

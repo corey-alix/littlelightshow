@@ -15,10 +15,16 @@ if (globalThis.process?.env) {
     "FAUNADB_ADMIN_SECRET"
   ) as string;
 
+  if (!accessKeys.FAUNADB_SERVER_SECRET) {
+    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
+    accessKeys.FAUNADB_SERVER_SECRET = secret;
+    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+  }
+
   if (!accessKeys.FAUNADB_SERVER_SECRET)
-    throw "set FAUNADB_SERVER_SECRET in local storage";
+    console.error("set FAUNADB_SERVER_SECRET in local storage");
   if (!accessKeys.FAUNADB_ADMIN_SECRET)
-    throw "set FAUNADB_ADMIN_SECRET in local storage";
+    console.error("set FAUNADB_ADMIN_SECRET in local storage");
 }
 
 function isNetlifyBuildContext() {
