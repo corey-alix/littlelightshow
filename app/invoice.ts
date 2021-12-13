@@ -1,124 +1,18 @@
 declare var netlifyIdentity: any;
 
+import { FormFactory, FormManager } from "./FormManager.js";
 import { CONTEXT } from "./globals.js";
-import { save } from "./services/invoices.js";
+import { InventoryManager } from "./InventoryManager.js";
+import {
+  save as saveInvoice,
+  invoices as getAllInvoices,
+  Invoice,
+} from "./services/invoices.js";
 
-function saveInvoice(model: any) {
-  save(model);
-}
+const inventoryManager = new InventoryManager();
+const formManager = new FormFactory();
 
-const inventory = JSON.parse(
-  localStorage.getItem("inventory") || "{}"
-) as Record<string, any>;
-
-function getInventoryItemByCode(code: string) {
-  if (inventory[code]) {
-    return inventory[code].price;
-  }
-  switch (code) {
-    case "test1":
-      return 11;
-    case "test2":
-      return 12;
-    case "test3":
-      return 13;
-  }
-  return Math.floor(100 * Math.random());
-}
-
-class EventBus {
-  private handlers = {} as Record<string, Array<() => void>>;
-  on(eventName: string, cb: () => void) {
-    if (!this.handlers[eventName]) this.handlers[eventName] = [];
-    this.handlers[eventName].push(cb);
-    return {
-      off: () => {
-        const i = this.handlers[eventName].indexOf(cb);
-        if (i >= 0) this.handlers[eventName].splice(i, 1);
-      },
-    };
-  }
-
-  trigger(eventName: string) {
-    if (!this.handlers[eventName]) return;
-    this.handlers[eventName].forEach((cb) => cb());
-  }
-
-  destroy() {
-    this.handlers = {};
-  }
-}
-
-function domAsForm(dom: HTMLFormElement) {
-  if (!dom) throw "cannot create a form without a dom element";
-  const channel = new EventBus();
-  // find all inputs with a 'data-event'
-  dom.querySelectorAll("[data-event]").forEach((eventItem) => {
-    eventItem.addEventListener("click", () => {
-      const eventName = (eventItem as HTMLInputElement).dataset["event"];
-      if (!eventName) throw "item must define a data-event";
-      channel.trigger(eventName);
-    });
-  });
-
-  return channel;
-}
-
-function asForm(
-  fieldInfos: Record<
-    string,
-    {
-      label?: string;
-      readonly?: boolean;
-      type?: string;
-      required?: boolean;
-      value?: string | number | boolean;
-      lookup?: string;
-    }
-  >
-) {
-  const fieldNames = Object.keys(fieldInfos);
-  const form = document.createElement("div");
-  fieldNames.forEach((fieldName) => {
-    const fieldInfo = fieldInfos[fieldName];
-    const label = document.createElement("label");
-    label.innerText = fieldInfo.label || fieldName;
-    const input = document.createElement("input");
-    if (fieldInfo.readonly) input.readOnly = true;
-    if (fieldInfo.required) input.required = true;
-    label.appendChild(input);
-    input.name = input.id = fieldName;
-    input.classList.add("field", fieldName, fieldInfo.type || "text");
-    switch (fieldInfo.type) {
-      case "currency":
-        input.type = "number";
-        label.classList.add("align-right");
-        input.setAttribute("step", "0.01");
-        break;
-      case "quantity":
-        input.type = "number";
-        label.classList.add("align-right");
-        break;
-      default:
-        label.classList.add("align-left");
-    }
-    if (fieldInfo.value) {
-      const fieldValue = fieldInfo.value;
-      if (typeof fieldValue == "boolean") input.checked = fieldValue;
-      else if (typeof fieldValue == "number") input.valueAsNumber = fieldValue;
-      else input.value = fieldValue;
-    }
-
-    if (fieldInfo.lookup) {
-      input.setAttribute("list", fieldInfo.lookup);
-      forceDatalist(fieldInfo, form);
-    }
-    form.appendChild(label);
-  });
-  return form;
-}
-
-function forceDatalist(
+export function forceDatalist(
   fieldInfo: {
     label?: string | undefined;
     readonly?: boolean | undefined;
@@ -132,9 +26,9 @@ function forceDatalist(
   if (document.querySelector(`#${fieldInfo.lookup}`)) return;
   const dataList = document.createElement("datalist");
   dataList.id = fieldInfo.lookup!;
-  ["test1", "test2", "test3"].forEach((id) => {
+  Object.entries(inventoryManager.inventory).forEach(([key, value]) => {
     const option = document.createElement("option");
-    option.value = id;
+    option.value = key;
     dataList.appendChild(option);
   });
   form.appendChild(dataList);
@@ -157,7 +51,7 @@ function bind(
 }
 
 function createItemPanel() {
-  const form = asForm({
+  const form = formManager.asForm({
     item: { label: "Item", required: true, lookup: "inventory-items" },
     quantity: { label: "Quantity", type: "quantity", required: true, value: 1 },
     price: { label: "Price", type: "currency", required: true },
@@ -184,7 +78,7 @@ function createItemPanel() {
     ["#price", "#quantity", "#total"],
     ([item, price, quantity, total]) => {
       const currentPrice = (price as HTMLInputElement).valueAsNumber;
-      const itemPrice = getInventoryItemByCode(
+      const itemPrice = inventoryManager.getInventoryItemByCode(
         (item as HTMLInputElement).value
       );
       if (itemPrice && currentPrice != itemPrice)
@@ -200,6 +94,10 @@ function createItemPanel() {
 
 function showInvoiceForm(auth?) {
   const { userName } = auth || { userName: "" };
+
+  const formDom = document.querySelector("#invoice-form") as HTMLFormElement;
+  if (!formDom) throw "a form must be defined with id of 'invoice-form'";
+
   document.querySelectorAll(".visible-when-auth").forEach((n) => {
     (n as HTMLElement).style.display = !!userName ? "block" : "none";
   });
@@ -207,14 +105,30 @@ function showInvoiceForm(auth?) {
     (n as HTMLElement).style.display = !userName ? "block" : "none";
   });
 
-  const formDom = document.querySelector("#invoice-form") as HTMLFormElement;
-  if (!formDom) throw "a form must be defined with id of 'invoice-form'";
-  const form = domAsForm(formDom);
-  form.on("add-another-item", () => {
-    addAnotherItem(formDom);
+  const form = formManager.domAsForm(formDom);
+
+  form.on("list-all-invoices", () => {
+    window.location.href = "invoices.html";
   });
-  addAnotherItem(formDom);
-  form.on("submit", () => {
+
+  form.on("remove-item", (event) => {
+    if (event?.item) {
+      debugger;
+      let lineItems = event.item as HTMLElement;
+      while (lineItems && !lineItems.classList.contains("line-items")) {
+        lineItems = lineItems.parentElement as HTMLElement;
+      }
+      if (!lineItems) throw "unable to find line-items";
+      lineItems.remove();
+    }
+  });
+
+  form.on("add-another-item", () => {
+    if (!form.isValid()) return;
+    addAnotherItem(form);
+  });
+
+  form.on("submit", async () => {
     if (!formDom.checkValidity()) {
       formDom.reportValidity();
       return false;
@@ -223,17 +137,24 @@ function showInvoiceForm(auth?) {
       const [itemInput, priceInput] = ["#item", "#price"].map(
         (id) => lineItemForm.querySelector(id) as HTMLInputElement
       );
-      persistInventoryItem({
+      inventoryManager.persistInventoryItem({
         code: itemInput.value,
         price: priceInput.valueAsNumber,
       });
     });
+    inventoryManager.persistInventoryItems();
     const data = new FormData(formDom);
-    const requestModel = {
-      clientname: data.get("clientname"),
-      telephone: data.get("telephone"),
-      email: data.get("email"),
-      items: [] as Array<{ item: string }>,
+    const requestModel: Invoice = {
+      id: "",
+      clientname: data.get("clientname") as string,
+      telephone: data.get("telephone") as string,
+      email: data.get("email") as string,
+      items: [] as Array<{
+        item: string;
+        price: number;
+        quantity: number;
+        total: number;
+      }>,
     };
 
     let currentItem = null as any;
@@ -246,20 +167,45 @@ function showInvoiceForm(auth?) {
     }
 
     console.log({ requestModel });
-    saveInvoice(requestModel);
+    await saveInvoice(requestModel);
+    form.trigger("list-all-invoices");
   });
 }
 
-function addAnotherItem(formDom: HTMLFormElement) {
+function createButton(
+  form: FormManager,
+  options: { title: string; event: string }
+) {
+  const button = document.createElement("button");
+  button.classList.add("button");
+  button.innerText = options.title;
+  button.dataset.event = options.event;
+  button.addEventListener("click", () => {});
+  return button;
+}
+
+function addAnotherItem(form: FormManager) {
   const itemPanel = createItemPanel();
-  const target = formDom.querySelector(".line-items") || formDom;
+  const target = form.formDom.querySelector(".line-items") || form.formDom;
   target.appendChild(itemPanel);
-  // while (itemPanel.firstChild) {
-  //   target.appendChild(itemPanel.firstChild);
-  // }
+  const removeButton = createButton(form, {
+    title: "Remove Item",
+    event: "remove-item",
+  });
+  removeButton.addEventListener("click", () => itemPanel.remove());
+  itemPanel.appendChild(removeButton);
 }
 
 export function init() {
+  const formDom = document.querySelector("#invoice-form") as HTMLFormElement;
+  if (!formDom) throw "a form must be defined with id of 'invoice-form'";
+
+  const queryParams = new URLSearchParams(window.location.search);
+  if (queryParams.has("id")) {
+    renderInvoice(formDom, queryParams.get("id")!);
+    return;
+  }
+
   switch (CONTEXT) {
     case "dev":
       showInvoiceForm({ userName: "dev" });
@@ -283,10 +229,47 @@ export function init() {
       break;
   }
 }
-function persistInventoryItem(inventoryItem: { code: string; price: number }) {
-  const inventory = JSON.parse(
-    localStorage.getItem("inventory") || "{}"
-  ) as Record<string, any>;
-  inventory[inventoryItem.code] = inventoryItem;
-  localStorage.setItem("inventory", JSON.stringify(inventory));
+
+export async function renderInvoices(target: HTMLElement) {
+  const invoices = await getAllInvoices();
+  let grandTotal = 0;
+  const rows = invoices
+    .map((invoice) => {
+      const total = invoice.items.reduce((a, b) => a + b.total, 0) || 0;
+      grandTotal += total;
+      return `<label class="form-label"><a href="invoice.html?id=${
+        invoice.id
+      }">${
+        invoice.clientname
+      }</a></label><label class="currency form-label"> ${total.toFixed(
+        2
+      )}</label>`;
+    })
+    .join("<br/>");
+  target.innerHTML = `${rows}<hr/><label class="form-label">Total</label><label class="form-label currency">${grandTotal.toFixed(
+    2
+  )}</label>`;
+}
+
+export async function renderInvoice(target: HTMLElement, invoiceId: string) {
+  const invoices = await getAllInvoices();
+  const invoice = invoices.find((invoice) => invoice.id === invoiceId);
+  if (!invoice) throw "invoice not found";
+  let clientInfo = `
+  <label>Client Name<input value="${invoice.clientname}"/></label><br/>
+  <label>Telephone<input value="${invoice.telephone}"/></label><br/>  
+  `;
+
+  let items = invoice.items
+    .map(
+      (item) => `
+  <label>Item<input value="${item.item}"/></label><br/>
+  <label>Quantity<input value="${item.quantity}"/></label><br/>
+  <label>Price<input value="${item.price}"/></label><br/>
+  <label>Total<input value="${item.total}"/></label><br/>
+  `
+    )
+    .join("");
+
+  target.innerHTML = clientInfo + items;
 }

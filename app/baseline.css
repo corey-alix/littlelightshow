@@ -37,6 +37,10 @@ div.section-title {
   border-radius: 0;
 }
 
+.toolbar .button {
+  display: inline-block;
+}
+
 .netlify-identity-item,
 .button {
   display: block;
@@ -61,6 +65,7 @@ hr {
 
 .form-label {
   width: 18rem;
+  display: table-cell;
 }
 
 .portfolio {
@@ -153,12 +158,12 @@ form input {
   margin-left: 0.5rem;
 }
 
-input.currency {
+.currency {
   width: 8rem;
   text-align: right;
 }
 
-input.quantity {
+.quantity {
   width: 4em;
   text-align: right;
 }

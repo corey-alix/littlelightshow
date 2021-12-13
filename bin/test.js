@@ -4717,6 +4717,7 @@ var require_faunadb = __commonJS({
 });
 
 // app/globals.ts
+var import_faunadb = __toModule(require_faunadb());
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4767,12 +4768,12 @@ var tables = {
 };
 
 // test/test.ts
-var import_faunadb = __toModule(require_faunadb());
-var q = import_faunadb.default.query;
+var import_faunadb2 = __toModule(require_faunadb());
+var q = import_faunadb2.default.query;
 function createDatabase() {
   if (CONTEXT !== "dev")
     return;
-  const client = new import_faunadb.default.Client({
+  const client = new import_faunadb2.default.Client({
     secret: FAUNADB_SERVER_SECRET,
     domain
   });

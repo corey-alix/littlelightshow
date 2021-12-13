@@ -1,8 +1,11 @@
+import faunadb from "faunadb";
+
 const accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
   FAUNADB_DOMAIN: "db.us.fauna.com",
 };
+
 if (globalThis.process?.env) {
   accessKeys.FAUNADB_SERVER_SECRET = process.env
     .FAUNADB_SERVER_SECRET as string;
@@ -35,3 +38,7 @@ export const domain = accessKeys.FAUNADB_DOMAIN;
 export const FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
 export const FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 export const CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
+
+export function createClient() {
+  return new faunadb.Client({ secret: FAUNADB_SERVER_SECRET, domain });
+}
