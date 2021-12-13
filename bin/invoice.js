@@ -4802,6 +4802,7 @@ var FormManager = class {
   }
   createButton(options) {
     const button = document.createElement("button");
+    button.type = "button";
     button.classList.add("button");
     button.innerText = options.title;
     button.dataset.event = options.event;
