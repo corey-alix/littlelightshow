@@ -1,4 +1,4 @@
-export class InventoryManager {
+class InventoryManager {
   inventory = JSON.parse(localStorage.getItem("inventory") || "{}") as Record<
     string,
     { code: string; price: number }
@@ -19,3 +19,5 @@ export class InventoryManager {
     localStorage.setItem("inventory", JSON.stringify(this.inventory));
   }
 }
+
+export const inventoryManager = new InventoryManager();

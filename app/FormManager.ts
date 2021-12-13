@@ -1,7 +1,38 @@
 import { EventBus } from "./EventBus.js";
-import { forceDatalist } from "./invoice.js";
+import { inventoryManager } from "./InventoryManager.js";
+
+function forceDatalist(
+  fieldInfo: {
+    label?: string | undefined;
+    readonly?: boolean | undefined;
+    type?: string | undefined;
+    required?: boolean | undefined;
+    value?: string | number | boolean | undefined;
+    lookup?: string | undefined;
+  },
+  form: HTMLElement
+) {
+  if (document.querySelector(`#${fieldInfo.lookup}`)) return;
+  const dataList = document.createElement("datalist");
+  dataList.id = fieldInfo.lookup!;
+  Object.entries(inventoryManager.inventory).forEach(([key, value]) => {
+    const option = document.createElement("option");
+    option.value = key;
+    dataList.appendChild(option);
+  });
+  form.appendChild(dataList);
+}
 
 export class FormManager {
+  set(name: string, value: string | number) {
+    const input = this.formDom.querySelector(
+      `[name="${name}"]`
+    ) as HTMLInputElement;
+    if (!input) throw `field not found: ${name}`;
+    if (typeof value === "number") input.valueAsNumber = value;
+    else input.value = value || "";
+  }
+
   isValid() {
     this.formDom.reportValidity();
     return this.formDom.checkValidity();
@@ -14,6 +45,17 @@ export class FormManager {
 
   on(eventName: string, cb: (event: any) => void) {
     this.channel.on(eventName, cb);
+  }
+
+  createButton(options: { title: string; event: string }) {
+    const button = document.createElement("button");
+    button.classList.add("button");
+    button.innerText = options.title;
+    button.dataset.event = options.event;
+    button.addEventListener("click", () => {
+      this.trigger(options.event, { item: button });
+    });
+    return button;
   }
 
   constructor(public formDom: HTMLFormElement) {}

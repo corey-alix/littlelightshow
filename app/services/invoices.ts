@@ -14,6 +14,7 @@ export interface InvoiceItem {
 export interface Invoice {
   id: string;
   clientname: string;
+  billto: string;
   telephone?: string;
   email?: string;
   items: Array<InvoiceItem>;
@@ -22,14 +23,21 @@ export interface Invoice {
 export async function save(invoice: Invoice) {
   const client = createClient();
 
-  const result = await client.query(
-    q.Create(q.Collection("Todos"), {
-      data: invoice,
-    })
-  );
-
-  console.log("save", result);
-  return result;
+  if (!invoice.id) {
+    const result = await client.query(
+      q.Create(q.Collection("Todos"), {
+        data: invoice,
+      })
+    );
+    console.log("create", result);
+  } else {
+    const result = await client.query(
+      q.Update(q.Ref(q.Collection("Todos"), invoice.id), {
+        data: invoice,
+      })
+    );
+    console.log("update", result);
+  }
 }
 
 export async function invoices() {
