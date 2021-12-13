@@ -192,6 +192,18 @@ a {
   text-decoration: none;
 }
 
+.column1 {
+  width: 50vw;
+  display: inline-block;
+  text-align: left;
+}
+
+.column2 {
+  width: 30vw;
+  display: inline-block;
+  text-align: right;
+}
+
 #total_due {
   color: black;
   font-size: 22pt;

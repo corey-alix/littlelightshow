@@ -129,16 +129,14 @@ export async function renderInvoices(target: HTMLElement) {
     .map((invoice) => {
       const total = invoice.items.reduce((a, b) => a + b.total, 0) || 0;
       grandTotal += total;
-      return `<label class="form-label"><a href="invoice.html?id=${
-        invoice.id
-      }">${
+      return `<label class="column1"><a href="invoice.html?id=${invoice.id}">${
         invoice.clientname
-      }</a></label><label class="currency form-label"> ${total.toFixed(
+      }</a></label><label class="currency column2"> ${total.toFixed(
         2
       )}</label>`;
     })
     .join("<br/>");
-  target.innerHTML = `${rows}<hr/><label class="form-label">Total</label><label class="form-label currency">${grandTotal.toFixed(
+  target.innerHTML = `${rows}<hr/><label class="column1">Total</label><label class="column2 currency">${grandTotal.toFixed(
     2
   )}</label>`;
 }
