@@ -1,4 +1,5 @@
 import { FormFactory, FormManager } from "./FormManager.js";
+import { TAXRATE } from "./globals.js";
 import { inventoryManager } from "./InventoryManager.js";
 import {
   save as saveInvoice,
@@ -8,7 +9,7 @@ import {
 } from "./services/invoices.js";
 
 export { identify } from "./identify.js";
-import { template as invoiceFormTemplate } from "./templates/invoice-form.js";
+import { create as createInvoiceFormTemplate } from "./templates/invoice-form.js";
 
 const formManager = new FormFactory();
 
@@ -28,7 +29,7 @@ function bind(
   inputs.forEach((input) => input.addEventListener("change", callback));
 }
 
-function createItemPanel(item?: InvoiceItem) {
+function createItemPanel(form: FormManager, item?: InvoiceItem) {
   if (!item)
     item = {
       item: "",
@@ -36,7 +37,7 @@ function createItemPanel(item?: InvoiceItem) {
       quantity: 1,
       total: 0,
     };
-  const form = formManager.asForm({
+  const formDom = formManager.asForm({
     item: {
       label: "Item",
       required: true,
@@ -62,10 +63,10 @@ function createItemPanel(item?: InvoiceItem) {
       value: item.total,
     },
   });
-  form.classList.add("line-item");
+  formDom.classList.add("line-item");
 
   bind(
-    form,
+    formDom,
     ["#price", "#quantity"],
     ["#total"],
     ([price, quantity, total]) => {
@@ -73,11 +74,13 @@ function createItemPanel(item?: InvoiceItem) {
         (price as HTMLInputElement).valueAsNumber *
         (quantity as HTMLInputElement).valueAsNumber;
       (total as HTMLInputElement).value = ttl.toFixed(2);
+      total.dispatchEvent(new Event("change"));
+      form.trigger("change");
     }
   );
 
   bind(
-    form,
+    formDom,
     ["#item"],
     ["#price", "#quantity", "#total"],
     ([item, price, quantity, total]) => {
@@ -87,24 +90,26 @@ function createItemPanel(item?: InvoiceItem) {
       );
       if (itemPrice && currentPrice != itemPrice)
         (price as HTMLInputElement).value = itemPrice.toFixed(2);
-      const ttl =
-        (price as HTMLInputElement).valueAsNumber *
-        (quantity as HTMLInputElement).valueAsNumber;
-      (total as HTMLInputElement).value = ttl.toFixed(2);
+      price.dispatchEvent(new Event("change"));
+      form.trigger("change");
     }
   );
-  return form;
+
+  return formDom;
 }
 
 function addAnotherItem(form: FormManager) {
-  const itemPanel = createItemPanel();
+  const itemPanel = createItemPanel(form);
   const target = form.formDom.querySelector(".line-items") || form.formDom;
   target.appendChild(itemPanel);
   const removeButton = form.createButton({
     title: "Remove Item",
     event: "remove-item",
   });
-  removeButton.addEventListener("click", () => itemPanel.remove());
+  removeButton.addEventListener("click", () => {
+    itemPanel.remove();
+    form.trigger("change");
+  });
   itemPanel.appendChild(removeButton);
 }
 
@@ -140,7 +145,9 @@ export async function renderInvoices(target: HTMLElement) {
 
 export async function renderInvoice(invoiceId?: string) {
   document.querySelector("#invoice-form")?.remove();
-  document.body.appendChild(invoiceFormTemplate);
+  const template = createInvoiceFormTemplate();
+  template.classList.add("hidden");
+  document.body.appendChild(template);
 
   const formDom = document.querySelector("#invoice-form") as HTMLFormElement;
   if (!formDom) throw "a form must be defined with id of 'invoice-form'";
@@ -157,9 +164,11 @@ export async function renderInvoice(invoiceId?: string) {
     form.set("billto", invoice.billto);
     form.set("telephone", invoice.telephone || "");
     form.set("email", invoice.email || "");
+    form.set("comments", invoice.comments || "");
 
-    const items = invoice.items.map(createItemPanel);
+    const items = invoice.items.map((item) => createItemPanel(form, item));
     items.forEach((item) => target.appendChild(item));
+    formDom.appendChild(form.createButton({ title: "Clear", event: "clear" }));
   }
 
   form.on("list-all-invoices", () => {
@@ -181,41 +190,65 @@ export async function renderInvoice(invoiceId?: string) {
       });
     });
     inventoryManager.persistInventoryItems();
-    const data = new FormData(formDom);
-    const requestModel: Invoice = {
-      id: invoiceId || "",
-      clientname: data.get("clientname") as string,
-      billto: data.get("billto") as string,
-      telephone: data.get("telephone") as string,
-      email: data.get("email") as string,
-      items: [] as Array<{
-        item: string;
-        price: number;
-        quantity: number;
-        total: number;
-      }>,
-    };
-
-    let currentItem = null as any;
-    for (let [key, value] of data.entries()) {
-      if (key === "item") {
-        currentItem = {};
-        requestModel.items.push(currentItem);
-      }
-      if (currentItem) currentItem[key] = value;
-    }
+    const requestModel = asModel(formDom);
+    requestModel.id = invoiceId || "";
 
     console.log({ requestModel });
     await saveInvoice(requestModel);
     form.trigger("list-all-invoices");
   });
 
+  form.on("remove-item", () => form.trigger("change"));
   form.on("add-another-item", () => {
     if (!form.isValid()) return;
     addAnotherItem(form);
+    form.trigger("change");
   });
 
   form.on("clear", () => {
-    renderInvoice();
+    location.href = "invoice.html";
   });
+
+  form.on("change", () => {
+    const totalDue = computeTotalDue(form);
+    const tax = totalDue * TAXRATE;
+    form.set("total_due", (totalDue + tax).toFixed(2));
+  });
+
+  template.classList.remove("hidden");
+  form.trigger("change");
+}
+
+function computeTotalDue(form: FormManager) {
+  const model = asModel(form.formDom);
+  const totalDue = model.items.reduce((a, b) => (b.total || 0) - 0 + a, 0);
+  return Number.parseFloat(totalDue.toFixed(2));
+}
+
+function asModel(formDom: HTMLFormElement) {
+  const data = new FormData(formDom);
+  const requestModel: Invoice = {
+    id: "",
+    clientname: data.get("clientname") as string,
+    billto: data.get("billto") as string,
+    telephone: data.get("telephone") as string,
+    email: data.get("email") as string,
+    comments: data.get("comments") as string,
+    items: [] as Array<{
+      item: string;
+      price: number;
+      quantity: number;
+      total: number;
+    }>,
+  };
+
+  let currentItem = null as any;
+  for (let [key, value] of data.entries()) {
+    if (key === "item") {
+      currentItem = {};
+      requestModel.items.push(currentItem);
+    }
+    if (currentItem) currentItem[key] = value;
+  }
+  return requestModel;
 }

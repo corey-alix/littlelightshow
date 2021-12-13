@@ -1,4 +1,5 @@
 import faunadb from "faunadb";
+export const TAXRATE = 0.06;
 
 const accessKeys = {
   FAUNADB_SERVER_SECRET: "",

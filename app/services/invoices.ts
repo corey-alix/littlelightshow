@@ -17,6 +17,7 @@ export interface Invoice {
   billto: string;
   telephone?: string;
   email?: string;
+  comments?: string;
   items: Array<InvoiceItem>;
 }
 

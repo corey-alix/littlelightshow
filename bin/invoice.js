@@ -3521,7 +3521,7 @@ var require_event_target_shim = __commonJS({
         data.event.preventDefault();
       }
     }
-    function Event(eventTarget, event) {
+    function Event2(eventTarget, event) {
       privateData.set(this, {
         eventTarget,
         event,
@@ -3542,7 +3542,7 @@ var require_event_target_shim = __commonJS({
         }
       }
     }
-    Event.prototype = {
+    Event2.prototype = {
       get type() {
         return pd(this).event.type;
       },
@@ -3634,14 +3634,14 @@ var require_event_target_shim = __commonJS({
       initEvent() {
       }
     };
-    Object.defineProperty(Event.prototype, "constructor", {
-      value: Event,
+    Object.defineProperty(Event2.prototype, "constructor", {
+      value: Event2,
       configurable: true,
       writable: true
     });
     if (typeof window !== "undefined" && typeof window.Event !== "undefined") {
-      Object.setPrototypeOf(Event.prototype, window.Event.prototype);
-      wrappers.set(window.Event.prototype, Event);
+      Object.setPrototypeOf(Event2.prototype, window.Event.prototype);
+      wrappers.set(window.Event.prototype, Event2);
     }
     function defineRedirectDescriptor(key) {
       return {
@@ -3688,7 +3688,7 @@ var require_event_target_shim = __commonJS({
     }
     function getWrapper(proto) {
       if (proto == null || proto === Object.prototype) {
-        return Event;
+        return Event2;
       }
       let wrapper = wrappers.get(proto);
       if (wrapper == null) {
@@ -4874,11 +4874,9 @@ var FormFactory = class {
   }
 };
 
-// app/services/invoices.ts
-var import_faunadb2 = __toModule(require_faunadb());
-
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
+var TAXRATE = 0.06;
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4914,6 +4912,7 @@ function createClient() {
 }
 
 // app/services/invoices.ts
+var import_faunadb2 = __toModule(require_faunadb());
 var { query, Client } = import_faunadb2.default;
 var q = query;
 function save(invoice) {
@@ -5034,70 +5033,75 @@ function dom(tag, args, ...children) {
 }
 
 // app/templates/invoice-form.tsx
-var template = /* @__PURE__ */ dom("form", {
-  id: "invoice-form"
-}, /* @__PURE__ */ dom("h1", null, "Create an Invoice"), /* @__PURE__ */ dom("section", {
-  class: "category"
-}, /* @__PURE__ */ dom("div", {
-  class: "section-title"
-}, "Client"), /* @__PURE__ */ dom("section", {
-  class: "grid-container"
-}, /* @__PURE__ */ dom("label", {
-  class: "form-label"
-}, "Client Name", /* @__PURE__ */ dom("input", {
-  type: "text",
-  placeholder: "clientname",
-  name: "clientname",
-  required: true
-})), /* @__PURE__ */ dom("label", {
-  class: "form-label"
-}, "Telephone", /* @__PURE__ */ dom("input", {
-  type: "tel",
-  placeholder: "telephone",
-  name: "telephone"
-})), /* @__PURE__ */ dom("label", {
-  class: "form-label"
-}, "Email ", /* @__PURE__ */ dom("input", {
-  type: "email",
-  placeholder: "email",
-  name: "email"
-})), /* @__PURE__ */ dom("label", {
-  class: "form-label"
-}, "Bill To", /* @__PURE__ */ dom("textarea", {
-  class: "address",
-  placeholder: "billto",
-  name: "billto"
-})))), /* @__PURE__ */ dom("div", {
-  class: "vspacer"
-}), /* @__PURE__ */ dom("section", {
-  class: "category"
-}, /* @__PURE__ */ dom("div", {
-  class: "section-title"
-}, "Items"), /* @__PURE__ */ dom("section", {
-  class: "line-items line-item-grid"
-})), /* @__PURE__ */ dom("div", {
-  class: "vspacer"
-}), /* @__PURE__ */ dom("button", {
-  class: "button",
-  "data-event": "add-another-item",
-  type: "button"
-}, "Add item"), /* @__PURE__ */ dom("div", {
-  class: "vspacer-1"
-}), /* @__PURE__ */ dom("button", {
-  class: "button",
-  "data-event": "submit",
-  type: "button"
-}, "Save"), /* @__PURE__ */ dom("div", {
-  class: "vspacer"
-}), /* @__PURE__ */ dom("button", {
-  class: "button",
-  "data-event": "clear",
-  type: "button"
-}, "Start Over"), /* @__PURE__ */ dom("button", {
-  class: "button",
-  "data-event": "list-all-invoices",
-  type: "button"
-}, "List All Invoices"));
+function create() {
+  return /* @__PURE__ */ dom("form", {
+    id: "invoice-form"
+  }, /* @__PURE__ */ dom("h1", null, "Create an Invoice"), /* @__PURE__ */ dom("section", {
+    class: "category"
+  }, /* @__PURE__ */ dom("div", {
+    class: "section-title"
+  }, "Client"), /* @__PURE__ */ dom("section", {
+    class: "grid-container"
+  }, /* @__PURE__ */ dom("label", {
+    class: "form-label"
+  }, "Client Name", /* @__PURE__ */ dom("input", {
+    type: "text",
+    placeholder: "clientname",
+    name: "clientname",
+    required: true
+  })), /* @__PURE__ */ dom("label", {
+    class: "form-label"
+  }, "Telephone", /* @__PURE__ */ dom("input", {
+    type: "tel",
+    placeholder: "telephone",
+    name: "telephone"
+  })), /* @__PURE__ */ dom("label", {
+    class: "form-label"
+  }, "Email ", /* @__PURE__ */ dom("input", {
+    type: "email",
+    placeholder: "email",
+    name: "email"
+  })), /* @__PURE__ */ dom("label", {
+    class: "form-label"
+  }, "Bill To", /* @__PURE__ */ dom("textarea", {
+    class: "address",
+    placeholder: "billto",
+    name: "billto"
+  })), /* @__PURE__ */ dom("label", {
+    class: "form-label"
+  }, "Comments", /* @__PURE__ */ dom("textarea", {
+    class: "comments",
+    placeholder: "comments",
+    name: "comments"
+  })))), /* @__PURE__ */ dom("div", {
+    class: "vspacer"
+  }), /* @__PURE__ */ dom("section", {
+    class: "category"
+  }, /* @__PURE__ */ dom("div", {
+    class: "section-title"
+  }, "Items"), /* @__PURE__ */ dom("section", {
+    class: "line-items line-item-grid"
+  })), /* @__PURE__ */ dom("div", {
+    class: "vspacer"
+  }), /* @__PURE__ */ dom("button", {
+    class: "button",
+    "data-event": "add-another-item",
+    type: "button"
+  }, "Add item"), /* @__PURE__ */ dom("label", null, "Total + Tax:", /* @__PURE__ */ dom("input", {
+    readonly: true,
+    type: "number",
+    class: "currency",
+    id: "total_due",
+    name: "total_due",
+    value: "$0.00"
+  })), /* @__PURE__ */ dom("div", {
+    class: "vspacer-1"
+  }), /* @__PURE__ */ dom("button", {
+    class: "button",
+    "data-event": "submit",
+    type: "button"
+  }, "Save"));
+}
 
 // app/invoice.ts
 var formManager = new FormFactory();
@@ -5107,7 +5111,7 @@ function bind(form, inputQuerySelectors, outputQuerySelectors, cb) {
   const callback = () => cb([...inputs, ...outputs]);
   inputs.forEach((input) => input.addEventListener("change", callback));
 }
-function createItemPanel(item) {
+function createItemPanel(form, item) {
   if (!item)
     item = {
       item: "",
@@ -5115,7 +5119,7 @@ function createItemPanel(item) {
       quantity: 1,
       total: 0
     };
-  const form = formManager.asForm({
+  const formDom = formManager.asForm({
     item: {
       label: "Item",
       required: true,
@@ -5141,30 +5145,35 @@ function createItemPanel(item) {
       value: item.total
     }
   });
-  form.classList.add("line-item");
-  bind(form, ["#price", "#quantity"], ["#total"], ([price, quantity, total]) => {
+  formDom.classList.add("line-item");
+  bind(formDom, ["#price", "#quantity"], ["#total"], ([price, quantity, total]) => {
     const ttl = price.valueAsNumber * quantity.valueAsNumber;
     total.value = ttl.toFixed(2);
+    total.dispatchEvent(new Event("change"));
+    form.trigger("change");
   });
-  bind(form, ["#item"], ["#price", "#quantity", "#total"], ([item2, price, quantity, total]) => {
+  bind(formDom, ["#item"], ["#price", "#quantity", "#total"], ([item2, price, quantity, total]) => {
     const currentPrice = price.valueAsNumber;
     const itemPrice = inventoryManager.getInventoryItemByCode(item2.value);
     if (itemPrice && currentPrice != itemPrice)
       price.value = itemPrice.toFixed(2);
-    const ttl = price.valueAsNumber * quantity.valueAsNumber;
-    total.value = ttl.toFixed(2);
+    price.dispatchEvent(new Event("change"));
+    form.trigger("change");
   });
-  return form;
+  return formDom;
 }
 function addAnotherItem(form) {
-  const itemPanel = createItemPanel();
+  const itemPanel = createItemPanel(form);
   const target = form.formDom.querySelector(".line-items") || form.formDom;
   target.appendChild(itemPanel);
   const removeButton = form.createButton({
     title: "Remove Item",
     event: "remove-item"
   });
-  removeButton.addEventListener("click", () => itemPanel.remove());
+  removeButton.addEventListener("click", () => {
+    itemPanel.remove();
+    form.trigger("change");
+  });
   itemPanel.appendChild(removeButton);
 }
 function init() {
@@ -5191,6 +5200,8 @@ function renderInvoice(invoiceId) {
   return __async(this, null, function* () {
     var _a2;
     (_a2 = document.querySelector("#invoice-form")) == null ? void 0 : _a2.remove();
+    const template = create();
+    template.classList.add("hidden");
     document.body.appendChild(template);
     const formDom = document.querySelector("#invoice-form");
     if (!formDom)
@@ -5206,8 +5217,10 @@ function renderInvoice(invoiceId) {
       form.set("billto", invoice.billto);
       form.set("telephone", invoice.telephone || "");
       form.set("email", invoice.email || "");
-      const items = invoice.items.map(createItemPanel);
+      form.set("comments", invoice.comments || "");
+      const items = invoice.items.map((item) => createItemPanel(form, item));
       items.forEach((item) => target.appendChild(item));
+      formDom.appendChild(form.createButton({ title: "Clear", event: "clear" }));
     }
     form.on("list-all-invoices", () => {
       window.location.href = "invoices.html";
@@ -5225,37 +5238,57 @@ function renderInvoice(invoiceId) {
         });
       });
       inventoryManager.persistInventoryItems();
-      const data = new FormData(formDom);
-      const requestModel = {
-        id: invoiceId || "",
-        clientname: data.get("clientname"),
-        billto: data.get("billto"),
-        telephone: data.get("telephone"),
-        email: data.get("email"),
-        items: []
-      };
-      let currentItem = null;
-      for (let [key, value] of data.entries()) {
-        if (key === "item") {
-          currentItem = {};
-          requestModel.items.push(currentItem);
-        }
-        if (currentItem)
-          currentItem[key] = value;
-      }
+      const requestModel = asModel(formDom);
+      requestModel.id = invoiceId || "";
       console.log({ requestModel });
       yield save(requestModel);
       form.trigger("list-all-invoices");
     }));
+    form.on("remove-item", () => form.trigger("change"));
     form.on("add-another-item", () => {
       if (!form.isValid())
         return;
       addAnotherItem(form);
+      form.trigger("change");
     });
     form.on("clear", () => {
-      renderInvoice();
+      location.href = "invoice.html";
     });
+    form.on("change", () => {
+      const totalDue = computeTotalDue(form);
+      const tax = totalDue * TAXRATE;
+      form.set("total_due", (totalDue + tax).toFixed(2));
+    });
+    template.classList.remove("hidden");
+    form.trigger("change");
   });
+}
+function computeTotalDue(form) {
+  const model = asModel(form.formDom);
+  const totalDue = model.items.reduce((a, b) => (b.total || 0) - 0 + a, 0);
+  return Number.parseFloat(totalDue.toFixed(2));
+}
+function asModel(formDom) {
+  const data = new FormData(formDom);
+  const requestModel = {
+    id: "",
+    clientname: data.get("clientname"),
+    billto: data.get("billto"),
+    telephone: data.get("telephone"),
+    email: data.get("email"),
+    comments: data.get("comments"),
+    items: []
+  };
+  let currentItem = null;
+  for (let [key, value] of data.entries()) {
+    if (key === "item") {
+      currentItem = {};
+      requestModel.items.push(currentItem);
+    }
+    if (currentItem)
+      currentItem[key] = value;
+  }
+  return requestModel;
 }
 export {
   identify,
