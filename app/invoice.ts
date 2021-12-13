@@ -1,5 +1,3 @@
-declare var netlifyIdentity: any;
-
 import { FormFactory, FormManager } from "./FormManager.js";
 import { CONTEXT } from "./globals.js";
 import { InventoryManager } from "./InventoryManager.js";
@@ -11,6 +9,14 @@ import {
 
 const inventoryManager = new InventoryManager();
 const formManager = new FormFactory();
+
+export function identify() {
+  if (!localStorage.getItem("user")) {
+    location.href = `identity.html?target=${location.href}&context=${CONTEXT}`;
+    return false;
+  }
+  return true;
+}
 
 export function forceDatalist(
   fieldInfo: {
@@ -92,18 +98,9 @@ function createItemPanel() {
   return form;
 }
 
-function showInvoiceForm(auth?) {
-  const { userName } = auth || { userName: "" };
-
+function showInvoiceForm() {
   const formDom = document.querySelector("#invoice-form") as HTMLFormElement;
   if (!formDom) throw "a form must be defined with id of 'invoice-form'";
-
-  document.querySelectorAll(".visible-when-auth").forEach((n) => {
-    (n as HTMLElement).style.display = !!userName ? "block" : "none";
-  });
-  document.querySelectorAll(".visible-when-noauth").forEach((n) => {
-    (n as HTMLElement).style.display = !userName ? "block" : "none";
-  });
 
   const form = formManager.domAsForm(formDom);
 
@@ -205,29 +202,7 @@ export function init() {
     renderInvoice(formDom, queryParams.get("id")!);
     return;
   }
-
-  switch (CONTEXT) {
-    case "dev":
-      showInvoiceForm({ userName: "dev" });
-      break;
-    case "NETLIFY":
-      netlifyIdentity.on("init", (user) => console.log("init", user));
-      netlifyIdentity.on("login", (user) => console.log("login", user));
-      netlifyIdentity.on("logout", () => console.log("Logged out"));
-      netlifyIdentity.on("error", (err) => console.error("Error", err));
-      netlifyIdentity.on("open", () => console.log("Widget opened"));
-      netlifyIdentity.on("close", () => console.log("Widget closed"));
-
-      showInvoiceForm();
-
-      netlifyIdentity.on("login", (user) => {
-        if (user.app_metadata.provider === "google") {
-          const userName = user.email;
-          showInvoiceForm({ userName });
-        }
-      });
-      break;
-  }
+  showInvoiceForm();
 }
 
 export async function renderInvoices(target: HTMLElement) {

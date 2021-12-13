@@ -11,8 +11,8 @@
   <body class="holiday">
     <div class="invoices"></div>
     <script type="module">
-      import { renderInvoices } from "../bin/invoice.js";
-      renderInvoices(document.querySelector(".invoices"));
+      import { identify, renderInvoices } from "../bin/invoice.js";
+      if (identify()) renderInvoices(document.querySelector(".invoices"));
     </script>
   </body>
 </html>

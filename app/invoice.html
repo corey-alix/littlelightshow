@@ -5,19 +5,11 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
     />
-    <title>Back Office</title>
-
-    <!-- include the widget -->
-    <script
-      type="text/javascript"
-      src="https://identity.netlify.com/v1/netlify-identity-widget.js"
-    ></script>
+    <title>Invoice</title>
     <link rel="stylesheet" href="./baseline.css" />
   </head>
   <body class="holiday">
-    <div class="visible-when-noauth" data-netlify-identity-menu></div>
-
-    <form id="invoice-form" class="visible-when-auth">
+    <form id="invoice-form">
       <h1>Create an Invoice</h1>
       <section class="category">
         <div class="section-title">Client</div>
@@ -67,8 +59,8 @@
     </form>
 
     <script type="module">
-      import { init } from "../bin/invoice.js";
-      init();
+      import { identify, init } from "../bin/invoice.js";
+      if (identify()) init();
     </script>
   </body>
 </html>
