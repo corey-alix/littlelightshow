@@ -4781,6 +4781,7 @@ var FormFactory = class {
     fieldNames.forEach((fieldName) => {
       const fieldInfo = fieldInfos[fieldName];
       const label = document.createElement("label");
+      label.classList.add("form-label");
       label.innerText = fieldInfo.label || fieldName;
       const input = document.createElement("input");
       if (fieldInfo.readonly)
