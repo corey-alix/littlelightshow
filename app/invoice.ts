@@ -266,8 +266,9 @@ function asModel(formDom: HTMLFormElement) {
 }
 
 export function print(invoice: Invoice) {
+  document.body.classList.add("print");
   const toPrint = createInvoicePrintTemplate(invoice);
-  document.body.insertBefore(toPrint, document.body.firstElementChild);
+  document.body.innerHTML = "";
+  document.body.appendChild(toPrint);
   window.print();
-  toPrint.remove();
 }

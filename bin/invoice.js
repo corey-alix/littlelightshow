@@ -5420,10 +5420,11 @@ function asModel(formDom) {
   return requestModel;
 }
 function print(invoice) {
+  document.body.classList.add("print");
   const toPrint = create2(invoice);
-  document.body.insertBefore(toPrint, document.body.firstElementChild);
+  document.body.innerHTML = "";
+  document.body.appendChild(toPrint);
   window.print();
-  toPrint.remove();
 }
 export {
   identify,
