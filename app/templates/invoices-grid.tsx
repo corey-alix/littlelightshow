@@ -13,7 +13,9 @@ function totalInvoice(invoice: Invoice) {
 function renderInvoice(invoice: Invoice): HTMLDivElement {
   return (
     <div>
-      <label class="col-1-4">{invoice.clientname}</label>
+      <a class="col-1-4" href={`invoice?id=${invoice.id}`}>
+        {invoice.clientname}
+      </a>
       <label class="col-5-2 currency">{totalInvoice(invoice).toFixed(2)}</label>
     </div>
   );

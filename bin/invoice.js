@@ -5232,8 +5232,9 @@ function totalInvoice(invoice) {
   return total;
 }
 function renderInvoice(invoice) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "col-1-4"
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
+    class: "col-1-4",
+    href: `invoice?id=${invoice.id}`
   }, invoice.clientname), /* @__PURE__ */ dom("label", {
     class: "col-5-2 currency"
   }, totalInvoice(invoice).toFixed(2)));
