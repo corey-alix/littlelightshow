@@ -19,26 +19,6 @@ var __reExport = (target, module, desc) => {
 var __toModule = (module) => {
   return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
 };
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
 
 // node_modules/fn-annotate/index.js
 var require_fn_annotate = __commonJS({
@@ -956,12 +936,12 @@ var require_util = __commonJS({
     function checkInstanceHasProperty(obj, prop) {
       return typeof obj === "object" && obj !== null && Boolean(obj[prop]);
     }
-    function formatUrl(base, path, query2) {
-      query2 = typeof query2 === "object" ? querystringify(query2) : query2;
+    function formatUrl(base, path, query3) {
+      query3 = typeof query3 === "object" ? querystringify(query3) : query3;
       return [
         base,
         path ? path.charAt(0) === "/" ? "" : "/" + path : "",
-        query2 ? query2.charAt(0) === "?" ? "" : "?" + query2 : ""
+        query3 ? query3.charAt(0) === "?" ? "" : "?" + query3 : ""
       ].join("");
     }
     function querystringify(obj, prefix) {
@@ -3101,7 +3081,7 @@ var require_json = __commonJS({
 var require_PageHelper = __commonJS({
   "node_modules/faunadb/src/PageHelper.js"(exports, module) {
     "use strict";
-    var query2 = require_query();
+    var query3 = require_query();
     var objectAssign = require_object_assign();
     function PageHelper(client, set, params, options) {
       if (params === void 0) {
@@ -3131,15 +3111,15 @@ var require_PageHelper = __commonJS({
     }
     PageHelper.prototype.map = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q2) {
-        return query2.Map(q2, lambda);
+      rv._faunaFunctions.push(function(q3) {
+        return query3.Map(q3, lambda);
       });
       return rv;
     };
     PageHelper.prototype.filter = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q2) {
-        return query2.Filter(q2, lambda);
+      rv._faunaFunctions.push(function(q3) {
+        return query3.Filter(q3, lambda);
       });
       return rv;
     };
@@ -3208,13 +3188,13 @@ var require_PageHelper = __commonJS({
           cursorOpts.before = null;
         }
       }
-      var q2 = query2.Paginate(this.set, opts);
+      var q3 = query3.Paginate(this.set, opts);
       if (this._faunaFunctions.length > 0) {
         this._faunaFunctions.forEach(function(lambda) {
-          q2 = lambda(q2);
+          q3 = lambda(q3);
         });
       }
-      return this.client.query(q2, this.options);
+      return this.client.query(q3, this.options);
     };
     PageHelper.prototype._clone = function() {
       return Object.create(PageHelper.prototype, {
@@ -3234,10 +3214,10 @@ var require_PageHelper = __commonJS({
 var require_RequestResult = __commonJS({
   "node_modules/faunadb/src/RequestResult.js"(exports, module) {
     "use strict";
-    function RequestResult(method, path, query2, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
+    function RequestResult(method, path, query3, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
       this.method = method;
       this.path = path;
-      this.query = query2;
+      this.query = query3;
       this.requestRaw = requestRaw;
       this.requestContent = requestContent;
       this.responseRaw = responseRaw;
@@ -4349,7 +4329,7 @@ var require_stream = __commonJS({
     var errors = require_errors();
     var json = require_json();
     var http = require_http3();
-    var q2 = require_query();
+    var q3 = require_query();
     var util = require_util();
     var DefaultEvents = ["start", "error", "version", "history_rewrite"];
     var DocumentStreamEvents = DefaultEvents.concat(["snapshot"]);
@@ -4359,14 +4339,14 @@ var require_stream = __commonJS({
       });
       this._client = client;
       this._onEvent = onEvent;
-      this._query = q2.wrap(expression);
+      this._query = q3.wrap(expression);
       this._urlParams = options.fields ? { fields: options.fields.join(",") } : null;
       this._abort = new AbortController();
       this._state = "idle";
     }
     StreamClient.prototype.snapshot = function() {
       var self2 = this;
-      self2._client.query(q2.Get(self2._query)).then(function(doc) {
+      self2._client.query(q3.Get(self2._query)).then(function(doc) {
         self2._onEvent({
           type: "snapshot",
           event: doc
@@ -4541,12 +4521,12 @@ var require_Client = __commonJS({
     var errors = require_errors();
     var http = require_http3();
     var json = require_json();
-    var query2 = require_query();
+    var query3 = require_query();
     var stream = require_stream();
     var util = require_util();
     var values = require_values();
     var notifyAboutNewVersion = util.notifyAboutNewVersion();
-    function Client2(options) {
+    function Client(options) {
       var http2SessionIdleTime = getHttp2SessionIdleTime();
       options = util.applyDefaults(options, {
         domain: "db.fauna.com",
@@ -4570,52 +4550,52 @@ var require_Client = __commonJS({
       this._http = new http.HttpClient(options);
       this.stream = stream.StreamAPI(this);
     }
-    Client2.apiVersion = packageJson.apiVersion;
-    Client2.prototype.query = function(expression, options) {
-      return this._execute("POST", "", query2.wrap(expression), null, options);
+    Client.apiVersion = packageJson.apiVersion;
+    Client.prototype.query = function(expression, options) {
+      return this._execute("POST", "", query3.wrap(expression), null, options);
     };
-    Client2.prototype.paginate = function(expression, params, options) {
+    Client.prototype.paginate = function(expression, params, options) {
       params = util.defaults(params, {});
       options = util.defaults(options, {});
       return new PageHelper(this, expression, params, options);
     };
-    Client2.prototype.ping = function(scope, timeout) {
+    Client.prototype.ping = function(scope, timeout) {
       return this._execute("GET", "ping", null, { scope, timeout });
     };
-    Client2.prototype.getLastTxnTime = function() {
+    Client.prototype.getLastTxnTime = function() {
       return this._http.getLastTxnTime();
     };
-    Client2.prototype.syncLastTxnTime = function(time) {
+    Client.prototype.syncLastTxnTime = function(time) {
       this._http.syncLastTxnTime(time);
     };
-    Client2.prototype.close = function(opts) {
+    Client.prototype.close = function(opts) {
       return this._http.close(opts);
     };
-    Client2.prototype._execute = function(method, path, data, query3, options) {
-      query3 = util.defaults(query3, null);
+    Client.prototype._execute = function(method, path, data, query4, options) {
+      query4 = util.defaults(query4, null);
       if (path instanceof values.Ref || util.checkInstanceHasProperty(path, "_isFaunaRef")) {
         path = path.value;
       }
-      if (query3 !== null) {
-        query3 = util.removeUndefinedValues(query3);
+      if (query4 !== null) {
+        query4 = util.removeUndefinedValues(query4);
       }
       var startTime = Date.now();
       var self2 = this;
       var body = ["GET", "HEAD"].indexOf(method) >= 0 ? void 0 : JSON.stringify(data);
       return this._http.execute(Object.assign({}, options, {
         path,
-        query: query3,
+        query: query4,
         method,
         body
       })).then(function(response) {
         var endTime = Date.now();
         var responseObject = json.parseJSON(response.body);
-        var result = new RequestResult(method, path, query3, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
+        var result = new RequestResult(method, path, query4, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
         self2._handleRequestResult(response, result, options);
         return responseObject["resource"];
       });
     };
-    Client2.prototype._handleRequestResult = function(response, result, options) {
+    Client.prototype._handleRequestResult = function(response, result, options) {
       var txnTimeHeaderKey = "x-txn-time";
       if (response.headers[txnTimeHeaderKey] != null) {
         this.syncLastTxnTime(parseInt(response.headers[txnTimeHeaderKey], 10));
@@ -4637,7 +4617,7 @@ var require_Client = __commonJS({
         value: useEnvVar ? parsed : 500
       };
     }
-    module.exports = Client2;
+    module.exports = Client;
     module.exports.resetNotifyAboutNewVersion = function() {
       notifyAboutNewVersion = util.notifyAboutNewVersion();
     };
@@ -4655,12 +4635,12 @@ var require_clientLogger = __commonJS({
       };
     }
     function showRequestResult(requestResult) {
-      var query2 = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
+      var query3 = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
       var out = "";
       function log(str) {
         out = out + str;
       }
-      log("Fauna " + method + " /" + path + _queryString(query2) + "\n");
+      log("Fauna " + method + " /" + path + _queryString(query3) + "\n");
       if (requestContent != null) {
         log("  Request JSON: " + _showJSON(requestContent) + "\n");
       }
@@ -4676,16 +4656,16 @@ var require_clientLogger = __commonJS({
     function _showJSON(object) {
       return _indent(json.toJSON(object, true));
     }
-    function _queryString(query2) {
-      if (query2 == null) {
+    function _queryString(query3) {
+      if (query3 == null) {
         return "";
       }
-      var keys = Object.keys(query2);
+      var keys = Object.keys(query3);
       if (keys.length === 0) {
         return "";
       }
       var pairs = keys.map(function(key) {
-        return key + "=" + query2[key];
+        return key + "=" + query3[key];
       });
       return "?" + pairs.join("&");
     }
@@ -4699,7 +4679,7 @@ var require_clientLogger = __commonJS({
 // node_modules/faunadb/index.js
 var require_faunadb = __commonJS({
   "node_modules/faunadb/index.js"(exports, module) {
-    var query2 = require_query();
+    var query3 = require_query();
     var util = require_util();
     var parseJSON = require_json().parseJSON;
     module.exports = util.mergeObjects({
@@ -4710,9 +4690,9 @@ var require_faunadb = __commonJS({
       clientLogger: require_clientLogger(),
       errors: require_errors(),
       values: require_values(),
-      query: query2,
+      query: query3,
       parseJSON
-    }, query2);
+    }, query3);
   }
 });
 
@@ -4896,8 +4876,7 @@ var accessKeys = {
   FAUNADB_ADMIN_SECRET: "",
   FAUNADB_DOMAIN: "db.us.fauna.com"
 };
-var _a;
-if ((_a = globalThis.process) == null ? void 0 : _a.env) {
+if (globalThis.process?.env) {
   accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
   accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
 } else if (localStorage) {
@@ -4926,44 +4905,56 @@ function createClient() {
 
 // app/services/invoices.ts
 var import_faunadb2 = __toModule(require_faunadb());
-var { query, Client } = import_faunadb2.default;
+var { query } = import_faunadb2.default;
 var q = query;
-function save(invoice) {
-  return __async(this, null, function* () {
-    const client = createClient();
-    if (!invoice.id) {
-      const result = yield client.query(q.Create(q.Collection("Todos"), {
-        data: invoice
-      }));
-      console.log("create", result);
-    } else {
-      const result = yield client.query(q.Update(q.Ref(q.Collection("Todos"), invoice.id), {
-        data: invoice
-      }));
-      console.log("update", result);
-    }
-  });
+async function save(invoice) {
+  const client = createClient();
+  if (!invoice.id) {
+    const result = await client.query(q.Create(q.Collection("Todos"), {
+      data: invoice
+    }));
+    console.log("create", result);
+  } else {
+    const result = await client.query(q.Update(q.Ref(q.Collection("Todos"), invoice.id), {
+      data: invoice
+    }));
+    console.log("update", result);
+  }
 }
-function invoices() {
-  return __async(this, null, function* () {
-    const client = createClient();
-    const result = yield client.query(q.Map(q.Paginate(q.Documents(q.Collection("Todos"))), q.Lambda("ref", q.Get(q.Var("ref")))));
-    console.log("invoices", result);
-    const invoices2 = result.data;
-    invoices2.forEach((invoice) => invoice.data.id = invoice.ref.value.id);
-    return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
-      invoice.items.forEach((item) => {
-        item.quantity = item.quantity - 0;
-        item.price = item.price - 0;
-        item.total = item.total - 0;
-      });
-      return invoice;
+async function invoices() {
+  const client = createClient();
+  const result = await client.query(q.Map(q.Paginate(q.Documents(q.Collection("Todos"))), q.Lambda("ref", q.Get(q.Var("ref")))));
+  console.log("invoices", result);
+  const invoices2 = result.data;
+  invoices2.forEach((invoice) => invoice.data.id = invoice.ref.value.id);
+  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
+    invoice.items.forEach((item) => {
+      item.quantity = item.quantity - 0;
+      item.price = item.price - 0;
+      item.total = item.total - 0;
     });
+    return invoice;
   });
 }
 
+// app/services/validateAccessToken.ts
+var import_faunadb3 = __toModule(require_faunadb());
+var { query: query2 } = import_faunadb3.default;
+var q2 = query2;
+async function validate() {
+  const client = createClient();
+  return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
+}
+
 // app/identify.ts
-function identify() {
+async function identify() {
+  try {
+    await validate();
+  } catch (ex) {
+    localStorage.setItem("FAUNADB_SERVER_SECRET", "");
+    console.log(ex);
+    return false;
+  }
   if (!localStorage.getItem("user")) {
     location.href = `identity.html?target=${location.href}&context=${CONTEXT}`;
     return false;
@@ -4995,7 +4986,7 @@ function dom(tag, args, ...children) {
   if (typeof tag === "string") {
     let element = document.createElement(tag);
     if (default_args[tag]) {
-      args = defaults(args != null ? args : {}, default_args[tag]);
+      args = defaults(args ?? {}, default_args[tag]);
     }
     if (args) {
       Object.keys(args).forEach((key) => {
@@ -5301,93 +5292,88 @@ function init() {
     renderInvoice();
   }
 }
-function renderInvoices(target) {
-  return __async(this, null, function* () {
-    const invoices2 = yield invoices();
-    let grandTotal = 0;
-    const rows = invoices2.map((invoice) => {
-      const total = invoice.items.reduce((a, b) => a + b.total, 0) || 0;
-      grandTotal += total;
-      return `<label class="column1"><a href="invoice.html?id=${invoice.id}">${invoice.clientname}</a></label><label class="currency column2"> ${total.toFixed(2)}</label>`;
-    }).join("<br/>");
-    target.innerHTML = `${rows}<hr/><label class="column1">Total</label><label class="column2 currency">${grandTotal.toFixed(2)}</label>`;
-  });
+async function renderInvoices(target) {
+  const invoices2 = await invoices();
+  let grandTotal = 0;
+  const rows = invoices2.map((invoice) => {
+    const total = invoice.items.reduce((a, b) => a + b.total, 0) || 0;
+    grandTotal += total;
+    return `<label class="column1"><a href="invoice.html?id=${invoice.id}">${invoice.clientname}</a></label><label class="currency column2"> ${total.toFixed(2)}</label>`;
+  }).join("<br/>");
+  target.innerHTML = `${rows}<hr/><label class="column1">Total</label><label class="column2 currency">${grandTotal.toFixed(2)}</label>`;
 }
-function renderInvoice(invoiceId) {
-  return __async(this, null, function* () {
-    var _a2;
-    (_a2 = document.querySelector("#invoice-form")) == null ? void 0 : _a2.remove();
-    const template = create();
-    template.classList.add("hidden");
-    document.body.appendChild(template);
-    const formDom = document.querySelector("#invoice-form");
-    if (!formDom)
-      throw "a form must be defined with id of 'invoice-form'";
-    const form = formManager.domAsForm(formDom);
-    const target = formDom.querySelector(".line-items") || formDom;
-    if (invoiceId) {
-      const invoices2 = yield invoices();
-      const invoice = invoices2.find((invoice2) => invoice2.id === invoiceId);
-      if (!invoice)
-        throw "invoice not found";
-      form.set("labor", invoice.labor);
-      form.set("clientname", invoice.clientname);
-      form.set("billto", invoice.billto);
-      form.set("telephone", invoice.telephone || "");
-      form.set("email", invoice.email || "");
-      form.set("comments", invoice.comments || "");
-      const items = invoice.items.map((item) => createItemPanel(form, item));
-      items.forEach((item) => target.appendChild(item));
-      formDom.appendChild(form.createButton({ title: "Clear", event: "clear" }));
+async function renderInvoice(invoiceId) {
+  document.querySelector("#invoice-form")?.remove();
+  const template = create();
+  template.classList.add("hidden");
+  document.body.appendChild(template);
+  const formDom = document.querySelector("#invoice-form");
+  if (!formDom)
+    throw "a form must be defined with id of 'invoice-form'";
+  const form = formManager.domAsForm(formDom);
+  const target = formDom.querySelector(".line-items") || formDom;
+  if (invoiceId) {
+    const invoices2 = await invoices();
+    const invoice = invoices2.find((invoice2) => invoice2.id === invoiceId);
+    if (!invoice)
+      throw "invoice not found";
+    form.set("labor", invoice.labor);
+    form.set("clientname", invoice.clientname);
+    form.set("billto", invoice.billto);
+    form.set("telephone", invoice.telephone || "");
+    form.set("email", invoice.email || "");
+    form.set("comments", invoice.comments || "");
+    const items = invoice.items.map((item) => createItemPanel(form, item));
+    items.forEach((item) => target.appendChild(item));
+    formDom.appendChild(form.createButton({ title: "Clear", event: "clear" }));
+  }
+  form.on("list-all-invoices", () => {
+    window.location.href = "invoices.html";
+  });
+  form.on("print", () => {
+    const requestModel = asModel(formDom);
+    requestModel.id = invoiceId || "";
+    print(requestModel);
+  });
+  form.on("submit", async () => {
+    if (!formDom.checkValidity()) {
+      formDom.reportValidity();
+      return false;
     }
-    form.on("list-all-invoices", () => {
-      window.location.href = "invoices.html";
-    });
-    form.on("print", () => {
-      const requestModel = asModel(formDom);
-      requestModel.id = invoiceId || "";
-      print(requestModel);
-    });
-    form.on("submit", () => __async(this, null, function* () {
-      if (!formDom.checkValidity()) {
-        formDom.reportValidity();
-        return false;
-      }
-      formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
-        const [itemInput, priceInput] = ["#item", "#price"].map((id) => lineItemForm.querySelector(id));
-        inventoryManager.persistInventoryItem({
-          code: itemInput.value,
-          price: priceInput.valueAsNumber
-        });
+    formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
+      const [itemInput, priceInput] = ["#item", "#price"].map((id) => lineItemForm.querySelector(id));
+      inventoryManager.persistInventoryItem({
+        code: itemInput.value,
+        price: priceInput.valueAsNumber
       });
-      inventoryManager.persistInventoryItems();
-      const requestModel = asModel(formDom);
-      requestModel.id = invoiceId || "";
-      console.log({ requestModel });
-      yield save(requestModel);
-      form.trigger("list-all-invoices");
-    }));
-    form.on("remove-item", () => form.trigger("change"));
-    form.on("add-another-item", () => {
-      if (!form.isValid())
-        return;
-      addAnotherItem(form);
-      form.trigger("change");
     });
-    form.on("clear", () => {
-      location.href = "invoice.html";
-    });
-    form.on("change", () => {
-      const labor = Number.parseFloat(form.get("labor"));
-      const totalDue = computeTotalDue(form);
-      const tax = totalDue * TAXRATE;
-      form.set("total_due", (labor + totalDue + tax).toFixed(2));
-    });
-    template.classList.remove("hidden");
+    inventoryManager.persistInventoryItems();
+    const requestModel = asModel(formDom);
+    requestModel.id = invoiceId || "";
+    console.log({ requestModel });
+    await save(requestModel);
+    form.trigger("list-all-invoices");
+  });
+  form.on("remove-item", () => form.trigger("change"));
+  form.on("add-another-item", () => {
+    if (!form.isValid())
+      return;
+    addAnotherItem(form);
     form.trigger("change");
-    bind(form.formDom, ["#labor"], [], ([labor]) => {
-      form.trigger("change");
-    });
+  });
+  form.on("clear", () => {
+    location.href = "invoice.html";
+  });
+  form.on("change", () => {
+    const labor = Number.parseFloat(form.get("labor"));
+    const totalDue = computeTotalDue(form);
+    const tax = totalDue * TAXRATE;
+    form.set("total_due", (labor + totalDue + tax).toFixed(2));
+  });
+  template.classList.remove("hidden");
+  form.trigger("change");
+  bind(form.formDom, ["#labor"], [], ([labor]) => {
+    form.trigger("change");
   });
 }
 function computeTotalDue(form) {

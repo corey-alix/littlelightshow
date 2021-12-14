@@ -10,9 +10,11 @@
   </head>
   <body class="holiday">
     <script type="module">
-      var React = {};
       import { identify, init } from "../bin/invoice.js";
-      if (identify()) init();
+      (async function () {
+        if (await identify()) init();
+        else window.location.href = "/index.html";
+      })();
     </script>
   </body>
 </html>

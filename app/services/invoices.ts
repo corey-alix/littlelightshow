@@ -1,7 +1,7 @@
 import faunadb from "faunadb";
 import { createClient } from "../globals.js";
 
-const { query, Client } = faunadb;
+const { query } = faunadb;
 const q = query;
 
 export interface InvoiceItem {

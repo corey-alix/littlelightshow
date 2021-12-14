@@ -19,26 +19,6 @@ var __reExport = (target, module, desc) => {
 var __toModule = (module) => {
   return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
 };
-var __async = (__this, __arguments, generator) => {
-  return new Promise((resolve, reject) => {
-    var fulfilled = (value) => {
-      try {
-        step(generator.next(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var rejected = (value) => {
-      try {
-        step(generator.throw(value));
-      } catch (e) {
-        reject(e);
-      }
-    };
-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
-    step((generator = generator.apply(__this, __arguments)).next());
-  });
-};
 
 // node_modules/fn-annotate/index.js
 var require_fn_annotate = __commonJS({
@@ -4723,8 +4703,7 @@ var accessKeys = {
   FAUNADB_ADMIN_SECRET: "",
   FAUNADB_DOMAIN: "db.us.fauna.com"
 };
-var _a;
-if ((_a = globalThis.process) == null ? void 0 : _a.env) {
+if (globalThis.process?.env) {
   accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
   accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
 } else if (localStorage) {
@@ -4777,9 +4756,9 @@ function createDatabase() {
     domain
   });
   const tableNames = Object.keys(tables);
-  tableNames.forEach((tableName) => __async(this, null, function* () {
-    const response = yield client.query(q.Create(q.Ref("classes"), { name: tableName }));
-  }));
+  tableNames.forEach(async (tableName) => {
+    const response = await client.query(q.Create(q.Ref("classes"), { name: tableName }));
+  });
 }
 export {
   createDatabase
