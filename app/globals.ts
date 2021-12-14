@@ -39,6 +39,7 @@ export const domain = accessKeys.FAUNADB_DOMAIN;
 export const FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
 export const FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 export const CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
+export const CURRENT_USER = localStorage.getItem("user");
 
 export function createClient() {
   return new faunadb.Client({ secret: FAUNADB_SERVER_SECRET, domain });

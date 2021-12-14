@@ -1,5 +1,5 @@
 import faunadb from "faunadb";
-import { createClient } from "../globals.js";
+import { createClient, CURRENT_USER } from "../globals.js";
 
 const { query } = faunadb;
 const q = query;
@@ -28,17 +28,18 @@ export async function save(invoice: Invoice) {
   if (!invoice.id) {
     const result = await client.query(
       q.Create(q.Collection("Todos"), {
-        data: invoice,
+        data: { ...invoice, user: CURRENT_USER },
       })
     );
     console.log("create", result);
   } else {
     const result = await client.query(
       q.Update(q.Ref(q.Collection("Todos"), invoice.id), {
-        data: invoice,
+        data: { ...invoice, user: CURRENT_USER || "unknown" },
       })
     );
     console.log("update", result);
+    throw "hereiam";
   }
 }
 

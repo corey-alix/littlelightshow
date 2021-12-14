@@ -4726,6 +4726,7 @@ var domain = accessKeys.FAUNADB_DOMAIN;
 var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
 var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
+var CURRENT_USER = localStorage.getItem("user");
 
 // app/meta/tables.js
 var tables = {

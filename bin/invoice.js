@@ -4899,6 +4899,7 @@ var domain = accessKeys.FAUNADB_DOMAIN;
 var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
 var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
+var CURRENT_USER = localStorage.getItem("user");
 function createClient() {
   return new import_faunadb.default.Client({ secret: FAUNADB_SERVER_SECRET, domain });
 }
@@ -4911,14 +4912,15 @@ async function save(invoice) {
   const client = createClient();
   if (!invoice.id) {
     const result = await client.query(q.Create(q.Collection("Todos"), {
-      data: invoice
+      data: { ...invoice, user: CURRENT_USER }
     }));
     console.log("create", result);
   } else {
     const result = await client.query(q.Update(q.Ref(q.Collection("Todos"), invoice.id), {
-      data: invoice
+      data: { ...invoice, user: CURRENT_USER || "unknown" }
     }));
     console.log("update", result);
+    throw "hereiam";
   }
 }
 async function invoices() {
