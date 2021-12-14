@@ -5150,41 +5150,45 @@ function create2(invoice) {
   const report = /* @__PURE__ */ dom("div", {
     class: "print page grid-6"
   }, /* @__PURE__ */ dom("label", {
-    class: "bold line row-1 col-1-2"
+    class: "bold col-1-2"
   }, "Little Light Show"), /* @__PURE__ */ dom("label", {
-    class: "bold line row-1 col-5-2 align-right"
-  }, "Invoice"), /* @__PURE__ */ dom("label", {
-    class: "row-2 col-1-2"
+    class: "bold col-3-4 align-right"
+  }, "Invoice"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-6"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-6 vspacer"
+  }), /* @__PURE__ */ dom("label", {
+    class: "col-1-2"
   }, "Nathan Alix"), /* @__PURE__ */ dom("label", {
-    class: "row-2 col-5-2 align-right"
+    class: "col-5-2 align-right"
   }, invoice.id), /* @__PURE__ */ dom("label", {
-    class: "row-3 col-1-2"
+    class: "col-1-2"
   }, "4 Andrea Lane"), /* @__PURE__ */ dom("label", {
-    class: "row-3 col-5-2 align-right"
+    class: "col-5-2 align-right"
   }, new Date().toDateString()), /* @__PURE__ */ dom("label", {
-    class: "row-3 col-1-2"
+    class: "col-1-2"
   }, "Greenville, SC 29615"), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("label", {
-    class: "bold row-5 col-1"
+    class: "bold col-1"
   }, "Bill To:"), /* @__PURE__ */ dom("label", {
-    class: "row-5 col-2-2"
+    class: "col-2-2"
   }, invoice.clientname), invoice.billto.split("\n").map((n) => /* @__PURE__ */ dom("label", {
-    class: "row-6 col-2-2"
+    class: "col-2-2"
   }, n)), invoice.comments && /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), invoice.comments && /* @__PURE__ */ dom("label", {
-    class: "row-6 col-2-5"
+    class: "col-2-5"
   }, invoice.comments), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("label", {
-    class: "bold row-7 col-1-3"
+    class: "bold col-1-3"
   }, "Description"), /* @__PURE__ */ dom("label", {
-    class: "bold row-7 col-4 align-right"
+    class: "bold col-4 align-right"
   }, "Quantity"), /* @__PURE__ */ dom("label", {
-    class: "bold row-7 col-5 align-right"
+    class: "bold col-5 align-right"
   }, "Rate"), /* @__PURE__ */ dom("label", {
-    class: "bold row-7 col-6 align-right"
+    class: "bold col-6 align-right"
   }, "Amount"), /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }));

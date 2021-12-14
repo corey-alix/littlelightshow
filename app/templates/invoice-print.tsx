@@ -20,30 +20,28 @@ function invoiceItem(item: InvoiceItem): HTMLDivElement {
 export function create(invoice: Invoice) {
   const report: HTMLDivElement = (
     <div class="print page grid-6">
-      <label class="bold line row-1 col-1-2">Little Light Show</label>
-      <label class="bold line row-1 col-5-2 align-right">Invoice</label>
-      <label class="row-2 col-1-2">Nathan Alix</label>
-      <label class="row-2 col-5-2 align-right">{invoice.id}</label>
-      <label class="row-3 col-1-2">4 Andrea Lane</label>
-      <label class="row-3 col-5-2 align-right">
-        {new Date().toDateString()}
-      </label>
-      <label class="row-3 col-1-2">Greenville, SC 29615</label>
+      <label class="bold col-1-2">Little Light Show</label>
+      <label class="bold col-3-4 align-right">Invoice</label>
+      <div class="line col-1-6"></div>
+      <div class="col-1-6 vspacer"></div>
+      <label class="col-1-2">Nathan Alix</label>
+      <label class="col-5-2 align-right">{invoice.id}</label>
+      <label class="col-1-2">4 Andrea Lane</label>
+      <label class="col-5-2 align-right">{new Date().toDateString()}</label>
+      <label class="col-1-2">Greenville, SC 29615</label>
       <div class="vspacer-2 col-1-6"></div>
-      <label class="bold row-5 col-1">Bill To:</label>
-      <label class="row-5 col-2-2">{invoice.clientname}</label>
+      <label class="bold col-1">Bill To:</label>
+      <label class="col-2-2">{invoice.clientname}</label>
       {invoice.billto.split("\n").map((n) => (
-        <label class="row-6 col-2-2">{n}</label>
+        <label class="col-2-2">{n}</label>
       ))}
       {invoice.comments && <div class="vspacer-2 col-1-6"></div>}
-      {invoice.comments && (
-        <label class="row-6 col-2-5">{invoice.comments}</label>
-      )}
+      {invoice.comments && <label class="col-2-5">{invoice.comments}</label>}
       <div class="vspacer-2 col-1-6"></div>
-      <label class="bold row-7 col-1-3">Description</label>
-      <label class="bold row-7 col-4 align-right">Quantity</label>
-      <label class="bold row-7 col-5 align-right">Rate</label>
-      <label class="bold row-7 col-6 align-right">Amount</label>
+      <label class="bold col-1-3">Description</label>
+      <label class="bold col-4 align-right">Quantity</label>
+      <label class="bold col-5 align-right">Rate</label>
+      <label class="bold col-6 align-right">Amount</label>
       <div class="line col-1-6" />
     </div>
   );
