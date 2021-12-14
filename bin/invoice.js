@@ -5448,6 +5448,7 @@ function print(invoice) {
   const toPrint = create2(invoice);
   document.body.innerHTML = "";
   document.body.appendChild(toPrint);
+  window.print();
 }
 export {
   identify,

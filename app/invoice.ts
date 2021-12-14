@@ -256,5 +256,5 @@ export function print(invoice: Invoice) {
   const toPrint = createInvoicePrintTemplate(invoice);
   document.body.innerHTML = "";
   document.body.appendChild(toPrint);
-  //window.print();
+  window.print();
 }
