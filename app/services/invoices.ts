@@ -31,15 +31,12 @@ export async function save(invoice: Invoice) {
         data: { ...invoice, user: CURRENT_USER },
       })
     );
-    console.log("create", result);
   } else {
     const result = await client.query(
       q.Update(q.Ref(q.Collection("Todos"), invoice.id), {
         data: { ...invoice, user: CURRENT_USER || "unknown" },
       })
     );
-    console.log("update", result);
-    throw "hereiam";
   }
 }
 
