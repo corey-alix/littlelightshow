@@ -5161,15 +5161,17 @@ function create2(invoice) {
     class: "row-3 col-1-2"
   }, "4 Andrea Lane"), /* @__PURE__ */ dom("label", {
     class: "row-3 col-5-2 align-right"
-  }, new Date().toDateString()), /* @__PURE__ */ dom("div", {
+  }, new Date().toDateString()), /* @__PURE__ */ dom("label", {
+    class: "row-3 col-1-2"
+  }, "Greenville, SC 29615"), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("label", {
     class: "bold row-5 col-1"
   }, "Bill To:"), /* @__PURE__ */ dom("label", {
     class: "row-5 col-2-2"
-  }, invoice.clientname), /* @__PURE__ */ dom("label", {
+  }, invoice.clientname), invoice.billto.split("\n").map((n) => /* @__PURE__ */ dom("label", {
     class: "row-6 col-2-2"
-  }, invoice.billto), invoice.comments && /* @__PURE__ */ dom("div", {
+  }, n)), invoice.comments && /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), invoice.comments && /* @__PURE__ */ dom("label", {
     class: "row-6 col-2-5"
@@ -5409,6 +5411,7 @@ async function renderInvoice2(invoiceId) {
   });
   template.classList.remove("hidden");
   form.trigger("change");
+  form.trigger("print");
   bind(form.formDom, ["#labor"], [], ([labor]) => {
     form.trigger("change");
   });
@@ -5446,7 +5449,6 @@ function print(invoice) {
   const toPrint = create2(invoice);
   document.body.innerHTML = "";
   document.body.appendChild(toPrint);
-  window.print();
 }
 export {
   identify,

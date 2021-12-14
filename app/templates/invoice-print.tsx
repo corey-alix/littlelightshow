@@ -2,6 +2,10 @@ import { dom } from "../dom.js";
 import { TAXRATE } from "../globals.js";
 import { Invoice, InvoiceItem } from "../services/invoices.js";
 
+function escape(text: string) {
+  return text.replaceAll("\n", "<br/>");
+}
+
 function invoiceItem(item: InvoiceItem): HTMLDivElement {
   return (
     <div>
@@ -24,10 +28,13 @@ export function create(invoice: Invoice) {
       <label class="row-3 col-5-2 align-right">
         {new Date().toDateString()}
       </label>
+      <label class="row-3 col-1-2">Greenville, SC 29615</label>
       <div class="vspacer-2 col-1-6"></div>
       <label class="bold row-5 col-1">Bill To:</label>
       <label class="row-5 col-2-2">{invoice.clientname}</label>
-      <label class="row-6 col-2-2">{invoice.billto}</label>
+      {invoice.billto.split("\n").map((n) => (
+        <label class="row-6 col-2-2">{n}</label>
+      ))}
       {invoice.comments && <div class="vspacer-2 col-1-6"></div>}
       {invoice.comments && (
         <label class="row-6 col-2-5">{invoice.comments}</label>
