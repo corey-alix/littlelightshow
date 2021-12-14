@@ -24,6 +24,14 @@ function forceDatalist(
 }
 
 export class FormManager {
+  get(name: string) {
+    const input = this.formDom.querySelector(
+      `[name="${name}"]`
+    ) as HTMLInputElement;
+    if (!input) throw `field not found: ${name}`;
+    return input.value;
+  }
+
   set(name: string, value: string | number) {
     const input = this.formDom.querySelector(
       `[name="${name}"]`
@@ -120,9 +128,16 @@ export class FormFactory {
       if (fieldInfo.value) {
         const fieldValue = fieldInfo.value;
         if (typeof fieldValue == "boolean") input.checked = fieldValue;
-        else if (typeof fieldValue == "number")
-          input.valueAsNumber = fieldValue;
-        else input.value = fieldValue;
+        else if (typeof fieldValue == "number") {
+          switch (fieldInfo.type) {
+            case "currency":
+              input.value = fieldValue.toFixed(2);
+              break;
+            default:
+              input.valueAsNumber = fieldValue;
+              break;
+          }
+        } else input.value = fieldValue;
       }
 
       if (fieldInfo.lookup) {

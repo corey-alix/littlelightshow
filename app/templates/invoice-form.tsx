@@ -41,9 +41,7 @@ export function create(): HTMLFormElement {
           </label>
         </section>
       </section>
-
       <div class="vspacer"></div>
-
       <section class="category">
         <div class="section-title">Items</div>
         <section class="line-items line-item-grid"></section>
@@ -52,8 +50,16 @@ export function create(): HTMLFormElement {
       <button class="button" data-event="add-another-item" type="button">
         Add item
       </button>
-      <label>
-        Total + Tax:
+      <section class="line-items">
+        <label class="form-label align-right">Labor</label>
+        <input
+          type="number"
+          class="currency"
+          placeholder="labor"
+          name="labor"
+          id="labor"
+        />
+        <label class="form-label align-right">Total + Tax</label>
         <input
           readonly
           type="number"
@@ -62,10 +68,13 @@ export function create(): HTMLFormElement {
           name="total_due"
           value="$0.00"
         />
-      </label>
+      </section>
       <div class="vspacer-1"></div>
       <button class="button" data-event="submit" type="button">
         Save
+      </button>
+      <button class="button" data-event="print" type="button">
+        Print
       </button>
     </form>
   );

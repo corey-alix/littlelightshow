@@ -10,6 +10,7 @@ import {
 
 export { identify } from "./identify.js";
 import { create as createInvoiceFormTemplate } from "./templates/invoice-form.js";
+import { create as createInvoicePrintTemplate } from "./templates/invoice-print.js";
 
 const formManager = new FormFactory();
 
@@ -158,6 +159,7 @@ export async function renderInvoice(invoiceId?: string) {
     const invoice = invoices.find((invoice) => invoice.id === invoiceId);
     if (!invoice) throw "invoice not found";
 
+    form.set("labor", invoice.labor);
     form.set("clientname", invoice.clientname);
     form.set("billto", invoice.billto);
     form.set("telephone", invoice.telephone || "");
@@ -171,6 +173,12 @@ export async function renderInvoice(invoiceId?: string) {
 
   form.on("list-all-invoices", () => {
     window.location.href = "invoices.html";
+  });
+
+  form.on("print", () => {
+    const requestModel = asModel(formDom);
+    requestModel.id = invoiceId || "";
+    print(requestModel);
   });
 
   form.on("submit", async () => {
@@ -208,13 +216,18 @@ export async function renderInvoice(invoiceId?: string) {
   });
 
   form.on("change", () => {
+    const labor = Number.parseFloat(form.get("labor"));
     const totalDue = computeTotalDue(form);
     const tax = totalDue * TAXRATE;
-    form.set("total_due", (totalDue + tax).toFixed(2));
+    form.set("total_due", (labor + totalDue + tax).toFixed(2));
   });
 
   template.classList.remove("hidden");
   form.trigger("change");
+
+  bind(form.formDom, ["#labor"], [], ([labor]) => {
+    form.trigger("change");
+  });
 }
 
 function computeTotalDue(form: FormManager) {
@@ -238,6 +251,7 @@ function asModel(formDom: HTMLFormElement) {
       quantity: number;
       total: number;
     }>,
+    labor: Number.parseFloat((data.get("labor") as string) || "0"),
   };
 
   let currentItem = null as any;
@@ -249,4 +263,11 @@ function asModel(formDom: HTMLFormElement) {
     if (currentItem) currentItem[key] = value;
   }
   return requestModel;
+}
+
+export function print(invoice: Invoice) {
+  const toPrint = createInvoicePrintTemplate(invoice);
+  document.body.insertBefore(toPrint, document.body.firstElementChild);
+  window.print();
+  toPrint.remove();
 }

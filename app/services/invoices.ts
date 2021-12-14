@@ -12,6 +12,7 @@ export interface InvoiceItem {
 }
 
 export interface Invoice {
+  labor: number;
   id: string;
   clientname: string;
   billto: string;

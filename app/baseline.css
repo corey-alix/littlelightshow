@@ -1,4 +1,5 @@
 body {
+  max-width: 40rem;
   width: calc(100vw - 3rem);
   background-color: rgba(253, 244, 220, 0.9);
   font-family: Arial black;
@@ -204,10 +205,84 @@ a {
   text-align: right;
 }
 
-#total_due {
-  color: black;
-  font-size: 22pt;
-  margin: 1em;
+.page {
+  width: 800px;
+  height: auto;
 }
+
+.print {
+  width: 800px !important;
+  background-color: white !important;
+  color: black !important;
+  padding: 1rem;
+}
+.grid-6 {
+  display: grid;
+  grid-template-columns: repeat(6, auto);
+  grid-column-gap: 1em;
+}
+
+.col-1 {
+  grid-column: 1;
+}
+.col-1-2 {
+  grid-column: 1/3;
+}
+.col-1-3 {
+  grid-column: 1/4;
+}
+.col-1-6 {
+  grid-column: 1/7;
+}
+.col-2 {
+  grid-column: 2;
+}
+.col-2-2 {
+  grid-column: 2/4;
+}
+.col-2-5 {
+  grid-column: 2/7;
+}
+.col-3 {
+  grid-column: 3;
+}
+.col-4 {
+  grid-column: 4;
+}
+.col-5 {
+  grid-column: 5;
+}
+.col-5-2 {
+  grid-column: 5/7;
+}
+.col-6 {
+  grid-column: 6;
+}
+
+.line {
+  border-bottom: 1px solid black;
+}
+
 @media (max-width: 459px) {
+}
+
+@media print {
+  * {
+    transition: none !important;
+    text-shadow: none;
+    font-family: "Times New Roman", Times, serif;
+  }
+
+  .tall {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+
+  .bold {
+    font-family: Arial black;
+  }
+
+  #invoice-form {
+    display: none;
+  }
 }

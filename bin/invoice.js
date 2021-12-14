@@ -4781,6 +4781,12 @@ var FormManager = class {
     this.formDom = formDom;
     this.channel = new EventBus();
   }
+  get(name) {
+    const input = this.formDom.querySelector(`[name="${name}"]`);
+    if (!input)
+      throw `field not found: ${name}`;
+    return input.value;
+  }
   set(name, value) {
     const input = this.formDom.querySelector(`[name="${name}"]`);
     if (!input)
@@ -4860,9 +4866,16 @@ var FormFactory = class {
         const fieldValue = fieldInfo.value;
         if (typeof fieldValue == "boolean")
           input.checked = fieldValue;
-        else if (typeof fieldValue == "number")
-          input.valueAsNumber = fieldValue;
-        else
+        else if (typeof fieldValue == "number") {
+          switch (fieldInfo.type) {
+            case "currency":
+              input.value = fieldValue.toFixed(2);
+              break;
+            default:
+              input.valueAsNumber = fieldValue;
+              break;
+          }
+        } else
           input.value = fieldValue;
       }
       if (fieldInfo.lookup) {
@@ -5088,7 +5101,19 @@ function create() {
     class: "button",
     "data-event": "add-another-item",
     type: "button"
-  }, "Add item"), /* @__PURE__ */ dom("label", null, "Total + Tax:", /* @__PURE__ */ dom("input", {
+  }, "Add item"), /* @__PURE__ */ dom("section", {
+    class: "line-items"
+  }, /* @__PURE__ */ dom("label", {
+    class: "form-label align-right"
+  }, "Labor"), /* @__PURE__ */ dom("input", {
+    type: "number",
+    class: "currency",
+    placeholder: "labor",
+    name: "labor",
+    id: "labor"
+  }), /* @__PURE__ */ dom("label", {
+    class: "form-label align-right"
+  }, "Total + Tax"), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
     class: "currency",
@@ -5101,7 +5126,99 @@ function create() {
     class: "button",
     "data-event": "submit",
     type: "button"
-  }, "Save"));
+  }, "Save"), /* @__PURE__ */ dom("button", {
+    class: "button",
+    "data-event": "print",
+    type: "button"
+  }, "Print"));
+}
+
+// app/templates/invoice-print.tsx
+function invoiceItem(item) {
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
+    class: "tall col-1-3"
+  }, item.item), /* @__PURE__ */ dom("label", {
+    class: "tall col-4 align-right"
+  }, item.quantity), /* @__PURE__ */ dom("label", {
+    class: "tall col-5 align-right"
+  }, item.price), /* @__PURE__ */ dom("label", {
+    class: "tall col-6 align-right"
+  }, item.total));
+}
+function create2(invoice) {
+  const report = /* @__PURE__ */ dom("div", {
+    class: "print page grid-6"
+  }, /* @__PURE__ */ dom("label", {
+    class: "bold line row-1 col-1-2"
+  }, "Little Light Show"), /* @__PURE__ */ dom("label", {
+    class: "bold line row-1 col-5-2 align-right"
+  }, "Invoice"), /* @__PURE__ */ dom("label", {
+    class: "row-2 col-1-2"
+  }, "Nathan Alix"), /* @__PURE__ */ dom("label", {
+    class: "row-2 col-5-2 align-right"
+  }, invoice.id), /* @__PURE__ */ dom("label", {
+    class: "row-3 col-1-2"
+  }, "4 Andrea Lane"), /* @__PURE__ */ dom("label", {
+    class: "row-3 col-5-2 align-right"
+  }, new Date().toDateString()), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-6"
+  }), /* @__PURE__ */ dom("label", {
+    class: "bold row-5 col-1"
+  }, "Bill To:"), /* @__PURE__ */ dom("label", {
+    class: "row-5 col-2-2"
+  }, invoice.clientname), /* @__PURE__ */ dom("label", {
+    class: "row-6 col-2-2"
+  }, invoice.billto), invoice.comments && /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-6"
+  }), invoice.comments && /* @__PURE__ */ dom("label", {
+    class: "row-6 col-2-5"
+  }, invoice.comments), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-6"
+  }), /* @__PURE__ */ dom("label", {
+    class: "bold row-7 col-1-3"
+  }, "Description"), /* @__PURE__ */ dom("label", {
+    class: "bold row-7 col-4 align-right"
+  }, "Quantity"), /* @__PURE__ */ dom("label", {
+    class: "bold row-7 col-5 align-right"
+  }, "Rate"), /* @__PURE__ */ dom("label", {
+    class: "bold row-7 col-6 align-right"
+  }, "Amount"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-6"
+  }));
+  {
+    invoice.items.forEach((item) => {
+      moveChildren(invoiceItem(item), report);
+    });
+    const totalItems = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
+    console.log(invoice.items, totalItems);
+    const summary = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+      class: "line col-1-6"
+    }), /* @__PURE__ */ dom("div", {
+      class: "vspacer-2 col-1-6"
+    }), /* @__PURE__ */ dom("label", {
+      class: "col-5"
+    }, "Total Supplies"), /* @__PURE__ */ dom("label", {
+      class: "col-6 align-right"
+    }, totalItems.toFixed(2)), /* @__PURE__ */ dom("label", {
+      class: "col-5"
+    }, "Tax (", 100 * TAXRATE + "", "%)"), /* @__PURE__ */ dom("label", {
+      class: "col-6 align-right"
+    }, (totalItems * TAXRATE).toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
+      class: "col-5"
+    }, "Labor"), invoice.labor && /* @__PURE__ */ dom("label", {
+      class: "col-6 align-right"
+    }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
+      class: "bold col-5"
+    }, "Balance Due"), /* @__PURE__ */ dom("label", {
+      class: "bold col-6 align-right"
+    }, ((invoice.labor || 0) + totalItems * (1 + TAXRATE)).toFixed(2)));
+    moveChildren(summary, report);
+  }
+  return report;
+}
+function moveChildren(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
 }
 
 // app/invoice.ts
@@ -5214,6 +5331,7 @@ function renderInvoice(invoiceId) {
       const invoice = invoices2.find((invoice2) => invoice2.id === invoiceId);
       if (!invoice)
         throw "invoice not found";
+      form.set("labor", invoice.labor);
       form.set("clientname", invoice.clientname);
       form.set("billto", invoice.billto);
       form.set("telephone", invoice.telephone || "");
@@ -5225,6 +5343,11 @@ function renderInvoice(invoiceId) {
     }
     form.on("list-all-invoices", () => {
       window.location.href = "invoices.html";
+    });
+    form.on("print", () => {
+      const requestModel = asModel(formDom);
+      requestModel.id = invoiceId || "";
+      print(requestModel);
     });
     form.on("submit", () => __async(this, null, function* () {
       if (!formDom.checkValidity()) {
@@ -5256,12 +5379,16 @@ function renderInvoice(invoiceId) {
       location.href = "invoice.html";
     });
     form.on("change", () => {
+      const labor = Number.parseFloat(form.get("labor"));
       const totalDue = computeTotalDue(form);
       const tax = totalDue * TAXRATE;
-      form.set("total_due", (totalDue + tax).toFixed(2));
+      form.set("total_due", (labor + totalDue + tax).toFixed(2));
     });
     template.classList.remove("hidden");
     form.trigger("change");
+    bind(form.formDom, ["#labor"], [], ([labor]) => {
+      form.trigger("change");
+    });
   });
 }
 function computeTotalDue(form) {
@@ -5278,7 +5405,8 @@ function asModel(formDom) {
     telephone: data.get("telephone"),
     email: data.get("email"),
     comments: data.get("comments"),
-    items: []
+    items: [],
+    labor: Number.parseFloat(data.get("labor") || "0")
   };
   let currentItem = null;
   for (let [key, value] of data.entries()) {
@@ -5291,9 +5419,16 @@ function asModel(formDom) {
   }
   return requestModel;
 }
+function print(invoice) {
+  const toPrint = create2(invoice);
+  document.body.insertBefore(toPrint, document.body.firstElementChild);
+  window.print();
+  toPrint.remove();
+}
 export {
   identify,
   init,
+  print,
   renderInvoice,
   renderInvoices
 };
