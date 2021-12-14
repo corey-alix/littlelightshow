@@ -210,7 +210,6 @@ export async function renderInvoice(invoiceId?: string) {
 
   template.classList.remove("hidden");
   form.trigger("change");
-  form.trigger("print");
 
   bind(form.formDom, ["#labor"], [], ([labor]) => {
     form.trigger("change");

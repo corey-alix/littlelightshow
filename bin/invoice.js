@@ -5411,7 +5411,6 @@ async function renderInvoice2(invoiceId) {
   });
   template.classList.remove("hidden");
   form.trigger("change");
-  form.trigger("print");
   bind(form.formDom, ["#labor"], [], ([labor]) => {
     form.trigger("change");
   });
