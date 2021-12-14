@@ -76,6 +76,12 @@ export function create(): HTMLFormElement {
       <button class="button" data-event="print" type="button">
         Print
       </button>
+      <button class="button" data-event="clear" type="button">
+        Clear
+      </button>
+      <button class="button" data-event="list-all-invoices" type="button">
+        List All Invoices
+      </button>
     </form>
   );
 }

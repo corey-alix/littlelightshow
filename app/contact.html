@@ -6,19 +6,21 @@
     <link rel="stylesheet" href="./baseline.css" />
   </head>
   <body class="holiday">
-    <form name="contact" netlify method="POST" action="../index.html">
-      <label class="form-label"
-        >Email or Text
-        <textarea
-          class="message"
-          type="text"
-          name="message"
-          placeholder="include text or email"
-          required
-        ></textarea>
-      </label>
-      <div class="spacer-1"></div>
-      <button class="button" type="submit">Contact Me</button>
+    <form
+      class="grid-6"
+      name="contact"
+      netlify
+      method="POST"
+      action="../index.html"
+    >
+      <textarea
+        class="message col-1-6"
+        type="text"
+        name="message"
+        placeholder="include text or email"
+        required
+      ></textarea>
+      <button class="button col-3-2" type="submit">Send</button>
     </form>
   </body>
 </html>

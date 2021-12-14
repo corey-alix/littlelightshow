@@ -936,12 +936,12 @@ var require_util = __commonJS({
     function checkInstanceHasProperty(obj, prop) {
       return typeof obj === "object" && obj !== null && Boolean(obj[prop]);
     }
-    function formatUrl(base, path, query3) {
-      query3 = typeof query3 === "object" ? querystringify(query3) : query3;
+    function formatUrl(base, path, query2) {
+      query2 = typeof query2 === "object" ? querystringify(query2) : query2;
       return [
         base,
         path ? path.charAt(0) === "/" ? "" : "/" + path : "",
-        query3 ? query3.charAt(0) === "?" ? "" : "?" + query3 : ""
+        query2 ? query2.charAt(0) === "?" ? "" : "?" + query2 : ""
       ].join("");
     }
     function querystringify(obj, prefix) {
@@ -3081,7 +3081,7 @@ var require_json = __commonJS({
 var require_PageHelper = __commonJS({
   "node_modules/faunadb/src/PageHelper.js"(exports, module) {
     "use strict";
-    var query3 = require_query();
+    var query2 = require_query();
     var objectAssign = require_object_assign();
     function PageHelper(client, set, params, options) {
       if (params === void 0) {
@@ -3112,14 +3112,14 @@ var require_PageHelper = __commonJS({
     PageHelper.prototype.map = function(lambda) {
       var rv = this._clone();
       rv._faunaFunctions.push(function(q3) {
-        return query3.Map(q3, lambda);
+        return query2.Map(q3, lambda);
       });
       return rv;
     };
     PageHelper.prototype.filter = function(lambda) {
       var rv = this._clone();
       rv._faunaFunctions.push(function(q3) {
-        return query3.Filter(q3, lambda);
+        return query2.Filter(q3, lambda);
       });
       return rv;
     };
@@ -3188,7 +3188,7 @@ var require_PageHelper = __commonJS({
           cursorOpts.before = null;
         }
       }
-      var q3 = query3.Paginate(this.set, opts);
+      var q3 = query2.Paginate(this.set, opts);
       if (this._faunaFunctions.length > 0) {
         this._faunaFunctions.forEach(function(lambda) {
           q3 = lambda(q3);
@@ -3214,10 +3214,10 @@ var require_PageHelper = __commonJS({
 var require_RequestResult = __commonJS({
   "node_modules/faunadb/src/RequestResult.js"(exports, module) {
     "use strict";
-    function RequestResult(method, path, query3, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
+    function RequestResult(method, path, query2, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
       this.method = method;
       this.path = path;
-      this.query = query3;
+      this.query = query2;
       this.requestRaw = requestRaw;
       this.requestContent = requestContent;
       this.responseRaw = responseRaw;
@@ -4521,7 +4521,7 @@ var require_Client = __commonJS({
     var errors = require_errors();
     var http = require_http3();
     var json = require_json();
-    var query3 = require_query();
+    var query2 = require_query();
     var stream = require_stream();
     var util = require_util();
     var values = require_values();
@@ -4552,7 +4552,7 @@ var require_Client = __commonJS({
     }
     Client.apiVersion = packageJson.apiVersion;
     Client.prototype.query = function(expression, options) {
-      return this._execute("POST", "", query3.wrap(expression), null, options);
+      return this._execute("POST", "", query2.wrap(expression), null, options);
     };
     Client.prototype.paginate = function(expression, params, options) {
       params = util.defaults(params, {});
@@ -4571,26 +4571,26 @@ var require_Client = __commonJS({
     Client.prototype.close = function(opts) {
       return this._http.close(opts);
     };
-    Client.prototype._execute = function(method, path, data, query4, options) {
-      query4 = util.defaults(query4, null);
+    Client.prototype._execute = function(method, path, data, query3, options) {
+      query3 = util.defaults(query3, null);
       if (path instanceof values.Ref || util.checkInstanceHasProperty(path, "_isFaunaRef")) {
         path = path.value;
       }
-      if (query4 !== null) {
-        query4 = util.removeUndefinedValues(query4);
+      if (query3 !== null) {
+        query3 = util.removeUndefinedValues(query3);
       }
       var startTime = Date.now();
       var self2 = this;
       var body = ["GET", "HEAD"].indexOf(method) >= 0 ? void 0 : JSON.stringify(data);
       return this._http.execute(Object.assign({}, options, {
         path,
-        query: query4,
+        query: query3,
         method,
         body
       })).then(function(response) {
         var endTime = Date.now();
         var responseObject = json.parseJSON(response.body);
-        var result = new RequestResult(method, path, query4, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
+        var result = new RequestResult(method, path, query3, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
         self2._handleRequestResult(response, result, options);
         return responseObject["resource"];
       });
@@ -4635,12 +4635,12 @@ var require_clientLogger = __commonJS({
       };
     }
     function showRequestResult(requestResult) {
-      var query3 = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
+      var query2 = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
       var out = "";
       function log(str) {
         out = out + str;
       }
-      log("Fauna " + method + " /" + path + _queryString(query3) + "\n");
+      log("Fauna " + method + " /" + path + _queryString(query2) + "\n");
       if (requestContent != null) {
         log("  Request JSON: " + _showJSON(requestContent) + "\n");
       }
@@ -4656,16 +4656,16 @@ var require_clientLogger = __commonJS({
     function _showJSON(object) {
       return _indent(json.toJSON(object, true));
     }
-    function _queryString(query3) {
-      if (query3 == null) {
+    function _queryString(query2) {
+      if (query2 == null) {
         return "";
       }
-      var keys = Object.keys(query3);
+      var keys = Object.keys(query2);
       if (keys.length === 0) {
         return "";
       }
       var pairs = keys.map(function(key) {
-        return key + "=" + query3[key];
+        return key + "=" + query2[key];
       });
       return "?" + pairs.join("&");
     }
@@ -4679,7 +4679,7 @@ var require_clientLogger = __commonJS({
 // node_modules/faunadb/index.js
 var require_faunadb = __commonJS({
   "node_modules/faunadb/index.js"(exports, module) {
-    var query3 = require_query();
+    var query2 = require_query();
     var util = require_util();
     var parseJSON = require_json().parseJSON;
     module.exports = util.mergeObjects({
@@ -4690,9 +4690,9 @@ var require_faunadb = __commonJS({
       clientLogger: require_clientLogger(),
       errors: require_errors(),
       values: require_values(),
-      query: query3,
+      query: query2,
       parseJSON
-    }, query3);
+    }, query2);
   }
 });
 
@@ -4906,31 +4906,35 @@ function createClient() {
 
 // app/services/invoices.ts
 var import_faunadb2 = __toModule(require_faunadb());
-var { query } = import_faunadb2.default;
-var q = query;
 async function save(invoice) {
+  if (!CURRENT_USER)
+    throw "user must be signed in";
   const client = createClient();
   if (!invoice.id) {
-    const result = await client.query(q.Create(q.Collection("Todos"), {
-      data: { ...invoice, user: CURRENT_USER }
+    const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection("Todos"), {
+      data: { ...invoice, user: CURRENT_USER, create_date: Date.now() }
     }));
   } else {
-    const result = await client.query(q.Update(q.Ref(q.Collection("Todos"), invoice.id), {
-      data: { ...invoice, user: CURRENT_USER || "unknown" }
+    const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection("Todos"), invoice.id), {
+      data: { ...invoice, user: CURRENT_USER, update_date: Date.now() }
     }));
   }
 }
 async function invoices() {
+  if (!CURRENT_USER)
+    throw "user must be signed in";
   const client = createClient();
-  const result = await client.query(q.Map(q.Paginate(q.Documents(q.Collection("Todos"))), q.Lambda("ref", q.Get(q.Var("ref")))));
-  console.log("invoices", result);
+  const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection("Todos"))), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
   const invoices2 = result.data;
+  invoices2.reverse();
   invoices2.forEach((invoice) => invoice.data.id = invoice.ref.value.id);
   return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
+    invoice.labor = (invoice.labor || 0) - 0;
     invoice.items.forEach((item) => {
-      item.quantity = item.quantity - 0;
-      item.price = item.price - 0;
-      item.total = item.total - 0;
+      item.item = (item.item || "").toLocaleUpperCase();
+      item.quantity = (item.quantity || 0) - 0;
+      item.price = (item.price || 0) - 0;
+      item.total = (item.total || 0) - 0;
     });
     return invoice;
   });
@@ -4938,8 +4942,8 @@ async function invoices() {
 
 // app/services/validateAccessToken.ts
 var import_faunadb3 = __toModule(require_faunadb());
-var { query: query2 } = import_faunadb3.default;
-var q2 = query2;
+var { query } = import_faunadb3.default;
+var q2 = query;
 async function validate() {
   const client = createClient();
   return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
@@ -5119,7 +5123,15 @@ function create() {
     class: "button",
     "data-event": "print",
     type: "button"
-  }, "Print"));
+  }, "Print"), /* @__PURE__ */ dom("button", {
+    class: "button",
+    "data-event": "clear",
+    type: "button"
+  }, "Clear"), /* @__PURE__ */ dom("button", {
+    class: "button",
+    "data-event": "list-all-invoices",
+    type: "button"
+  }, "List All Invoices"));
 }
 
 // app/templates/invoice-print.tsx
@@ -5210,6 +5222,38 @@ function moveChildren(items, report) {
     report.appendChild(items.firstChild);
 }
 
+// app/templates/invoices-grid.tsx
+function moveChildren2(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
+}
+function totalInvoice(invoice) {
+  let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
+  return total;
+}
+function renderInvoice(invoice) {
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
+    class: "col-1-4"
+  }, invoice.clientname), /* @__PURE__ */ dom("label", {
+    class: "col-5-2 currency"
+  }, totalInvoice(invoice).toFixed(2)));
+}
+function create3(invoices2) {
+  const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
+  const report = /* @__PURE__ */ dom("div", {
+    class: "grid-6"
+  });
+  invoices2.map(renderInvoice).forEach((item) => moveChildren2(item, report));
+  moveChildren2(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "line col-1-6"
+  }), /* @__PURE__ */ dom("label", {
+    class: "bold col-1-4"
+  }, "Total"), /* @__PURE__ */ dom("label", {
+    class: "currency bold col-5-2"
+  }, total.toFixed(2))), report);
+  return report;
+}
+
 // app/invoice.ts
 var formManager = new FormFactory();
 function bind(form, inputQuerySelectors, outputQuerySelectors, cb) {
@@ -5286,22 +5330,16 @@ function addAnotherItem(form) {
 function init() {
   const queryParams = new URLSearchParams(window.location.search);
   if (queryParams.has("id")) {
-    renderInvoice(queryParams.get("id"));
+    renderInvoice2(queryParams.get("id"));
   } else {
-    renderInvoice();
+    renderInvoice2();
   }
 }
 async function renderInvoices(target) {
   const invoices2 = await invoices();
-  let grandTotal = 0;
-  const rows = invoices2.map((invoice) => {
-    const total = invoice.items.reduce((a, b) => a + b.total, 0) || 0;
-    grandTotal += total;
-    return `<label class="column1"><a href="invoice.html?id=${invoice.id}">${invoice.clientname}</a></label><label class="currency column2"> ${total.toFixed(2)}</label>`;
-  }).join("<br/>");
-  target.innerHTML = `${rows}<hr/><label class="column1">Total</label><label class="column2 currency">${grandTotal.toFixed(2)}</label>`;
+  target.appendChild(create3(invoices2));
 }
-async function renderInvoice(invoiceId) {
+async function renderInvoice2(invoiceId) {
   document.querySelector("#invoice-form")?.remove();
   const template = create();
   template.classList.add("hidden");
@@ -5324,7 +5362,6 @@ async function renderInvoice(invoiceId) {
     form.set("comments", invoice.comments || "");
     const items = invoice.items.map((item) => createItemPanel(form, item));
     items.forEach((item) => target.appendChild(item));
-    formDom.appendChild(form.createButton({ title: "Clear", event: "clear" }));
   }
   form.on("list-all-invoices", () => {
     window.location.href = "invoices.html";
@@ -5414,7 +5451,7 @@ export {
   identify,
   init,
   print,
-  renderInvoice,
+  renderInvoice2 as renderInvoice,
   renderInvoices
 };
 /*

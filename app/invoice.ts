@@ -11,6 +11,7 @@ import {
 export { identify } from "./identify.js";
 import { create as createInvoiceFormTemplate } from "./templates/invoice-form.js";
 import { create as createInvoicePrintTemplate } from "./templates/invoice-print.js";
+import { create as createInvoicesGridTemplate } from "./templates/invoices-grid.js";
 
 const formManager = new FormFactory();
 
@@ -125,21 +126,7 @@ export function init() {
 
 export async function renderInvoices(target: HTMLElement) {
   const invoices = await getAllInvoices();
-  let grandTotal = 0;
-  const rows = invoices
-    .map((invoice) => {
-      const total = invoice.items.reduce((a, b) => a + b.total, 0) || 0;
-      grandTotal += total;
-      return `<label class="column1"><a href="invoice.html?id=${invoice.id}">${
-        invoice.clientname
-      }</a></label><label class="currency column2"> ${total.toFixed(
-        2
-      )}</label>`;
-    })
-    .join("<br/>");
-  target.innerHTML = `${rows}<hr/><label class="column1">Total</label><label class="column2 currency">${grandTotal.toFixed(
-    2
-  )}</label>`;
+  target.appendChild(createInvoicesGridTemplate(invoices));
 }
 
 export async function renderInvoice(invoiceId?: string) {
@@ -168,7 +155,6 @@ export async function renderInvoice(invoiceId?: string) {
 
     const items = invoice.items.map((item) => createItemPanel(form, item));
     items.forEach((item) => target.appendChild(item));
-    formDom.appendChild(form.createButton({ title: "Clear", event: "clear" }));
   }
 
   form.on("list-all-invoices", () => {
