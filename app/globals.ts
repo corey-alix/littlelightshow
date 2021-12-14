@@ -32,7 +32,7 @@ if (globalThis.process?.env) {
 }
 
 function isNetlifyBuildContext() {
-  return !!globalThis.process?.env.DEPLOY_PRIME_URL;
+  return 0 <= location.href.indexOf("netlify");
 }
 
 export const domain = accessKeys.FAUNADB_DOMAIN;

@@ -4914,8 +4914,7 @@ if ((_a = globalThis.process) == null ? void 0 : _a.env) {
     console.error("set FAUNADB_ADMIN_SECRET in local storage");
 }
 function isNetlifyBuildContext() {
-  var _a2;
-  return !!((_a2 = globalThis.process) == null ? void 0 : _a2.env.DEPLOY_PRIME_URL);
+  return 0 <= location.href.indexOf("netlify");
 }
 var domain = accessKeys.FAUNADB_DOMAIN;
 var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
