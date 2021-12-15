@@ -76,8 +76,8 @@ export function create(invoice: Invoice): HTMLFormElement {
       </button>
       <div class="vspacer col-1-6"></div>
       <div class="section-title col-1-6">Summary</div>
-      <label class="form-label col-1-3">Labor</label>
-      <label class="form-label col-4-3">Total + Tax</label>
+      <label class="form-label col-1-3 currency">Labor</label>
+      <label class="form-label col-4-3 currency">Total + Tax</label>
       <input
         type="number"
         class="currency col-1-3"
@@ -152,9 +152,9 @@ export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
         value={item.item}
         list={forceDatalist().id}
       />
-      <label class="form-label col-1">Quantity</label>
-      <label class="form-label col-2-2">Price</label>
-      <label class="form-label col-4-3">Total</label>
+      <label class="form-label col-1 quantity">Quantity</label>
+      <label class="form-label col-2-2 currency">Price</label>
+      <label class="form-label col-4-3 currency">Total</label>
       <input
         name="quantity"
         required

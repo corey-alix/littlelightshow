@@ -5126,9 +5126,9 @@ function create(invoice) {
   }), /* @__PURE__ */ dom("div", {
     class: "section-title col-1-6"
   }, "Summary"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-3"
+    class: "form-label col-1-3 currency"
   }, "Labor"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3"
+    class: "form-label col-4-3 currency"
   }, "Total + Tax"), /* @__PURE__ */ dom("input", {
     type: "number",
     class: "currency col-1-3",
@@ -5191,11 +5191,11 @@ function renderInvoiceItem(item) {
     value: item.item,
     list: forceDatalist().id
   }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1"
+    class: "form-label col-1 quantity"
   }, "Quantity"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-2-2"
+    class: "form-label col-2-2 currency"
   }, "Price"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3"
+    class: "form-label col-4-3 currency"
   }, "Total"), /* @__PURE__ */ dom("input", {
     name: "quantity",
     required: true,

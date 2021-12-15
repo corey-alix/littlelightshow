@@ -74,6 +74,8 @@ div.section-title {
 .grid-6 input {
   width: 100%;
   min-height: 2rem;
+  border: none;
+  border-bottom: 1px solid silver;
 }
 
 .form-label > input {
