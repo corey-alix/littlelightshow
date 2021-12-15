@@ -5182,14 +5182,15 @@ function compute(form) {
 }
 function renderInvoiceItem(item) {
   const form = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6 bold"
-  }, "Item", /* @__PURE__ */ dom("input", {
+    class: "form-label col-1-6"
+  }, "Item"), /* @__PURE__ */ dom("input", {
     name: "item",
+    class: "bold col-1-6",
     required: true,
     type: "text",
     value: item.item,
     list: forceDatalist().id
-  })), /* @__PURE__ */ dom("label", {
+  }), /* @__PURE__ */ dom("label", {
     class: "form-label col-1"
   }, "Quantity"), /* @__PURE__ */ dom("label", {
     class: "form-label col-2-2"

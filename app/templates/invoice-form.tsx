@@ -143,16 +143,15 @@ function compute(form: HTMLFormElement) {
 export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
   const form: HTMLDivElement = (
     <div>
-      <label class="form-label col-1-6 bold">
-        Item
-        <input
-          name="item"
-          required
-          type="text"
-          value={item.item}
-          list={forceDatalist().id}
-        />
-      </label>
+      <label class="form-label col-1-6">Item</label>
+      <input
+        name="item"
+        class="bold col-1-6"
+        required
+        type="text"
+        value={item.item}
+        list={forceDatalist().id}
+      />
       <label class="form-label col-1">Quantity</label>
       <label class="form-label col-2-2">Price</label>
       <label class="form-label col-4-3">Total</label>
