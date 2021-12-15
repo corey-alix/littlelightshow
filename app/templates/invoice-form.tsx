@@ -1,139 +1,152 @@
 import { dom } from "../dom.js";
 import { forceDatalist } from "../FormManager.js";
 import { moveChildren } from "../fun/dom.js";
+import { TAXRATE } from "../globals.js";
 import { inventoryManager } from "../InventoryManager.js";
 import { Invoice, InvoiceItem } from "../services/invoices.js";
 
 export function create(invoice: Invoice): HTMLFormElement {
   console.log({ invoice });
   const form: HTMLFormElement = (
-    <form id="invoice-form">
-      <h1>Create an Invoice</h1>
+    <form class="grid-6" id="invoice-form">
+      <h1 class="col-1-6">Create an Invoice</h1>
       <input
-        class="form-label"
+        class="form-label hidden"
         readonly
         type="text"
         name="id"
         value={invoice.id}
       />
-      <section class="category">
-        <div class="section-title">Client</div>
-        <section class="grid-6">
-          <label class="form-label col-1-6">
-            Client Name
-            <input
-              type="text"
-              placeholder="clientname"
-              name="clientname"
-              required
-              value={invoice.clientname}
-            />
-          </label>
-          <label class="form-label col-1-3">
-            Telephone
-            <input
-              type="tel"
-              placeholder="telephone"
-              name="telephone"
-              value={invoice.telephone}
-            />
-          </label>
-          <label class="form-label col-4-3">
-            Email{" "}
-            <input
-              type="email"
-              placeholder="email"
-              name="email"
-              value={invoice.email}
-            />
-          </label>
-          <label class="form-label col-1-6">
-            Bill To
-            <textarea class="address" placeholder="billto" name="billto">
-              {invoice.billto}
-            </textarea>
-          </label>
-          <label class="form-label col-1-6">
-            Comments
-            <textarea class="comments" placeholder="comments" name="comments">
-              {invoice.comments}
-            </textarea>
-          </label>
-        </section>
-      </section>
-      <div class="vspacer"></div>
-      <section class="category">
-        <div class="section-title">Items</div>
-        <section class="line-items grid-6"></section>
-      </section>
-      <div class="vspacer"></div>
-      <section class="grid-6">
-        <button
-          class="button col-1-3"
-          data-event="add-another-item"
-          type="button"
-        >
-          Add item
-        </button>
-        <button
-          class="button col-4-3"
-          data-event="remove-last-item"
-          type="button"
-        >
-          Remove Last Item
-        </button>
-        <label class="form-label col-1-6">Labor</label>
+      <div class="section-title col-1-6">Client</div>
+      <label class="form-label col-1-6">
+        Client Name
         <input
-          type="number"
-          class="currency"
-          placeholder="labor"
-          name="labor"
-          id="labor"
-          value={invoice.labor.toFixed(2)}
+          type="text"
+          placeholder="clientname"
+          name="clientname"
+          required
+          value={invoice.clientname}
         />
-        <label class="form-label col-1-6">Total + Tax</label>
+      </label>
+      <label class="form-label col-1-3">
+        Telephone
         <input
-          readonly
-          type="number"
-          class="currency"
-          id="total_due"
-          name="total_due"
-          value="$0.00"
+          type="tel"
+          placeholder="telephone"
+          name="telephone"
+          value={invoice.telephone}
         />
+      </label>
+      <label class="form-label col-4-3">
+        Email{" "}
+        <input
+          type="email"
+          placeholder="email"
+          name="email"
+          value={invoice.email}
+        />
+      </label>
+      <label class="form-label col-1-6">
+        Bill To
+        <textarea class="address" placeholder="billto" name="billto">
+          {invoice.billto}
+        </textarea>
+      </label>
+      <label class="form-label col-1-6">
+        Comments
+        <textarea class="comments" placeholder="comments" name="comments">
+          {invoice.comments}
+        </textarea>
+      </label>
+      <div class="vspacer col-1-6"></div>
+      <section class="line-items grid-6 col-1-6">
+        <div class="section-title col-1-6">Items</div>
       </section>
-      <section class="grid-6">
-        <div class="vspacer-1"></div>
-        <button class="button col-1-2" data-event="submit" type="button">
-          Save
-        </button>
-        <button class="button col-3-2" data-event="print" type="button">
-          Print
-        </button>
-        <button class="button col-1-2" data-event="clear" type="button">
-          Clear
-        </button>
-        <button
-          class="button col-3-2"
-          data-event="list-all-invoices"
-          type="button"
-        >
-          List All Invoices
-        </button>
-      </section>
+      <div class="vspacer col-1-6"></div>
+      <button
+        class="button col-1-3"
+        data-event="add-another-item"
+        type="button"
+      >
+        Add item
+      </button>
+      <button
+        class="button col-4-3"
+        data-event="remove-last-item"
+        type="button"
+      >
+        Remove Last Item
+      </button>
+      <div class="vspacer col-1-6"></div>
+      <div class="section-title col-1-6">Summary</div>
+      <label class="form-label col-1-3">Labor</label>
+      <label class="form-label col-4-3">Total + Tax</label>
+      <input
+        type="number"
+        class="currency col-1-3"
+        placeholder="labor"
+        name="labor"
+        id="labor"
+        value={invoice.labor.toFixed(2)}
+      />
+      <input
+        readonly
+        type="number"
+        class="currency col-4-3 bold"
+        id="total_due"
+        name="total_due"
+      />
+      <div class="vspacer-1"></div>
+      <button class="button col-1-2" data-event="submit" type="button">
+        Save
+      </button>
+      <button class="button col-3-2" data-event="print" type="button">
+        Print
+      </button>
+      <button class="button col-5-2" data-event="clear" type="button">
+        Clear
+      </button>
+      <button
+        class="button col-5-2"
+        data-event="list-all-invoices"
+        type="button"
+      >
+        List All Invoices
+      </button>
     </form>
+  );
+
+  const labor = form.querySelector("[name=labor]") as HTMLInputElement;
+  const total_due = form.querySelector("[name=total_due]") as HTMLInputElement;
+
+  labor.addEventListener("change", () =>
+    form.dispatchEvent(new Event("change"))
   );
 
   const lineItemsTarget = form.querySelector(".line-items") as HTMLElement;
   const lineItems = invoice.items.map(renderInvoiceItem);
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
+  form.addEventListener("change", () => compute(form));
+  compute(form);
   return form;
+}
+
+function compute(form: HTMLFormElement) {
+  const labor = form.querySelector("[name=labor]") as HTMLInputElement;
+  const total_due = form.querySelector("[name=total_due]") as HTMLInputElement;
+  const totals = Array.from(form.querySelectorAll("input[name=total]")).map(
+    (input) => parseFloat((input as HTMLInputElement).value || "0")
+  );
+  const total = totals.reduce((a, b) => a + b, 0);
+  const grandTotal = labor.valueAsNumber + total * (1.0 + TAXRATE);
+  total_due.value = grandTotal.toFixed(2);
 }
 
 export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
   const form: HTMLDivElement = (
     <div>
-      <label class="form-label col-1-6">
+      <label class="form-label col-1-6 bold">
         Item
         <input
           name="item"

@@ -135,19 +135,8 @@ export async function renderInvoice(invoiceId?: string) {
     location.href = "invoice.html";
   });
 
-  form.on("change", () => {
-    const labor = Number.parseFloat(form.get("labor"));
-    const totalDue = computeTotalDue(form);
-    const tax = totalDue * TAXRATE;
-    form.set("total_due", (labor + totalDue + tax).toFixed(2));
-  });
-
   template.classList.remove("hidden");
   form.trigger("change");
-
-  bind(form.formDom, ["#labor"], [], ([labor]) => {
-    form.trigger("change");
-  });
 }
 
 async function tryToSaveInvoice(form: FormManager) {
@@ -173,12 +162,6 @@ async function tryToSaveInvoice(form: FormManager) {
   return true;
 }
 
-function computeTotalDue(form: FormManager) {
-  const model = asModel(form.formDom);
-  const totalDue = model.items.reduce((a, b) => (b.total || 0) - 0 + a, 0);
-  return Number.parseFloat(totalDue.toFixed(2));
-}
-
 function asModel(formDom: HTMLFormElement) {
   const data = new FormData(formDom);
   const requestModel: Invoice = {
@@ -197,13 +180,27 @@ function asModel(formDom: HTMLFormElement) {
     labor: Number.parseFloat((data.get("labor") as string) || "0"),
   };
 
-  let currentItem = null as any;
+  let currentItem: InvoiceItem | null = null;
   for (let [key, value] of data.entries()) {
-    if (key === "item") {
-      currentItem = {};
-      requestModel.items.push(currentItem);
+    switch (key) {
+      case "item":
+        currentItem = <InvoiceItem>{};
+        requestModel.items.push(currentItem);
+        currentItem.item = value as string;
+        break;
+      case "quantity":
+        if (!currentItem) throw "item expected";
+        currentItem.quantity = parseFloat(value as string);
+        break;
+      case "price":
+        if (!currentItem) throw "item expected";
+        currentItem.price = parseFloat(value as string);
+        break;
+      case "total":
+        if (!currentItem) throw "item expected";
+        currentItem.total = parseFloat(value as string);
+        break;
     }
-    if (currentItem) currentItem[key] = value;
   }
   return requestModel;
 }

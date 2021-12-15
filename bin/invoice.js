@@ -4875,6 +4875,9 @@ function moveChildren(items, report) {
     report.appendChild(items.firstChild);
 }
 
+// app/services/invoices.ts
+var import_faunadb2 = __toModule(require_faunadb());
+
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.06;
@@ -4912,7 +4915,6 @@ function createClient() {
 }
 
 // app/services/invoices.ts
-var import_faunadb2 = __toModule(require_faunadb());
 var INVOICE_TABLE = "invoices";
 async function save(invoice) {
   if (!CURRENT_USER)
@@ -5054,20 +5056,19 @@ function dom(tag, args, ...children) {
 function create(invoice) {
   console.log({ invoice });
   const form = /* @__PURE__ */ dom("form", {
+    class: "grid-6",
     id: "invoice-form"
-  }, /* @__PURE__ */ dom("h1", null, "Create an Invoice"), /* @__PURE__ */ dom("input", {
-    class: "form-label",
+  }, /* @__PURE__ */ dom("h1", {
+    class: "col-1-6"
+  }, "Create an Invoice"), /* @__PURE__ */ dom("input", {
+    class: "form-label hidden",
     readonly: true,
     type: "text",
     name: "id",
     value: invoice.id
-  }), /* @__PURE__ */ dom("section", {
-    class: "category"
-  }, /* @__PURE__ */ dom("div", {
-    class: "section-title"
-  }, "Client"), /* @__PURE__ */ dom("section", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("label", {
+  }), /* @__PURE__ */ dom("div", {
+    class: "section-title col-1-6"
+  }, "Client"), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-6"
   }, "Client Name", /* @__PURE__ */ dom("input", {
     type: "text",
@@ -5101,19 +5102,15 @@ function create(invoice) {
     class: "comments",
     placeholder: "comments",
     name: "comments"
-  }, invoice.comments)))), /* @__PURE__ */ dom("div", {
-    class: "vspacer"
+  }, invoice.comments)), /* @__PURE__ */ dom("div", {
+    class: "vspacer col-1-6"
   }), /* @__PURE__ */ dom("section", {
-    class: "category"
+    class: "line-items grid-6 col-1-6"
   }, /* @__PURE__ */ dom("div", {
-    class: "section-title"
-  }, "Items"), /* @__PURE__ */ dom("section", {
-    class: "line-items grid-6"
-  })), /* @__PURE__ */ dom("div", {
-    class: "vspacer"
-  }), /* @__PURE__ */ dom("section", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("button", {
+    class: "section-title col-1-6"
+  }, "Items")), /* @__PURE__ */ dom("div", {
+    class: "vspacer col-1-6"
+  }), /* @__PURE__ */ dom("button", {
     class: "button col-1-3",
     "data-event": "add-another-item",
     type: "button"
@@ -5121,27 +5118,28 @@ function create(invoice) {
     class: "button col-4-3",
     "data-event": "remove-last-item",
     type: "button"
-  }, "Remove Last Item"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
-  }, "Labor"), /* @__PURE__ */ dom("input", {
+  }, "Remove Last Item"), /* @__PURE__ */ dom("div", {
+    class: "vspacer col-1-6"
+  }), /* @__PURE__ */ dom("div", {
+    class: "section-title col-1-6"
+  }, "Summary"), /* @__PURE__ */ dom("label", {
+    class: "form-label col-1-3"
+  }, "Labor"), /* @__PURE__ */ dom("label", {
+    class: "form-label col-4-3"
+  }, "Total + Tax"), /* @__PURE__ */ dom("input", {
     type: "number",
-    class: "currency",
+    class: "currency col-1-3",
     placeholder: "labor",
     name: "labor",
     id: "labor",
     value: invoice.labor.toFixed(2)
-  }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
-  }, "Total + Tax"), /* @__PURE__ */ dom("input", {
+  }), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
-    class: "currency",
+    class: "currency col-4-3 bold",
     id: "total_due",
-    name: "total_due",
-    value: "$0.00"
-  })), /* @__PURE__ */ dom("section", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("div", {
+    name: "total_due"
+  }), /* @__PURE__ */ dom("div", {
     class: "vspacer-1"
   }), /* @__PURE__ */ dom("button", {
     class: "button col-1-2",
@@ -5152,23 +5150,36 @@ function create(invoice) {
     "data-event": "print",
     type: "button"
   }, "Print"), /* @__PURE__ */ dom("button", {
-    class: "button col-1-2",
+    class: "button col-5-2",
     "data-event": "clear",
     type: "button"
   }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button col-3-2",
+    class: "button col-5-2",
     "data-event": "list-all-invoices",
     type: "button"
-  }, "List All Invoices")));
+  }, "List All Invoices"));
+  const labor = form.querySelector("[name=labor]");
+  const total_due = form.querySelector("[name=total_due]");
+  labor.addEventListener("change", () => form.dispatchEvent(new Event("change")));
   const lineItemsTarget = form.querySelector(".line-items");
   const lineItems = invoice.items.map(renderInvoiceItem);
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
+  form.addEventListener("change", () => compute(form));
+  compute(form);
   return form;
+}
+function compute(form) {
+  const labor = form.querySelector("[name=labor]");
+  const total_due = form.querySelector("[name=total_due]");
+  const totals = Array.from(form.querySelectorAll("input[name=total]")).map((input) => parseFloat(input.value || "0"));
+  const total = totals.reduce((a, b) => a + b, 0);
+  const grandTotal = labor.valueAsNumber + total * (1 + TAXRATE);
+  total_due.value = grandTotal.toFixed(2);
 }
 function renderInvoiceItem(item) {
   const form = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
+    class: "form-label col-1-6 bold"
   }, "Item", /* @__PURE__ */ dom("input", {
     name: "item",
     required: true,
@@ -5368,12 +5379,6 @@ function create3(invoices2) {
 // app/invoice.ts
 var formManager = new FormFactory();
 var itemsToRemove = [];
-function bind(form, inputQuerySelectors, outputQuerySelectors, cb) {
-  const inputs = inputQuerySelectors.map((qs) => form.querySelector(qs));
-  const outputs = outputQuerySelectors.map((qs) => form.querySelector(qs));
-  const callback = () => cb([...inputs, ...outputs]);
-  inputs.forEach((input) => input.addEventListener("change", callback));
-}
 function addAnotherItem(form) {
   const itemPanel = renderInvoiceItem({
     quantity: 1,
@@ -5461,17 +5466,8 @@ async function renderInvoice2(invoiceId) {
   form.on("clear", () => {
     location.href = "invoice.html";
   });
-  form.on("change", () => {
-    const labor = Number.parseFloat(form.get("labor"));
-    const totalDue = computeTotalDue(form);
-    const tax = totalDue * TAXRATE;
-    form.set("total_due", (labor + totalDue + tax).toFixed(2));
-  });
   template.classList.remove("hidden");
   form.trigger("change");
-  bind(form.formDom, ["#labor"], [], ([labor]) => {
-    form.trigger("change");
-  });
 }
 async function tryToSaveInvoice(form) {
   const { formDom } = form;
@@ -5493,11 +5489,6 @@ async function tryToSaveInvoice(form) {
   form.set("id", requestModel.id);
   return true;
 }
-function computeTotalDue(form) {
-  const model = asModel(form.formDom);
-  const totalDue = model.items.reduce((a, b) => (b.total || 0) - 0 + a, 0);
-  return Number.parseFloat(totalDue.toFixed(2));
-}
 function asModel(formDom) {
   const data = new FormData(formDom);
   const requestModel = {
@@ -5512,12 +5503,28 @@ function asModel(formDom) {
   };
   let currentItem = null;
   for (let [key, value] of data.entries()) {
-    if (key === "item") {
-      currentItem = {};
-      requestModel.items.push(currentItem);
+    switch (key) {
+      case "item":
+        currentItem = {};
+        requestModel.items.push(currentItem);
+        currentItem.item = value;
+        break;
+      case "quantity":
+        if (!currentItem)
+          throw "item expected";
+        currentItem.quantity = parseFloat(value);
+        break;
+      case "price":
+        if (!currentItem)
+          throw "item expected";
+        currentItem.price = parseFloat(value);
+        break;
+      case "total":
+        if (!currentItem)
+          throw "item expected";
+        currentItem.total = parseFloat(value);
+        break;
     }
-    if (currentItem)
-      currentItem[key] = value;
   }
   return requestModel;
 }

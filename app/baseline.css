@@ -1,7 +1,11 @@
+* {
+  font-size: 1.2rem;
+  font-family: Arial;
+}
+
 body {
   max-width: 40rem;
   width: calc(100vw - 3rem);
-  font-family: Arial;
   border: 1.5rem solid transparent;
   margin: 0;
   padding: 0;
@@ -31,7 +35,6 @@ body.holiday {
 }
 
 section.category {
-  border: 1px solid black;
   padding: 0;
 }
 
@@ -49,7 +52,7 @@ div.section-title {
 .netlify-identity-item,
 .button {
   display: block;
-  height: 2rem;
+  min-height: 2rem;
   padding: 0.5rem;
   margin-bottom: 0.5rem;
   text-align: center;
@@ -76,6 +79,7 @@ div.section-title {
   padding-left: 0.5rem;
 }
 
+.grid-6 input,
 .form-label > input {
   width: 100%;
 }
@@ -138,7 +142,7 @@ div.section-title {
 
 .comments {
   resize: none;
-  height: 12rem;
+  min-height: 6rem;
 }
 
 .address {
@@ -160,16 +164,8 @@ div.section-title {
   grid-template-rows: auto auto auto auto;
 }
 
-.line-item-grid > .line-item {
-  display: grid;
-  grid-gap: 1rem;
-  grid-template-columns: repeat(auto-fill, 16rem);
-  padding: 1rem;
-}
-
 form textarea {
   width: 100%;
-  font-size: 1.5rem;
   border-radius: 0.5rem;
   margin-left: 0.5rem;
 }
@@ -221,7 +217,7 @@ form textarea {
 .grid-6 {
   display: grid;
   grid-template-columns: repeat(6, auto);
-  grid-column-gap: 1em;
+  grid-column-gap: 0.5em;
 }
 
 .col-1 {
