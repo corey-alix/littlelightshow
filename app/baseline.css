@@ -36,7 +36,8 @@ section.category {
 
 div.section-title {
   width: 100%;
-  min-height: 3rem;
+  min-height: 2.5rem;
+  padding-top: 0.5rem;
   color: white;
   background: black;
   text-align: center;
