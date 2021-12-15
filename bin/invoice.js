@@ -4914,6 +4914,7 @@ async function save(invoice) {
     const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection("Todos"), {
       data: { ...invoice, user: CURRENT_USER, create_date: Date.now() }
     }));
+    invoice.id = result.ref.id;
   } else {
     const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection("Todos"), invoice.id), {
       data: { ...invoice, user: CURRENT_USER, update_date: Date.now() }
@@ -5252,7 +5253,7 @@ function renderInvoice(invoice) {
 }
 function create3(invoices2) {
   const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
-  const report = /* @__PURE__ */ dom("div", {
+  const report = /* @__PURE__ */ dom("form", {
     class: "grid-6"
   });
   invoices2.map(renderInvoice).forEach((item) => moveChildren2(item, report));
@@ -5262,7 +5263,10 @@ function create3(invoices2) {
     class: "bold col-1-4"
   }, "Total"), /* @__PURE__ */ dom("label", {
     class: "currency bold col-5-2"
-  }, total.toFixed(2))), report);
+  }, total.toFixed(2)), /* @__PURE__ */ dom("button", {
+    type: "button",
+    "data-event": "create-invoice"
+  }, "Create Invoice")), report);
   return report;
 }
 
@@ -5350,7 +5354,12 @@ function init() {
 }
 async function renderInvoices(target) {
   const invoices2 = await invoices();
-  target.appendChild(create3(invoices2));
+  const formDom = create3(invoices2);
+  const form = formManager.domAsForm(formDom);
+  target.appendChild(formDom);
+  form.on("create-invoice", () => {
+    location.href = "invoice.html";
+  });
 }
 async function renderInvoice2(invoiceId) {
   document.querySelector("#invoice-form")?.remove();
@@ -5380,9 +5389,11 @@ async function renderInvoice2(invoiceId) {
   form.on("list-all-invoices", () => {
     window.location.href = "invoices.html";
   });
-  form.on("print", () => {
-    const requestModel = asModel(formDom);
-    print(requestModel);
+  form.on("print", async () => {
+    if (await tryToSaveInvoice(form)) {
+      const requestModel = asModel(formDom);
+      print(requestModel);
+    }
   });
   form.on("submit", async () => {
     if (await tryToSaveInvoice(form))
@@ -5427,6 +5438,7 @@ async function tryToSaveInvoice(form) {
   const requestModel = asModel(formDom);
   console.log({ requestModel });
   await save(requestModel);
+  form.set("id", requestModel.id);
   return true;
 }
 function computeTotalDue(form) {

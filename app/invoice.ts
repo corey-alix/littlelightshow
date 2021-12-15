@@ -127,7 +127,12 @@ export function init() {
 
 export async function renderInvoices(target: HTMLElement) {
   const invoices = await getAllInvoices();
-  target.appendChild(createInvoicesGridTemplate(invoices));
+  const formDom = createInvoicesGridTemplate(invoices);
+  const form = formManager.domAsForm(formDom);
+  target.appendChild(formDom);
+  form.on("create-invoice", () => {
+    location.href = "invoice.html";
+  });
 }
 
 export async function renderInvoice(invoiceId?: string) {
@@ -163,9 +168,11 @@ export async function renderInvoice(invoiceId?: string) {
     window.location.href = "invoices.html";
   });
 
-  form.on("print", () => {
-    const requestModel = asModel(formDom);
-    print(requestModel);
+  form.on("print", async () => {
+    if (await tryToSaveInvoice(form)) {
+      const requestModel = asModel(formDom);
+      print(requestModel);
+    }
   });
 
   form.on("submit", async () => {
@@ -217,6 +224,7 @@ async function tryToSaveInvoice(form: FormManager) {
   const requestModel = asModel(formDom);
   console.log({ requestModel });
   await saveInvoice(requestModel);
+  form.set("id", requestModel.id);
   return true;
 }
 

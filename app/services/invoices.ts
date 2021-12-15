@@ -25,11 +25,12 @@ export async function save(invoice: Invoice) {
   const client = createClient();
 
   if (!invoice.id) {
-    const result = await client.query(
+    const result = (await client.query(
       q.Create(q.Collection("Todos"), {
         data: { ...invoice, user: CURRENT_USER, create_date: Date.now() },
       })
-    );
+    )) as { data: any; ref: any };
+    invoice.id = result.ref.id;
   } else {
     const result = await client.query(
       q.Update(q.Ref(q.Collection("Todos"), invoice.id), {
