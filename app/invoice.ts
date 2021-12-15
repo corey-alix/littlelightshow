@@ -14,6 +14,7 @@ export { identify } from "./identify.js";
 import {
   create as createInvoiceFormTemplate,
   renderInvoiceItem,
+  setupComputeOnLineItem,
 } from "./templates/invoice-form.js";
 import { create as createInvoicePrintTemplate } from "./templates/invoice-print.js";
 import { create as createInvoicesGridTemplate } from "./templates/invoices-grid.js";
@@ -37,75 +38,6 @@ function bind(
   inputs.forEach((input) => input.addEventListener("change", callback));
 }
 
-function createItemPanel(form: FormManager, item?: InvoiceItem) {
-  if (!item)
-    item = {
-      item: "",
-      price: 0,
-      quantity: 1,
-      total: 0,
-    };
-  const formDom = formManager.asForm({
-    item: {
-      label: "Item",
-      required: true,
-      lookup: "inventory-items",
-      value: item.item,
-    },
-    quantity: {
-      label: "Quantity",
-      type: "quantity",
-      required: true,
-      value: item.quantity,
-    },
-    price: {
-      label: "Price",
-      type: "currency",
-      required: true,
-      value: item.price,
-    },
-    total: {
-      label: "Total",
-      type: "currency",
-      readonly: true,
-      value: item.total,
-    },
-  });
-  formDom.classList.add("line-item");
-
-  bind(
-    formDom,
-    ["#price", "#quantity"],
-    ["#total"],
-    ([price, quantity, total]) => {
-      const ttl =
-        (price as HTMLInputElement).valueAsNumber *
-        (quantity as HTMLInputElement).valueAsNumber;
-      (total as HTMLInputElement).value = ttl.toFixed(2);
-      total.dispatchEvent(new Event("change"));
-      form.trigger("change");
-    }
-  );
-
-  bind(
-    formDom,
-    ["#item"],
-    ["#price", "#quantity", "#total"],
-    ([item, price, quantity, total]) => {
-      const currentPrice = (price as HTMLInputElement).valueAsNumber;
-      const itemPrice = inventoryManager.getInventoryItemByCode(
-        (item as HTMLInputElement).value
-      );
-      if (itemPrice && currentPrice != itemPrice)
-        (price as HTMLInputElement).value = itemPrice.toFixed(2);
-      price.dispatchEvent(new Event("change"));
-      form.trigger("change");
-    }
-  );
-
-  return formDom;
-}
-
 function addAnotherItem(form: FormManager) {
   const itemPanel = renderInvoiceItem({
     quantity: 1,
@@ -113,6 +45,7 @@ function addAnotherItem(form: FormManager) {
     price: 0,
     total: 0,
   });
+  setupComputeOnLineItem(form.formDom, itemPanel);
   const toFocus = getFirstInput(itemPanel);
   const target: HTMLElement =
     form.formDom.querySelector(".line-items") || form.formDom;

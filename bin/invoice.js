@@ -4729,10 +4729,7 @@ var InventoryManager = class {
     this.inventory = JSON.parse(localStorage.getItem("inventory") || "{}");
   }
   getInventoryItemByCode(code) {
-    if (this.inventory[code]) {
-      return this.inventory[code].price;
-    }
-    return 0;
+    return this.inventory[code];
   }
   persistInventoryItem(inventoryItem) {
     this.inventory[inventoryItem.code] = inventoryItem;
@@ -4744,17 +4741,19 @@ var InventoryManager = class {
 var inventoryManager = new InventoryManager();
 
 // app/FormManager.ts
-function forceDatalist(fieldInfo, form) {
-  if (document.querySelector(`#${fieldInfo.lookup}`))
-    return;
-  const dataList = document.createElement("datalist");
-  dataList.id = fieldInfo.lookup;
+function forceDatalist() {
+  let dataList = document.querySelector(`#inventory_list`);
+  if (dataList)
+    return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = "inventory_list";
   Object.entries(inventoryManager.inventory).forEach(([key, value]) => {
     const option = document.createElement("option");
     option.value = key;
     dataList.appendChild(option);
   });
-  form.appendChild(dataList);
+  document.body.appendChild(dataList);
+  return dataList;
 }
 var FormManager = class {
   constructor(formDom) {
@@ -4803,6 +4802,9 @@ var FormFactory = class {
     if (!dom2)
       throw "cannot create a form without a dom element";
     const form = new FormManager(dom2);
+    dom2.addEventListener("change", () => {
+      form.trigger("change");
+    });
     dom2.querySelectorAll("[data-event]").forEach((eventItem) => {
       eventItem.addEventListener("click", () => {
         const eventName = eventItem.dataset["event"];
@@ -4859,8 +4861,7 @@ var FormFactory = class {
           input.value = fieldValue;
       }
       if (fieldInfo.lookup) {
-        input.setAttribute("list", fieldInfo.lookup);
-        forceDatalist(fieldInfo, form);
+        input.setAttribute("list", forceDatalist().id);
       }
       form.appendChild(label);
     });
@@ -5161,19 +5162,23 @@ function create(invoice) {
   }, "List All Invoices")));
   const lineItemsTarget = form.querySelector(".line-items");
   const lineItems = invoice.items.map(renderInvoiceItem);
+  lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
   return form;
 }
 function renderInvoiceItem(item) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
+  const form = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
     class: "form-label col-1-6"
   }, "Item", /* @__PURE__ */ dom("input", {
+    name: "item",
     required: true,
     type: "text",
-    value: item.item
+    value: item.item,
+    list: forceDatalist().id
   })), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-3"
   }, "Quantity", /* @__PURE__ */ dom("input", {
+    name: "quantity",
     required: true,
     class: "quantity",
     type: "number",
@@ -5181,17 +5186,48 @@ function renderInvoiceItem(item) {
   })), /* @__PURE__ */ dom("label", {
     class: "form-label col-4-3"
   }, "Price", /* @__PURE__ */ dom("input", {
+    name: "price",
     required: true,
     class: "currency",
-    type: "text",
+    type: "number",
+    step: "0.01",
     value: item.price.toFixed(2)
   })), /* @__PURE__ */ dom("label", {
     class: "form-label col-4-3"
   }, "Total", /* @__PURE__ */ dom("input", {
+    readonly: true,
+    name: "total",
     class: "bold currency",
-    type: "text",
+    type: "number",
     value: item.total.toFixed(2)
   })));
+  return form;
+}
+function setupComputeOnLineItem(event, form) {
+  const itemInput = form.querySelector("[name=item]");
+  const quantityInput = form.querySelector("[name=quantity]");
+  const priceInput = form.querySelector("[name=price]");
+  const totalInput = form.querySelector("[name=total]");
+  const computeTotal = () => {
+    const qty = parseFloat(quantityInput.value);
+    const price = parseFloat(priceInput.value);
+    const value = qty * price;
+    console.log({ qty, price, value });
+    totalInput.value = value.toFixed(2);
+    event.dispatchEvent(new Event("change"));
+  };
+  quantityInput?.addEventListener("change", computeTotal);
+  priceInput?.addEventListener("change", computeTotal);
+  itemInput.addEventListener("change", () => {
+    const item = inventoryManager.getInventoryItemByCode(itemInput.value);
+    if (!item)
+      return;
+    const price = parseFloat(priceInput.value);
+    if (item.price !== price) {
+      priceInput.value = item.price.toFixed(2);
+      priceInput.dispatchEvent(new Event("change"));
+    }
+  });
 }
 
 // app/templates/invoice-print.tsx
@@ -5345,6 +5381,7 @@ function addAnotherItem(form) {
     price: 0,
     total: 0
   });
+  setupComputeOnLineItem(form.formDom, itemPanel);
   const toFocus = getFirstInput(itemPanel);
   const target = form.formDom.querySelector(".line-items") || form.formDom;
   itemsToRemove.splice(0, itemsToRemove.length);

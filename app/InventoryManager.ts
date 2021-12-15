@@ -5,10 +5,7 @@ class InventoryManager {
   >;
 
   getInventoryItemByCode(code: string) {
-    if (this.inventory[code]) {
-      return this.inventory[code].price;
-    }
-    return 0;
+    return this.inventory[code];
   }
 
   persistInventoryItem(inventoryItem: { code: string; price: number }) {

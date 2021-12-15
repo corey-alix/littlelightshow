@@ -1,26 +1,20 @@
 import { EventBus } from "./EventBus.js";
 import { inventoryManager } from "./InventoryManager.js";
 
-function forceDatalist(
-  fieldInfo: {
-    label?: string | undefined;
-    readonly?: boolean | undefined;
-    type?: string | undefined;
-    required?: boolean | undefined;
-    value?: string | number | boolean | undefined;
-    lookup?: string | undefined;
-  },
-  form: HTMLElement
-) {
-  if (document.querySelector(`#${fieldInfo.lookup}`)) return;
-  const dataList = document.createElement("datalist");
-  dataList.id = fieldInfo.lookup!;
+export function forceDatalist() {
+  let dataList = document.querySelector(
+    `#inventory_list`
+  ) as HTMLDataListElement;
+  if (dataList) return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = "inventory_list";
   Object.entries(inventoryManager.inventory).forEach(([key, value]) => {
     const option = document.createElement("option");
     option.value = key;
     dataList.appendChild(option);
   });
-  form.appendChild(dataList);
+  document.body.appendChild(dataList);
+  return dataList;
 }
 
 export class FormManager {
@@ -74,6 +68,9 @@ export class FormFactory {
   domAsForm(dom: HTMLFormElement) {
     if (!dom) throw "cannot create a form without a dom element";
     const form = new FormManager(dom);
+    dom.addEventListener("change", () => {
+      form.trigger("change");
+    });
     // find all inputs with a 'data-event'
     dom.querySelectorAll("[data-event]").forEach((eventItem) => {
       eventItem.addEventListener("click", () => {
@@ -141,8 +138,7 @@ export class FormFactory {
       }
 
       if (fieldInfo.lookup) {
-        input.setAttribute("list", fieldInfo.lookup);
-        forceDatalist(fieldInfo, form);
+        input.setAttribute("list", forceDatalist().id);
       }
       form.appendChild(label);
     });
