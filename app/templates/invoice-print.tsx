@@ -73,9 +73,19 @@ export function create(invoice: Invoice) {
         {invoice.labor && (
           <label class="col-6 align-right">{invoice.labor.toFixed(2)}</label>
         )}
+        {invoice.additional && <label class="col-5">additional</label>}
+        {invoice.additional && (
+          <label class="col-6 align-right">
+            {invoice.additional.toFixed(2)}
+          </label>
+        )}
         <label class="bold col-5">Balance Due</label>
         <label class="bold col-6 align-right">
-          {((invoice.labor || 0) + totalItems * (1 + TAXRATE)).toFixed(2)}
+          {(
+            (invoice.labor || 0) +
+            (invoice.additional || 0) +
+            totalItems * (1 + TAXRATE)
+          ).toFixed(2)}
         </label>
       </div>
     );

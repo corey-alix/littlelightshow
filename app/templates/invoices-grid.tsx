@@ -5,7 +5,7 @@ import { Invoice } from "../services/invoices.js";
 
 function totalInvoice(invoice: Invoice) {
   let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-  return total * (1 + TAXRATE) + invoice.labor;
+  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
 }
 
 function renderInvoice(invoice: Invoice): HTMLDivElement {

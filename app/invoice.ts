@@ -93,6 +93,7 @@ export async function renderInvoice(invoiceId?: string) {
       telephone: "",
       items: [],
       labor: 0,
+      additional: 0,
     };
   }
   const template = createInvoiceFormTemplate(invoice);
@@ -178,6 +179,7 @@ function asModel(formDom: HTMLFormElement) {
       total: number;
     }>,
     labor: Number.parseFloat((data.get("labor") as string) || "0"),
+    additional: Number.parseFloat((data.get("additional") as string) || "0"),
   };
 
   let currentItem: InvoiceItem | null = null;

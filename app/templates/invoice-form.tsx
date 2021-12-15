@@ -76,20 +76,28 @@ export function create(invoice: Invoice): HTMLFormElement {
       </button>
       <div class="vspacer col-1-6"></div>
       <div class="section-title col-1-6">Summary</div>
-      <label class="form-label col-1-3 currency">Labor</label>
-      <label class="form-label col-4-3 currency">Total + Tax</label>
+      <label class="form-label col-1-2 currency">Labor</label>
+      <label class="form-label col-3-2 currency">Other</label>
+      <label class="form-label col-5-2 currency">Total + Tax</label>
       <input
         type="number"
-        class="currency col-1-3"
+        class="currency col-1-2"
         placeholder="labor"
         name="labor"
         id="labor"
         value={invoice.labor.toFixed(2)}
       />
       <input
+        type="number"
+        class="currency col-3-2"
+        placeholder="additional"
+        name="additional"
+        value={invoice.additional.toFixed(2)}
+      />
+      <input
         readonly
         type="number"
-        class="currency col-4-3 bold"
+        class="currency col-5-2 bold"
         id="total_due"
         name="total_due"
       />
@@ -114,9 +122,15 @@ export function create(invoice: Invoice): HTMLFormElement {
   );
 
   const labor = form.querySelector("[name=labor]") as HTMLInputElement;
-  const total_due = form.querySelector("[name=total_due]") as HTMLInputElement;
+  const additional = form.querySelector(
+    "[name=additional]"
+  ) as HTMLInputElement;
 
   labor.addEventListener("change", () =>
+    form.dispatchEvent(new Event("change"))
+  );
+
+  additional.addEventListener("change", () =>
     form.dispatchEvent(new Event("change"))
   );
 
@@ -131,12 +145,16 @@ export function create(invoice: Invoice): HTMLFormElement {
 
 function compute(form: HTMLFormElement) {
   const labor = form.querySelector("[name=labor]") as HTMLInputElement;
+  const additional = form.querySelector(
+    "[name=additional]"
+  ) as HTMLInputElement;
   const total_due = form.querySelector("[name=total_due]") as HTMLInputElement;
   const totals = Array.from(form.querySelectorAll("input[name=total]")).map(
     (input) => parseFloat((input as HTMLInputElement).value || "0")
   );
   const total = totals.reduce((a, b) => a + b, 0);
-  const grandTotal = labor.valueAsNumber + total * (1.0 + TAXRATE);
+  const grandTotal =
+    labor.valueAsNumber + additional.valueAsNumber + total * (1.0 + TAXRATE);
   total_due.value = grandTotal.toFixed(2);
 }
 

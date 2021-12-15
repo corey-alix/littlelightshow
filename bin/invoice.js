@@ -5126,20 +5126,28 @@ function create(invoice) {
   }), /* @__PURE__ */ dom("div", {
     class: "section-title col-1-6"
   }, "Summary"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-3 currency"
+    class: "form-label col-1-2 currency"
   }, "Labor"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3 currency"
+    class: "form-label col-3-2 currency"
+  }, "Other"), /* @__PURE__ */ dom("label", {
+    class: "form-label col-5-2 currency"
   }, "Total + Tax"), /* @__PURE__ */ dom("input", {
     type: "number",
-    class: "currency col-1-3",
+    class: "currency col-1-2",
     placeholder: "labor",
     name: "labor",
     id: "labor",
     value: invoice.labor.toFixed(2)
   }), /* @__PURE__ */ dom("input", {
+    type: "number",
+    class: "currency col-3-2",
+    placeholder: "additional",
+    name: "additional",
+    value: invoice.additional.toFixed(2)
+  }), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
-    class: "currency col-4-3 bold",
+    class: "currency col-5-2 bold",
     id: "total_due",
     name: "total_due"
   }), /* @__PURE__ */ dom("div", {
@@ -5162,8 +5170,9 @@ function create(invoice) {
     type: "button"
   }, "List All Invoices"));
   const labor = form.querySelector("[name=labor]");
-  const total_due = form.querySelector("[name=total_due]");
+  const additional = form.querySelector("[name=additional]");
   labor.addEventListener("change", () => form.dispatchEvent(new Event("change")));
+  additional.addEventListener("change", () => form.dispatchEvent(new Event("change")));
   const lineItemsTarget = form.querySelector(".line-items");
   const lineItems = invoice.items.map(renderInvoiceItem);
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
@@ -5174,10 +5183,11 @@ function create(invoice) {
 }
 function compute(form) {
   const labor = form.querySelector("[name=labor]");
+  const additional = form.querySelector("[name=additional]");
   const total_due = form.querySelector("[name=total_due]");
   const totals = Array.from(form.querySelectorAll("input[name=total]")).map((input) => parseFloat(input.value || "0"));
   const total = totals.reduce((a, b) => a + b, 0);
-  const grandTotal = labor.valueAsNumber + total * (1 + TAXRATE);
+  const grandTotal = labor.valueAsNumber + additional.valueAsNumber + total * (1 + TAXRATE);
   total_due.value = grandTotal.toFixed(2);
 }
 function renderInvoiceItem(item) {
@@ -5325,11 +5335,15 @@ function create2(invoice) {
       class: "col-5"
     }, "Labor"), invoice.labor && /* @__PURE__ */ dom("label", {
       class: "col-6 align-right"
-    }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
+    }, invoice.labor.toFixed(2)), invoice.additional && /* @__PURE__ */ dom("label", {
+      class: "col-5"
+    }, "additional"), invoice.additional && /* @__PURE__ */ dom("label", {
+      class: "col-6 align-right"
+    }, invoice.additional.toFixed(2)), /* @__PURE__ */ dom("label", {
       class: "bold col-5"
     }, "Balance Due"), /* @__PURE__ */ dom("label", {
       class: "bold col-6 align-right"
-    }, ((invoice.labor || 0) + totalItems * (1 + TAXRATE)).toFixed(2)));
+    }, ((invoice.labor || 0) + (invoice.additional || 0) + totalItems * (1 + TAXRATE)).toFixed(2)));
     moveChildren(summary, report);
   }
   return report;
@@ -5338,7 +5352,7 @@ function create2(invoice) {
 // app/templates/invoices-grid.tsx
 function totalInvoice(invoice) {
   let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-  return total * (1 + TAXRATE) + invoice.labor;
+  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
 }
 function renderInvoice(invoice) {
   return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
@@ -5435,7 +5449,8 @@ async function renderInvoice2(invoiceId) {
       email: "",
       telephone: "",
       items: [],
-      labor: 0
+      labor: 0,
+      additional: 0
     };
   }
   const template = create(invoice);
@@ -5505,7 +5520,8 @@ function asModel(formDom) {
     email: data.get("email"),
     comments: data.get("comments"),
     items: [],
-    labor: Number.parseFloat(data.get("labor") || "0")
+    labor: Number.parseFloat(data.get("labor") || "0"),
+    additional: Number.parseFloat(data.get("additional") || "0")
   };
   let currentItem = null;
   for (let [key, value] of data.entries()) {
