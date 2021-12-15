@@ -1,4 +1,5 @@
 import { dom } from "../../dom.js";
+import { moveChildren, moveChildrenBefore } from "../../fun/dom.js";
 import { Ledger, LedgerItem, save as saveLedger } from "../../services/gl.js";
 
 function asModel(form: HTMLFormElement) {
@@ -22,7 +23,9 @@ function asModel(form: HTMLFormElement) {
       case "credit":
         currentItem!.amount =
           (currentItem!.amount || 0) - parseFloat((value as string) || "0");
-
+        break;
+      case "comment":
+        currentItem!.comment = value as string;
         break;
     }
   }
@@ -59,7 +62,7 @@ function hookupTriggers(domNode: HTMLElement) {
 }
 
 function hookupHandlers(domNode: HTMLFormElement) {
-  const tbody = domNode.querySelector("tbody") as HTMLElement;
+  const lineItems = domNode.querySelector("#end-of-line-items") as HTMLElement;
 
   const [totalCredits, totalDebits, totalError] = [
     "total_credit",
@@ -68,10 +71,10 @@ function hookupHandlers(domNode: HTMLFormElement) {
   ].map((name) => domNode.querySelector(`[name=${name}]`) as HTMLInputElement);
 
   domNode.addEventListener("change", () => {
-    const debits = Array.from(tbody.querySelectorAll("[name=debit]")).map(
+    const debits = Array.from(domNode.querySelectorAll("[name=debit]")).map(
       asNumber
     );
-    const credits = Array.from(tbody.querySelectorAll("[name=credit]")).map(
+    const credits = Array.from(domNode.querySelectorAll("[name=credit]")).map(
       asNumber
     );
 
@@ -83,62 +86,66 @@ function hookupHandlers(domNode: HTMLFormElement) {
     setCurrency(totalError, debitTotal - creditTotal);
   });
 
-  domNode.addEventListener("submit", () => {
+  domNode.addEventListener("submit", async () => {
     if (!domNode.reportValidity()) return;
     if (0 !== asNumber(domNode["total_error"]))
       alert("Total error must be zero");
     const model = asModel(domNode);
-    saveLedger(model);
+    await saveLedger(model);
+    location.reload();
   });
 
   domNode.addEventListener("add-row", () => {
-    const tr: HTMLTableRowElement = (
-      <tr>
-        <td>
-          <input
-            name="date"
-            required
-            type="date"
-            placeholder="date"
-            value={currentDay()}
-          />
-        </td>
-        <td>
-          <input
-            name="account"
-            required
-            type="text"
-            placeholder="account"
-            list="listOfAccounts"
-          />
-        </td>
-        <td>
-          <input
-            name="debit"
-            class="currency"
-            type="number"
-            placeholder="debit"
-          />
-        </td>
-        <td>
-          <input
-            name="credit"
-            class="currency"
-            type="number"
-            placeholder="credit"
-          />
-        </td>
-      </tr>
+    const tr: HTMLElement = (
+      <div>
+        <input
+          class="col-1"
+          name="date"
+          required
+          type="date"
+          placeholder="date"
+          value={currentDay()}
+        />
+        <input
+          class="col-2"
+          name="account"
+          required
+          type="text"
+          placeholder="account"
+          list="listOfAccounts"
+        />
+        <input
+          name="debit"
+          class="currency col-3"
+          type="number"
+          step="0.01"
+          placeholder="debit"
+        />
+        <input
+          name="credit"
+          class="currency col-4"
+          type="number"
+          step="0.01"
+          placeholder="credit"
+        />
+        <input
+          name="comment"
+          class="text col-5-2"
+          type="text"
+          placeholder="comment"
+        />
+      </div>
     );
 
-    tbody.appendChild(tr);
-    (tr.querySelector("[name=account]") as HTMLElement).focus();
+    const focus = tr.querySelector("[name=account]") as HTMLElement;
+    moveChildrenBefore(tr, lineItems);
+    focus.focus();
   });
 }
 
 export function createGeneralLedgerGrid() {
   const ledger: HTMLFormElement = (
-    <form>
+    <form class="grid-6">
       <datalist id="listOfAccounts">
         <option>AP</option>
         <option>AR</option>
@@ -146,52 +153,47 @@ export function createGeneralLedgerGrid() {
         <option>MOM/DAD</option>
         <option>INVENTORY</option>
       </datalist>
-      <table>
-        <thead>
-          <th class="date">Date</th>
-          <th class="text">Account</th>
-          <th class="currency">Debit (+)</th>
-          <th class="currency">Credit (-)</th>
-        </thead>
-        <tfoot>
-          <th></th>
-          <th>
-            <input
-              readonly
-              type="number"
-              class="currency"
-              name="total_error"
-              value="0.00"
-            />
-          </th>
-          <th>
-            <input
-              readonly
-              type="number"
-              class="currency"
-              name="total_debit"
-              value="0.00"
-            />
-          </th>
-          <th>
-            <input
-              type="number"
-              readonly
-              class="currency"
-              name="total_credit"
-              value="0.00"
-            />
-          </th>
-        </tfoot>
-        <tbody></tbody>
-      </table>
-      <div class="vspacer-1"></div>
-      <button class="button" type="button" data-event="add-row">
+      <div class="date col-1">Date</div>
+      <div class="text col-2">Account</div>
+      <div class="currency col-3">Debit (+)</div>
+      <div class="currency col-4">Credit (-)</div>
+      <div class="text col-5-2">Comment</div>
+      <div class="line col-1-6"></div>
+      <div class="vspacer"></div>
+      <div id="end-of-line-items" class="vspacer col-1-6"></div>
+
+      <button class="button col-1" type="button" data-event="add-row">
         Add Row
       </button>
-      <button class="button" type="button" data-event="submit">
+
+      <div class="vspacer-1 col-1-6"></div>
+      <div class="currency col-3">Total Debit</div>
+      <div class="currency col-4">Total Credit</div>
+      <div class="currency col-6">Imbalance</div>
+      <button class="button col-1" type="button" data-event="submit">
         Save
       </button>
+      <input
+        readonly
+        type="number"
+        class="currency col-3"
+        name="total_debit"
+        value="0.00"
+      />
+      <input
+        type="number"
+        readonly
+        class="currency col-4"
+        name="total_credit"
+        value="0.00"
+      />
+      <input
+        readonly
+        type="number"
+        class="currency col-6"
+        name="total_error"
+        value="0.00"
+      />
     </form>
   );
   hookupTriggers(ledger);

@@ -4,6 +4,7 @@ import { createClient, CURRENT_USER } from "../globals.js";
 const LEDGER_TABLE = "Todos";
 
 export interface LedgerItem {
+  comment: string;
   date: number;
   account: string;
   amount: number;

@@ -280,6 +280,20 @@ form textarea {
   border-bottom: 1px solid black;
 }
 
+body.dark .line {
+  border-bottom: 1px solid white;
+}
+
+body.dark input {
+  background: black;
+  color: silver;
+}
+
+body.dark button {
+  color: black;
+  background: silver;
+}
+
 .bold {
   font-weight: bold;
 }

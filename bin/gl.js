@@ -4770,6 +4770,12 @@ function dom(tag, args, ...children) {
   }
 }
 
+// app/fun/dom.ts
+function moveChildrenBefore(items, report) {
+  while (items.firstChild)
+    report.before(items.firstChild);
+}
+
 // app/services/gl.ts
 var import_faunadb2 = __toModule(require_faunadb());
 
@@ -4840,6 +4846,9 @@ function asModel(form) {
       case "credit":
         currentItem.amount = (currentItem.amount || 0) - parseFloat(value || "0");
         break;
+      case "comment":
+        currentItem.comment = value;
+        break;
     }
   }
   return result;
@@ -4872,97 +4881,125 @@ function hookupTriggers(domNode) {
   });
 }
 function hookupHandlers(domNode) {
-  const tbody = domNode.querySelector("tbody");
+  const lineItems = domNode.querySelector("#end-of-line-items");
   const [totalCredits, totalDebits, totalError] = [
     "total_credit",
     "total_debit",
     "total_error"
   ].map((name) => domNode.querySelector(`[name=${name}]`));
   domNode.addEventListener("change", () => {
-    const debits = Array.from(tbody.querySelectorAll("[name=debit]")).map(asNumber);
-    const credits = Array.from(tbody.querySelectorAll("[name=credit]")).map(asNumber);
+    const debits = Array.from(domNode.querySelectorAll("[name=debit]")).map(asNumber);
+    const credits = Array.from(domNode.querySelectorAll("[name=credit]")).map(asNumber);
     const debitTotal = sum(debits);
     const creditTotal = sum(credits);
     setCurrency(totalDebits, debitTotal);
     setCurrency(totalCredits, creditTotal);
     setCurrency(totalError, debitTotal - creditTotal);
   });
-  domNode.addEventListener("submit", () => {
+  domNode.addEventListener("submit", async () => {
     if (!domNode.reportValidity())
       return;
     if (asNumber(domNode["total_error"]) !== 0)
       alert("Total error must be zero");
     const model = asModel(domNode);
-    save(model);
+    await save(model);
+    location.reload();
   });
   domNode.addEventListener("add-row", () => {
-    const tr = /* @__PURE__ */ dom("tr", null, /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
+    const tr = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("input", {
+      class: "col-1",
       name: "date",
       required: true,
       type: "date",
       placeholder: "date",
       value: currentDay()
-    })), /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
+    }), /* @__PURE__ */ dom("input", {
+      class: "col-2",
       name: "account",
       required: true,
       type: "text",
       placeholder: "account",
       list: "listOfAccounts"
-    })), /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
+    }), /* @__PURE__ */ dom("input", {
       name: "debit",
-      class: "currency",
+      class: "currency col-3",
       type: "number",
+      step: "0.01",
       placeholder: "debit"
-    })), /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
+    }), /* @__PURE__ */ dom("input", {
       name: "credit",
-      class: "currency",
+      class: "currency col-4",
       type: "number",
+      step: "0.01",
       placeholder: "credit"
-    })));
-    tbody.appendChild(tr);
-    tr.querySelector("[name=account]").focus();
+    }), /* @__PURE__ */ dom("input", {
+      name: "comment",
+      class: "text col-5-2",
+      type: "text",
+      placeholder: "comment"
+    }));
+    const focus = tr.querySelector("[name=account]");
+    moveChildrenBefore(tr, lineItems);
+    focus.focus();
   });
 }
 function createGeneralLedgerGrid() {
-  const ledger = /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("datalist", {
+  const ledger = /* @__PURE__ */ dom("form", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("datalist", {
     id: "listOfAccounts"
-  }, /* @__PURE__ */ dom("option", null, "AP"), /* @__PURE__ */ dom("option", null, "AR"), /* @__PURE__ */ dom("option", null, "CASH"), /* @__PURE__ */ dom("option", null, "MOM/DAD"), /* @__PURE__ */ dom("option", null, "INVENTORY")), /* @__PURE__ */ dom("table", null, /* @__PURE__ */ dom("thead", null, /* @__PURE__ */ dom("th", {
-    class: "date"
-  }, "Date"), /* @__PURE__ */ dom("th", {
-    class: "text"
-  }, "Account"), /* @__PURE__ */ dom("th", {
-    class: "currency"
-  }, "Debit (+)"), /* @__PURE__ */ dom("th", {
-    class: "currency"
-  }, "Credit (-)")), /* @__PURE__ */ dom("tfoot", null, /* @__PURE__ */ dom("th", null), /* @__PURE__ */ dom("th", null, /* @__PURE__ */ dom("input", {
-    readonly: true,
-    type: "number",
-    class: "currency",
-    name: "total_error",
-    value: "0.00"
-  })), /* @__PURE__ */ dom("th", null, /* @__PURE__ */ dom("input", {
-    readonly: true,
-    type: "number",
-    class: "currency",
-    name: "total_debit",
-    value: "0.00"
-  })), /* @__PURE__ */ dom("th", null, /* @__PURE__ */ dom("input", {
-    type: "number",
-    readonly: true,
-    class: "currency",
-    name: "total_credit",
-    value: "0.00"
-  }))), /* @__PURE__ */ dom("tbody", null)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1"
+  }, /* @__PURE__ */ dom("option", null, "AP"), /* @__PURE__ */ dom("option", null, "AR"), /* @__PURE__ */ dom("option", null, "CASH"), /* @__PURE__ */ dom("option", null, "MOM/DAD"), /* @__PURE__ */ dom("option", null, "INVENTORY")), /* @__PURE__ */ dom("div", {
+    class: "date col-1"
+  }, "Date"), /* @__PURE__ */ dom("div", {
+    class: "text col-2"
+  }, "Account"), /* @__PURE__ */ dom("div", {
+    class: "currency col-3"
+  }, "Debit (+)"), /* @__PURE__ */ dom("div", {
+    class: "currency col-4"
+  }, "Credit (-)"), /* @__PURE__ */ dom("div", {
+    class: "text col-5-2"
+  }, "Comment"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-6"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer"
+  }), /* @__PURE__ */ dom("div", {
+    id: "end-of-line-items",
+    class: "vspacer col-1-6"
   }), /* @__PURE__ */ dom("button", {
-    class: "button",
+    class: "button col-1",
     type: "button",
     "data-event": "add-row"
-  }, "Add Row"), /* @__PURE__ */ dom("button", {
-    class: "button",
+  }, "Add Row"), /* @__PURE__ */ dom("div", {
+    class: "vspacer-1 col-1-6"
+  }), /* @__PURE__ */ dom("div", {
+    class: "currency col-3"
+  }, "Total Debit"), /* @__PURE__ */ dom("div", {
+    class: "currency col-4"
+  }, "Total Credit"), /* @__PURE__ */ dom("div", {
+    class: "currency col-6"
+  }, "Imbalance"), /* @__PURE__ */ dom("button", {
+    class: "button col-1",
     type: "button",
     "data-event": "submit"
-  }, "Save"));
+  }, "Save"), /* @__PURE__ */ dom("input", {
+    readonly: true,
+    type: "number",
+    class: "currency col-3",
+    name: "total_debit",
+    value: "0.00"
+  }), /* @__PURE__ */ dom("input", {
+    type: "number",
+    readonly: true,
+    class: "currency col-4",
+    name: "total_credit",
+    value: "0.00"
+  }), /* @__PURE__ */ dom("input", {
+    readonly: true,
+    type: "number",
+    class: "currency col-6",
+    name: "total_error",
+    value: "0.00"
+  }));
   hookupTriggers(ledger);
   hookupHandlers(ledger);
   ledger.dispatchEvent(new Event("add-row"));
