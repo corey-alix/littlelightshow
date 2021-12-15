@@ -1,6 +1,8 @@
 import { query as q } from "faunadb";
 import { createClient, CURRENT_USER } from "../globals.js";
 
+const INVOICE_TABLE = "invoices";
+
 export interface InvoiceItem {
   item: string;
   quantity: number;
@@ -26,14 +28,14 @@ export async function save(invoice: Invoice) {
 
   if (!invoice.id) {
     const result = (await client.query(
-      q.Create(q.Collection("Todos"), {
+      q.Create(q.Collection(INVOICE_TABLE), {
         data: { ...invoice, user: CURRENT_USER, create_date: Date.now() },
       })
     )) as { data: any; ref: any };
     invoice.id = result.ref.id;
   } else {
     const result = await client.query(
-      q.Update(q.Ref(q.Collection("Todos"), invoice.id), {
+      q.Update(q.Ref(q.Collection(INVOICE_TABLE), invoice.id), {
         data: { ...invoice, user: CURRENT_USER, update_date: Date.now() },
       })
     );
@@ -47,7 +49,7 @@ export async function invoices() {
 
   const result: any = await client.query(
     q.Map(
-      q.Paginate(q.Documents(q.Collection("Todos"))),
+      q.Paginate(q.Documents(q.Collection(INVOICE_TABLE)), { size: 100 }),
       q.Lambda("ref", q.Get(q.Var("ref")))
     )
   );
@@ -55,7 +57,9 @@ export async function invoices() {
   const invoices = result.data as Array<{ data: Invoice }>;
   invoices.reverse();
   // copy ref into invoice id
-  invoices.forEach((invoice: any) => (invoice.data.id = invoice.ref.value.id));
+  invoices.forEach((invoice: any) => {
+    invoice.data.id = invoice.ref.value.id;
+  });
   return invoices
     .filter((invoice) => invoice.data.items)
     .map((invoice) => invoice.data)

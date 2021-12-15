@@ -594,9 +594,9 @@ var require_browser_ponyfill = __commonJS({
           exports2.DOMException.prototype = Object.create(Error.prototype);
           exports2.DOMException.prototype.constructor = exports2.DOMException;
         }
-        function fetch(input, init2) {
+        function fetch(input, init) {
           return new Promise(function(resolve, reject) {
-            var request = new Request(input, init2);
+            var request = new Request(input, init);
             if (request.signal && request.signal.aborted) {
               return reject(new exports2.DOMException("Aborted", "AbortError"));
             }
@@ -891,24 +891,24 @@ var require_util = __commonJS({
       var detectedEnv = runtimeEnvs.find((env) => env.check());
       return detectedEnv ? detectedEnv.name : "unknown";
     }
-    function defaults2(obj, def) {
+    function defaults(obj, def) {
       if (obj === void 0) {
         return def;
       } else {
         return obj;
       }
     }
-    function applyDefaults(provided, defaults3) {
+    function applyDefaults(provided, defaults2) {
       var out = {};
       for (var providedKey in provided) {
-        if (!(providedKey in defaults3)) {
+        if (!(providedKey in defaults2)) {
           throw new Error("No such option " + providedKey);
         }
         out[providedKey] = provided[providedKey];
       }
-      for (var defaultsKey in defaults3) {
+      for (var defaultsKey in defaults2) {
         if (!(defaultsKey in out)) {
-          out[defaultsKey] = defaults3[defaultsKey];
+          out[defaultsKey] = defaults2[defaultsKey];
         }
       }
       return out;
@@ -1019,7 +1019,7 @@ Changelog: https://github.com/${packageJson.repository}/blob/main/CHANGELOG.md`,
       inherits,
       isNodeEnv,
       getEnvVariable,
-      defaults: defaults2,
+      defaults,
       applyDefaults,
       removeNullAndUndefinedValues,
       removeUndefinedValues,
@@ -3501,7 +3501,7 @@ var require_event_target_shim = __commonJS({
         data.event.preventDefault();
       }
     }
-    function Event2(eventTarget, event) {
+    function Event(eventTarget, event) {
       privateData.set(this, {
         eventTarget,
         event,
@@ -3522,7 +3522,7 @@ var require_event_target_shim = __commonJS({
         }
       }
     }
-    Event2.prototype = {
+    Event.prototype = {
       get type() {
         return pd(this).event.type;
       },
@@ -3614,14 +3614,14 @@ var require_event_target_shim = __commonJS({
       initEvent() {
       }
     };
-    Object.defineProperty(Event2.prototype, "constructor", {
-      value: Event2,
+    Object.defineProperty(Event.prototype, "constructor", {
+      value: Event,
       configurable: true,
       writable: true
     });
     if (typeof window !== "undefined" && typeof window.Event !== "undefined") {
-      Object.setPrototypeOf(Event2.prototype, window.Event.prototype);
-      wrappers.set(window.Event.prototype, Event2);
+      Object.setPrototypeOf(Event.prototype, window.Event.prototype);
+      wrappers.set(window.Event.prototype, Event);
     }
     function defineRedirectDescriptor(key) {
       return {
@@ -3668,7 +3668,7 @@ var require_event_target_shim = __commonJS({
     }
     function getWrapper(proto) {
       if (proto == null || proto === Object.prototype) {
-        return Event2;
+        return Event;
       }
       let wrapper = wrappers.get(proto);
       if (wrapper == null) {
@@ -4696,181 +4696,8 @@ var require_faunadb = __commonJS({
   }
 });
 
-// app/EventBus.ts
-var EventBus = class {
-  constructor() {
-    this.handlers = {};
-  }
-  on(eventName, cb) {
-    if (!this.handlers[eventName])
-      this.handlers[eventName] = [];
-    this.handlers[eventName].push(cb);
-    return {
-      off: () => {
-        const i = this.handlers[eventName].indexOf(cb);
-        if (i >= 0)
-          this.handlers[eventName].splice(i, 1);
-      }
-    };
-  }
-  trigger(eventName, event) {
-    if (!this.handlers[eventName])
-      return;
-    this.handlers[eventName].forEach((cb) => cb(event));
-  }
-  destroy() {
-    this.handlers = {};
-  }
-};
-
-// app/InventoryManager.ts
-var InventoryManager = class {
-  constructor() {
-    this.inventory = JSON.parse(localStorage.getItem("inventory") || "{}");
-  }
-  getInventoryItemByCode(code) {
-    if (this.inventory[code]) {
-      return this.inventory[code].price;
-    }
-    return 0;
-  }
-  persistInventoryItem(inventoryItem) {
-    this.inventory[inventoryItem.code] = inventoryItem;
-  }
-  persistInventoryItems() {
-    localStorage.setItem("inventory", JSON.stringify(this.inventory));
-  }
-};
-var inventoryManager = new InventoryManager();
-
-// app/FormManager.ts
-function forceDatalist(fieldInfo, form) {
-  if (document.querySelector(`#${fieldInfo.lookup}`))
-    return;
-  const dataList = document.createElement("datalist");
-  dataList.id = fieldInfo.lookup;
-  Object.entries(inventoryManager.inventory).forEach(([key, value]) => {
-    const option = document.createElement("option");
-    option.value = key;
-    dataList.appendChild(option);
-  });
-  form.appendChild(dataList);
-}
-var FormManager = class {
-  constructor(formDom) {
-    this.formDom = formDom;
-    this.channel = new EventBus();
-  }
-  get(name) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    return input.value;
-  }
-  set(name, value) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    if (typeof value === "number")
-      input.valueAsNumber = value;
-    else
-      input.value = value || "";
-  }
-  isValid() {
-    this.formDom.reportValidity();
-    return this.formDom.checkValidity();
-  }
-  trigger(eventName, event) {
-    this.channel.trigger(eventName, event);
-  }
-  on(eventName, cb) {
-    this.channel.on(eventName, cb);
-  }
-  createButton(options) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.classList.add("button");
-    button.innerText = options.title;
-    button.dataset.event = options.event;
-    button.addEventListener("click", () => {
-      this.trigger(options.event, { item: button });
-    });
-    return button;
-  }
-};
-var FormFactory = class {
-  domAsForm(dom2) {
-    if (!dom2)
-      throw "cannot create a form without a dom element";
-    const form = new FormManager(dom2);
-    dom2.querySelectorAll("[data-event]").forEach((eventItem) => {
-      eventItem.addEventListener("click", () => {
-        const eventName = eventItem.dataset["event"];
-        if (!eventName)
-          throw "item must define a data-event";
-        form.trigger(eventName, { item: eventItem });
-      });
-    });
-    return form;
-  }
-  asForm(fieldInfos) {
-    const fieldNames = Object.keys(fieldInfos);
-    const form = document.createElement("div");
-    fieldNames.forEach((fieldName) => {
-      const fieldInfo = fieldInfos[fieldName];
-      const label = document.createElement("label");
-      label.classList.add("form-label");
-      label.innerText = fieldInfo.label || fieldName;
-      const input = document.createElement("input");
-      if (fieldInfo.readonly)
-        input.readOnly = true;
-      if (fieldInfo.required)
-        input.required = true;
-      label.appendChild(input);
-      input.name = input.id = fieldName;
-      input.classList.add("field", fieldName, fieldInfo.type || "text");
-      switch (fieldInfo.type) {
-        case "currency":
-          input.type = "number";
-          label.classList.add("align-right");
-          input.setAttribute("step", "0.01");
-          break;
-        case "quantity":
-          input.type = "number";
-          label.classList.add("align-right");
-          break;
-        default:
-          label.classList.add("align-left");
-      }
-      if (fieldInfo.value) {
-        const fieldValue = fieldInfo.value;
-        if (typeof fieldValue == "boolean")
-          input.checked = fieldValue;
-        else if (typeof fieldValue == "number") {
-          switch (fieldInfo.type) {
-            case "currency":
-              input.value = fieldValue.toFixed(2);
-              break;
-            default:
-              input.valueAsNumber = fieldValue;
-              break;
-          }
-        } else
-          input.value = fieldValue;
-      }
-      if (fieldInfo.lookup) {
-        input.setAttribute("list", fieldInfo.lookup);
-        forceDatalist(fieldInfo, form);
-      }
-      form.appendChild(label);
-    });
-    return form;
-  }
-};
-
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.06;
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4904,53 +4731,13 @@ function createClient() {
   return new import_faunadb.default.Client({ secret: FAUNADB_SERVER_SECRET, domain });
 }
 
-// app/services/invoices.ts
-var import_faunadb2 = __toModule(require_faunadb());
-var INVOICE_TABLE = "invoices";
-async function save(invoice) {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-  const client = createClient();
-  if (!invoice.id) {
-    const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(INVOICE_TABLE), {
-      data: { ...invoice, user: CURRENT_USER, create_date: Date.now() }
-    }));
-    invoice.id = result.ref.id;
-  } else {
-    const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection(INVOICE_TABLE), invoice.id), {
-      data: { ...invoice, user: CURRENT_USER, update_date: Date.now() }
-    }));
-  }
-}
-async function invoices() {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-  const client = createClient();
-  const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(INVOICE_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
-  const invoices2 = result.data;
-  invoices2.reverse();
-  invoices2.forEach((invoice) => {
-    invoice.data.id = invoice.ref.value.id;
-  });
-  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
-    invoice.labor = (invoice.labor || 0) - 0;
-    invoice.items.forEach((item) => {
-      item.item = (item.item || "").toLocaleUpperCase();
-      item.quantity = (item.quantity || 0) - 0;
-      item.price = (item.price || 0) - 0;
-      item.total = (item.total || 0) - 0;
-    });
-    return invoice;
-  });
-}
-
 // app/services/validateAccessToken.ts
-var import_faunadb3 = __toModule(require_faunadb());
-var { query } = import_faunadb3.default;
-var q2 = query;
+var import_faunadb2 = __toModule(require_faunadb());
+var { query } = import_faunadb2.default;
+var q = query;
 async function validate() {
   const client = createClient();
-  return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
+  return client.query(q.Paginate(q.Documents(q.Collection("Todos"))));
 }
 
 // app/identify.ts
@@ -4969,542 +4756,30 @@ async function identify() {
   return true;
 }
 
-// app/dom.ts
-function asStyle(o) {
-  if (typeof o === "string")
-    return o;
-  return Object.keys(o).map((k) => `${k}:${o[k]}`).join(";");
-}
-function defaults(a, ...b) {
-  b.filter((b2) => !!b2).forEach((b2) => {
-    Object.keys(b2).filter((k) => a[k] === void 0).forEach((k) => a[k] = b2[k]);
+// app/services/admin.ts
+var import_faunadb3 = __toModule(require_faunadb());
+async function copyInvoicesFromTodo() {
+  const client = createClient();
+  const result = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Documents(import_faunadb3.query.Collection("Todos")), { size: 25 }), import_faunadb3.query.Lambda("ref", import_faunadb3.query.Get(import_faunadb3.query.Var("ref")))));
+  const invoices = result.data.map((v) => v.data);
+  invoices.forEach(async (invoice, index) => {
+    console.log("copying invoice", invoice);
+    const priorKey = invoice.id;
+    const id = 1001 + index;
+    const result2 = await client.query(import_faunadb3.query.Create(import_faunadb3.query.Collection("invoices"), {
+      data: { ...invoice, priorKey, id }
+    }));
   });
-  return a;
-}
-var rules = {
-  style: asStyle
-};
-var default_args = {
-  button: {
-    type: "button"
-  }
-};
-function dom(tag, args, ...children) {
-  if (typeof tag === "string") {
-    let element = document.createElement(tag);
-    if (default_args[tag]) {
-      args = defaults(args ?? {}, default_args[tag]);
-    }
-    if (args) {
-      Object.keys(args).forEach((key) => {
-        let value = rules[key] ? rules[key](args[key]) : args[key];
-        if (typeof value === "string") {
-          element.setAttribute(key, value);
-        } else if (value instanceof Function) {
-          element.addEventListener(key, value);
-        } else {
-          element.setAttribute(key, value + "");
-        }
-      });
-    }
-    let addChildren = (children2) => {
-      children2 && children2.forEach((c) => {
-        if (typeof c === "string") {
-          element.appendChild(document.createTextNode(c));
-        } else if (c instanceof HTMLElement) {
-          element.appendChild(c);
-        } else if (c instanceof Array) {
-          addChildren(c);
-        } else {
-          console.log("addChildren cannot add to dom node", c);
-        }
-      });
-    };
-    children && addChildren(children);
-    return element;
-  }
-  {
-    let element = tag(args);
-    let addChildren = (children2) => {
-      children2 && children2.forEach((c) => {
-        if (typeof c === "string" || c instanceof HTMLElement) {
-          element.setContent(c);
-        } else if (c instanceof Array) {
-          addChildren(c);
-        } else if (typeof c === "object") {
-          element.addChild(c);
-        } else {
-          console.log("addChildren cannot add to widget", c);
-        }
-      });
-    };
-    children && addChildren(children);
-    return element;
-  }
 }
 
-// app/templates/invoice-form.tsx
-function create() {
-  return /* @__PURE__ */ dom("form", {
-    id: "invoice-form"
-  }, /* @__PURE__ */ dom("h1", null, "Create an Invoice"), /* @__PURE__ */ dom("input", {
-    class: "form-label",
-    readonly: true,
-    type: "text",
-    name: "id"
-  }), /* @__PURE__ */ dom("section", {
-    class: "category"
-  }, /* @__PURE__ */ dom("div", {
-    class: "section-title"
-  }, "Client"), /* @__PURE__ */ dom("section", {
-    class: "grid-container"
-  }, /* @__PURE__ */ dom("label", {
-    class: "form-label"
-  }, "Client Name", /* @__PURE__ */ dom("input", {
-    type: "text",
-    placeholder: "clientname",
-    name: "clientname",
-    required: true
-  })), /* @__PURE__ */ dom("label", {
-    class: "form-label"
-  }, "Telephone", /* @__PURE__ */ dom("input", {
-    type: "tel",
-    placeholder: "telephone",
-    name: "telephone"
-  })), /* @__PURE__ */ dom("label", {
-    class: "form-label"
-  }, "Email ", /* @__PURE__ */ dom("input", {
-    type: "email",
-    placeholder: "email",
-    name: "email"
-  })), /* @__PURE__ */ dom("label", {
-    class: "form-label"
-  }, "Bill To", /* @__PURE__ */ dom("textarea", {
-    class: "address",
-    placeholder: "billto",
-    name: "billto"
-  })), /* @__PURE__ */ dom("label", {
-    class: "form-label"
-  }, "Comments", /* @__PURE__ */ dom("textarea", {
-    class: "comments",
-    placeholder: "comments",
-    name: "comments"
-  })))), /* @__PURE__ */ dom("div", {
-    class: "vspacer"
-  }), /* @__PURE__ */ dom("section", {
-    class: "category"
-  }, /* @__PURE__ */ dom("div", {
-    class: "section-title"
-  }, "Items"), /* @__PURE__ */ dom("section", {
-    class: "line-items line-item-grid"
-  })), /* @__PURE__ */ dom("div", {
-    class: "vspacer"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button",
-    "data-event": "add-another-item",
-    type: "button"
-  }, "Add item"), /* @__PURE__ */ dom("section", {
-    class: "line-items"
-  }, /* @__PURE__ */ dom("label", {
-    class: "form-label align-right"
-  }, "Labor"), /* @__PURE__ */ dom("input", {
-    type: "number",
-    class: "currency",
-    placeholder: "labor",
-    name: "labor",
-    id: "labor"
-  }), /* @__PURE__ */ dom("label", {
-    class: "form-label align-right"
-  }, "Total + Tax"), /* @__PURE__ */ dom("input", {
-    readonly: true,
-    type: "number",
-    class: "currency",
-    id: "total_due",
-    name: "total_due",
-    value: "$0.00"
-  })), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button",
-    "data-event": "submit",
-    type: "button"
-  }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button",
-    "data-event": "print",
-    type: "button"
-  }, "Print"), /* @__PURE__ */ dom("button", {
-    class: "button",
-    "data-event": "clear",
-    type: "button"
-  }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button",
-    "data-event": "list-all-invoices",
-    type: "button"
-  }, "List All Invoices"));
-}
-
-// app/templates/invoice-print.tsx
-function invoiceItem(item) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "tall col-1-3"
-  }, item.item), /* @__PURE__ */ dom("label", {
-    class: "tall col-4 align-right"
-  }, item.quantity), /* @__PURE__ */ dom("label", {
-    class: "tall col-5 align-right"
-  }, item.price), /* @__PURE__ */ dom("label", {
-    class: "tall col-6 align-right"
-  }, item.total));
-}
-function create2(invoice) {
-  const report = /* @__PURE__ */ dom("div", {
-    class: "print page grid-6"
-  }, /* @__PURE__ */ dom("label", {
-    class: "bold col-1-2"
-  }, "Little Light Show"), /* @__PURE__ */ dom("label", {
-    class: "bold col-3-4 align-right"
-  }, "Invoice"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }), /* @__PURE__ */ dom("div", {
-    class: "col-1-6 vspacer"
-  }), /* @__PURE__ */ dom("label", {
-    class: "col-1-2"
-  }, "Nathan Alix"), /* @__PURE__ */ dom("label", {
-    class: "col-5-2 align-right"
-  }, invoice.id), /* @__PURE__ */ dom("label", {
-    class: "col-1-2"
-  }, "4 Andrea Lane"), /* @__PURE__ */ dom("label", {
-    class: "col-5-2 align-right"
-  }, new Date().toDateString()), /* @__PURE__ */ dom("label", {
-    class: "col-1-2"
-  }, "Greenville, SC 29615"), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1"
-  }, "Bill To:"), /* @__PURE__ */ dom("label", {
-    class: "col-2-2"
-  }, invoice.clientname), invoice.billto.split("\n").map((n) => /* @__PURE__ */ dom("label", {
-    class: "col-2-2"
-  }, n)), invoice.comments && /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), invoice.comments && invoice.comments.split("\n").map((n) => /* @__PURE__ */ dom("label", {
-    class: "col-2-5"
-  }, n)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1-3"
-  }, "Description"), /* @__PURE__ */ dom("label", {
-    class: "bold col-4 align-right"
-  }, "Quantity"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5 align-right"
-  }, "Rate"), /* @__PURE__ */ dom("label", {
-    class: "bold col-6 align-right"
-  }, "Amount"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }));
-  {
-    invoice.items.forEach((item) => {
-      moveChildren(invoiceItem(item), report);
-    });
-    const totalItems = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-    console.log(invoice.items, totalItems);
-    const summary = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-      class: "line col-1-6"
-    }), /* @__PURE__ */ dom("div", {
-      class: "vspacer-2 col-1-6"
-    }), /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Total Supplies"), /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, totalItems.toFixed(2)), /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Tax (", 100 * TAXRATE + "", "%)"), /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, (totalItems * TAXRATE).toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Labor"), invoice.labor && /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
-      class: "bold col-5"
-    }, "Balance Due"), /* @__PURE__ */ dom("label", {
-      class: "bold col-6 align-right"
-    }, ((invoice.labor || 0) + totalItems * (1 + TAXRATE)).toFixed(2)));
-    moveChildren(summary, report);
-  }
-  return report;
-}
-function moveChildren(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
-}
-
-// app/templates/invoices-grid.tsx
-function moveChildren2(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
-}
-function totalInvoice(invoice) {
-  let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-  return total * (1 + TAXRATE) + invoice.labor;
-}
-function renderInvoice(invoice) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
-    class: "col-1-4",
-    href: `invoice?id=${invoice.id}`
-  }, invoice.clientname), /* @__PURE__ */ dom("label", {
-    class: "col-5 align-right"
-  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "col-6 align-right"
-  }, totalInvoice(invoice).toFixed(2)));
-}
-function create3(invoices2) {
-  const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
-  const report = /* @__PURE__ */ dom("form", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("label", {
-    class: "bold col-1-4"
-  }, "Client"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5 align-right"
-  }, "Labor"), /* @__PURE__ */ dom("label", {
-    class: "bold col-6 align-right"
-  }, "Total"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }));
-  invoices2.map(renderInvoice).forEach((item) => moveChildren2(item, report));
-  moveChildren2(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1-4"
-  }, "Total"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5-2 align-right"
-  }, total.toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("button", {
-    type: "button",
-    class: "button col-1-2",
-    "data-event": "create-invoice"
-  }, "Create Invoice")), report);
-  return report;
-}
-
-// app/invoice.ts
-var formManager = new FormFactory();
-function bind(form, inputQuerySelectors, outputQuerySelectors, cb) {
-  const inputs = inputQuerySelectors.map((qs) => form.querySelector(qs));
-  const outputs = outputQuerySelectors.map((qs) => form.querySelector(qs));
-  const callback = () => cb([...inputs, ...outputs]);
-  inputs.forEach((input) => input.addEventListener("change", callback));
-}
-function createItemPanel(form, item) {
-  if (!item)
-    item = {
-      item: "",
-      price: 0,
-      quantity: 1,
-      total: 0
-    };
-  const formDom = formManager.asForm({
-    item: {
-      label: "Item",
-      required: true,
-      lookup: "inventory-items",
-      value: item.item
-    },
-    quantity: {
-      label: "Quantity",
-      type: "quantity",
-      required: true,
-      value: item.quantity
-    },
-    price: {
-      label: "Price",
-      type: "currency",
-      required: true,
-      value: item.price
-    },
-    total: {
-      label: "Total",
-      type: "currency",
-      readonly: true,
-      value: item.total
-    }
-  });
-  formDom.classList.add("line-item");
-  bind(formDom, ["#price", "#quantity"], ["#total"], ([price, quantity, total]) => {
-    const ttl = price.valueAsNumber * quantity.valueAsNumber;
-    total.value = ttl.toFixed(2);
-    total.dispatchEvent(new Event("change"));
-    form.trigger("change");
-  });
-  bind(formDom, ["#item"], ["#price", "#quantity", "#total"], ([item2, price, quantity, total]) => {
-    const currentPrice = price.valueAsNumber;
-    const itemPrice = inventoryManager.getInventoryItemByCode(item2.value);
-    if (itemPrice && currentPrice != itemPrice)
-      price.value = itemPrice.toFixed(2);
-    price.dispatchEvent(new Event("change"));
-    form.trigger("change");
-  });
-  return formDom;
-}
-function addAnotherItem(form) {
-  const itemPanel = createItemPanel(form);
-  const target = form.formDom.querySelector(".line-items") || form.formDom;
-  target.appendChild(itemPanel);
-  const removeButton = form.createButton({
-    title: "Remove Item",
-    event: "remove-item"
-  });
-  focusFirstInput(itemPanel);
-  removeButton.addEventListener("click", () => {
-    itemPanel.remove();
-    form.trigger("change");
-  });
-  itemPanel.appendChild(removeButton);
-}
-function init() {
-  const queryParams = new URLSearchParams(window.location.search);
-  if (queryParams.has("id")) {
-    renderInvoice2(queryParams.get("id"));
-  } else {
-    renderInvoice2();
-  }
-}
-async function renderInvoices(target) {
-  const invoices2 = await invoices();
-  const formDom = create3(invoices2);
-  const form = formManager.domAsForm(formDom);
-  target.appendChild(formDom);
-  form.on("create-invoice", () => {
-    location.href = "invoice.html";
-  });
-}
-async function renderInvoice2(invoiceId) {
-  document.querySelector("#invoice-form")?.remove();
-  const template = create();
-  template.classList.add("hidden");
-  document.body.appendChild(template);
-  const formDom = document.querySelector("#invoice-form");
-  if (!formDom)
-    throw "a form must be defined with id of 'invoice-form'";
-  const form = formManager.domAsForm(formDom);
-  const target = formDom.querySelector(".line-items") || formDom;
-  if (invoiceId) {
-    const invoices2 = await invoices();
-    const invoice = invoices2.find((invoice2) => invoice2.id === invoiceId);
-    if (!invoice)
-      throw "invoice not found";
-    form.set("id", invoice.id);
-    form.set("labor", invoice.labor);
-    form.set("clientname", invoice.clientname);
-    form.set("billto", invoice.billto);
-    form.set("telephone", invoice.telephone || "");
-    form.set("email", invoice.email || "");
-    form.set("comments", invoice.comments || "");
-    const items = invoice.items.map((item) => createItemPanel(form, item));
-    items.forEach((item) => target.appendChild(item));
-  }
-  form.on("list-all-invoices", () => {
-    window.location.href = "invoices.html";
-  });
-  form.on("print", async () => {
-    if (await tryToSaveInvoice(form)) {
-      const requestModel = asModel(formDom);
-      print(requestModel);
-    }
-  });
-  form.on("submit", async () => {
-    if (await tryToSaveInvoice(form))
-      form.trigger("list-all-invoices");
-  });
-  form.on("remove-item", () => form.trigger("change"));
-  form.on("add-another-item", () => {
-    if (!form.isValid())
-      return;
-    addAnotherItem(form);
-    form.trigger("change");
-  });
-  form.on("clear", () => {
-    location.href = "invoice.html";
-  });
-  form.on("change", () => {
-    const labor = Number.parseFloat(form.get("labor"));
-    const totalDue = computeTotalDue(form);
-    const tax = totalDue * TAXRATE;
-    form.set("total_due", (labor + totalDue + tax).toFixed(2));
-  });
-  template.classList.remove("hidden");
-  form.trigger("change");
-  bind(form.formDom, ["#labor"], [], ([labor]) => {
-    form.trigger("change");
-  });
-}
-async function tryToSaveInvoice(form) {
-  const { formDom } = form;
-  if (!formDom.checkValidity()) {
-    formDom.reportValidity();
-    return false;
-  }
-  formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
-    const [itemInput, priceInput] = ["#item", "#price"].map((id) => lineItemForm.querySelector(id));
-    inventoryManager.persistInventoryItem({
-      code: itemInput.value,
-      price: priceInput.valueAsNumber
-    });
-  });
-  inventoryManager.persistInventoryItems();
-  const requestModel = asModel(formDom);
-  console.log({ requestModel });
-  await save(requestModel);
-  form.set("id", requestModel.id);
-  return true;
-}
-function computeTotalDue(form) {
-  const model = asModel(form.formDom);
-  const totalDue = model.items.reduce((a, b) => (b.total || 0) - 0 + a, 0);
-  return Number.parseFloat(totalDue.toFixed(2));
-}
-function asModel(formDom) {
-  const data = new FormData(formDom);
-  const requestModel = {
-    id: data.get("id"),
-    clientname: data.get("clientname"),
-    billto: data.get("billto"),
-    telephone: data.get("telephone"),
-    email: data.get("email"),
-    comments: data.get("comments"),
-    items: [],
-    labor: Number.parseFloat(data.get("labor") || "0")
-  };
-  let currentItem = null;
-  for (let [key, value] of data.entries()) {
-    if (key === "item") {
-      currentItem = {};
-      requestModel.items.push(currentItem);
-    }
-    if (currentItem)
-      currentItem[key] = value;
-  }
-  return requestModel;
-}
-function print(invoice) {
-  document.body.classList.add("print");
-  const toPrint = create2(invoice);
-  document.body.innerHTML = "";
-  document.body.appendChild(toPrint);
-  window.document.title = invoice.clientname;
-  window.print();
-}
-function focusFirstInput(itemPanel) {
-  const input = itemPanel.querySelector("input");
-  if (!input)
-    return;
-  input.focus();
+// app/admin.ts
+function run() {
+  debugger;
+  copyInvoicesFromTodo();
 }
 export {
   identify,
-  init,
-  print,
-  renderInvoice2 as renderInvoice,
-  renderInvoices
+  run
 };
 /*
 object-assign
