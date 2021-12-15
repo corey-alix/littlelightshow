@@ -4696,289 +4696,6 @@ var require_faunadb = __commonJS({
   }
 });
 
-// app/EventBus.ts
-var EventBus = class {
-  constructor() {
-    this.handlers = {};
-  }
-  on(eventName, cb) {
-    if (!this.handlers[eventName])
-      this.handlers[eventName] = [];
-    this.handlers[eventName].push(cb);
-    return {
-      off: () => {
-        const i = this.handlers[eventName].indexOf(cb);
-        if (i >= 0)
-          this.handlers[eventName].splice(i, 1);
-      }
-    };
-  }
-  trigger(eventName, event) {
-    if (!this.handlers[eventName])
-      return;
-    this.handlers[eventName].forEach((cb) => cb(event));
-  }
-  destroy() {
-    this.handlers = {};
-  }
-};
-
-// app/InventoryManager.ts
-var InventoryManager = class {
-  constructor() {
-    this.inventory = JSON.parse(localStorage.getItem("inventory") || "{}");
-  }
-  getInventoryItemByCode(code) {
-    return this.inventory[code];
-  }
-  persistInventoryItem(inventoryItem) {
-    this.inventory[inventoryItem.code] = inventoryItem;
-  }
-  persistInventoryItems() {
-    localStorage.setItem("inventory", JSON.stringify(this.inventory));
-  }
-};
-var inventoryManager = new InventoryManager();
-
-// app/FormManager.ts
-function forceDatalist() {
-  let dataList = document.querySelector(`#inventory_list`);
-  if (dataList)
-    return dataList;
-  dataList = document.createElement("datalist");
-  dataList.id = "inventory_list";
-  Object.entries(inventoryManager.inventory).forEach(([key, value]) => {
-    const option = document.createElement("option");
-    option.value = key;
-    dataList.appendChild(option);
-  });
-  document.body.appendChild(dataList);
-  return dataList;
-}
-var FormManager = class {
-  constructor(formDom) {
-    this.formDom = formDom;
-    this.channel = new EventBus();
-  }
-  get(name) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    return input.value;
-  }
-  set(name, value) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    if (typeof value === "number")
-      input.valueAsNumber = value;
-    else
-      input.value = value || "";
-  }
-  isValid() {
-    this.formDom.reportValidity();
-    return this.formDom.checkValidity();
-  }
-  trigger(eventName, event) {
-    this.channel.trigger(eventName, event);
-  }
-  on(eventName, cb) {
-    this.channel.on(eventName, cb);
-  }
-  createButton(options) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.classList.add("button");
-    button.innerText = options.title;
-    button.dataset.event = options.event;
-    button.addEventListener("click", () => {
-      this.trigger(options.event, { item: button });
-    });
-    return button;
-  }
-};
-var FormFactory = class {
-  domAsForm(dom2) {
-    if (!dom2)
-      throw "cannot create a form without a dom element";
-    const form = new FormManager(dom2);
-    dom2.addEventListener("change", () => {
-      form.trigger("change");
-    });
-    dom2.querySelectorAll("[data-event]").forEach((eventItem) => {
-      eventItem.addEventListener("click", () => {
-        const eventName = eventItem.dataset["event"];
-        if (!eventName)
-          throw "item must define a data-event";
-        form.trigger(eventName, { item: eventItem });
-      });
-    });
-    return form;
-  }
-  asForm(fieldInfos) {
-    const fieldNames = Object.keys(fieldInfos);
-    const form = document.createElement("div");
-    fieldNames.forEach((fieldName) => {
-      const fieldInfo = fieldInfos[fieldName];
-      const label = document.createElement("label");
-      label.classList.add("form-label");
-      label.innerText = fieldInfo.label || fieldName;
-      const input = document.createElement("input");
-      if (fieldInfo.readonly)
-        input.readOnly = true;
-      if (fieldInfo.required)
-        input.required = true;
-      label.appendChild(input);
-      input.name = input.id = fieldName;
-      input.classList.add("field", fieldName, fieldInfo.type || "text");
-      switch (fieldInfo.type) {
-        case "currency":
-          input.type = "number";
-          label.classList.add("align-right");
-          input.setAttribute("step", "0.01");
-          break;
-        case "quantity":
-          input.type = "number";
-          label.classList.add("align-right");
-          break;
-        default:
-          label.classList.add("align-left");
-      }
-      if (fieldInfo.value) {
-        const fieldValue = fieldInfo.value;
-        if (typeof fieldValue == "boolean")
-          input.checked = fieldValue;
-        else if (typeof fieldValue == "number") {
-          switch (fieldInfo.type) {
-            case "currency":
-              input.value = fieldValue.toFixed(2);
-              break;
-            default:
-              input.valueAsNumber = fieldValue;
-              break;
-          }
-        } else
-          input.value = fieldValue;
-      }
-      if (fieldInfo.lookup) {
-        input.setAttribute("list", forceDatalist().id);
-      }
-      form.appendChild(label);
-    });
-    return form;
-  }
-};
-
-// app/fun/dom.ts
-function moveChildren(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
-}
-
-// app/services/invoices.ts
-var import_faunadb2 = __toModule(require_faunadb());
-
-// app/globals.ts
-var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.06;
-var accessKeys = {
-  FAUNADB_SERVER_SECRET: "",
-  FAUNADB_ADMIN_SECRET: "",
-  FAUNADB_DOMAIN: "db.us.fauna.com"
-};
-if (globalThis.process?.env) {
-  accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
-  accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
-} else if (localStorage) {
-  accessKeys.FAUNADB_SERVER_SECRET = localStorage.getItem("FAUNADB_SERVER_SECRET");
-  accessKeys.FAUNADB_ADMIN_SECRET = localStorage.getItem("FAUNADB_ADMIN_SECRET");
-  if (!accessKeys.FAUNADB_SERVER_SECRET) {
-    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
-    accessKeys.FAUNADB_SERVER_SECRET = secret;
-    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
-  }
-  if (!accessKeys.FAUNADB_SERVER_SECRET)
-    console.error("set FAUNADB_SERVER_SECRET in local storage");
-  if (!accessKeys.FAUNADB_ADMIN_SECRET)
-    console.error("set FAUNADB_ADMIN_SECRET in local storage");
-}
-function isNetlifyBuildContext() {
-  return 0 <= location.href.indexOf("netlify");
-}
-var domain = accessKeys.FAUNADB_DOMAIN;
-var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
-var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
-var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
-var CURRENT_USER = localStorage.getItem("user");
-function createClient() {
-  return new import_faunadb.default.Client({ secret: FAUNADB_SERVER_SECRET, domain });
-}
-
-// app/services/invoices.ts
-var INVOICE_TABLE = "invoices";
-async function save(invoice) {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-  const client = createClient();
-  if (!invoice.id) {
-    const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(INVOICE_TABLE), {
-      data: { ...invoice, user: CURRENT_USER, create_date: Date.now() }
-    }));
-    invoice.id = result.ref.id;
-  } else {
-    const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection(INVOICE_TABLE), invoice.id), {
-      data: { ...invoice, user: CURRENT_USER, update_date: Date.now() }
-    }));
-  }
-}
-async function invoices() {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-  const client = createClient();
-  const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(INVOICE_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
-  const invoices2 = result.data;
-  invoices2.reverse();
-  invoices2.forEach((invoice) => {
-    invoice.data.id = invoice.ref.value.id;
-  });
-  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
-    invoice.labor = (invoice.labor || 0) - 0;
-    invoice.additional = (invoice.additional || 0) - 0;
-    invoice.items.forEach((item) => {
-      item.item = (item.item || "").toLocaleUpperCase();
-      item.quantity = (item.quantity || 0) - 0;
-      item.price = (item.price || 0) - 0;
-      item.total = (item.total || 0) - 0;
-    });
-    return invoice;
-  });
-}
-
-// app/services/validateAccessToken.ts
-var import_faunadb3 = __toModule(require_faunadb());
-var { query } = import_faunadb3.default;
-var q2 = query;
-async function validate() {
-  const client = createClient();
-  return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
-}
-
-// app/identify.ts
-async function identify() {
-  try {
-    await validate();
-  } catch (ex) {
-    localStorage.setItem("FAUNADB_SERVER_SECRET", "");
-    console.log(ex);
-    return false;
-  }
-  if (!localStorage.getItem("user")) {
-    location.href = `/app/identity.html?target=${location.href}&context=${CONTEXT}`;
-    return false;
-  }
-  return true;
-}
-
 // app/dom.ts
 function asStyle(o) {
   if (typeof o === "string")
@@ -5053,522 +4770,238 @@ function dom(tag, args, ...children) {
   }
 }
 
-// app/templates/invoice-form.tsx
-function create(invoice) {
-  console.log({ invoice });
-  const form = /* @__PURE__ */ dom("form", {
-    class: "grid-6",
-    id: "invoice-form"
-  }, /* @__PURE__ */ dom("h1", {
-    class: "col-1-6"
-  }, "Create an Invoice"), /* @__PURE__ */ dom("input", {
-    class: "form-label hidden",
-    readonly: true,
-    type: "text",
-    name: "id",
-    value: invoice.id
-  }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
-  }, "Client"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
-  }, "Client Name"), /* @__PURE__ */ dom("input", {
-    class: "col-1-6",
-    type: "text",
-    placeholder: "clientname",
-    name: "clientname",
-    required: true,
-    value: invoice.clientname
-  }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-3"
-  }, "Telephone"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3"
-  }, "Email"), /* @__PURE__ */ dom("input", {
-    type: "tel",
-    class: "col-1-3",
-    placeholder: "telephone",
-    name: "telephone",
-    value: invoice.telephone
-  }), /* @__PURE__ */ dom("input", {
-    type: "email",
-    class: "col-4-3",
-    placeholder: "email",
-    name: "email",
-    value: invoice.email
-  }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
-  }, "Bill To", /* @__PURE__ */ dom("textarea", {
-    class: "address",
-    placeholder: "billto",
-    name: "billto"
-  }, invoice.billto)), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
-  }, "Comments", /* @__PURE__ */ dom("textarea", {
-    class: "comments",
-    placeholder: "comments",
-    name: "comments"
-  }, invoice.comments)), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
-  }), /* @__PURE__ */ dom("section", {
-    class: "line-items grid-6 col-1-6"
-  }, /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
-  }, "Items")), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button col-1-4",
-    "data-event": "add-another-item",
-    type: "button"
-  }, "Add item"), /* @__PURE__ */ dom("button", {
-    class: "button col-5-2",
-    "data-event": "remove-last-item",
-    type: "button"
-  }, "Remove Last Item"), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
-  }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
-  }, "Summary"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-2 currency"
-  }, "Labor"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-3-2 currency"
-  }, "Other"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-5-2 currency"
-  }, "Total + Tax"), /* @__PURE__ */ dom("input", {
-    type: "number",
-    class: "currency col-1-2",
-    placeholder: "labor",
-    name: "labor",
-    id: "labor",
-    value: invoice.labor.toFixed(2)
-  }), /* @__PURE__ */ dom("input", {
-    type: "number",
-    class: "currency col-3-2",
-    placeholder: "additional",
-    name: "additional",
-    value: invoice.additional.toFixed(2)
-  }), /* @__PURE__ */ dom("input", {
-    readonly: true,
-    type: "number",
-    class: "currency col-5-2 bold",
-    id: "total_due",
-    name: "total_due"
-  }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1"
-  }), /* @__PURE__ */ dom("button", {
-    class: "bold button col-1-3",
-    "data-event": "submit",
-    type: "button"
-  }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button col-4-2",
-    "data-event": "print",
-    type: "button"
-  }, "Save and Print"), /* @__PURE__ */ dom("button", {
-    class: "button col-6",
-    "data-event": "clear",
-    type: "button"
-  }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button col-1-6",
-    "data-event": "list-all-invoices",
-    type: "button"
-  }, "List All Invoices"));
-  const labor = form.querySelector("[name=labor]");
-  const additional = form.querySelector("[name=additional]");
-  labor.addEventListener("change", () => form.dispatchEvent(new Event("change")));
-  additional.addEventListener("change", () => form.dispatchEvent(new Event("change")));
-  const lineItemsTarget = form.querySelector(".line-items");
-  const lineItems = invoice.items.map(renderInvoiceItem);
-  lineItems.forEach((item) => setupComputeOnLineItem(form, item));
-  lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
-  form.addEventListener("change", () => compute(form));
-  compute(form);
-  return form;
+// app/services/gl.ts
+var import_faunadb2 = __toModule(require_faunadb());
+
+// app/globals.ts
+var import_faunadb = __toModule(require_faunadb());
+var accessKeys = {
+  FAUNADB_SERVER_SECRET: "",
+  FAUNADB_ADMIN_SECRET: "",
+  FAUNADB_DOMAIN: "db.us.fauna.com"
+};
+if (globalThis.process?.env) {
+  accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
+  accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
+} else if (localStorage) {
+  accessKeys.FAUNADB_SERVER_SECRET = localStorage.getItem("FAUNADB_SERVER_SECRET");
+  accessKeys.FAUNADB_ADMIN_SECRET = localStorage.getItem("FAUNADB_ADMIN_SECRET");
+  if (!accessKeys.FAUNADB_SERVER_SECRET) {
+    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
+    accessKeys.FAUNADB_SERVER_SECRET = secret;
+    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+  }
+  if (!accessKeys.FAUNADB_SERVER_SECRET)
+    console.error("set FAUNADB_SERVER_SECRET in local storage");
+  if (!accessKeys.FAUNADB_ADMIN_SECRET)
+    console.error("set FAUNADB_ADMIN_SECRET in local storage");
 }
-function compute(form) {
-  const labor = form.querySelector("[name=labor]");
-  const additional = form.querySelector("[name=additional]");
-  const total_due = form.querySelector("[name=total_due]");
-  const totals = Array.from(form.querySelectorAll("input[name=total]")).map((input) => parseFloat(input.value || "0"));
-  const total = totals.reduce((a, b) => a + b, 0);
-  const grandTotal = labor.valueAsNumber + additional.valueAsNumber + total * (1 + TAXRATE);
-  total_due.value = grandTotal.toFixed(2);
+function isNetlifyBuildContext() {
+  return 0 <= location.href.indexOf("netlify");
 }
-function renderInvoiceItem(item) {
-  const form = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
-  }, "Item"), /* @__PURE__ */ dom("input", {
-    name: "item",
-    class: "bold col-1-6",
-    required: true,
-    type: "text",
-    value: item.item,
-    list: forceDatalist().id
-  }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1 quantity"
-  }, "Quantity"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-2-2 currency"
-  }, "Price"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3 currency"
-  }, "Total"), /* @__PURE__ */ dom("input", {
-    name: "quantity",
-    required: true,
-    class: "quantity col-1",
-    type: "number",
-    value: item.quantity
-  }), /* @__PURE__ */ dom("input", {
-    name: "price",
-    required: true,
-    class: "currency col-2-2",
-    type: "number",
-    step: "0.01",
-    value: item.price.toFixed(2)
-  }), /* @__PURE__ */ dom("input", {
-    readonly: true,
-    name: "total",
-    class: "bold currency col-4-3",
-    type: "number",
-    value: item.total.toFixed(2)
-  }));
-  return form;
-}
-function setupComputeOnLineItem(event, form) {
-  const itemInput = form.querySelector("[name=item]");
-  const quantityInput = form.querySelector("[name=quantity]");
-  const priceInput = form.querySelector("[name=price]");
-  const totalInput = form.querySelector("[name=total]");
-  const computeTotal = () => {
-    const qty = parseFloat(quantityInput.value);
-    const price = parseFloat(priceInput.value);
-    const value = qty * price;
-    console.log({ qty, price, value });
-    totalInput.value = value.toFixed(2);
-    event.dispatchEvent(new Event("change"));
-  };
-  quantityInput?.addEventListener("change", computeTotal);
-  priceInput?.addEventListener("change", computeTotal);
-  itemInput.addEventListener("change", () => {
-    const item = inventoryManager.getInventoryItemByCode(itemInput.value);
-    if (!item)
-      return;
-    const price = parseFloat(priceInput.value);
-    if (item.price !== price) {
-      priceInput.value = item.price.toFixed(2);
-      priceInput.dispatchEvent(new Event("change"));
-    }
-  });
+var domain = accessKeys.FAUNADB_DOMAIN;
+var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
+var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
+var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
+var CURRENT_USER = localStorage.getItem("user");
+function createClient() {
+  return new import_faunadb.default.Client({ secret: FAUNADB_SERVER_SECRET, domain });
 }
 
-// app/templates/invoice-print.tsx
-function invoiceItem(item) {
-  console.log("invoiceItem", { item });
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "tall col-1-3"
-  }, item.item), /* @__PURE__ */ dom("label", {
-    class: "tall col-4 align-right"
-  }, item.quantity.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "tall col-5 align-right"
-  }, item.price.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "tall col-6 align-right"
-  }, item.total.toFixed(2)));
-}
-function create2(invoice) {
-  const report = /* @__PURE__ */ dom("div", {
-    class: "print page grid-6"
-  }, /* @__PURE__ */ dom("label", {
-    class: "bold col-1-2"
-  }, "Little Light Show"), /* @__PURE__ */ dom("label", {
-    class: "bold col-3-4 align-right"
-  }, "Invoice"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }), /* @__PURE__ */ dom("div", {
-    class: "col-1-6 vspacer"
-  }), /* @__PURE__ */ dom("label", {
-    class: "col-1-2"
-  }, "Nathan Alix"), /* @__PURE__ */ dom("label", {
-    class: "col-5-2 align-right"
-  }, invoice.id), /* @__PURE__ */ dom("label", {
-    class: "col-1-2"
-  }, "4 Andrea Lane"), /* @__PURE__ */ dom("label", {
-    class: "col-5-2 align-right"
-  }, new Date().toDateString()), /* @__PURE__ */ dom("label", {
-    class: "col-1-2"
-  }, "Greenville, SC 29615"), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1"
-  }, "Bill To:"), /* @__PURE__ */ dom("label", {
-    class: "col-2-2"
-  }, invoice.clientname), invoice.billto.split("\n").map((n) => /* @__PURE__ */ dom("label", {
-    class: "col-2-2"
-  }, n)), invoice.comments && /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), invoice.comments && invoice.comments.split("\n").map((n) => /* @__PURE__ */ dom("label", {
-    class: "col-2-5"
-  }, n)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1-3"
-  }, "Description"), /* @__PURE__ */ dom("label", {
-    class: "bold col-4 align-right"
-  }, "Quantity"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5 align-right"
-  }, "Rate"), /* @__PURE__ */ dom("label", {
-    class: "bold col-6 align-right"
-  }, "Amount"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
+// app/services/gl.ts
+var LEDGER_TABLE = "Todos";
+async function save(ledger) {
+  if (!CURRENT_USER)
+    throw "user must be signed in";
+  const client = createClient();
+  const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(LEDGER_TABLE), {
+    data: { ...ledger, user: CURRENT_USER, create_date: Date.now() }
   }));
-  {
-    invoice.items.forEach((item) => {
-      moveChildren(invoiceItem(item), report);
-    });
-    const totalItems = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-    console.log(invoice.items, totalItems);
-    const summary = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-      class: "line col-1-6"
-    }), /* @__PURE__ */ dom("div", {
-      class: "vspacer-2 col-1-6"
-    }), /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Total Supplies"), /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, totalItems.toFixed(2)), /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Tax (", 100 * TAXRATE + "", "%)"), /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, (totalItems * TAXRATE).toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Labor"), invoice.labor && /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, invoice.labor.toFixed(2)), invoice.additional && /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Additional"), invoice.additional && /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, invoice.additional.toFixed(2)), /* @__PURE__ */ dom("label", {
-      class: "bold col-5"
-    }, "Balance Due"), /* @__PURE__ */ dom("label", {
-      class: "bold col-6 align-right"
-    }, ((invoice.labor || 0) + (invoice.additional || 0) + totalItems * (1 + TAXRATE)).toFixed(2)));
-    moveChildren(summary, report);
-  }
-  return report;
 }
 
-// app/templates/invoices-grid.tsx
-function totalInvoice(invoice) {
-  let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
-}
-function renderInvoice(invoice) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
-    class: "col-1-4",
-    href: `invoice?id=${invoice.id}`
-  }, invoice.clientname), /* @__PURE__ */ dom("label", {
-    class: "col-5 align-right"
-  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "col-6 align-right"
-  }, totalInvoice(invoice).toFixed(2)));
-}
-function create3(invoices2) {
-  const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
-  const report = /* @__PURE__ */ dom("form", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("label", {
-    class: "bold col-1-4"
-  }, "Client"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5 align-right"
-  }, "Labor"), /* @__PURE__ */ dom("label", {
-    class: "bold col-6 align-right"
-  }, "Total"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }));
-  invoices2.map(renderInvoice).forEach((item) => moveChildren(item, report));
-  moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-6"
-  }), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1-4"
-  }, "Total"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5-2 align-right"
-  }, total.toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("button", {
-    type: "button",
-    class: "button col-1-2",
-    "data-event": "create-invoice"
-  }, "Create Invoice")), report);
-  return report;
-}
-
-// app/invoice.ts
-var formManager = new FormFactory();
-var itemsToRemove = [];
-function addAnotherItem(form) {
-  const itemPanel = renderInvoiceItem({
-    quantity: 1,
-    item: "",
-    price: 0,
-    total: 0
-  });
-  setupComputeOnLineItem(form.formDom, itemPanel);
-  const toFocus = getFirstInput(itemPanel);
-  const target = form.formDom.querySelector(".line-items") || form.formDom;
-  itemsToRemove.splice(0, itemsToRemove.length);
-  for (let i = 0; i < itemPanel.children.length; i++) {
-    itemsToRemove.push(itemPanel.children[i]);
-  }
-  moveChildren(itemPanel, target);
-  toFocus?.focus();
-}
-function init() {
-  const queryParams = new URLSearchParams(window.location.search);
-  if (queryParams.has("id")) {
-    renderInvoice2(queryParams.get("id"));
-  } else {
-    renderInvoice2();
-  }
-}
-async function renderInvoices(target) {
-  const invoices2 = await invoices();
-  const formDom = create3(invoices2);
-  const form = formManager.domAsForm(formDom);
-  target.appendChild(formDom);
-  form.on("create-invoice", () => {
-    location.href = "invoice.html";
-  });
-}
-async function renderInvoice2(invoiceId) {
-  let invoice;
-  if (invoiceId) {
-    const invoices2 = await invoices();
-    invoice = invoices2.find((invoice2) => invoice2.id === invoiceId) || null;
-    if (!invoice)
-      throw "invoice not found";
-  } else {
-    invoice = {
-      id: 1e3 + invoices.length + 1 + "",
-      clientname: "",
-      billto: "",
-      comments: "",
-      email: "",
-      telephone: "",
-      items: [],
-      labor: 0,
-      additional: 0
-    };
-  }
-  const template = create(invoice);
-  template.classList.add("hidden");
-  document.body.appendChild(template);
-  const formDom = document.querySelector("#invoice-form");
-  if (!formDom)
-    throw "a form must be defined with id of 'invoice-form'";
-  const form = formManager.domAsForm(formDom);
-  const target = formDom.querySelector(".line-items") || formDom;
-  form.on("list-all-invoices", () => {
-    window.location.href = "invoices.html";
-  });
-  form.on("print", async () => {
-    if (await tryToSaveInvoice(form)) {
-      const requestModel = asModel(formDom);
-      print(requestModel);
-    }
-  });
-  form.on("submit", async () => {
-    if (await tryToSaveInvoice(form))
-      form.trigger("list-all-invoices");
-  });
-  form.on("remove-last-item", () => {
-    itemsToRemove.forEach((item) => item.remove());
-    form.trigger("change");
-  });
-  form.on("add-another-item", () => {
-    if (!form.isValid())
-      return;
-    addAnotherItem(form);
-    form.trigger("change");
-  });
-  form.on("clear", () => {
-    location.href = "invoice.html";
-  });
-  template.classList.remove("hidden");
-  form.trigger("change");
-}
-async function tryToSaveInvoice(form) {
-  const { formDom } = form;
-  if (!formDom.checkValidity()) {
-    formDom.reportValidity();
-    return false;
-  }
-  formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
-    const [itemInput, priceInput] = ["#item", "#price"].map((id) => lineItemForm.querySelector(id));
-    inventoryManager.persistInventoryItem({
-      code: itemInput.value,
-      price: priceInput.valueAsNumber
-    });
-  });
-  inventoryManager.persistInventoryItems();
-  const requestModel = asModel(formDom);
-  console.log({ requestModel });
-  await save(requestModel);
-  form.set("id", requestModel.id);
-  return true;
-}
-function asModel(formDom) {
-  const data = new FormData(formDom);
-  const requestModel = {
-    id: data.get("id"),
-    clientname: data.get("clientname"),
-    billto: data.get("billto"),
-    telephone: data.get("telephone"),
-    email: data.get("email"),
-    comments: data.get("comments"),
-    items: [],
-    labor: Number.parseFloat(data.get("labor") || "0"),
-    additional: Number.parseFloat(data.get("additional") || "0")
-  };
-  let currentItem = null;
+// app/gl/templates/glgrid.tsx
+function asModel(form) {
+  const result = { items: [] };
+  const data = new FormData(form);
+  let currentItem;
   for (let [key, value] of data.entries()) {
     switch (key) {
-      case "item":
+      case "date":
         currentItem = {};
-        requestModel.items.push(currentItem);
-        currentItem.item = value;
+        result.items.push(currentItem);
+        currentItem.date = new Date(value + "").valueOf();
         break;
-      case "quantity":
-        if (!currentItem)
-          throw "item expected";
-        currentItem.quantity = parseFloat(value);
+      case "account":
+        currentItem.account = value;
         break;
-      case "price":
-        if (!currentItem)
-          throw "item expected";
-        currentItem.price = parseFloat(value);
+      case "debit":
+        currentItem.amount = (currentItem.amount || 0) + parseFloat(value || "0");
         break;
-      case "total":
-        if (!currentItem)
-          throw "item expected";
-        currentItem.total = parseFloat(value);
+      case "credit":
+        currentItem.amount = (currentItem.amount || 0) - parseFloat(value || "0");
         break;
     }
   }
-  return requestModel;
+  return result;
 }
-function print(invoice) {
-  document.body.classList.add("print");
-  const toPrint = create2(invoice);
-  document.body.innerHTML = "";
-  document.body.appendChild(toPrint);
-  window.document.title = invoice.clientname;
-  window.print();
+function currentDay() {
+  const date = new Date();
+  return date.toISOString().split("T")[0];
 }
-function getFirstInput(itemPanel) {
-  return itemPanel.querySelector("input");
+function setCurrency(input, value) {
+  if (!input)
+    throw "no input found";
+  input.value = (value || 0).toFixed(2);
+}
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+function asNumber(node) {
+  return node.valueAsNumber || 0;
+}
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    eventItem.addEventListener("click", () => {
+      const eventName = eventItem.dataset["event"];
+      if (!eventName)
+        throw "item must define a data-event";
+      domNode.dispatchEvent(new Event(eventName));
+    });
+  });
+}
+function hookupHandlers(domNode) {
+  const tbody = domNode.querySelector("tbody");
+  const [totalCredits, totalDebits, totalError] = [
+    "total_credit",
+    "total_debit",
+    "total_error"
+  ].map((name) => domNode.querySelector(`[name=${name}]`));
+  domNode.addEventListener("change", () => {
+    const debits = Array.from(tbody.querySelectorAll("[name=debit]")).map(asNumber);
+    const credits = Array.from(tbody.querySelectorAll("[name=credit]")).map(asNumber);
+    const debitTotal = sum(debits);
+    const creditTotal = sum(credits);
+    setCurrency(totalDebits, debitTotal);
+    setCurrency(totalCredits, creditTotal);
+    setCurrency(totalError, debitTotal - creditTotal);
+  });
+  domNode.addEventListener("submit", () => {
+    if (!domNode.reportValidity())
+      return;
+    if (asNumber(domNode["total_error"]) !== 0)
+      alert("Total error must be zero");
+    const model = asModel(domNode);
+    save(model);
+  });
+  domNode.addEventListener("add-row", () => {
+    const tr = /* @__PURE__ */ dom("tr", null, /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
+      name: "date",
+      required: true,
+      type: "date",
+      placeholder: "date",
+      value: currentDay()
+    })), /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
+      name: "account",
+      required: true,
+      type: "text",
+      placeholder: "account",
+      list: "listOfAccounts"
+    })), /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
+      name: "debit",
+      class: "currency",
+      type: "number",
+      placeholder: "debit"
+    })), /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
+      name: "credit",
+      class: "currency",
+      type: "number",
+      placeholder: "credit"
+    })));
+    tbody.appendChild(tr);
+    tr.querySelector("[name=account]").focus();
+  });
+}
+function createGeneralLedgerGrid() {
+  const ledger = /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("datalist", {
+    id: "listOfAccounts"
+  }, /* @__PURE__ */ dom("option", null, "AP"), /* @__PURE__ */ dom("option", null, "AR"), /* @__PURE__ */ dom("option", null, "CASH"), /* @__PURE__ */ dom("option", null, "MOM/DAD"), /* @__PURE__ */ dom("option", null, "INVENTORY")), /* @__PURE__ */ dom("table", null, /* @__PURE__ */ dom("thead", null, /* @__PURE__ */ dom("th", {
+    class: "date"
+  }, "Date"), /* @__PURE__ */ dom("th", {
+    class: "text"
+  }, "Account"), /* @__PURE__ */ dom("th", {
+    class: "currency"
+  }, "Debit (+)"), /* @__PURE__ */ dom("th", {
+    class: "currency"
+  }, "Credit (-)")), /* @__PURE__ */ dom("tfoot", null, /* @__PURE__ */ dom("th", null), /* @__PURE__ */ dom("th", null, /* @__PURE__ */ dom("input", {
+    readonly: true,
+    type: "number",
+    class: "currency",
+    name: "total_error",
+    value: "0.00"
+  })), /* @__PURE__ */ dom("th", null, /* @__PURE__ */ dom("input", {
+    readonly: true,
+    type: "number",
+    class: "currency",
+    name: "total_debit",
+    value: "0.00"
+  })), /* @__PURE__ */ dom("th", null, /* @__PURE__ */ dom("input", {
+    type: "number",
+    readonly: true,
+    class: "currency",
+    name: "total_credit",
+    value: "0.00"
+  }))), /* @__PURE__ */ dom("tbody", null)), /* @__PURE__ */ dom("div", {
+    class: "vspacer-1"
+  }), /* @__PURE__ */ dom("button", {
+    class: "button",
+    type: "button",
+    "data-event": "add-row"
+  }, "Add Row"), /* @__PURE__ */ dom("button", {
+    class: "button",
+    type: "button",
+    "data-event": "submit"
+  }, "Save"));
+  hookupTriggers(ledger);
+  hookupHandlers(ledger);
+  ledger.dispatchEvent(new Event("add-row"));
+  return ledger;
+}
+
+// app/services/validateAccessToken.ts
+var import_faunadb3 = __toModule(require_faunadb());
+var { query } = import_faunadb3.default;
+var q2 = query;
+async function validate() {
+  const client = createClient();
+  return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
+}
+
+// app/identify.ts
+async function identify() {
+  try {
+    await validate();
+  } catch (ex) {
+    localStorage.setItem("FAUNADB_SERVER_SECRET", "");
+    console.log(ex);
+    return false;
+  }
+  if (!localStorage.getItem("user")) {
+    location.href = `/app/identity.html?target=${location.href}&context=${CONTEXT}`;
+    return false;
+  }
+  return true;
+}
+
+// app/gl/gl.ts
+function init(domNode) {
+  const ledger = createGeneralLedgerGrid();
+  domNode.appendChild(ledger);
 }
 export {
   identify,
-  init,
-  print,
-  renderInvoice2 as renderInvoice,
-  renderInvoices
+  init
 };
 /*
 object-assign

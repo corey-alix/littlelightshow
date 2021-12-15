@@ -11,7 +11,7 @@ export async function identify() {
   }
 
   if (!localStorage.getItem("user")) {
-    location.href = `identity.html?target=${location.href}&context=${CONTEXT}`;
+    location.href = `/app/identity.html?target=${location.href}&context=${CONTEXT}`;
     return false;
   }
   return true;

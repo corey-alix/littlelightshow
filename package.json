@@ -6,10 +6,11 @@
   "main": "index.js",
   "scripts": {
     "debug": "netlify dev --inspect",
+    "build:admin": "esbuild --watch --format=esm --bundle app/admin.ts --outfile=bin/admin.js",
     "build:test": "esbuild --watch --format=esm --bundle test/test.ts --outfile=bin/test.js",
     "build:invoice": "esbuild --watch --format=esm --bundle app/invoice.ts --outfile=bin/invoice.js",
-    "build:admin": "esbuild --watch --format=esm --bundle app/admin.ts --outfile=bin/admin.js",
-    "build": "npm-run-all -p build:admin build:invoice"
+    "build:gl": "esbuild --watch --format=esm --bundle app/gl/gl.ts --outfile=bin/gl.js",
+    "build": "npm-run-all -p build:gl build:invoice"
   },
   "repository": {
     "type": "git",

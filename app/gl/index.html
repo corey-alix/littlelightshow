@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Little Light Show General Ledger</title>
+    <link rel="stylesheet" href="../baseline.css" />
+  </head>
+  <body class="dark">
+    <h1>General Ledger</h1>
+    <div class="gl"></div>
+    <script type="module">
+      import { identify, init } from "../../bin/gl.js";
+      if (await identify()) init(document.querySelector(".gl"));
+    </script>
+  </body>
+</html>
