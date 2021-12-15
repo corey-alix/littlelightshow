@@ -5043,7 +5043,12 @@ function dom(tag, args, ...children) {
 function create() {
   return /* @__PURE__ */ dom("form", {
     id: "invoice-form"
-  }, /* @__PURE__ */ dom("h1", null, "Create an Invoice"), /* @__PURE__ */ dom("section", {
+  }, /* @__PURE__ */ dom("h1", null, "Create an Invoice"), /* @__PURE__ */ dom("input", {
+    class: "form-label",
+    readonly: true,
+    type: "text",
+    name: "id"
+  }), /* @__PURE__ */ dom("section", {
     class: "category"
   }, /* @__PURE__ */ dom("div", {
     class: "section-title"
@@ -5362,6 +5367,7 @@ async function renderInvoice2(invoiceId) {
     const invoice = invoices2.find((invoice2) => invoice2.id === invoiceId);
     if (!invoice)
       throw "invoice not found";
+    form.set("id", invoice.id);
     form.set("labor", invoice.labor);
     form.set("clientname", invoice.clientname);
     form.set("billto", invoice.billto);
@@ -5376,27 +5382,11 @@ async function renderInvoice2(invoiceId) {
   });
   form.on("print", () => {
     const requestModel = asModel(formDom);
-    requestModel.id = invoiceId || "";
     print(requestModel);
   });
   form.on("submit", async () => {
-    if (!formDom.checkValidity()) {
-      formDom.reportValidity();
-      return false;
-    }
-    formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
-      const [itemInput, priceInput] = ["#item", "#price"].map((id) => lineItemForm.querySelector(id));
-      inventoryManager.persistInventoryItem({
-        code: itemInput.value,
-        price: priceInput.valueAsNumber
-      });
-    });
-    inventoryManager.persistInventoryItems();
-    const requestModel = asModel(formDom);
-    requestModel.id = invoiceId || "";
-    console.log({ requestModel });
-    await save(requestModel);
-    form.trigger("list-all-invoices");
+    if (await tryToSaveInvoice(form))
+      form.trigger("list-all-invoices");
   });
   form.on("remove-item", () => form.trigger("change"));
   form.on("add-another-item", () => {
@@ -5420,6 +5410,25 @@ async function renderInvoice2(invoiceId) {
     form.trigger("change");
   });
 }
+async function tryToSaveInvoice(form) {
+  const { formDom } = form;
+  if (!formDom.checkValidity()) {
+    formDom.reportValidity();
+    return false;
+  }
+  formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
+    const [itemInput, priceInput] = ["#item", "#price"].map((id) => lineItemForm.querySelector(id));
+    inventoryManager.persistInventoryItem({
+      code: itemInput.value,
+      price: priceInput.valueAsNumber
+    });
+  });
+  inventoryManager.persistInventoryItems();
+  const requestModel = asModel(formDom);
+  console.log({ requestModel });
+  await save(requestModel);
+  return true;
+}
 function computeTotalDue(form) {
   const model = asModel(form.formDom);
   const totalDue = model.items.reduce((a, b) => (b.total || 0) - 0 + a, 0);
@@ -5428,7 +5437,7 @@ function computeTotalDue(form) {
 function asModel(formDom) {
   const data = new FormData(formDom);
   const requestModel = {
-    id: "",
+    id: data.get("id"),
     clientname: data.get("clientname"),
     billto: data.get("billto"),
     telephone: data.get("telephone"),

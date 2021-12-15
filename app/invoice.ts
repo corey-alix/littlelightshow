@@ -147,6 +147,7 @@ export async function renderInvoice(invoiceId?: string) {
     const invoice = invoices.find((invoice) => invoice.id === invoiceId);
     if (!invoice) throw "invoice not found";
 
+    form.set("id", invoice.id);
     form.set("labor", invoice.labor);
     form.set("clientname", invoice.clientname);
     form.set("billto", invoice.billto);
@@ -164,31 +165,11 @@ export async function renderInvoice(invoiceId?: string) {
 
   form.on("print", () => {
     const requestModel = asModel(formDom);
-    requestModel.id = invoiceId || "";
     print(requestModel);
   });
 
   form.on("submit", async () => {
-    if (!formDom.checkValidity()) {
-      formDom.reportValidity();
-      return false;
-    }
-    formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
-      const [itemInput, priceInput] = ["#item", "#price"].map(
-        (id) => lineItemForm.querySelector(id) as HTMLInputElement
-      );
-      inventoryManager.persistInventoryItem({
-        code: itemInput.value,
-        price: priceInput.valueAsNumber,
-      });
-    });
-    inventoryManager.persistInventoryItems();
-    const requestModel = asModel(formDom);
-    requestModel.id = invoiceId || "";
-
-    console.log({ requestModel });
-    await saveInvoice(requestModel);
-    form.trigger("list-all-invoices");
+    if (await tryToSaveInvoice(form)) form.trigger("list-all-invoices");
   });
 
   form.on("remove-item", () => form.trigger("change"));
@@ -217,6 +198,28 @@ export async function renderInvoice(invoiceId?: string) {
   });
 }
 
+async function tryToSaveInvoice(form: FormManager) {
+  const { formDom } = form;
+  if (!formDom.checkValidity()) {
+    formDom.reportValidity();
+    return false;
+  }
+  formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
+    const [itemInput, priceInput] = ["#item", "#price"].map(
+      (id) => lineItemForm.querySelector(id) as HTMLInputElement
+    );
+    inventoryManager.persistInventoryItem({
+      code: itemInput.value,
+      price: priceInput.valueAsNumber,
+    });
+  });
+  inventoryManager.persistInventoryItems();
+  const requestModel = asModel(formDom);
+  console.log({ requestModel });
+  await saveInvoice(requestModel);
+  return true;
+}
+
 function computeTotalDue(form: FormManager) {
   const model = asModel(form.formDom);
   const totalDue = model.items.reduce((a, b) => (b.total || 0) - 0 + a, 0);
@@ -226,7 +229,7 @@ function computeTotalDue(form: FormManager) {
 function asModel(formDom: HTMLFormElement) {
   const data = new FormData(formDom);
   const requestModel: Invoice = {
-    id: "",
+    id: data.get("id") as string,
     clientname: data.get("clientname") as string,
     billto: data.get("billto") as string,
     telephone: data.get("telephone") as string,

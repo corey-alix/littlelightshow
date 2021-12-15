@@ -4,6 +4,7 @@ export function create(): HTMLFormElement {
   return (
     <form id="invoice-form">
       <h1>Create an Invoice</h1>
+      <input class="form-label" readonly type="text" name="id" />
       <section class="category">
         <div class="section-title">Client</div>
         <section class="grid-container">
