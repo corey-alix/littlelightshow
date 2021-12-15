@@ -66,6 +66,7 @@ export async function invoices() {
     .map((invoice) => invoice.data)
     .map((invoice) => {
       invoice.labor = (invoice.labor || 0) - 0;
+      invoice.additional = (invoice.additional || 0) - 0;
       invoice.items.forEach((item) => {
         item.item = (item.item || "").toLocaleUpperCase();
         item.quantity = (item.quantity || 0) - 0;
