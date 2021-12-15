@@ -5258,15 +5258,16 @@ function setupComputeOnLineItem(event, form) {
 
 // app/templates/invoice-print.tsx
 function invoiceItem(item) {
+  console.log("invoiceItem", { item });
   return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
     class: "tall col-1-3"
   }, item.item), /* @__PURE__ */ dom("label", {
     class: "tall col-4 align-right"
-  }, item.quantity), /* @__PURE__ */ dom("label", {
+  }, item.quantity.toFixed(2)), /* @__PURE__ */ dom("label", {
     class: "tall col-5 align-right"
-  }, item.price), /* @__PURE__ */ dom("label", {
+  }, item.price.toFixed(2)), /* @__PURE__ */ dom("label", {
     class: "tall col-6 align-right"
-  }, item.total));
+  }, item.total.toFixed(2)));
 }
 function create2(invoice) {
   const report = /* @__PURE__ */ dom("div", {

@@ -8,12 +8,13 @@ function escape(text: string) {
 }
 
 function invoiceItem(item: InvoiceItem): HTMLDivElement {
+  console.log("invoiceItem", { item });
   return (
     <div>
       <label class="tall col-1-3">{item.item}</label>
-      <label class="tall col-4 align-right">{item.quantity}</label>
-      <label class="tall col-5 align-right">{item.price}</label>
-      <label class="tall col-6 align-right">{item.total}</label>
+      <label class="tall col-4 align-right">{item.quantity.toFixed(2)}</label>
+      <label class="tall col-5 align-right">{item.price.toFixed(2)}</label>
+      <label class="tall col-6 align-right">{item.total.toFixed(2)}</label>
     </div>
   );
 }
