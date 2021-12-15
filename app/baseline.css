@@ -1,6 +1,6 @@
 * {
   font-size: 1.2rem;
-  font-family: Arial;
+  font-family: -webkit-pictograph;
 }
 
 body {
@@ -35,6 +35,7 @@ section.category {
 }
 
 div.section-title {
+  width: 100%;
   padding: 0.5rem;
   color: white;
   background: black;
@@ -69,7 +70,12 @@ div.section-title {
   padding-top: 0.5rem;
 }
 
-.grid-6 input,
+.grid-6 input {
+  width: 100%;
+  padding-right: -1rem;
+  min-height: 2rem;
+}
+
 .form-label > input {
   width: 100%;
   min-height: 2rem;
@@ -266,7 +272,7 @@ form textarea {
 }
 
 .bold {
-  font-family: Arial black;
+  font-weight: bold;
 }
 
 .tall {

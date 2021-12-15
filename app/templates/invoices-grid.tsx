@@ -35,6 +35,7 @@ export function create(invoices: Invoice[]) {
   invoices.map(renderInvoice).forEach((item) => moveChildren(item, report));
   moveChildren(
     <div>
+      <div class="vspacer-1 col-1-6"></div>
       <div class="line col-1-6"></div>
       <label class="bold col-1-4">Total</label>
       <label class="bold col-5-2 align-right">{total.toFixed(2)}</label>

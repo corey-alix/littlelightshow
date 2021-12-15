@@ -18,34 +18,31 @@ export function create(invoice: Invoice): HTMLFormElement {
         value={invoice.id}
       />
       <div class="section-title col-1-6">Client</div>
-      <label class="form-label col-1-6">
-        Client Name
-        <input
-          type="text"
-          placeholder="clientname"
-          name="clientname"
-          required
-          value={invoice.clientname}
-        />
-      </label>
-      <label class="form-label col-1-3">
-        Telephone
-        <input
-          type="tel"
-          placeholder="telephone"
-          name="telephone"
-          value={invoice.telephone}
-        />
-      </label>
-      <label class="form-label col-4-3">
-        Email{" "}
-        <input
-          type="email"
-          placeholder="email"
-          name="email"
-          value={invoice.email}
-        />
-      </label>
+      <label class="form-label col-1-6">Client Name</label>
+      <input
+        class="col-1-6"
+        type="text"
+        placeholder="clientname"
+        name="clientname"
+        required
+        value={invoice.clientname}
+      />
+      <label class="form-label col-1-3">Telephone</label>
+      <label class="form-label col-4-3">Email</label>
+      <input
+        type="tel"
+        class="col-1-3"
+        placeholder="telephone"
+        name="telephone"
+        value={invoice.telephone}
+      />
+      <input
+        type="email"
+        class="col-4-3"
+        placeholder="email"
+        name="email"
+        value={invoice.email}
+      />
       <label class="form-label col-1-6">
         Bill To
         <textarea class="address" placeholder="billto" name="billto">
@@ -156,37 +153,31 @@ export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
           list={forceDatalist().id}
         />
       </label>
-      <label class="form-label col-1">
-        Quantity
-        <input
-          name="quantity"
-          required
-          class="quantity"
-          type="number"
-          value={item.quantity}
-        />
-      </label>
-      <label class="form-label col-2-2">
-        Price
-        <input
-          name="price"
-          required
-          class="currency"
-          type="number"
-          step="0.01"
-          value={item.price.toFixed(2)}
-        />
-      </label>
-      <label class="form-label col-4-3">
-        Total
-        <input
-          readonly
-          name="total"
-          class="bold currency"
-          type="number"
-          value={item.total.toFixed(2)}
-        />
-      </label>
+      <label class="form-label col-1">Quantity</label>
+      <label class="form-label col-2-2">Price</label>
+      <label class="form-label col-4-3">Total</label>
+      <input
+        name="quantity"
+        required
+        class="quantity col-1"
+        type="number"
+        value={item.quantity}
+      />
+      <input
+        name="price"
+        required
+        class="currency col-2-2"
+        type="number"
+        step="0.01"
+        value={item.price.toFixed(2)}
+      />
+      <input
+        readonly
+        name="total"
+        class="bold currency col-4-3"
+        type="number"
+        value={item.total.toFixed(2)}
+      />
     </div>
   );
 

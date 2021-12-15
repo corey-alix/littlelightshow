@@ -5070,27 +5070,30 @@ function create(invoice) {
     class: "section-title col-1-6"
   }, "Client"), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-6"
-  }, "Client Name", /* @__PURE__ */ dom("input", {
+  }, "Client Name"), /* @__PURE__ */ dom("input", {
+    class: "col-1-6",
     type: "text",
     placeholder: "clientname",
     name: "clientname",
     required: true,
     value: invoice.clientname
-  })), /* @__PURE__ */ dom("label", {
+  }), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-3"
-  }, "Telephone", /* @__PURE__ */ dom("input", {
+  }, "Telephone"), /* @__PURE__ */ dom("label", {
+    class: "form-label col-4-3"
+  }, "Email"), /* @__PURE__ */ dom("input", {
     type: "tel",
+    class: "col-1-3",
     placeholder: "telephone",
     name: "telephone",
     value: invoice.telephone
-  })), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3"
-  }, "Email", " ", /* @__PURE__ */ dom("input", {
+  }), /* @__PURE__ */ dom("input", {
     type: "email",
+    class: "col-4-3",
     placeholder: "email",
     name: "email",
     value: invoice.email
-  })), /* @__PURE__ */ dom("label", {
+  }), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-6"
   }, "Bill To", /* @__PURE__ */ dom("textarea", {
     class: "address",
@@ -5188,30 +5191,30 @@ function renderInvoiceItem(item) {
     list: forceDatalist().id
   })), /* @__PURE__ */ dom("label", {
     class: "form-label col-1"
-  }, "Quantity", /* @__PURE__ */ dom("input", {
+  }, "Quantity"), /* @__PURE__ */ dom("label", {
+    class: "form-label col-2-2"
+  }, "Price"), /* @__PURE__ */ dom("label", {
+    class: "form-label col-4-3"
+  }, "Total"), /* @__PURE__ */ dom("input", {
     name: "quantity",
     required: true,
-    class: "quantity",
+    class: "quantity col-1",
     type: "number",
     value: item.quantity
-  })), /* @__PURE__ */ dom("label", {
-    class: "form-label col-2-2"
-  }, "Price", /* @__PURE__ */ dom("input", {
+  }), /* @__PURE__ */ dom("input", {
     name: "price",
     required: true,
-    class: "currency",
+    class: "currency col-2-2",
     type: "number",
     step: "0.01",
     value: item.price.toFixed(2)
-  })), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3"
-  }, "Total", /* @__PURE__ */ dom("input", {
+  }), /* @__PURE__ */ dom("input", {
     readonly: true,
     name: "total",
-    class: "bold currency",
+    class: "bold currency col-4-3",
     type: "number",
     value: item.total.toFixed(2)
-  })));
+  }));
   return form;
 }
 function setupComputeOnLineItem(event, form) {
@@ -5361,6 +5364,8 @@ function create3(invoices2) {
   }));
   invoices2.map(renderInvoice).forEach((item) => moveChildren(item, report));
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "vspacer-1 col-1-6"
+  }), /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1-4"
