@@ -4,11 +4,7 @@
 }
 
 body {
-  max-width: 40rem;
-  width: calc(100vw - 3rem);
-  border: 1.5rem solid transparent;
-  margin: 0;
-  padding: 0;
+  padding: 1rem;
 }
 
 body.dark {

@@ -5423,11 +5423,11 @@ async function renderInvoice2(invoiceId) {
   } else {
     invoice = {
       id: 1e3 + invoices.length + 1 + "",
-      clientname: "<CLIENT NAME>",
-      billto: "<BILL TO>",
-      comments: "<COMMENTS>",
-      email: "<EMAIL>",
-      telephone: "<TEL>",
+      clientname: "",
+      billto: "",
+      comments: "",
+      email: "",
+      telephone: "",
       items: [],
       labor: 0
     };

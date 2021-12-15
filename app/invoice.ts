@@ -86,11 +86,11 @@ export async function renderInvoice(invoiceId?: string) {
     // invoice is empty
     invoice = {
       id: 1000 + invoices.length + 1 + "",
-      clientname: "<CLIENT NAME>",
-      billto: "<BILL TO>",
-      comments: "<COMMENTS>",
-      email: "<EMAIL>",
-      telephone: "<TEL>",
+      clientname: "",
+      billto: "",
+      comments: "",
+      email: "",
+      telephone: "",
       items: [],
       labor: 0,
     };
