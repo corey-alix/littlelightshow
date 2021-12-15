@@ -5241,30 +5241,43 @@ function moveChildren2(items, report) {
 }
 function totalInvoice(invoice) {
   let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-  return total;
+  return total * (1 + TAXRATE) + invoice.labor;
 }
 function renderInvoice(invoice) {
   return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
     class: "col-1-4",
     href: `invoice?id=${invoice.id}`
   }, invoice.clientname), /* @__PURE__ */ dom("label", {
-    class: "col-5-2 currency"
+    class: "col-5 align-right"
+  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
+    class: "col-6 align-right"
   }, totalInvoice(invoice).toFixed(2)));
 }
 function create3(invoices2) {
   const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
   const report = /* @__PURE__ */ dom("form", {
     class: "grid-6"
-  });
+  }, /* @__PURE__ */ dom("label", {
+    class: "bold col-1-4"
+  }, "Client"), /* @__PURE__ */ dom("label", {
+    class: "bold col-5 align-right"
+  }, "Labor"), /* @__PURE__ */ dom("label", {
+    class: "bold col-6 align-right"
+  }, "Total"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-6"
+  }));
   invoices2.map(renderInvoice).forEach((item) => moveChildren2(item, report));
   moveChildren2(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1-4"
   }, "Total"), /* @__PURE__ */ dom("label", {
-    class: "currency bold col-5-2"
-  }, total.toFixed(2)), /* @__PURE__ */ dom("button", {
+    class: "bold col-5-2 align-right"
+  }, total.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-6"
+  }), /* @__PURE__ */ dom("button", {
     type: "button",
+    class: "button col-1-2",
     "data-event": "create-invoice"
   }, "Create Invoice")), report);
   return report;
