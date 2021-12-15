@@ -36,7 +36,10 @@ export function create(invoice: Invoice) {
         <label class="col-2-2">{n}</label>
       ))}
       {invoice.comments && <div class="vspacer-2 col-1-6"></div>}
-      {invoice.comments && <label class="col-2-5">{invoice.comments}</label>}
+      {invoice.comments &&
+        invoice.comments
+          .split("\n")
+          .map((n) => <label class="col-2-5">{n}</label>)}
       <div class="vspacer-2 col-1-6"></div>
       <label class="bold col-1-3">Description</label>
       <label class="bold col-4 align-right">Quantity</label>

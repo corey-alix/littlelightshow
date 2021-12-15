@@ -108,6 +108,7 @@ function addAnotherItem(form: FormManager) {
     title: "Remove Item",
     event: "remove-item",
   });
+  focusFirstInput(itemPanel);
   removeButton.addEventListener("click", () => {
     itemPanel.remove();
     form.trigger("change");
@@ -258,4 +259,10 @@ export function print(invoice: Invoice) {
   document.body.appendChild(toPrint);
   window.document.title = invoice.clientname;
   window.print();
+}
+
+function focusFirstInput(itemPanel: HTMLDivElement) {
+  const input = itemPanel.querySelector("input") as HTMLInputElement;
+  if (!input) return;
+  input.focus();
 }

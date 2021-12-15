@@ -5177,9 +5177,9 @@ function create2(invoice) {
     class: "col-2-2"
   }, n)), invoice.comments && /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
-  }), invoice.comments && /* @__PURE__ */ dom("label", {
+  }), invoice.comments && invoice.comments.split("\n").map((n) => /* @__PURE__ */ dom("label", {
     class: "col-2-5"
-  }, invoice.comments), /* @__PURE__ */ dom("div", {
+  }, n)), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1-3"
@@ -5328,6 +5328,7 @@ function addAnotherItem(form) {
     title: "Remove Item",
     event: "remove-item"
   });
+  focusFirstInput(itemPanel);
   removeButton.addEventListener("click", () => {
     itemPanel.remove();
     form.trigger("change");
@@ -5454,6 +5455,12 @@ function print(invoice) {
   document.body.appendChild(toPrint);
   window.document.title = invoice.clientname;
   window.print();
+}
+function focusFirstInput(itemPanel) {
+  const input = itemPanel.querySelector("input");
+  if (!input)
+    return;
+  input.focus();
 }
 export {
   identify,
