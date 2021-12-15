@@ -42,11 +42,7 @@ div.section-title {
   padding: 0.5rem;
   color: white;
   background: black;
-  border-radius: 0;
-}
-
-.toolbar .button {
-  display: inline-block;
+  text-align: center;
 }
 
 .netlify-identity-item,
@@ -74,14 +70,13 @@ div.section-title {
 }
 
 .form-label {
-  width: calc(100% - 2rem);
   padding-top: 0.5rem;
-  padding-left: 0.5rem;
 }
 
 .grid-6 input,
 .form-label > input {
   width: 100%;
+  min-height: 2rem;
 }
 
 .portfolio {
@@ -166,8 +161,6 @@ div.section-title {
 
 form textarea {
   width: 100%;
-  border-radius: 0.5rem;
-  margin-left: 0.5rem;
 }
 
 .text {

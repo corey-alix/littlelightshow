@@ -5187,7 +5187,7 @@ function renderInvoiceItem(item) {
     value: item.item,
     list: forceDatalist().id
   })), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-3"
+    class: "form-label col-1"
   }, "Quantity", /* @__PURE__ */ dom("input", {
     name: "quantity",
     required: true,
@@ -5195,7 +5195,7 @@ function renderInvoiceItem(item) {
     type: "number",
     value: item.quantity
   })), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3"
+    class: "form-label col-2-2"
   }, "Price", /* @__PURE__ */ dom("input", {
     name: "price",
     required: true,

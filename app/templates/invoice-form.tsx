@@ -156,7 +156,7 @@ export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
           list={forceDatalist().id}
         />
       </label>
-      <label class="form-label col-1-3">
+      <label class="form-label col-1">
         Quantity
         <input
           name="quantity"
@@ -166,7 +166,7 @@ export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
           value={item.quantity}
         />
       </label>
-      <label class="form-label col-4-3">
+      <label class="form-label col-2-2">
         Price
         <input
           name="price"
