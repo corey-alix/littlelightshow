@@ -5114,11 +5114,11 @@ function create(invoice) {
   }, "Items")), /* @__PURE__ */ dom("div", {
     class: "vspacer col-1-6"
   }), /* @__PURE__ */ dom("button", {
-    class: "button col-1-3",
+    class: "button col-1-4",
     "data-event": "add-another-item",
     type: "button"
   }, "Add item"), /* @__PURE__ */ dom("button", {
-    class: "button col-4-3",
+    class: "button col-5-2",
     "data-event": "remove-last-item",
     type: "button"
   }, "Remove Last Item"), /* @__PURE__ */ dom("div", {
@@ -5145,19 +5145,19 @@ function create(invoice) {
   }), /* @__PURE__ */ dom("div", {
     class: "vspacer-1"
   }), /* @__PURE__ */ dom("button", {
-    class: "button col-1-2",
+    class: "bold button col-1-3",
     "data-event": "submit",
     type: "button"
   }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button col-3-2",
+    class: "button col-4-2",
     "data-event": "print",
     type: "button"
-  }, "Print"), /* @__PURE__ */ dom("button", {
-    class: "button col-5-2",
+  }, "Save and Print"), /* @__PURE__ */ dom("button", {
+    class: "button col-6",
     "data-event": "clear",
     type: "button"
   }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button col-5-2",
+    class: "button col-1-6",
     "data-event": "list-all-invoices",
     type: "button"
   }, "List All Invoices"));

@@ -61,14 +61,14 @@ export function create(invoice: Invoice): HTMLFormElement {
       </section>
       <div class="vspacer col-1-6"></div>
       <button
-        class="button col-1-3"
+        class="button col-1-4"
         data-event="add-another-item"
         type="button"
       >
         Add item
       </button>
       <button
-        class="button col-4-3"
+        class="button col-5-2"
         data-event="remove-last-item"
         type="button"
       >
@@ -94,17 +94,17 @@ export function create(invoice: Invoice): HTMLFormElement {
         name="total_due"
       />
       <div class="vspacer-1"></div>
-      <button class="button col-1-2" data-event="submit" type="button">
+      <button class="bold button col-1-3" data-event="submit" type="button">
         Save
       </button>
-      <button class="button col-3-2" data-event="print" type="button">
-        Print
+      <button class="button col-4-2" data-event="print" type="button">
+        Save and Print
       </button>
-      <button class="button col-5-2" data-event="clear" type="button">
+      <button class="button col-6" data-event="clear" type="button">
         Clear
       </button>
       <button
-        class="button col-5-2"
+        class="button col-1-6"
         data-event="list-all-invoices"
         type="button"
       >
