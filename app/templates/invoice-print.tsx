@@ -74,7 +74,7 @@ export function create(invoice: Invoice) {
         {invoice.labor && (
           <label class="col-6 align-right">{invoice.labor.toFixed(2)}</label>
         )}
-        {invoice.additional && <label class="col-5">additional</label>}
+        {invoice.additional && <label class="col-5">Additional</label>}
         {invoice.additional && (
           <label class="col-6 align-right">
             {invoice.additional.toFixed(2)}

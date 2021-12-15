@@ -5339,7 +5339,7 @@ function create2(invoice) {
       class: "col-6 align-right"
     }, invoice.labor.toFixed(2)), invoice.additional && /* @__PURE__ */ dom("label", {
       class: "col-5"
-    }, "additional"), invoice.additional && /* @__PURE__ */ dom("label", {
+    }, "Additional"), invoice.additional && /* @__PURE__ */ dom("label", {
       class: "col-6 align-right"
     }, invoice.additional.toFixed(2)), /* @__PURE__ */ dom("label", {
       class: "bold col-5"
