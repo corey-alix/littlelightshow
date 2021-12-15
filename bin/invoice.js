@@ -4868,6 +4868,12 @@ var FormFactory = class {
   }
 };
 
+// app/fun/dom.ts
+function moveChildren(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
+}
+
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.06;
@@ -5044,77 +5050,87 @@ function dom(tag, args, ...children) {
 }
 
 // app/templates/invoice-form.tsx
-function create() {
-  return /* @__PURE__ */ dom("form", {
+function create(invoice) {
+  console.log({ invoice });
+  const form = /* @__PURE__ */ dom("form", {
     id: "invoice-form"
   }, /* @__PURE__ */ dom("h1", null, "Create an Invoice"), /* @__PURE__ */ dom("input", {
     class: "form-label",
     readonly: true,
     type: "text",
-    name: "id"
+    name: "id",
+    value: invoice.id
   }), /* @__PURE__ */ dom("section", {
     class: "category"
   }, /* @__PURE__ */ dom("div", {
     class: "section-title"
   }, "Client"), /* @__PURE__ */ dom("section", {
-    class: "grid-container"
+    class: "grid-6"
   }, /* @__PURE__ */ dom("label", {
-    class: "form-label"
+    class: "form-label col-1-6"
   }, "Client Name", /* @__PURE__ */ dom("input", {
     type: "text",
     placeholder: "clientname",
     name: "clientname",
-    required: true
+    required: true,
+    value: invoice.clientname
   })), /* @__PURE__ */ dom("label", {
-    class: "form-label"
+    class: "form-label col-1-3"
   }, "Telephone", /* @__PURE__ */ dom("input", {
     type: "tel",
     placeholder: "telephone",
-    name: "telephone"
+    name: "telephone",
+    value: invoice.telephone
   })), /* @__PURE__ */ dom("label", {
-    class: "form-label"
-  }, "Email ", /* @__PURE__ */ dom("input", {
+    class: "form-label col-4-3"
+  }, "Email", " ", /* @__PURE__ */ dom("input", {
     type: "email",
     placeholder: "email",
-    name: "email"
+    name: "email",
+    value: invoice.email
   })), /* @__PURE__ */ dom("label", {
-    class: "form-label"
+    class: "form-label col-1-6"
   }, "Bill To", /* @__PURE__ */ dom("textarea", {
     class: "address",
     placeholder: "billto",
     name: "billto"
-  })), /* @__PURE__ */ dom("label", {
-    class: "form-label"
+  }, invoice.billto)), /* @__PURE__ */ dom("label", {
+    class: "form-label col-1-6"
   }, "Comments", /* @__PURE__ */ dom("textarea", {
     class: "comments",
     placeholder: "comments",
     name: "comments"
-  })))), /* @__PURE__ */ dom("div", {
+  }, invoice.comments)))), /* @__PURE__ */ dom("div", {
     class: "vspacer"
   }), /* @__PURE__ */ dom("section", {
     class: "category"
   }, /* @__PURE__ */ dom("div", {
     class: "section-title"
   }, "Items"), /* @__PURE__ */ dom("section", {
-    class: "line-items line-item-grid"
+    class: "line-items grid-6"
   })), /* @__PURE__ */ dom("div", {
     class: "vspacer"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button",
+  }), /* @__PURE__ */ dom("section", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("button", {
+    class: "button col-1-3",
     "data-event": "add-another-item",
     type: "button"
-  }, "Add item"), /* @__PURE__ */ dom("section", {
-    class: "line-items"
-  }, /* @__PURE__ */ dom("label", {
-    class: "form-label align-right"
+  }, "Add item"), /* @__PURE__ */ dom("button", {
+    class: "button col-4-3",
+    "data-event": "remove-last-item",
+    type: "button"
+  }, "Remove Last Item"), /* @__PURE__ */ dom("label", {
+    class: "form-label col-1-6"
   }, "Labor"), /* @__PURE__ */ dom("input", {
     type: "number",
     class: "currency",
     placeholder: "labor",
     name: "labor",
-    id: "labor"
+    id: "labor",
+    value: invoice.labor.toFixed(2)
   }), /* @__PURE__ */ dom("label", {
-    class: "form-label align-right"
+    class: "form-label col-1-6"
   }, "Total + Tax"), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
@@ -5122,25 +5138,60 @@ function create() {
     id: "total_due",
     name: "total_due",
     value: "$0.00"
-  })), /* @__PURE__ */ dom("div", {
+  })), /* @__PURE__ */ dom("section", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("div", {
     class: "vspacer-1"
   }), /* @__PURE__ */ dom("button", {
-    class: "button",
+    class: "button col-1-2",
     "data-event": "submit",
     type: "button"
   }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button",
+    class: "button col-3-2",
     "data-event": "print",
     type: "button"
   }, "Print"), /* @__PURE__ */ dom("button", {
-    class: "button",
+    class: "button col-1-2",
     "data-event": "clear",
     type: "button"
   }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button",
+    class: "button col-3-2",
     "data-event": "list-all-invoices",
     type: "button"
-  }, "List All Invoices"));
+  }, "List All Invoices")));
+  const lineItemsTarget = form.querySelector(".line-items");
+  const lineItems = invoice.items.map(renderInvoiceItem);
+  lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
+  return form;
+}
+function renderInvoiceItem(item) {
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
+    class: "form-label col-1-6"
+  }, "Item", /* @__PURE__ */ dom("input", {
+    required: true,
+    type: "text",
+    value: item.item
+  })), /* @__PURE__ */ dom("label", {
+    class: "form-label col-1-3"
+  }, "Quantity", /* @__PURE__ */ dom("input", {
+    required: true,
+    class: "quantity",
+    type: "number",
+    value: item.quantity
+  })), /* @__PURE__ */ dom("label", {
+    class: "form-label col-4-3"
+  }, "Price", /* @__PURE__ */ dom("input", {
+    required: true,
+    class: "currency",
+    type: "text",
+    value: item.price.toFixed(2)
+  })), /* @__PURE__ */ dom("label", {
+    class: "form-label col-4-3"
+  }, "Total", /* @__PURE__ */ dom("input", {
+    class: "bold currency",
+    type: "text",
+    value: item.total.toFixed(2)
+  })));
 }
 
 // app/templates/invoice-print.tsx
@@ -5232,16 +5283,8 @@ function create2(invoice) {
   }
   return report;
 }
-function moveChildren(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
-}
 
 // app/templates/invoices-grid.tsx
-function moveChildren2(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
-}
 function totalInvoice(invoice) {
   let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
   return total * (1 + TAXRATE) + invoice.labor;
@@ -5269,8 +5312,8 @@ function create3(invoices2) {
   }, "Total"), /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }));
-  invoices2.map(renderInvoice).forEach((item) => moveChildren2(item, report));
-  moveChildren2(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+  invoices2.map(renderInvoice).forEach((item) => moveChildren(item, report));
+  moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1-4"
@@ -5288,77 +5331,28 @@ function create3(invoices2) {
 
 // app/invoice.ts
 var formManager = new FormFactory();
+var itemsToRemove = [];
 function bind(form, inputQuerySelectors, outputQuerySelectors, cb) {
   const inputs = inputQuerySelectors.map((qs) => form.querySelector(qs));
   const outputs = outputQuerySelectors.map((qs) => form.querySelector(qs));
   const callback = () => cb([...inputs, ...outputs]);
   inputs.forEach((input) => input.addEventListener("change", callback));
 }
-function createItemPanel(form, item) {
-  if (!item)
-    item = {
-      item: "",
-      price: 0,
-      quantity: 1,
-      total: 0
-    };
-  const formDom = formManager.asForm({
-    item: {
-      label: "Item",
-      required: true,
-      lookup: "inventory-items",
-      value: item.item
-    },
-    quantity: {
-      label: "Quantity",
-      type: "quantity",
-      required: true,
-      value: item.quantity
-    },
-    price: {
-      label: "Price",
-      type: "currency",
-      required: true,
-      value: item.price
-    },
-    total: {
-      label: "Total",
-      type: "currency",
-      readonly: true,
-      value: item.total
-    }
-  });
-  formDom.classList.add("line-item");
-  bind(formDom, ["#price", "#quantity"], ["#total"], ([price, quantity, total]) => {
-    const ttl = price.valueAsNumber * quantity.valueAsNumber;
-    total.value = ttl.toFixed(2);
-    total.dispatchEvent(new Event("change"));
-    form.trigger("change");
-  });
-  bind(formDom, ["#item"], ["#price", "#quantity", "#total"], ([item2, price, quantity, total]) => {
-    const currentPrice = price.valueAsNumber;
-    const itemPrice = inventoryManager.getInventoryItemByCode(item2.value);
-    if (itemPrice && currentPrice != itemPrice)
-      price.value = itemPrice.toFixed(2);
-    price.dispatchEvent(new Event("change"));
-    form.trigger("change");
-  });
-  return formDom;
-}
 function addAnotherItem(form) {
-  const itemPanel = createItemPanel(form);
+  const itemPanel = renderInvoiceItem({
+    quantity: 1,
+    item: "",
+    price: 0,
+    total: 0
+  });
+  const toFocus = getFirstInput(itemPanel);
   const target = form.formDom.querySelector(".line-items") || form.formDom;
-  target.appendChild(itemPanel);
-  const removeButton = form.createButton({
-    title: "Remove Item",
-    event: "remove-item"
-  });
-  focusFirstInput(itemPanel);
-  removeButton.addEventListener("click", () => {
-    itemPanel.remove();
-    form.trigger("change");
-  });
-  itemPanel.appendChild(removeButton);
+  itemsToRemove.splice(0, itemsToRemove.length);
+  for (let i = 0; i < itemPanel.children.length; i++) {
+    itemsToRemove.push(itemPanel.children[i]);
+  }
+  moveChildren(itemPanel, target);
+  toFocus?.focus();
 }
 function init() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -5378,8 +5372,25 @@ async function renderInvoices(target) {
   });
 }
 async function renderInvoice2(invoiceId) {
-  document.querySelector("#invoice-form")?.remove();
-  const template = create();
+  let invoice;
+  if (invoiceId) {
+    const invoices2 = await invoices();
+    invoice = invoices2.find((invoice2) => invoice2.id === invoiceId) || null;
+    if (!invoice)
+      throw "invoice not found";
+  } else {
+    invoice = {
+      id: 1e3 + invoices.length + 1 + "",
+      clientname: "<CLIENT NAME>",
+      billto: "<BILL TO>",
+      comments: "<COMMENTS>",
+      email: "<EMAIL>",
+      telephone: "<TEL>",
+      items: [],
+      labor: 0
+    };
+  }
+  const template = create(invoice);
   template.classList.add("hidden");
   document.body.appendChild(template);
   const formDom = document.querySelector("#invoice-form");
@@ -5387,21 +5398,6 @@ async function renderInvoice2(invoiceId) {
     throw "a form must be defined with id of 'invoice-form'";
   const form = formManager.domAsForm(formDom);
   const target = formDom.querySelector(".line-items") || formDom;
-  if (invoiceId) {
-    const invoices2 = await invoices();
-    const invoice = invoices2.find((invoice2) => invoice2.id === invoiceId);
-    if (!invoice)
-      throw "invoice not found";
-    form.set("id", invoice.id);
-    form.set("labor", invoice.labor);
-    form.set("clientname", invoice.clientname);
-    form.set("billto", invoice.billto);
-    form.set("telephone", invoice.telephone || "");
-    form.set("email", invoice.email || "");
-    form.set("comments", invoice.comments || "");
-    const items = invoice.items.map((item) => createItemPanel(form, item));
-    items.forEach((item) => target.appendChild(item));
-  }
   form.on("list-all-invoices", () => {
     window.location.href = "invoices.html";
   });
@@ -5415,7 +5411,10 @@ async function renderInvoice2(invoiceId) {
     if (await tryToSaveInvoice(form))
       form.trigger("list-all-invoices");
   });
-  form.on("remove-item", () => form.trigger("change"));
+  form.on("remove-last-item", () => {
+    itemsToRemove.forEach((item) => item.remove());
+    form.trigger("change");
+  });
   form.on("add-another-item", () => {
     if (!form.isValid())
       return;
@@ -5493,11 +5492,8 @@ function print(invoice) {
   window.document.title = invoice.clientname;
   window.print();
 }
-function focusFirstInput(itemPanel) {
-  const input = itemPanel.querySelector("input");
-  if (!input)
-    return;
-  input.focus();
+function getFirstInput(itemPanel) {
+  return itemPanel.querySelector("input");
 }
 export {
   identify,

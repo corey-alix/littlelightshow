@@ -1,4 +1,5 @@
 import { FormFactory, FormManager } from "./FormManager.js";
+import { moveChildren } from "./fun/dom.js";
 import { TAXRATE } from "./globals.js";
 import { inventoryManager } from "./InventoryManager.js";
 import {
@@ -6,14 +7,19 @@ import {
   invoices as getAllInvoices,
   Invoice,
   InvoiceItem,
+  invoices,
 } from "./services/invoices.js";
 
 export { identify } from "./identify.js";
-import { create as createInvoiceFormTemplate } from "./templates/invoice-form.js";
+import {
+  create as createInvoiceFormTemplate,
+  renderInvoiceItem,
+} from "./templates/invoice-form.js";
 import { create as createInvoicePrintTemplate } from "./templates/invoice-print.js";
 import { create as createInvoicesGridTemplate } from "./templates/invoices-grid.js";
 
 const formManager = new FormFactory();
+const itemsToRemove = [] as Array<HTMLElement>;
 
 function bind(
   form: HTMLElement,
@@ -101,19 +107,21 @@ function createItemPanel(form: FormManager, item?: InvoiceItem) {
 }
 
 function addAnotherItem(form: FormManager) {
-  const itemPanel = createItemPanel(form);
-  const target = form.formDom.querySelector(".line-items") || form.formDom;
-  target.appendChild(itemPanel);
-  const removeButton = form.createButton({
-    title: "Remove Item",
-    event: "remove-item",
+  const itemPanel = renderInvoiceItem({
+    quantity: 1,
+    item: "",
+    price: 0,
+    total: 0,
   });
-  focusFirstInput(itemPanel);
-  removeButton.addEventListener("click", () => {
-    itemPanel.remove();
-    form.trigger("change");
-  });
-  itemPanel.appendChild(removeButton);
+  const toFocus = getFirstInput(itemPanel);
+  const target: HTMLElement =
+    form.formDom.querySelector(".line-items") || form.formDom;
+  itemsToRemove.splice(0, itemsToRemove.length);
+  for (let i = 0; i < itemPanel.children.length; i++) {
+    itemsToRemove.push(itemPanel.children[i] as HTMLElement);
+  }
+  moveChildren(itemPanel, target);
+  toFocus?.focus();
 }
 
 export function init() {
@@ -136,8 +144,25 @@ export async function renderInvoices(target: HTMLElement) {
 }
 
 export async function renderInvoice(invoiceId?: string) {
-  document.querySelector("#invoice-form")?.remove();
-  const template = createInvoiceFormTemplate();
+  let invoice: Invoice | null;
+  if (invoiceId) {
+    const invoices = await getAllInvoices();
+    invoice = invoices.find((invoice) => invoice.id === invoiceId) || null;
+    if (!invoice) throw "invoice not found";
+  } else {
+    // invoice is empty
+    invoice = {
+      id: 1000 + invoices.length + 1 + "",
+      clientname: "<CLIENT NAME>",
+      billto: "<BILL TO>",
+      comments: "<COMMENTS>",
+      email: "<EMAIL>",
+      telephone: "<TEL>",
+      items: [],
+      labor: 0,
+    };
+  }
+  const template = createInvoiceFormTemplate(invoice);
   template.classList.add("hidden");
   document.body.appendChild(template);
 
@@ -146,23 +171,6 @@ export async function renderInvoice(invoiceId?: string) {
 
   const form = formManager.domAsForm(formDom);
   const target = formDom.querySelector(".line-items") || formDom;
-
-  if (invoiceId) {
-    const invoices = await getAllInvoices();
-    const invoice = invoices.find((invoice) => invoice.id === invoiceId);
-    if (!invoice) throw "invoice not found";
-
-    form.set("id", invoice.id);
-    form.set("labor", invoice.labor);
-    form.set("clientname", invoice.clientname);
-    form.set("billto", invoice.billto);
-    form.set("telephone", invoice.telephone || "");
-    form.set("email", invoice.email || "");
-    form.set("comments", invoice.comments || "");
-
-    const items = invoice.items.map((item) => createItemPanel(form, item));
-    items.forEach((item) => target.appendChild(item));
-  }
 
   form.on("list-all-invoices", () => {
     window.location.href = "invoices.html";
@@ -179,7 +187,11 @@ export async function renderInvoice(invoiceId?: string) {
     if (await tryToSaveInvoice(form)) form.trigger("list-all-invoices");
   });
 
-  form.on("remove-item", () => form.trigger("change"));
+  form.on("remove-last-item", () => {
+    itemsToRemove.forEach((item) => item.remove());
+    form.trigger("change");
+  });
+
   form.on("add-another-item", () => {
     if (!form.isValid()) return;
     addAnotherItem(form);
@@ -272,8 +284,6 @@ export function print(invoice: Invoice) {
   window.print();
 }
 
-function focusFirstInput(itemPanel: HTMLDivElement) {
-  const input = itemPanel.querySelector("input") as HTMLInputElement;
-  if (!input) return;
-  input.focus();
+function getFirstInput(itemPanel: HTMLDivElement) {
+  return itemPanel.querySelector("input") as HTMLInputElement;
 }

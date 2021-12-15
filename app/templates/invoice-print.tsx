@@ -1,4 +1,5 @@
 import { dom } from "../dom.js";
+import { moveChildren } from "../fun/dom.js";
 import { TAXRATE } from "../globals.js";
 import { Invoice, InvoiceItem } from "../services/invoices.js";
 
@@ -82,7 +83,4 @@ export function create(invoice: Invoice) {
     moveChildren(summary, report);
   }
   return report;
-}
-function moveChildren(items: HTMLDivElement, report: HTMLDivElement) {
-  while (items.firstChild) report.appendChild(items.firstChild);
 }
