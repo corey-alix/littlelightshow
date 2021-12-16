@@ -64,7 +64,6 @@ export async function invoices() {
   return invoices
     .filter((invoice) => invoice.data.items)
     .map((invoice) => invoice.data)
-    .sort((a, b) => a.date - b.date)
     .map((invoice) => {
       invoice.date = invoice.date || (invoice as any).create_date;
       invoice.labor = (invoice.labor || 0) - 0;
@@ -76,5 +75,7 @@ export async function invoices() {
         item.total = (item.total || 0) - 0;
       });
       return invoice;
-    });
+    })
+    .sort((a, b) => a.date - b.date)
+    .reverse();
 }

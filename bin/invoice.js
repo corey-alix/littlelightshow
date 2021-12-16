@@ -4940,7 +4940,7 @@ async function invoices() {
   invoices2.forEach((invoice) => {
     invoice.data.id = invoice.ref.value.id;
   });
-  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).sort((a, b) => a.date - b.date).map((invoice) => {
+  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
     invoice.date = invoice.date || invoice.create_date;
     invoice.labor = (invoice.labor || 0) - 0;
     invoice.additional = (invoice.additional || 0) - 0;
@@ -4951,7 +4951,7 @@ async function invoices() {
       item.total = (item.total || 0) - 0;
     });
     return invoice;
-  });
+  }).sort((a, b) => a.date - b.date).reverse();
 }
 
 // app/services/validateAccessToken.ts
