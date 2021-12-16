@@ -37,8 +37,7 @@ function asModel(form: HTMLFormElement) {
   return result;
 }
 
-function currentDay() {
-  const date = new Date();
+function currentDay(date = new Date()) {
   return date.toISOString().split("T")[0];
 }
 
@@ -91,83 +90,26 @@ function hookupHandlers(domNode: HTMLFormElement) {
     setCurrency(totalError, debitTotal - creditTotal);
   });
 
+  domNode.addEventListener("print-all", async () => {
+    const ledgers = await loadAllLedgers();
+    const report1 = printDetail(ledgers);
+    const report2 = printSummary(ledgers);
+    document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
+    document.body.appendChild(report1);
+    document.body.appendChild(<div class="vspacer-2"></div>);
+    document.body.appendChild(report2);
+  });
+
   domNode.addEventListener("print-detail", async () => {
     const ledgers = await loadAllLedgers();
-    const report: HTMLElement = (
-      <div class="grid-6">
-        <div class="col-1 date">Date</div>
-        <div class="col-2 text">Account</div>
-        <div class="col-3 currency">Debit</div>
-        <div class="col-4 currency">Credit</div>
-        <div class="col-5-2 text">Comment</div>
-        <div class="line col-1-6"></div>
-      </div>
-    );
-    const totals = [0, 0];
-    ledgers.forEach((ledger) => {
-      ledger.items.forEach((item) => {
-        const amount = item.amount;
-        const debit = amount >= 0 && amount;
-        const credit = amount < 0 && -amount;
-        totals[0] += debit || 0;
-        totals[1] += credit || 0;
-        const lineitem = (
-          <div>
-            <div class="col-1 date">
-              {new Date(item.date).toLocaleDateString()}
-            </div>
-            <div class="col-2 text">{item.account}</div>
-            <div class="col-3 currency">{debit && debit.toFixed(2)}</div>
-            <div class="col-4 currency">{credit && credit.toFixed(2)}</div>
-            <div class="col-5-2 text">{item.comment}</div>
-          </div>
-        );
-        moveChildren(lineitem, report);
-      });
-    });
-    moveChildren(
-      <div>
-        <div class="line col-1-6"></div>
-        <div class="col-3 currency">{totals[0].toFixed(2)}</div>
-        <div class="col-4 currency">{totals[1].toFixed(2)}</div>
-        <div class="col-6 currency">{(totals[0] - totals[1]).toFixed(2)}</div>
-      </div>,
-      report
-    );
+    const report: HTMLElement = printDetail(ledgers);
     document.body.innerHTML = "";
     document.body.appendChild(report);
   });
 
   domNode.addEventListener("print-summary", async () => {
     const ledgers = await loadAllLedgers();
-    const totals: Record<string, number> = {};
-    ledgers.forEach((l) => {
-      l.items.forEach((item) => {
-        console.log(item);
-        totals[item.account] = (totals[item.account] || 0) + item.amount;
-      });
-    });
-
-    let grandTotal = 0;
-    const reportItems = Object.keys(totals)
-      .sort()
-      .map((account) => {
-        const total = totals[account];
-        grandTotal += total;
-        return (
-          <div>
-            <div class="col-1-3">{account}</div>
-            <div class="currency col-4-3">{total.toFixed(2)}</div>
-          </div>
-        );
-      });
-    const report = (
-      <div class="grid-6 col-1-6">
-        <div class="col-1-5 line">Account</div>
-        <div class="currency col-6 line bold">{grandTotal.toFixed(2)}</div>
-      </div>
-    );
-    reportItems.forEach((item) => moveChildren(item, report));
+    const report = printSummary(ledgers);
     document.body.innerHTML = "";
     document.body.appendChild(report);
   });
@@ -229,6 +171,84 @@ function hookupHandlers(domNode: HTMLFormElement) {
   });
 }
 
+function printDetail(ledgers: (Ledger & { id: any })[]) {
+  const report: HTMLElement = (
+    <div class="grid-6">
+      <div class="col-1 date">Date</div>
+      <div class="col-2 text">Account</div>
+      <div class="col-3 currency">Debit</div>
+      <div class="col-4 currency">Credit</div>
+      <div class="col-5-2 text">Comment</div>
+      <div class="line col-1-6"></div>
+    </div>
+  );
+  const totals = [0, 0];
+  const items = ledgers
+    .map((l) => l.items)
+    .flat(1)
+    .sort((a, b) => a.date - b.date);
+
+  items.forEach((item) => {
+    const amount = item.amount;
+    const debit = amount >= 0 && amount;
+    const credit = amount < 0 && -amount;
+    totals[0] += debit || 0;
+    totals[1] += credit || 0;
+    const lineitem = (
+      <div>
+        <div class="col-1 date">{currentDay(new Date(item.date))}</div>
+        <div class="col-2 text">{item.account}</div>
+        <div class="col-3 currency">{debit && debit.toFixed(2)}</div>
+        <div class="col-4 currency">{credit && credit.toFixed(2)}</div>
+        <div class="col-5-2 text">{item.comment}</div>
+      </div>
+    );
+    moveChildren(lineitem, report);
+  });
+  moveChildren(
+    <div>
+      <div class="line col-1-6"></div>
+      <div class="col-3 currency">{totals[0].toFixed(2)}</div>
+      <div class="col-4 currency">{totals[1].toFixed(2)}</div>
+      <div class="col-6 currency">{(totals[0] - totals[1]).toFixed(2)}</div>
+    </div>,
+    report
+  );
+  return report;
+}
+
+function printSummary(ledgers: (Ledger & { id: any })[]) {
+  const totals: Record<string, number> = {};
+  ledgers.forEach((l) => {
+    l.items.forEach((item) => {
+      console.log(item);
+      totals[item.account] = (totals[item.account] || 0) + item.amount;
+    });
+  });
+
+  let grandTotal = 0;
+  const reportItems = Object.keys(totals)
+    .sort()
+    .map((account) => {
+      const total = totals[account];
+      grandTotal += total;
+      return (
+        <div>
+          <div class="col-1-3">{account}</div>
+          <div class="currency col-4-3">{total.toFixed(2)}</div>
+        </div>
+      );
+    });
+  const report = (
+    <div class="grid-6 col-1-6">
+      <div class="col-1-5 line">Account</div>
+      <div class="currency col-6 line bold">{grandTotal.toFixed(2)}</div>
+    </div>
+  );
+  reportItems.forEach((item) => moveChildren(item, report));
+  return report;
+}
+
 export function createGeneralLedgerGrid() {
   const ledger: HTMLFormElement = (
     <form class="grid-6">
@@ -284,7 +304,7 @@ export function createGeneralLedgerGrid() {
       <button class="button col-1" type="button" data-event="print-summary">
         Print Summary
       </button>
-      <button class="button col-1" type="button" data-event="print-detail">
+      <button class="button col-1" type="button" data-event="print-all">
         Print Details
       </button>
     </form>

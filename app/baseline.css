@@ -311,6 +311,8 @@ body.dark button {
     transition: none !important;
     text-shadow: none;
     font-family: "Times New Roman", Times, serif;
+    background: white;
+    color: black;
   }
 
   #invoice-form {
