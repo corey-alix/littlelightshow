@@ -284,7 +284,8 @@ body.dark .line {
   border-bottom: 1px solid white;
 }
 
-body.dark input {
+body.dark input,
+body.dark textarea {
   background: black;
   color: silver;
 }
@@ -308,9 +309,9 @@ body.dark button {
 
 @media print {
   * {
+    font-size: 1rem;
     transition: none !important;
     text-shadow: none;
-    font-family: "Times New Roman", Times, serif;
     background: white;
     color: black;
   }

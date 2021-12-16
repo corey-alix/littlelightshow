@@ -10,15 +10,16 @@ import {
 function asModel(form: HTMLFormElement) {
   const result: Ledger = { items: [] };
   const data = new FormData(form);
+  const batchDate = data.get("date") as string;
+  result.description = (data.get("description") as string) || "";
+
   let currentItem: LedgerItem;
   for (let [key, value] of data.entries()) {
     switch (key) {
-      case "date":
+      case "account":
         currentItem = {} as any;
         result.items.push(currentItem);
-        currentItem.date = new Date(value + "").valueOf();
-        break;
-      case "account":
+        currentItem.date = new Date(batchDate).valueOf();
         currentItem!.account = value as string;
         break;
       case "debit":
@@ -128,14 +129,6 @@ function hookupHandlers(domNode: HTMLFormElement) {
       <div>
         <input
           class="col-1"
-          name="date"
-          required
-          type="date"
-          placeholder="date"
-          value={currentDay()}
-        />
-        <input
-          class="col-2"
           name="account"
           required
           type="text"
@@ -144,21 +137,21 @@ function hookupHandlers(domNode: HTMLFormElement) {
         />
         <input
           name="debit"
-          class="currency col-3"
+          class="currency col-2"
           type="number"
           step="0.01"
           placeholder="debit"
         />
         <input
           name="credit"
-          class="currency col-4"
+          class="currency col-3"
           type="number"
           step="0.01"
           placeholder="credit"
         />
         <input
           name="comment"
-          class="text col-5-2"
+          class="text col-4-3"
           type="text"
           placeholder="comment"
         />
@@ -260,10 +253,25 @@ export function createGeneralLedgerGrid() {
         <option>INVENTORY</option>
       </datalist>
       <div class="date col-1">Date</div>
-      <div class="text col-2">Account</div>
-      <div class="currency col-3">Debit (+)</div>
-      <div class="currency col-4">Credit (-)</div>
-      <div class="text col-5-2">Comment</div>
+      <label class="col-2-5">Batch Summary</label>
+      <input
+        class="col-1"
+        name="date"
+        required
+        type="date"
+        placeholder="date"
+        value={currentDay()}
+      />
+      <textarea
+        name="description"
+        class="col-2-5"
+        placeholder="Describe the context for these entries"
+      ></textarea>
+      <div class="vspacer col-1-6"></div>
+      <div class="text col-1">Account</div>
+      <div class="currency col-2">Debit (+)</div>
+      <div class="currency col-3">Credit (-)</div>
+      <div class="text col-4-3">Comment</div>
       <div class="line col-1-6"></div>
       <div class="vspacer"></div>
       <div id="end-of-line-items" class="vspacer col-1-6"></div>
@@ -273,26 +281,32 @@ export function createGeneralLedgerGrid() {
       </button>
 
       <div class="vspacer-1 col-1-6"></div>
-      <div class="currency col-3">Total Debit</div>
-      <div class="currency col-4">Total Credit</div>
-      <div class="currency col-6">Imbalance</div>
       <button class="button col-1" type="button" data-event="submit">
         Save
       </button>
+      <div class="currency col-5">Total Debit</div>
       <input
         readonly
         type="number"
-        class="currency col-3"
+        class="currency col-6"
         name="total_debit"
         value="0.00"
       />
+      <button class="button col-1" type="button" data-event="print-summary">
+        Print Summary
+      </button>
+      <div class="currency col-5">Total Credit</div>
       <input
         type="number"
         readonly
-        class="currency col-4"
+        class="currency col-6"
         name="total_credit"
         value="0.00"
       />
+      <button class="button col-1" type="button" data-event="print-all">
+        Print Details
+      </button>
+      <div class="currency col-5">Imbalance</div>
       <input
         readonly
         type="number"
@@ -300,13 +314,6 @@ export function createGeneralLedgerGrid() {
         name="total_error"
         value="0.00"
       />
-      <div class="vspacer-2"></div>
-      <button class="button col-1" type="button" data-event="print-summary">
-        Print Summary
-      </button>
-      <button class="button col-1" type="button" data-event="print-all">
-        Print Details
-      </button>
     </form>
   );
   hookupTriggers(ledger);

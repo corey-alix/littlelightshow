@@ -11,6 +11,7 @@ export interface LedgerItem {
 }
 
 export interface Ledger {
+  description?: string;
   items: Array<LedgerItem>;
 }
 
