@@ -4771,6 +4771,10 @@ function dom(tag, args, ...children) {
 }
 
 // app/fun/dom.ts
+function moveChildren(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
+}
 function moveChildrenBefore(items, report) {
   while (items.firstChild)
     report.before(items.firstChild);
@@ -4823,6 +4827,17 @@ async function save(ledger) {
   const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(LEDGER_TABLE), {
     data: { ...ledger, user: CURRENT_USER, create_date: Date.now() }
   }));
+}
+async function ledgers() {
+  if (!CURRENT_USER)
+    throw "user must be signed in";
+  const client = createClient();
+  const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(LEDGER_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
+  const ledgers2 = result.data;
+  ledgers2.forEach((ledger) => {
+    ledger.data.id = ledger.ref.value.id;
+  });
+  return ledgers2.filter((ledger) => ledger.data.items && ledger.data.items[0] && ledger.data.items[0].account).map((ledger) => ledger.data);
 }
 
 // app/gl/templates/glgrid.tsx
@@ -4895,6 +4910,36 @@ function hookupHandlers(domNode) {
     setCurrency(totalDebits, debitTotal);
     setCurrency(totalCredits, creditTotal);
     setCurrency(totalError, debitTotal - creditTotal);
+  });
+  domNode.addEventListener("print", async () => {
+    const ledgers2 = await ledgers();
+    const totals = {};
+    ledgers2.forEach((l) => {
+      l.items.forEach((item) => {
+        console.log(item);
+        totals[item.account] = (totals[item.account] || 0) + item.amount;
+      });
+    });
+    let grandTotal = 0;
+    const reportItems = Object.keys(totals).map((account) => {
+      const total = totals[account];
+      grandTotal += total;
+      return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+        class: "col-1-3"
+      }, account), /* @__PURE__ */ dom("div", {
+        class: "currency col-4-3"
+      }, total.toFixed(2)));
+    });
+    const report = /* @__PURE__ */ dom("div", {
+      class: "grid-6 col-1-6"
+    }, /* @__PURE__ */ dom("div", {
+      class: "col-1-5 line"
+    }, "Account"), /* @__PURE__ */ dom("div", {
+      class: "currency col-6 line bold"
+    }, grandTotal.toFixed(2)));
+    reportItems.forEach((item) => moveChildren(item, report));
+    document.body.innerHTML = "";
+    document.body.appendChild(report);
   });
   domNode.addEventListener("submit", async () => {
     if (!domNode.reportValidity())
@@ -4981,7 +5026,11 @@ function createGeneralLedgerGrid() {
     class: "button col-1",
     type: "button",
     "data-event": "submit"
-  }, "Save"), /* @__PURE__ */ dom("input", {
+  }, "Save"), /* @__PURE__ */ dom("button", {
+    class: "button col-2",
+    type: "button",
+    "data-event": "print"
+  }, "Summarize"), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
     class: "currency col-3",

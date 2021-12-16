@@ -1,6 +1,11 @@
 import { dom } from "../../dom.js";
 import { moveChildren, moveChildrenBefore } from "../../fun/dom.js";
-import { Ledger, LedgerItem, save as saveLedger } from "../../services/gl.js";
+import {
+  Ledger,
+  LedgerItem,
+  save as saveLedger,
+  ledgers as loadAllLedgers,
+} from "../../services/gl.js";
 
 function asModel(form: HTMLFormElement) {
   const result: Ledger = { items: [] };
@@ -84,6 +89,38 @@ function hookupHandlers(domNode: HTMLFormElement) {
     setCurrency(totalDebits, debitTotal);
     setCurrency(totalCredits, creditTotal);
     setCurrency(totalError, debitTotal - creditTotal);
+  });
+
+  domNode.addEventListener("print", async () => {
+    const ledgers = await loadAllLedgers();
+    const totals: Record<string, number> = {};
+    ledgers.forEach((l) => {
+      l.items.forEach((item) => {
+        console.log(item);
+        totals[item.account] = (totals[item.account] || 0) + item.amount;
+      });
+    });
+
+    let grandTotal = 0;
+    const reportItems = Object.keys(totals).map((account) => {
+      const total = totals[account];
+      grandTotal += total;
+      return (
+        <div>
+          <div class="col-1-3">{account}</div>
+          <div class="currency col-4-3">{total.toFixed(2)}</div>
+        </div>
+      );
+    });
+    const report = (
+      <div class="grid-6 col-1-6">
+        <div class="col-1-5 line">Account</div>
+        <div class="currency col-6 line bold">{grandTotal.toFixed(2)}</div>
+      </div>
+    );
+    reportItems.forEach((item) => moveChildren(item, report));
+    document.body.innerHTML = "";
+    document.body.appendChild(report);
   });
 
   domNode.addEventListener("submit", async () => {
@@ -172,6 +209,9 @@ export function createGeneralLedgerGrid() {
       <div class="currency col-6">Imbalance</div>
       <button class="button col-1" type="button" data-event="submit">
         Save
+      </button>
+      <button class="button col-2" type="button" data-event="print">
+        Summarize
       </button>
       <input
         readonly
