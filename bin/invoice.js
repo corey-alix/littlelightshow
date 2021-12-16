@@ -4937,11 +4937,11 @@ async function invoices() {
   const client = createClient();
   const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(INVOICE_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
   const invoices2 = result.data;
-  invoices2.reverse();
   invoices2.forEach((invoice) => {
     invoice.data.id = invoice.ref.value.id;
   });
-  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
+  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).sort((a, b) => a.date - b.date).map((invoice) => {
+    invoice.date = invoice.date || invoice.create_date;
     invoice.labor = (invoice.labor || 0) - 0;
     invoice.additional = (invoice.additional || 0) - 0;
     invoice.items.forEach((item) => {
@@ -5054,6 +5054,9 @@ function dom(tag, args, ...children) {
 }
 
 // app/templates/invoice-form.tsx
+function currentDay(date = new Date()) {
+  return date.toISOString().split("T")[0];
+}
 function create(invoice) {
   console.log({ invoice });
   const form = /* @__PURE__ */ dom("form", {
@@ -5070,14 +5073,23 @@ function create(invoice) {
   }), /* @__PURE__ */ dom("div", {
     class: "section-title col-1-6"
   }, "Client"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
-  }, "Client Name"), /* @__PURE__ */ dom("input", {
-    class: "col-1-6",
+    class: "form-label col-1-5"
+  }, "Client Name"), /* @__PURE__ */ dom("label", {
+    class: "form-label col-6"
+  }, "Date"), /* @__PURE__ */ dom("input", {
+    class: "col-1-5",
     type: "text",
     placeholder: "clientname",
     name: "clientname",
     required: true,
     value: invoice.clientname
+  }), /* @__PURE__ */ dom("input", {
+    class: "col-6",
+    type: "date",
+    placeholder: "Date",
+    name: "date",
+    required: true,
+    value: currentDay(new Date(invoice.date || Date.now()))
   }), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-3"
   }, "Telephone"), /* @__PURE__ */ dom("label", {
@@ -5445,6 +5457,7 @@ async function renderInvoice2(invoiceId) {
   } else {
     invoice = {
       id: 1e3 + invoices.length + 1 + "",
+      date: Date.now(),
       clientname: "",
       billto: "",
       comments: "",
@@ -5517,6 +5530,7 @@ function asModel(formDom) {
   const requestModel = {
     id: data.get("id"),
     clientname: data.get("clientname"),
+    date: new Date(data.get("date")).valueOf(),
     billto: data.get("billto"),
     telephone: data.get("telephone"),
     email: data.get("email"),

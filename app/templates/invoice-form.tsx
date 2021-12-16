@@ -5,6 +5,10 @@ import { TAXRATE } from "../globals.js";
 import { inventoryManager } from "../InventoryManager.js";
 import { Invoice, InvoiceItem } from "../services/invoices.js";
 
+function currentDay(date = new Date()) {
+  return date.toISOString().split("T")[0];
+}
+
 export function create(invoice: Invoice): HTMLFormElement {
   console.log({ invoice });
   const form: HTMLFormElement = (
@@ -18,14 +22,23 @@ export function create(invoice: Invoice): HTMLFormElement {
         value={invoice.id}
       />
       <div class="section-title col-1-6">Client</div>
-      <label class="form-label col-1-6">Client Name</label>
+      <label class="form-label col-1-5">Client Name</label>
+      <label class="form-label col-6">Date</label>
       <input
-        class="col-1-6"
+        class="col-1-5"
         type="text"
         placeholder="clientname"
         name="clientname"
         required
         value={invoice.clientname}
+      />
+      <input
+        class="col-6"
+        type="date"
+        placeholder="Date"
+        name="date"
+        required
+        value={currentDay(new Date(invoice.date || Date.now()))}
       />
       <label class="form-label col-1-3">Telephone</label>
       <label class="form-label col-4-3">Email</label>

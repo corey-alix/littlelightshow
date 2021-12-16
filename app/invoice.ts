@@ -86,6 +86,7 @@ export async function renderInvoice(invoiceId?: string) {
     // invoice is empty
     invoice = {
       id: 1000 + invoices.length + 1 + "",
+      date: Date.now(),
       clientname: "",
       billto: "",
       comments: "",
@@ -168,6 +169,7 @@ function asModel(formDom: HTMLFormElement) {
   const requestModel: Invoice = {
     id: data.get("id") as string,
     clientname: data.get("clientname") as string,
+    date: new Date(data.get("date") as string).valueOf(),
     billto: data.get("billto") as string,
     telephone: data.get("telephone") as string,
     email: data.get("email") as string,

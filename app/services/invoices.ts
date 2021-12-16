@@ -11,10 +11,11 @@ export interface InvoiceItem {
 }
 
 export interface Invoice {
+  clientname: string;
+  date: number;
   labor: number;
   additional: number;
   id: string;
-  clientname: string;
   billto: string;
   telephone?: string;
   email?: string;
@@ -56,7 +57,6 @@ export async function invoices() {
   );
 
   const invoices = result.data as Array<{ data: Invoice }>;
-  invoices.reverse();
   // copy ref into invoice id
   invoices.forEach((invoice: any) => {
     invoice.data.id = invoice.ref.value.id;
@@ -64,7 +64,9 @@ export async function invoices() {
   return invoices
     .filter((invoice) => invoice.data.items)
     .map((invoice) => invoice.data)
+    .sort((a, b) => a.date - b.date)
     .map((invoice) => {
+      invoice.date = invoice.date || (invoice as any).create_date;
       invoice.labor = (invoice.labor || 0) - 0;
       invoice.additional = (invoice.additional || 0) - 0;
       invoice.items.forEach((item) => {
