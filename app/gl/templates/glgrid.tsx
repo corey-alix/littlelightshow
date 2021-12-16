@@ -284,33 +284,33 @@ export function createGeneralLedgerGrid() {
       <button class="button col-1" type="button" data-event="submit">
         Save
       </button>
-      <div class="currency col-5">Total Debit</div>
+      <div class="currency col-2-2">Total Debit</div>
       <input
         readonly
         type="number"
-        class="currency col-6"
+        class="currency col-4-3"
         name="total_debit"
         value="0.00"
       />
       <button class="button col-1" type="button" data-event="print-summary">
         Print Summary
       </button>
-      <div class="currency col-5">Total Credit</div>
+      <div class="currency col-2-2">Total Credit</div>
       <input
         type="number"
         readonly
-        class="currency col-6"
+        class="currency col-4-3"
         name="total_credit"
         value="0.00"
       />
       <button class="button col-1" type="button" data-event="print-all">
         Print Details
       </button>
-      <div class="currency col-5">Imbalance</div>
+      <div class="currency col-2-2">Imbalance</div>
       <input
         readonly
         type="number"
-        class="currency col-6"
+        class="currency col-4-3"
         name="total_error"
         value="0.00"
       />

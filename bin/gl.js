@@ -5097,11 +5097,11 @@ function createGeneralLedgerGrid() {
     type: "button",
     "data-event": "submit"
   }, "Save"), /* @__PURE__ */ dom("div", {
-    class: "currency col-5"
+    class: "currency col-2-2"
   }, "Total Debit"), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
-    class: "currency col-6",
+    class: "currency col-4-3",
     name: "total_debit",
     value: "0.00"
   }), /* @__PURE__ */ dom("button", {
@@ -5109,11 +5109,11 @@ function createGeneralLedgerGrid() {
     type: "button",
     "data-event": "print-summary"
   }, "Print Summary"), /* @__PURE__ */ dom("div", {
-    class: "currency col-5"
+    class: "currency col-2-2"
   }, "Total Credit"), /* @__PURE__ */ dom("input", {
     type: "number",
     readonly: true,
-    class: "currency col-6",
+    class: "currency col-4-3",
     name: "total_credit",
     value: "0.00"
   }), /* @__PURE__ */ dom("button", {
@@ -5121,11 +5121,11 @@ function createGeneralLedgerGrid() {
     type: "button",
     "data-event": "print-all"
   }, "Print Details"), /* @__PURE__ */ dom("div", {
-    class: "currency col-5"
+    class: "currency col-2-2"
   }, "Imbalance"), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
-    class: "currency col-6",
+    class: "currency col-4-3",
     name: "total_error",
     value: "0.00"
   }));
