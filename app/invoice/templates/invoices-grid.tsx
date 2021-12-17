@@ -1,7 +1,7 @@
-import { dom } from "../dom.js";
-import { moveChildren } from "../fun/dom.js";
-import { TAXRATE } from "../globals.js";
-import { Invoice } from "../services/invoices.js";
+import { dom } from "../../dom.js";
+import { moveChildren } from "../../fun/dom.js";
+import { TAXRATE } from "../../globals.js";
+import { Invoice } from "../../services/invoices.js";
 
 function totalInvoice(invoice: Invoice) {
   let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);

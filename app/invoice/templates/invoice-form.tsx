@@ -1,9 +1,9 @@
-import { dom } from "../dom.js";
-import { forceDatalist } from "../FormManager.js";
-import { moveChildren } from "../fun/dom.js";
-import { TAXRATE } from "../globals.js";
-import { inventoryManager } from "../InventoryManager.js";
-import { Invoice, InvoiceItem } from "../services/invoices.js";
+import { dom } from "../../dom.js";
+import { forceDatalist } from "../../FormManager.js";
+import { moveChildren } from "../../fun/dom.js";
+import { TAXRATE } from "../../globals.js";
+import { inventoryManager } from "../../InventoryManager.js";
+import { Invoice, InvoiceItem } from "../../services/invoices.js";
 
 function currentDay(date = new Date()) {
   return date.toISOString().split("T")[0];

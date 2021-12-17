@@ -5053,7 +5053,7 @@ function dom(tag, args, ...children) {
   }
 }
 
-// app/templates/invoice-form.tsx
+// app/invoice/templates/invoice-form.tsx
 function currentDay(date = new Date()) {
   return date.toISOString().split("T")[0];
 }
@@ -5268,7 +5268,7 @@ function setupComputeOnLineItem(event, form) {
   });
 }
 
-// app/templates/invoice-print.tsx
+// app/invoice/templates/invoice-print.tsx
 function invoiceItem(item) {
   console.log("invoiceItem", { item });
   return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
@@ -5363,7 +5363,7 @@ function create2(invoice) {
   return report;
 }
 
-// app/templates/invoices-grid.tsx
+// app/invoice/templates/invoices-grid.tsx
 function totalInvoice(invoice) {
   let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
   return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
@@ -5410,7 +5410,7 @@ function create3(invoices3) {
   return report;
 }
 
-// app/invoice.ts
+// app/invoice/invoice.ts
 var formManager = new FormFactory();
 var itemsToRemove = [];
 function addAnotherItem(form) {

@@ -1,7 +1,7 @@
-import { dom } from "../dom.js";
-import { moveChildren } from "../fun/dom.js";
-import { TAXRATE } from "../globals.js";
-import { Invoice, InvoiceItem } from "../services/invoices.js";
+import { dom } from "../../dom.js";
+import { moveChildren } from "../../fun/dom.js";
+import { TAXRATE } from "../../globals.js";
+import { Invoice, InvoiceItem } from "../../services/invoices.js";
 
 function escape(text: string) {
   return text.replaceAll("\n", "<br/>");
