@@ -1,5 +1,4 @@
 * {
-  font-size: 1.2rem;
   font-family: -webkit-pictograph;
 }
 
@@ -23,16 +22,22 @@ body.holiday {
 }
 
 .banner {
-  background-image: url(../assets/bannerbush.PNG);
+  background-image: url(../assets/bannerbush.png);
   background-size: cover;
   color: rgba(253, 244, 220, 0.9);
   border-radius: 0.5em;
   font-size: 16pt;
   font-weight: bolder;
+  padding: 1em;
 }
 
 section.category {
   padding: 0;
+}
+
+body.dark div.section-title {
+  color: black;
+  background: white;
 }
 
 div.section-title {
@@ -43,6 +48,10 @@ div.section-title {
   background: black;
   text-align: center;
   vertical-align: middle;
+}
+
+.margin {
+  margin: 0.5em;
 }
 
 .netlify-identity-item,
@@ -62,6 +71,13 @@ div.section-title {
   background: rgb(214, 0, 28);
 }
 
+body.dark .button {
+  border: 1px solid white;
+  color: white;
+  background: black;
+  text-decoration: none;
+}
+
 .holiday hr {
   border: solid;
   border-width: 1px;
@@ -76,7 +92,10 @@ div.section-title {
   width: 100%;
   min-height: 2rem;
   border: none;
-  border-bottom: 1px solid silver;
+}
+
+.grid-6 input:focus {
+  border: 1px solid;
 }
 
 .form-label > input {
@@ -162,6 +181,10 @@ div.section-title {
 .grid-container {
   display: grid;
   grid-template-rows: auto auto auto auto;
+}
+
+a {
+  color: white;
 }
 
 form textarea {
@@ -304,6 +327,11 @@ body.dark button {
   margin-bottom: 0.5em;
 }
 
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 459px) {
 }
 
@@ -316,7 +344,20 @@ body.dark button {
     color: black;
   }
 
+  ::placeholder {
+    color: transparent;
+  }
+
   #invoice-form {
     display: none;
   }
+}
+
+.wavy {
+  text-decoration: underline wavy;
+  text-decoration-color: rgb(214, 0, 28);
+}
+
+.date {
+  white-space: nowrap;
 }

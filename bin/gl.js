@@ -4847,11 +4847,29 @@ async function ledgers() {
 }
 
 // app/gl/templates/glgrid.tsx
+function asCurrency(value) {
+  return value.toFixed(2);
+}
+function isZero(value) {
+  if (value === "0.00")
+    return true;
+  if (value === "-0.00")
+    return true;
+  return false;
+}
+function noZero(value) {
+  return isZero(value) ? "" : value;
+}
 function asModel(form) {
-  const result = { id: "", items: [] };
+  const result = {
+    id: "",
+    items: [],
+    date: new Date().valueOf()
+  };
   const data = new FormData(form);
   result.id = data.get("id") || "";
   const batchDate = data.get("date");
+  result.date = new Date(batchDate).valueOf();
   result.description = data.get("description") || "";
   let currentItem;
   for (let [key, value] of data.entries()) {
@@ -4859,7 +4877,6 @@ function asModel(form) {
       case "account":
         currentItem = {};
         result.items.push(currentItem);
-        currentItem.date = new Date(batchDate).valueOf();
         currentItem.account = value;
         break;
       case "debit":
@@ -4875,7 +4892,7 @@ function asModel(form) {
   }
   return result;
 }
-function currentDay(date = new Date()) {
+function asDateString(date = new Date()) {
   return date.toISOString().split("T")[0];
 }
 function setCurrency(input, value) {
@@ -4903,6 +4920,7 @@ function hookupTriggers(domNode) {
 }
 function hookupHandlers(domNode) {
   const lineItems = domNode.querySelector("#end-of-line-items");
+  const summaryArea = domNode.querySelector("#summary-area");
   const [totalCredits, totalDebits, totalError] = [
     "total_credit",
     "total_debit",
@@ -4916,6 +4934,10 @@ function hookupHandlers(domNode) {
     setCurrency(totalDebits, debitTotal);
     setCurrency(totalCredits, creditTotal);
     setCurrency(totalError, debitTotal - creditTotal);
+    const ledger = asModel(domNode);
+    const summaryReport = printSummary([ledger]);
+    summaryArea.innerText = "";
+    summaryArea.appendChild(summaryReport);
   });
   domNode.addEventListener("print-all", async () => {
     const ledgers2 = await ledgers();
@@ -4960,7 +4982,7 @@ function hookupHandlers(domNode) {
 }
 function createRow() {
   return /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("input", {
-    class: "col-1",
+    class: "col-1-2",
     name: "account",
     required: true,
     type: "text",
@@ -4968,61 +4990,62 @@ function createRow() {
     list: "listOfAccounts"
   }), /* @__PURE__ */ dom("input", {
     name: "debit",
-    class: "currency col-2",
+    class: "currency col-3-2",
     type: "number",
     step: "0.01",
     placeholder: "debit"
   }), /* @__PURE__ */ dom("input", {
     name: "credit",
-    class: "currency col-3",
+    class: "currency col-5-2",
     type: "number",
     step: "0.01",
     placeholder: "credit"
   }), /* @__PURE__ */ dom("input", {
     name: "comment",
-    class: "text col-4-3",
+    class: "text col-1-6",
     type: "text",
     placeholder: "comment"
   }));
 }
 function printDetail(ledgers2) {
-  const items = ledgers2.map((l) => l.items.map((i) => ({ ref: l.id, ...i }))).flat(1).sort((a, b) => a.date - b.date);
   const report = /* @__PURE__ */ dom("div", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
-    class: "col-1 date"
-  }, "Date"), /* @__PURE__ */ dom("div", {
-    class: "col-2 text"
+    class: "col-1-4 text"
   }, "Account"), /* @__PURE__ */ dom("div", {
-    class: "col-3 currency"
+    class: "col-5 currency"
   }, "Debit"), /* @__PURE__ */ dom("div", {
-    class: "col-4 currency"
+    class: "col-6 currency"
   }, "Credit"), /* @__PURE__ */ dom("div", {
-    class: "col-5-2 text"
-  }, "Comment"), /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }));
   const totals = [0, 0];
-  items.forEach((item) => {
-    const amount = item.amount;
-    const debit = amount >= 0 && amount;
-    const credit = amount < 0 && -amount;
-    totals[0] += debit || 0;
-    totals[1] += credit || 0;
-    const lineitem = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-      class: "col-1 date"
-    }, currentDay(new Date(item.date))), /* @__PURE__ */ dom("div", {
-      class: "col-2 text"
-    }, item.account), /* @__PURE__ */ dom("div", {
-      class: "col-3 currency"
-    }, debit && debit.toFixed(2)), /* @__PURE__ */ dom("div", {
-      class: "col-4 currency"
-    }, credit && credit.toFixed(2)), /* @__PURE__ */ dom("div", {
-      class: "col-5-2 text"
-    }, /* @__PURE__ */ dom("a", {
-      href: `/app/gl/index.html?id=${item.ref}`
-    }, item.comment || "no comment")));
-    moveChildren(lineitem, report);
+  let priorDate = "";
+  ledgers2.forEach((ledger) => {
+    ledger.items.forEach((item) => {
+      const amount = item.amount;
+      const debit = amount >= 0 && amount;
+      const credit = amount < 0 && -amount;
+      totals[0] += debit || 0;
+      totals[1] += credit || 0;
+      let currentDate = asDateString(new Date(ledger.date || item["date"]));
+      const lineitem = /* @__PURE__ */ dom("div", null, currentDate != priorDate && /* @__PURE__ */ dom("div", {
+        class: "col-1-6 section-title"
+      }, `${priorDate = currentDate}`), /* @__PURE__ */ dom("div", {
+        class: "col-1-4 text"
+      }, item.account), /* @__PURE__ */ dom("div", {
+        class: "col-5 currency"
+      }, debit && debit.toFixed(2)), /* @__PURE__ */ dom("div", {
+        class: "col-6 currency"
+      }, credit && credit.toFixed(2)), /* @__PURE__ */ dom("div", {
+        class: "col-1-6 text"
+      }, /* @__PURE__ */ dom("a", {
+        href: `/app/gl/index.html?id=${ledger.id}`
+      }, item.comment || "no comment")), /* @__PURE__ */ dom("div", {
+        class: "vspacer"
+      }));
+      moveChildren(lineitem, report);
+    });
   });
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
@@ -5039,70 +5062,86 @@ function printSummary(ledgers2) {
   const totals = {};
   ledgers2.forEach((l) => {
     l.items.forEach((item) => {
-      console.log(item);
-      totals[item.account] = (totals[item.account] || 0) + item.amount;
+      totals[item.account] = totals[item.account] || { debit: 0, credit: 0 };
+      if (item.amount < 0) {
+        totals[item.account].credit -= item.amount;
+      } else {
+        totals[item.account].debit += item.amount;
+      }
     });
   });
   let grandTotal = 0;
   const reportItems = Object.keys(totals).sort().map((account) => {
     const total = totals[account];
-    grandTotal += total;
+    grandTotal += total.debit - total.credit;
     return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-      class: "col-1-3"
+      class: "col-1-2"
     }, account), /* @__PURE__ */ dom("div", {
-      class: "currency col-4-3"
-    }, total.toFixed(2)));
+      class: "currency col-3-2"
+    }, noZero(total.debit.toFixed(2))), /* @__PURE__ */ dom("div", {
+      class: "currency col-5-2"
+    }, noZero(total.credit.toFixed(2))));
   });
   const report = /* @__PURE__ */ dom("div", {
     class: "grid-6 col-1-6"
   }, /* @__PURE__ */ dom("div", {
-    class: "col-1-5 line"
+    class: "col-1-2 line"
   }, "Account"), /* @__PURE__ */ dom("div", {
-    class: "currency col-6 line bold"
-  }, grandTotal.toFixed(2)));
+    class: "col-3-2 line currency"
+  }, "Debit"), /* @__PURE__ */ dom("div", {
+    class: "col-5-2 line currency"
+  }, "Credit"));
   reportItems.forEach((item) => moveChildren(item, report));
+  moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "col-1-6 line"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-6 vspacer-2"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-4"
+  }, "Imbalance"), /* @__PURE__ */ dom("div", {
+    class: "currency col-6 bold"
+  }, noZero(grandTotal.toFixed(2)))), report);
   return report;
 }
 function createGeneralLedgerGrid(ledgerModel) {
   const ledger = /* @__PURE__ */ dom("form", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("input", {
+    hidden: true,
     name: "id",
     value: ledgerModel?.id || ""
   }), /* @__PURE__ */ dom("datalist", {
     id: "listOfAccounts"
   }, /* @__PURE__ */ dom("option", null, "AP"), /* @__PURE__ */ dom("option", null, "AR"), /* @__PURE__ */ dom("option", null, "CASH"), /* @__PURE__ */ dom("option", null, "MOM/DAD"), /* @__PURE__ */ dom("option", null, "INVENTORY")), /* @__PURE__ */ dom("div", {
     class: "date col-1"
-  }, "Date"), /* @__PURE__ */ dom("label", {
-    class: "col-2-5"
-  }, "Batch Summary"), /* @__PURE__ */ dom("input", {
-    class: "col-1",
+  }, "Date"), /* @__PURE__ */ dom("input", {
+    class: "col-2-5",
     name: "date",
     required: true,
     type: "date",
     placeholder: "date",
-    value: currentDay()
-  }), /* @__PURE__ */ dom("textarea", {
+    value: ledgerModel?.date || asDateString()
+  }), /* @__PURE__ */ dom("label", {
+    class: "col-1"
+  }, "Batch Summary"), /* @__PURE__ */ dom("textarea", {
     name: "description",
-    class: "col-2-5",
+    class: "col-2-5 comments",
     placeholder: "Describe the context for these entries"
   }), /* @__PURE__ */ dom("div", {
     class: "vspacer col-1-6"
   }), /* @__PURE__ */ dom("div", {
-    class: "text col-1"
+    class: "text col-1-2"
   }, "Account"), /* @__PURE__ */ dom("div", {
-    class: "currency col-2"
+    class: "currency col-3-2"
   }, "Debit (+)"), /* @__PURE__ */ dom("div", {
-    class: "currency col-3"
+    class: "currency col-5-2"
   }, "Credit (-)"), /* @__PURE__ */ dom("div", {
-    class: "text col-4-3"
-  }, "Comment"), /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }), /* @__PURE__ */ dom("div", {
     class: "vspacer"
   }), /* @__PURE__ */ dom("div", {
     id: "end-of-line-items",
-    class: "vspacer col-1-6"
+    class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("button", {
     class: "button col-1",
     type: "button",
@@ -5145,17 +5184,27 @@ function createGeneralLedgerGrid(ledgerModel) {
     class: "currency col-4-3",
     name: "total_error",
     value: "0.00"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-6"
+  }), /* @__PURE__ */ dom("div", {
+    class: "section-title col-1-6"
+  }, "Summary"), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-6"
+  }), /* @__PURE__ */ dom("div", {
+    id: "summary-area",
+    class: "vspacer-2 col-1-6"
   }));
   if (ledgerModel) {
     const lineItems = ledger.querySelector("#end-of-line-items");
+    ledger["date"].value = asDateString(new Date(ledgerModel.date || ledgerModel.items[0]["date"]));
     ledger["description"].value = ledgerModel.description;
     ledgerModel.items.forEach((item) => {
       const row = createRow();
       row["account"].value = item.account;
       if (item.amount < 0) {
-        row["credit"].value = -item.amount;
+        row["credit"].value = asCurrency(-item.amount);
       } else {
-        row["debit"].value = item.amount;
+        row["debit"].value = asCurrency(item.amount);
       }
       row["comment"].value = item.comment;
       moveChildrenBefore(row, lineItems);
@@ -5165,6 +5214,7 @@ function createGeneralLedgerGrid(ledgerModel) {
   }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
+  ledger.dispatchEvent(new Event("change"));
   return ledger;
 }
 

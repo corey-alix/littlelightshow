@@ -5,12 +5,12 @@ const LEDGER_TABLE = "Todos";
 
 export interface LedgerItem {
   comment: string;
-  date: number;
   account: string;
   amount: number;
 }
 
 export interface Ledger {
+  date: number;
   description?: string;
   items: Array<LedgerItem>;
 }

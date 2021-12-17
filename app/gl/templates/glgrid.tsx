@@ -7,11 +7,31 @@ import {
   ledgers as loadAllLedgers,
 } from "../../services/gl.js";
 
+function asCurrency(value: number) {
+  return value.toFixed(2);
+}
+
+function isZero(value: string) {
+  if (value === "0.00") return true;
+  if (value === "-0.00") return true;
+  return false;
+}
+
+function noZero(value: string) {
+  return isZero(value) ? "" : value;
+}
+
 function asModel(form: HTMLFormElement) {
-  const result: Ledger & { id: string } = { id: "", items: [] };
+  const result: Ledger & { id: string } = {
+    id: "",
+    items: [],
+    date: new Date().valueOf(),
+  };
   const data = new FormData(form);
   result.id = (data.get("id") as string) || "";
   const batchDate = data.get("date") as string;
+  result.date = new Date(batchDate).valueOf();
+
   result.description = (data.get("description") as string) || "";
 
   let currentItem: LedgerItem;
@@ -20,7 +40,6 @@ function asModel(form: HTMLFormElement) {
       case "account":
         currentItem = {} as any;
         result.items.push(currentItem);
-        currentItem.date = new Date(batchDate).valueOf();
         currentItem!.account = value as string;
         break;
       case "debit":
@@ -39,7 +58,7 @@ function asModel(form: HTMLFormElement) {
   return result;
 }
 
-function currentDay(date = new Date()) {
+function asDateString(date = new Date()) {
   return date.toISOString().split("T")[0];
 }
 
@@ -69,6 +88,7 @@ function hookupTriggers(domNode: HTMLElement) {
 
 function hookupHandlers(domNode: HTMLFormElement) {
   const lineItems = domNode.querySelector("#end-of-line-items") as HTMLElement;
+  const summaryArea = domNode.querySelector("#summary-area") as HTMLElement;
 
   const [totalCredits, totalDebits, totalError] = [
     "total_credit",
@@ -90,6 +110,10 @@ function hookupHandlers(domNode: HTMLFormElement) {
     setCurrency(totalDebits, debitTotal);
     setCurrency(totalCredits, creditTotal);
     setCurrency(totalError, debitTotal - creditTotal);
+    const ledger = asModel(domNode);
+    const summaryReport = printSummary([ledger]);
+    summaryArea.innerText = "";
+    summaryArea.appendChild(summaryReport);
   });
 
   domNode.addEventListener("print-all", async () => {
@@ -139,7 +163,7 @@ function createRow(): HTMLElement {
   return (
     <form>
       <input
-        class="col-1"
+        class="col-1-2"
         name="account"
         required
         type="text"
@@ -148,21 +172,21 @@ function createRow(): HTMLElement {
       />
       <input
         name="debit"
-        class="currency col-2"
+        class="currency col-3-2"
         type="number"
         step="0.01"
         placeholder="debit"
       />
       <input
         name="credit"
-        class="currency col-3"
+        class="currency col-5-2"
         type="number"
         step="0.01"
         placeholder="credit"
       />
       <input
         name="comment"
-        class="text col-4-3"
+        class="text col-1-6"
         type="text"
         placeholder="comment"
       />
@@ -171,43 +195,44 @@ function createRow(): HTMLElement {
 }
 
 function printDetail(ledgers: (Ledger & { id: any })[]) {
-  const items = ledgers
-    .map((l) => l.items.map((i) => ({ ref: l.id, ...i })))
-    .flat(1)
-    .sort((a, b) => a.date - b.date);
-
   const report: HTMLElement = (
     <div class="grid-6">
-      <div class="col-1 date">Date</div>
-      <div class="col-2 text">Account</div>
-      <div class="col-3 currency">Debit</div>
-      <div class="col-4 currency">Credit</div>
-      <div class="col-5-2 text">Comment</div>
+      <div class="col-1-4 text">Account</div>
+      <div class="col-5 currency">Debit</div>
+      <div class="col-6 currency">Credit</div>
       <div class="line col-1-6"></div>
     </div>
   );
   const totals = [0, 0];
+  let priorDate: string = "";
 
-  items.forEach((item) => {
-    const amount = item.amount;
-    const debit = amount >= 0 && amount;
-    const credit = amount < 0 && -amount;
-    totals[0] += debit || 0;
-    totals[1] += credit || 0;
-    const lineitem = (
-      <div>
-        <div class="col-1 date">{currentDay(new Date(item.date))}</div>
-        <div class="col-2 text">{item.account}</div>
-        <div class="col-3 currency">{debit && debit.toFixed(2)}</div>
-        <div class="col-4 currency">{credit && credit.toFixed(2)}</div>
-        <div class="col-5-2 text">
-          <a href={`/app/gl/index.html?id=${item.ref}`}>
-            {item.comment || "no comment"}
-          </a>
+  ledgers.forEach((ledger) => {
+    ledger.items.forEach((item) => {
+      const amount = item.amount;
+      const debit = amount >= 0 && amount;
+      const credit = amount < 0 && -amount;
+      totals[0] += debit || 0;
+      totals[1] += credit || 0;
+      let currentDate = asDateString(new Date(ledger.date || item["date"]));
+      const lineitem = (
+        <div>
+          {currentDate != priorDate && (
+            <div class="col-1-6 section-title">{`${(priorDate =
+              currentDate)}`}</div>
+          )}
+          <div class="col-1-4 text">{item.account}</div>
+          <div class="col-5 currency">{debit && debit.toFixed(2)}</div>
+          <div class="col-6 currency">{credit && credit.toFixed(2)}</div>
+          <div class="col-1-6 text">
+            <a href={`/app/gl/index.html?id=${ledger.id}`}>
+              {item.comment || "no comment"}
+            </a>
+          </div>
+          <div class="vspacer"></div>
         </div>
-      </div>
-    );
-    moveChildren(lineitem, report);
+      );
+      moveChildren(lineitem, report);
+    });
   });
   moveChildren(
     <div>
@@ -222,11 +247,15 @@ function printDetail(ledgers: (Ledger & { id: any })[]) {
 }
 
 function printSummary(ledgers: (Ledger & { id: any })[]) {
-  const totals: Record<string, number> = {};
+  const totals: Record<string, { debit: number; credit: number }> = {};
   ledgers.forEach((l) => {
     l.items.forEach((item) => {
-      console.log(item);
-      totals[item.account] = (totals[item.account] || 0) + item.amount;
+      totals[item.account] = totals[item.account] || { debit: 0, credit: 0 };
+      if (item.amount < 0) {
+        totals[item.account].credit -= item.amount;
+      } else {
+        totals[item.account].debit += item.amount;
+      }
     });
   });
 
@@ -235,28 +264,39 @@ function printSummary(ledgers: (Ledger & { id: any })[]) {
     .sort()
     .map((account) => {
       const total = totals[account];
-      grandTotal += total;
+      grandTotal += total.debit - total.credit;
       return (
         <div>
-          <div class="col-1-3">{account}</div>
-          <div class="currency col-4-3">{total.toFixed(2)}</div>
+          <div class="col-1-2">{account}</div>
+          <div class="currency col-3-2">{noZero(total.debit.toFixed(2))}</div>
+          <div class="currency col-5-2">{noZero(total.credit.toFixed(2))}</div>
         </div>
       );
     });
   const report = (
     <div class="grid-6 col-1-6">
-      <div class="col-1-5 line">Account</div>
-      <div class="currency col-6 line bold">{grandTotal.toFixed(2)}</div>
+      <div class="col-1-2 line">Account</div>
+      <div class="col-3-2 line currency">Debit</div>
+      <div class="col-5-2 line currency">Credit</div>
     </div>
   );
   reportItems.forEach((item) => moveChildren(item, report));
+  moveChildren(
+    <div>
+      <div class="col-1-6 line"></div>
+      <div class="col-1-6 vspacer-2"></div>
+      <div class="col-1-4">Imbalance</div>
+      <div class="currency col-6 bold">{noZero(grandTotal.toFixed(2))}</div>
+    </div>,
+    report
+  );
   return report;
 }
 
 export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
   const ledger: HTMLFormElement = (
     <form class="grid-6">
-      <input name="id" value={ledgerModel?.id || ""} />
+      <input hidden name="id" value={ledgerModel?.id || ""} />
       <datalist id="listOfAccounts">
         <option>AP</option>
         <option>AR</option>
@@ -265,28 +305,27 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
         <option>INVENTORY</option>
       </datalist>
       <div class="date col-1">Date</div>
-      <label class="col-2-5">Batch Summary</label>
       <input
-        class="col-1"
+        class="col-2-5"
         name="date"
         required
         type="date"
         placeholder="date"
-        value={currentDay()}
+        value={ledgerModel?.date || asDateString()}
       />
+      <label class="col-1">Batch Summary</label>
       <textarea
         name="description"
-        class="col-2-5"
+        class="col-2-5 comments"
         placeholder="Describe the context for these entries"
       ></textarea>
       <div class="vspacer col-1-6"></div>
-      <div class="text col-1">Account</div>
-      <div class="currency col-2">Debit (+)</div>
-      <div class="currency col-3">Credit (-)</div>
-      <div class="text col-4-3">Comment</div>
+      <div class="text col-1-2">Account</div>
+      <div class="currency col-3-2">Debit (+)</div>
+      <div class="currency col-5-2">Credit (-)</div>
       <div class="line col-1-6"></div>
       <div class="vspacer"></div>
-      <div id="end-of-line-items" class="vspacer col-1-6"></div>
+      <div id="end-of-line-items" class="vspacer-2 col-1-6"></div>
 
       <button class="button col-1" type="button" data-event="add-row">
         Add Row
@@ -326,18 +365,25 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
         name="total_error"
         value="0.00"
       />
+      <div class="vspacer-2 col-1-6"></div>
+      <div class="section-title col-1-6">Summary</div>
+      <div class="vspacer-2 col-1-6"></div>
+      <div id="summary-area" class="vspacer-2 col-1-6"></div>
     </form>
   );
   if (ledgerModel) {
     const lineItems = ledger.querySelector("#end-of-line-items") as HTMLElement;
+    ledger["date"].value = asDateString(
+      new Date(ledgerModel.date || ledgerModel.items[0]["date"])
+    );
     ledger["description"].value = ledgerModel.description;
     ledgerModel.items.forEach((item) => {
       const row = createRow();
       row["account"].value = item.account;
       if (item.amount < 0) {
-        row["credit"].value = -item.amount;
+        row["credit"].value = asCurrency(-item.amount);
       } else {
-        row["debit"].value = item.amount;
+        row["debit"].value = asCurrency(item.amount);
       }
       row["comment"].value = item.comment;
       moveChildrenBefore(row, lineItems);
@@ -347,5 +393,6 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
   }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
+  ledger.dispatchEvent(new Event("change"));
   return ledger;
 }
