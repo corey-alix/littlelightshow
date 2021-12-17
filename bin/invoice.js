@@ -4936,11 +4936,11 @@ async function invoices() {
     throw "user must be signed in";
   const client = createClient();
   const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(INVOICE_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
-  const invoices2 = result.data;
-  invoices2.forEach((invoice) => {
+  const invoices3 = result.data;
+  invoices3.forEach((invoice) => {
     invoice.data.id = invoice.ref.value.id;
   });
-  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
+  return invoices3.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
     invoice.date = invoice.date || invoice.create_date;
     invoice.labor = (invoice.labor || 0) - 0;
     invoice.additional = (invoice.additional || 0) - 0;
@@ -5378,8 +5378,8 @@ function renderInvoice(invoice) {
     class: "col-6 align-right"
   }, totalInvoice(invoice).toFixed(2)));
 }
-function create3(invoices2) {
-  const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
+function create3(invoices3) {
+  const total = invoices3.map(totalInvoice).reduce((a, b) => a + b, 0);
   const report = /* @__PURE__ */ dom("form", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("label", {
@@ -5391,7 +5391,7 @@ function create3(invoices2) {
   }, "Total"), /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }));
-  invoices2.map(renderInvoice).forEach((item) => moveChildren(item, report));
+  invoices3.map(renderInvoice).forEach((item) => moveChildren(item, report));
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "vspacer-1 col-1-6"
   }), /* @__PURE__ */ dom("div", {
@@ -5439,8 +5439,8 @@ function init() {
   }
 }
 async function renderInvoices(target) {
-  const invoices2 = await invoices();
-  const formDom = create3(invoices2);
+  const invoices3 = await invoices();
+  const formDom = create3(invoices3);
   const form = formManager.domAsForm(formDom);
   target.appendChild(formDom);
   form.on("create-invoice", () => {
@@ -5450,13 +5450,13 @@ async function renderInvoices(target) {
 async function renderInvoice2(invoiceId) {
   let invoice;
   if (invoiceId) {
-    const invoices2 = await invoices();
-    invoice = invoices2.find((invoice2) => invoice2.id === invoiceId) || null;
+    const invoices3 = await invoices();
+    invoice = invoices3.find((invoice2) => invoice2.id === invoiceId) || null;
     if (!invoice)
       throw "invoice not found";
   } else {
     invoice = {
-      id: 1e3 + invoices.length + 1 + "",
+      id: "",
       date: Date.now(),
       clientname: "",
       billto: "",

@@ -85,7 +85,7 @@ export async function renderInvoice(invoiceId?: string) {
   } else {
     // invoice is empty
     invoice = {
-      id: 1000 + invoices.length + 1 + "",
+      id: "",
       date: Date.now(),
       clientname: "",
       billto: "",
