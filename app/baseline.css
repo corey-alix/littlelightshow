@@ -4,6 +4,7 @@
 
 body {
   padding: 1rem;
+  max-width: 1024px;
 }
 
 body.dark {
@@ -332,7 +333,33 @@ body.dark button {
   flex-wrap: wrap;
 }
 
+.flex .button {
+  min-width: 4rem;
+  margin: 0.5rem;
+}
+
+.wavy {
+  text-decoration: underline wavy;
+  text-decoration-color: rgb(214, 0, 28);
+}
+
+.date {
+  white-space: nowrap;
+}
+
 @media (max-width: 459px) {
+}
+
+@media (min-width: 640px) {
+  * {
+    font-size: 1.2rem;
+  }
+}
+
+@media (min-width: 960px) {
+  * {
+    font-size: 1.5rem;
+  }
 }
 
 @media print {
@@ -344,6 +371,11 @@ body.dark button {
     color: black;
   }
 
+  a {
+    color: black;
+    text-decoration: none;
+  }
+
   ::placeholder {
     color: transparent;
   }
@@ -351,13 +383,4 @@ body.dark button {
   #invoice-form {
     display: none;
   }
-}
-
-.wavy {
-  text-decoration: underline wavy;
-  text-decoration-color: rgb(214, 0, 28);
-}
-
-.date {
-  white-space: nowrap;
 }

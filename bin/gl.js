@@ -4940,15 +4940,19 @@ function hookupHandlers(domNode) {
     summaryArea.appendChild(summaryReport);
   });
   domNode.addEventListener("print-all", async () => {
-    const ledgers2 = await ledgers();
-    const report1 = printDetail(ledgers2);
-    const report2 = printSummary(ledgers2);
-    document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
-    document.body.appendChild(report1);
-    document.body.appendChild(/* @__PURE__ */ dom("div", {
-      class: "vspacer-2"
-    }));
-    document.body.appendChild(report2);
+    location.href = `index.html?print=all`;
+    await printAll();
+  });
+  domNode.addEventListener("print", async () => {
+    if (!domNode.reportValidity())
+      return;
+    if (asNumber(domNode["total_error"]) !== 0) {
+      alert("Total error must be zero");
+      return;
+    }
+    const model = asModel(domNode);
+    await save(model);
+    location.href = `index.html?print=${model.id}`;
   });
   domNode.addEventListener("print-detail", async () => {
     const ledgers2 = await ledgers();
@@ -4961,6 +4965,9 @@ function hookupHandlers(domNode) {
     const report = printSummary(ledgers2);
     document.body.innerHTML = "";
     document.body.appendChild(report);
+  });
+  domNode.addEventListener("clear", async () => {
+    location.href = "index.html";
   });
   domNode.addEventListener("submit", async () => {
     if (!domNode.reportValidity())
@@ -4979,6 +4986,33 @@ function hookupHandlers(domNode) {
     moveChildrenBefore(row, lineItems);
     focus.focus();
   });
+}
+async function printAll() {
+  const ledgers2 = await ledgers();
+  ledgers2.sort((a, b) => a.date - b.date).reverse();
+  const report2 = printDetail(ledgers2);
+  const report1 = printSummary(ledgers2);
+  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
+  document.body.appendChild(report1);
+  document.body.appendChild(/* @__PURE__ */ dom("div", {
+    class: "vspacer-2"
+  }));
+  document.body.appendChild(report2);
+}
+async function print(id) {
+  const ledgers2 = await ledgers();
+  const ledger = ledgers2.find((l) => l.id === id);
+  if (!ledger)
+    throw "ledger not found";
+  const report2 = printDetail([ledger]);
+  const report1 = printSummary([ledger]);
+  document.body.innerHTML = "";
+  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
+  document.body.appendChild(report1);
+  document.body.appendChild(/* @__PURE__ */ dom("div", {
+    class: "vspacer-2"
+  }));
+  document.body.appendChild(report2);
 }
 function createRow() {
   return /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("input", {
@@ -5030,7 +5064,7 @@ function printDetail(ledgers2) {
       totals[1] += credit || 0;
       let currentDate = asDateString(new Date(ledger.date || item["date"]));
       const lineitem = /* @__PURE__ */ dom("div", null, currentDate != priorDate && /* @__PURE__ */ dom("div", {
-        class: "col-1-6 section-title"
+        class: "col-1-6 date section-title"
       }, `${priorDate = currentDate}`), /* @__PURE__ */ dom("div", {
         class: "col-1-4 text"
       }, item.account), /* @__PURE__ */ dom("div", {
@@ -5042,7 +5076,7 @@ function printDetail(ledgers2) {
       }, /* @__PURE__ */ dom("a", {
         href: `/app/gl/index.html?id=${ledger.id}`
       }, item.comment || "no comment")), /* @__PURE__ */ dom("div", {
-        class: "vspacer"
+        class: "vspacer-2"
       }));
       moveChildren(lineitem, report);
     });
@@ -5050,12 +5084,12 @@ function printDetail(ledgers2) {
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }), /* @__PURE__ */ dom("div", {
-    class: "col-3 currency"
+    class: "col-5 currency"
   }, totals[0].toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "col-4 currency"
+    class: "col-6 currency"
   }, totals[1].toFixed(2)), /* @__PURE__ */ dom("div", {
     class: "col-6 currency"
-  }, (totals[0] - totals[1]).toFixed(2))), report);
+  }, noZero((totals[0] - totals[1]).toFixed(2)))), report);
   return report;
 }
 function printSummary(ledgers2) {
@@ -5075,21 +5109,21 @@ function printSummary(ledgers2) {
     const total = totals[account];
     grandTotal += total.debit - total.credit;
     return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-      class: "col-1-2"
+      class: "col-1-4"
     }, account), /* @__PURE__ */ dom("div", {
-      class: "currency col-3-2"
+      class: "currency col-5"
     }, noZero(total.debit.toFixed(2))), /* @__PURE__ */ dom("div", {
-      class: "currency col-5-2"
+      class: "currency col-6"
     }, noZero(total.credit.toFixed(2))));
   });
   const report = /* @__PURE__ */ dom("div", {
     class: "grid-6 col-1-6"
   }, /* @__PURE__ */ dom("div", {
-    class: "col-1-2 line"
+    class: "col-1-4 line"
   }, "Account"), /* @__PURE__ */ dom("div", {
-    class: "col-3-2 line currency"
+    class: "col-5 line currency"
   }, "Debit"), /* @__PURE__ */ dom("div", {
-    class: "col-5-2 line currency"
+    class: "col-6 line currency"
   }, "Credit"));
   reportItems.forEach((item) => moveChildren(item, report));
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
@@ -5148,11 +5182,7 @@ function createGeneralLedgerGrid(ledgerModel) {
     "data-event": "add-row"
   }, "Add Row"), /* @__PURE__ */ dom("div", {
     class: "vspacer-1 col-1-6"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button col-1",
-    type: "button",
-    "data-event": "submit"
-  }, "Save"), /* @__PURE__ */ dom("div", {
+  }), /* @__PURE__ */ dom("div", {
     class: "currency col-2-2"
   }, "Total Debit"), /* @__PURE__ */ dom("input", {
     readonly: true,
@@ -5160,11 +5190,7 @@ function createGeneralLedgerGrid(ledgerModel) {
     class: "currency col-4-3",
     name: "total_debit",
     value: "0.00"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button col-1",
-    type: "button",
-    "data-event": "print-summary"
-  }, "Print Summary"), /* @__PURE__ */ dom("div", {
+  }), /* @__PURE__ */ dom("div", {
     class: "currency col-2-2"
   }, "Total Credit"), /* @__PURE__ */ dom("input", {
     type: "number",
@@ -5172,11 +5198,7 @@ function createGeneralLedgerGrid(ledgerModel) {
     class: "currency col-4-3",
     name: "total_credit",
     value: "0.00"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button col-1",
-    type: "button",
-    "data-event": "print-all"
-  }, "Print Details"), /* @__PURE__ */ dom("div", {
+  }), /* @__PURE__ */ dom("div", {
     class: "currency col-2-2"
   }, "Imbalance"), /* @__PURE__ */ dom("input", {
     readonly: true,
@@ -5185,6 +5207,24 @@ function createGeneralLedgerGrid(ledgerModel) {
     name: "total_error",
     value: "0.00"
   }), /* @__PURE__ */ dom("div", {
+    class: "col-1-6 flex"
+  }, /* @__PURE__ */ dom("button", {
+    class: "button col-1",
+    type: "button",
+    "data-event": "submit"
+  }, "Save"), /* @__PURE__ */ dom("button", {
+    class: "button col-1",
+    type: "button",
+    "data-event": "clear"
+  }, "Clear"), /* @__PURE__ */ dom("button", {
+    class: "button col-1",
+    type: "button",
+    "data-event": "print"
+  }, "Save and Print"), /* @__PURE__ */ dom("button", {
+    class: "button col-1",
+    type: "button",
+    "data-event": "print-all"
+  }, "Show All")), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("div", {
     class: "section-title col-1-6"
@@ -5246,6 +5286,17 @@ async function identify() {
 // app/gl/gl.ts
 async function init(domNode) {
   const queryParams = new URLSearchParams(window.location.search);
+  const printId = queryParams.get("print");
+  if (printId) {
+    switch (printId) {
+      case "all":
+        await printAll();
+        break;
+      default:
+        await print(printId);
+    }
+    return;
+  }
   if (queryParams.has("id")) {
     const id = queryParams.get("id");
     const ledgers2 = await ledgers();

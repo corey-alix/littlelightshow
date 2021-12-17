@@ -117,13 +117,20 @@ function hookupHandlers(domNode: HTMLFormElement) {
   });
 
   domNode.addEventListener("print-all", async () => {
-    const ledgers = await loadAllLedgers();
-    const report1 = printDetail(ledgers);
-    const report2 = printSummary(ledgers);
-    document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
-    document.body.appendChild(report1);
-    document.body.appendChild(<div class="vspacer-2"></div>);
-    document.body.appendChild(report2);
+    location.href = `index.html?print=all`;
+    await printAll();
+  });
+
+  domNode.addEventListener("print", async () => {
+    if (!domNode.reportValidity()) return;
+    if (0 !== asNumber(domNode["total_error"])) {
+      alert("Total error must be zero");
+      return;
+    }
+    const model = asModel(domNode);
+    await saveLedger(model);
+
+    location.href = `index.html?print=${model.id}`;
   });
 
   domNode.addEventListener("print-detail", async () => {
@@ -138,6 +145,10 @@ function hookupHandlers(domNode: HTMLFormElement) {
     const report = printSummary(ledgers);
     document.body.innerHTML = "";
     document.body.appendChild(report);
+  });
+
+  domNode.addEventListener("clear", async () => {
+    location.href = "index.html";
   });
 
   domNode.addEventListener("submit", async () => {
@@ -157,6 +168,30 @@ function hookupHandlers(domNode: HTMLFormElement) {
     moveChildrenBefore(row, lineItems);
     focus.focus();
   });
+}
+
+export async function printAll() {
+  const ledgers = await loadAllLedgers();
+  ledgers.sort((a, b) => a.date - b.date).reverse();
+  const report2 = printDetail(ledgers);
+  const report1 = printSummary(ledgers);
+  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
+  document.body.appendChild(report1);
+  document.body.appendChild(<div class="vspacer-2"></div>);
+  document.body.appendChild(report2);
+}
+
+export async function print(id: string) {
+  const ledgers = await loadAllLedgers();
+  const ledger = ledgers.find((l) => l.id === id);
+  if (!ledger) throw "ledger not found";
+  const report2 = printDetail([ledger]);
+  const report1 = printSummary([ledger]);
+  document.body.innerHTML = "";
+  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
+  document.body.appendChild(report1);
+  document.body.appendChild(<div class="vspacer-2"></div>);
+  document.body.appendChild(report2);
 }
 
 function createRow(): HTMLElement {
@@ -217,7 +252,7 @@ function printDetail(ledgers: (Ledger & { id: any })[]) {
       const lineitem = (
         <div>
           {currentDate != priorDate && (
-            <div class="col-1-6 section-title">{`${(priorDate =
+            <div class="col-1-6 date section-title">{`${(priorDate =
               currentDate)}`}</div>
           )}
           <div class="col-1-4 text">{item.account}</div>
@@ -228,7 +263,7 @@ function printDetail(ledgers: (Ledger & { id: any })[]) {
               {item.comment || "no comment"}
             </a>
           </div>
-          <div class="vspacer"></div>
+          <div class="vspacer-2"></div>
         </div>
       );
       moveChildren(lineitem, report);
@@ -237,9 +272,11 @@ function printDetail(ledgers: (Ledger & { id: any })[]) {
   moveChildren(
     <div>
       <div class="line col-1-6"></div>
-      <div class="col-3 currency">{totals[0].toFixed(2)}</div>
-      <div class="col-4 currency">{totals[1].toFixed(2)}</div>
-      <div class="col-6 currency">{(totals[0] - totals[1]).toFixed(2)}</div>
+      <div class="col-5 currency">{totals[0].toFixed(2)}</div>
+      <div class="col-6 currency">{totals[1].toFixed(2)}</div>
+      <div class="col-6 currency">
+        {noZero((totals[0] - totals[1]).toFixed(2))}
+      </div>
     </div>,
     report
   );
@@ -267,17 +304,17 @@ function printSummary(ledgers: (Ledger & { id: any })[]) {
       grandTotal += total.debit - total.credit;
       return (
         <div>
-          <div class="col-1-2">{account}</div>
-          <div class="currency col-3-2">{noZero(total.debit.toFixed(2))}</div>
-          <div class="currency col-5-2">{noZero(total.credit.toFixed(2))}</div>
+          <div class="col-1-4">{account}</div>
+          <div class="currency col-5">{noZero(total.debit.toFixed(2))}</div>
+          <div class="currency col-6">{noZero(total.credit.toFixed(2))}</div>
         </div>
       );
     });
   const report = (
     <div class="grid-6 col-1-6">
-      <div class="col-1-2 line">Account</div>
-      <div class="col-3-2 line currency">Debit</div>
-      <div class="col-5-2 line currency">Credit</div>
+      <div class="col-1-4 line">Account</div>
+      <div class="col-5 line currency">Debit</div>
+      <div class="col-6 line currency">Credit</div>
     </div>
   );
   reportItems.forEach((item) => moveChildren(item, report));
@@ -326,15 +363,10 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
       <div class="line col-1-6"></div>
       <div class="vspacer"></div>
       <div id="end-of-line-items" class="vspacer-2 col-1-6"></div>
-
       <button class="button col-1" type="button" data-event="add-row">
         Add Row
       </button>
-
       <div class="vspacer-1 col-1-6"></div>
-      <button class="button col-1" type="button" data-event="submit">
-        Save
-      </button>
       <div class="currency col-2-2">Total Debit</div>
       <input
         readonly
@@ -343,9 +375,6 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
         name="total_debit"
         value="0.00"
       />
-      <button class="button col-1" type="button" data-event="print-summary">
-        Print Summary
-      </button>
       <div class="currency col-2-2">Total Credit</div>
       <input
         type="number"
@@ -354,9 +383,6 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
         name="total_credit"
         value="0.00"
       />
-      <button class="button col-1" type="button" data-event="print-all">
-        Print Details
-      </button>
       <div class="currency col-2-2">Imbalance</div>
       <input
         readonly
@@ -365,6 +391,20 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
         name="total_error"
         value="0.00"
       />
+      <div class="col-1-6 flex">
+        <button class="button col-1" type="button" data-event="submit">
+          Save
+        </button>
+        <button class="button col-1" type="button" data-event="clear">
+          Clear
+        </button>
+        <button class="button col-1" type="button" data-event="print">
+          Save and Print
+        </button>
+        <button class="button col-1" type="button" data-event="print-all">
+          Show All
+        </button>
+      </div>
       <div class="vspacer-2 col-1-6"></div>
       <div class="section-title col-1-6">Summary</div>
       <div class="vspacer-2 col-1-6"></div>
