@@ -15,16 +15,24 @@ export interface Ledger {
   items: Array<LedgerItem>;
 }
 
-export async function save(ledger: Ledger) {
+export async function save(ledger: Ledger & { id: string }) {
   if (!CURRENT_USER) throw "user must be signed in";
 
   const client = createClient();
 
-  const result = (await client.query(
-    q.Create(q.Collection(LEDGER_TABLE), {
-      data: { ...ledger, user: CURRENT_USER, create_date: Date.now() },
-    })
-  )) as { data: any; ref: any };
+  if (!ledger.id) {
+    const result = (await client.query(
+      q.Create(q.Collection(LEDGER_TABLE), {
+        data: { ...ledger, user: CURRENT_USER, create_date: Date.now() },
+      })
+    )) as { data: any; ref: any };
+  } else {
+    const result = (await client.query(
+      q.Update(q.Ref(q.Collection(LEDGER_TABLE), ledger.id), {
+        data: { ...ledger, user: CURRENT_USER, update_date: Date.now() },
+      })
+    )) as { data: any; ref: any };
+  }
 }
 
 export async function ledgers() {
@@ -43,7 +51,7 @@ export async function ledgers() {
     data: Ledger & { id: any };
     ref: any;
   }>;
-  // copy ref into invoice id
+  // copy ref into ledger id
   ledgers.forEach((ledger) => {
     ledger.data.id = ledger.ref.value.id;
   });

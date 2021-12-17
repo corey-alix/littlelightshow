@@ -8,8 +8,9 @@ import {
 } from "../../services/gl.js";
 
 function asModel(form: HTMLFormElement) {
-  const result: Ledger = { items: [] };
+  const result: Ledger & { id: string } = { id: "", items: [] };
   const data = new FormData(form);
+  result.id = (data.get("id") as string) || "";
   const batchDate = data.get("date") as string;
   result.description = (data.get("description") as string) || "";
 
@@ -117,54 +118,64 @@ function hookupHandlers(domNode: HTMLFormElement) {
 
   domNode.addEventListener("submit", async () => {
     if (!domNode.reportValidity()) return;
-    if (0 !== asNumber(domNode["total_error"]))
+    if (0 !== asNumber(domNode["total_error"])) {
       alert("Total error must be zero");
+      return;
+    }
     const model = asModel(domNode);
     await saveLedger(model);
     location.reload();
   });
 
   domNode.addEventListener("add-row", () => {
-    const tr: HTMLElement = (
-      <div>
-        <input
-          class="col-1"
-          name="account"
-          required
-          type="text"
-          placeholder="account"
-          list="listOfAccounts"
-        />
-        <input
-          name="debit"
-          class="currency col-2"
-          type="number"
-          step="0.01"
-          placeholder="debit"
-        />
-        <input
-          name="credit"
-          class="currency col-3"
-          type="number"
-          step="0.01"
-          placeholder="credit"
-        />
-        <input
-          name="comment"
-          class="text col-4-3"
-          type="text"
-          placeholder="comment"
-        />
-      </div>
-    );
-
-    const focus = tr.querySelector("[name=account]") as HTMLElement;
-    moveChildrenBefore(tr, lineItems);
+    const row = createRow();
+    const focus = row.querySelector("[name=account]") as HTMLElement;
+    moveChildrenBefore(row, lineItems);
     focus.focus();
   });
 }
 
+function createRow(): HTMLElement {
+  return (
+    <form>
+      <input
+        class="col-1"
+        name="account"
+        required
+        type="text"
+        placeholder="account"
+        list="listOfAccounts"
+      />
+      <input
+        name="debit"
+        class="currency col-2"
+        type="number"
+        step="0.01"
+        placeholder="debit"
+      />
+      <input
+        name="credit"
+        class="currency col-3"
+        type="number"
+        step="0.01"
+        placeholder="credit"
+      />
+      <input
+        name="comment"
+        class="text col-4-3"
+        type="text"
+        placeholder="comment"
+      />
+    </form>
+  );
+}
+
 function printDetail(ledgers: (Ledger & { id: any })[]) {
+  const items = ledgers
+    .map((l) => l.items.map((i) => ({ ref: l.id, ...i })))
+    .flat(1)
+    .sort((a, b) => a.date - b.date);
+
   const report: HTMLElement = (
     <div class="grid-6">
       <div class="col-1 date">Date</div>
@@ -176,10 +187,6 @@ function printDetail(ledgers: (Ledger & { id: any })[]) {
     </div>
   );
   const totals = [0, 0];
-  const items = ledgers
-    .map((l) => l.items)
-    .flat(1)
-    .sort((a, b) => a.date - b.date);
 
   items.forEach((item) => {
     const amount = item.amount;
@@ -193,7 +200,11 @@ function printDetail(ledgers: (Ledger & { id: any })[]) {
         <div class="col-2 text">{item.account}</div>
         <div class="col-3 currency">{debit && debit.toFixed(2)}</div>
         <div class="col-4 currency">{credit && credit.toFixed(2)}</div>
-        <div class="col-5-2 text">{item.comment}</div>
+        <div class="col-5-2 text">
+          <a href={`/app/gl/index.html?id=${item.ref}`}>
+            {item.comment || "no comment"}
+          </a>
+        </div>
       </div>
     );
     moveChildren(lineitem, report);
@@ -242,9 +253,10 @@ function printSummary(ledgers: (Ledger & { id: any })[]) {
   return report;
 }
 
-export function createGeneralLedgerGrid() {
+export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
   const ledger: HTMLFormElement = (
     <form class="grid-6">
+      <input name="id" value={ledgerModel?.id || ""} />
       <datalist id="listOfAccounts">
         <option>AP</option>
         <option>AR</option>
@@ -316,8 +328,24 @@ export function createGeneralLedgerGrid() {
       />
     </form>
   );
+  if (ledgerModel) {
+    const lineItems = ledger.querySelector("#end-of-line-items") as HTMLElement;
+    ledger["description"].value = ledgerModel.description;
+    ledgerModel.items.forEach((item) => {
+      const row = createRow();
+      row["account"].value = item.account;
+      if (item.amount < 0) {
+        row["credit"].value = -item.amount;
+      } else {
+        row["debit"].value = item.amount;
+      }
+      row["comment"].value = item.comment;
+      moveChildrenBefore(row, lineItems);
+    });
+  } else {
+    ledger.dispatchEvent(new Event("add-row"));
+  }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
-  ledger.dispatchEvent(new Event("add-row"));
   return ledger;
 }

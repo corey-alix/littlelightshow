@@ -4824,9 +4824,15 @@ async function save(ledger) {
   if (!CURRENT_USER)
     throw "user must be signed in";
   const client = createClient();
-  const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(LEDGER_TABLE), {
-    data: { ...ledger, user: CURRENT_USER, create_date: Date.now() }
-  }));
+  if (!ledger.id) {
+    const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(LEDGER_TABLE), {
+      data: { ...ledger, user: CURRENT_USER, create_date: Date.now() }
+    }));
+  } else {
+    const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection(LEDGER_TABLE), ledger.id), {
+      data: { ...ledger, user: CURRENT_USER, update_date: Date.now() }
+    }));
+  }
 }
 async function ledgers() {
   if (!CURRENT_USER)
@@ -4842,8 +4848,9 @@ async function ledgers() {
 
 // app/gl/templates/glgrid.tsx
 function asModel(form) {
-  const result = { items: [] };
+  const result = { id: "", items: [] };
   const data = new FormData(form);
+  result.id = data.get("id") || "";
   const batchDate = data.get("date");
   result.description = data.get("description") || "";
   let currentItem;
@@ -4936,44 +4943,50 @@ function hookupHandlers(domNode) {
   domNode.addEventListener("submit", async () => {
     if (!domNode.reportValidity())
       return;
-    if (asNumber(domNode["total_error"]) !== 0)
+    if (asNumber(domNode["total_error"]) !== 0) {
       alert("Total error must be zero");
+      return;
+    }
     const model = asModel(domNode);
     await save(model);
     location.reload();
   });
   domNode.addEventListener("add-row", () => {
-    const tr = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("input", {
-      class: "col-1",
-      name: "account",
-      required: true,
-      type: "text",
-      placeholder: "account",
-      list: "listOfAccounts"
-    }), /* @__PURE__ */ dom("input", {
-      name: "debit",
-      class: "currency col-2",
-      type: "number",
-      step: "0.01",
-      placeholder: "debit"
-    }), /* @__PURE__ */ dom("input", {
-      name: "credit",
-      class: "currency col-3",
-      type: "number",
-      step: "0.01",
-      placeholder: "credit"
-    }), /* @__PURE__ */ dom("input", {
-      name: "comment",
-      class: "text col-4-3",
-      type: "text",
-      placeholder: "comment"
-    }));
-    const focus = tr.querySelector("[name=account]");
-    moveChildrenBefore(tr, lineItems);
+    const row = createRow();
+    const focus = row.querySelector("[name=account]");
+    moveChildrenBefore(row, lineItems);
     focus.focus();
   });
 }
+function createRow() {
+  return /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("input", {
+    class: "col-1",
+    name: "account",
+    required: true,
+    type: "text",
+    placeholder: "account",
+    list: "listOfAccounts"
+  }), /* @__PURE__ */ dom("input", {
+    name: "debit",
+    class: "currency col-2",
+    type: "number",
+    step: "0.01",
+    placeholder: "debit"
+  }), /* @__PURE__ */ dom("input", {
+    name: "credit",
+    class: "currency col-3",
+    type: "number",
+    step: "0.01",
+    placeholder: "credit"
+  }), /* @__PURE__ */ dom("input", {
+    name: "comment",
+    class: "text col-4-3",
+    type: "text",
+    placeholder: "comment"
+  }));
+}
 function printDetail(ledgers2) {
+  const items = ledgers2.map((l) => l.items.map((i) => ({ ref: l.id, ...i }))).flat(1).sort((a, b) => a.date - b.date);
   const report = /* @__PURE__ */ dom("div", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
@@ -4990,7 +5003,6 @@ function printDetail(ledgers2) {
     class: "line col-1-6"
   }));
   const totals = [0, 0];
-  const items = ledgers2.map((l) => l.items).flat(1).sort((a, b) => a.date - b.date);
   items.forEach((item) => {
     const amount = item.amount;
     const debit = amount >= 0 && amount;
@@ -5007,7 +5019,9 @@ function printDetail(ledgers2) {
       class: "col-4 currency"
     }, credit && credit.toFixed(2)), /* @__PURE__ */ dom("div", {
       class: "col-5-2 text"
-    }, item.comment));
+    }, /* @__PURE__ */ dom("a", {
+      href: `/app/gl/index.html?id=${item.ref}`
+    }, item.comment || "no comment")));
     moveChildren(lineitem, report);
   });
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
@@ -5049,10 +5063,13 @@ function printSummary(ledgers2) {
   reportItems.forEach((item) => moveChildren(item, report));
   return report;
 }
-function createGeneralLedgerGrid() {
+function createGeneralLedgerGrid(ledgerModel) {
   const ledger = /* @__PURE__ */ dom("form", {
     class: "grid-6"
-  }, /* @__PURE__ */ dom("datalist", {
+  }, /* @__PURE__ */ dom("input", {
+    name: "id",
+    value: ledgerModel?.id || ""
+  }), /* @__PURE__ */ dom("datalist", {
     id: "listOfAccounts"
   }, /* @__PURE__ */ dom("option", null, "AP"), /* @__PURE__ */ dom("option", null, "AR"), /* @__PURE__ */ dom("option", null, "CASH"), /* @__PURE__ */ dom("option", null, "MOM/DAD"), /* @__PURE__ */ dom("option", null, "INVENTORY")), /* @__PURE__ */ dom("div", {
     class: "date col-1"
@@ -5129,9 +5146,25 @@ function createGeneralLedgerGrid() {
     name: "total_error",
     value: "0.00"
   }));
+  if (ledgerModel) {
+    const lineItems = ledger.querySelector("#end-of-line-items");
+    ledger["description"].value = ledgerModel.description;
+    ledgerModel.items.forEach((item) => {
+      const row = createRow();
+      row["account"].value = item.account;
+      if (item.amount < 0) {
+        row["credit"].value = -item.amount;
+      } else {
+        row["debit"].value = item.amount;
+      }
+      row["comment"].value = item.comment;
+      moveChildrenBefore(row, lineItems);
+    });
+  } else {
+    ledger.dispatchEvent(new Event("add-row"));
+  }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
-  ledger.dispatchEvent(new Event("add-row"));
   return ledger;
 }
 
@@ -5161,9 +5194,19 @@ async function identify() {
 }
 
 // app/gl/gl.ts
-function init(domNode) {
-  const ledger = createGeneralLedgerGrid();
-  domNode.appendChild(ledger);
+async function init(domNode) {
+  const queryParams = new URLSearchParams(window.location.search);
+  if (queryParams.has("id")) {
+    const id = queryParams.get("id");
+    const ledgers2 = await ledgers();
+    const ledger = ledgers2.find((l) => l.id === id);
+    if (!ledger)
+      throw `cannot find ledger: ${id}`;
+    domNode.appendChild(createGeneralLedgerGrid(ledger));
+  } else {
+    const ledger = createGeneralLedgerGrid();
+    domNode.appendChild(ledger);
+  }
 }
 export {
   identify,
