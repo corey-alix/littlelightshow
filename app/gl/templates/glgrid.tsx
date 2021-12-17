@@ -6,10 +6,12 @@ import {
   save as saveLedger,
   ledgers as loadAllLedgers,
 } from "../../services/gl.js";
-
-function asCurrency(value: number) {
-  return value.toFixed(2);
-}
+import { asCurrency } from "../../fun/asCurrency";
+import { asDateString } from "../../fun/asDateString";
+import { sum } from "../../fun/sum";
+import { asNumber } from "../../fun/asNumber";
+import { setCurrency } from "../../fun/setCurrency";
+import { hookupTriggers } from "../../fun/hookupTriggers";
 
 function isZero(value: string) {
   if (value === "0.00") return true;
@@ -56,34 +58,6 @@ function asModel(form: HTMLFormElement) {
     }
   }
   return result;
-}
-
-function asDateString(date = new Date()) {
-  return date.toISOString().split("T")[0];
-}
-
-function setCurrency(input: HTMLInputElement, value: number) {
-  if (!input) throw "no input found";
-  input.value = (value || 0).toFixed(2);
-}
-
-function sum(values: Array<number>) {
-  if (!values.length) return 0;
-  return values.reduce((a, b) => a + b, 0);
-}
-
-function asNumber(node: Element) {
-  return (node as HTMLInputElement).valueAsNumber || 0;
-}
-
-function hookupTriggers(domNode: HTMLElement) {
-  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
-    eventItem.addEventListener("click", () => {
-      const eventName = (eventItem as HTMLInputElement).dataset["event"];
-      if (!eventName) throw "item must define a data-event";
-      domNode.dispatchEvent(new Event(eventName));
-    });
-  });
 }
 
 function hookupHandlers(domNode: HTMLFormElement) {

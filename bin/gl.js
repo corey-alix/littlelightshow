@@ -4846,10 +4846,48 @@ async function ledgers() {
   return ledgers2.filter((ledger) => ledger.data.items && ledger.data.items[0] && ledger.data.items[0].account).map((ledger) => ledger.data);
 }
 
-// app/gl/templates/glgrid.tsx
+// app/fun/asCurrency.ts
 function asCurrency(value) {
   return value.toFixed(2);
 }
+
+// app/fun/asDateString.ts
+function asDateString(date = new Date()) {
+  return date.toISOString().split("T")[0];
+}
+
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
+// app/fun/asNumber.ts
+function asNumber(node) {
+  return node.valueAsNumber || 0;
+}
+
+// app/fun/setCurrency.ts
+function setCurrency(input, value) {
+  if (!input)
+    throw "no input found";
+  input.value = (value || 0).toFixed(2);
+}
+
+// app/fun/hookupTriggers.ts
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    eventItem.addEventListener("click", () => {
+      const eventName = eventItem.dataset["event"];
+      if (!eventName)
+        throw "item must define a data-event";
+      domNode.dispatchEvent(new Event(eventName));
+    });
+  });
+}
+
+// app/gl/templates/glgrid.tsx
 function isZero(value) {
   if (value === "0.00")
     return true;
@@ -4891,32 +4929,6 @@ function asModel(form) {
     }
   }
   return result;
-}
-function asDateString(date = new Date()) {
-  return date.toISOString().split("T")[0];
-}
-function setCurrency(input, value) {
-  if (!input)
-    throw "no input found";
-  input.value = (value || 0).toFixed(2);
-}
-function sum(values) {
-  if (!values.length)
-    return 0;
-  return values.reduce((a, b) => a + b, 0);
-}
-function asNumber(node) {
-  return node.valueAsNumber || 0;
-}
-function hookupTriggers(domNode) {
-  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
-    eventItem.addEventListener("click", () => {
-      const eventName = eventItem.dataset["event"];
-      if (!eventName)
-        throw "item must define a data-event";
-      domNode.dispatchEvent(new Event(eventName));
-    });
-  });
 }
 function hookupHandlers(domNode) {
   const lineItems = domNode.querySelector("#end-of-line-items");

@@ -6,11 +6,11 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
     />
     <title>Invoice</title>
-    <link rel="stylesheet" href="./baseline.css" />
+    <link rel="stylesheet" href="../baseline.css" />
   </head>
   <body class="dark no-holiday">
     <script type="module">
-      import { identify, init } from "../bin/invoice.js";
+      import { identify, init } from "/bin/invoice.js";
       (async function () {
         if (await identify()) init();
         else window.location.href = "/index.html";

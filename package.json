@@ -8,7 +8,7 @@
     "debug": "netlify dev --inspect",
     "build:admin": "esbuild --watch --format=esm --bundle app/admin.ts --outfile=bin/admin.js",
     "build:test": "esbuild --watch --format=esm --bundle test/test.ts --outfile=bin/test.js",
-    "build:invoice": "esbuild --watch --format=esm --bundle app/invoice.ts --outfile=bin/invoice.js",
+    "build:invoice": "esbuild --watch --format=esm --bundle app/invoice/invoice.ts --outfile=bin/invoice.js",
     "build:gl": "esbuild --watch --format=esm --bundle app/gl/gl.ts --outfile=bin/gl.js",
     "build": "npm-run-all -p build:gl build:invoice"
   },

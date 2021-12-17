@@ -1,16 +1,16 @@
-import { FormFactory, FormManager } from "./FormManager.js";
-import { moveChildren } from "./fun/dom.js";
-import { TAXRATE } from "./globals.js";
-import { inventoryManager } from "./InventoryManager.js";
+import { FormFactory, FormManager } from "../FormManager.js";
+import { moveChildren } from "../fun/dom.js";
+import { TAXRATE } from "../globals.js";
+import { inventoryManager } from "../InventoryManager.js";
 import {
   save as saveInvoice,
   invoices as getAllInvoices,
   Invoice,
   InvoiceItem,
   invoices,
-} from "./services/invoices.js";
+} from "../services/invoices.js";
 
-export { identify } from "./identify.js";
+export { identify } from "../identify.js";
 import {
   create as createInvoiceFormTemplate,
   renderInvoiceItem,
