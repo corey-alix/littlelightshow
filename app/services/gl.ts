@@ -15,6 +15,14 @@ export interface Ledger {
   items: Array<LedgerItem>;
 }
 
+export async function deleteLedger(id: string) {
+  const client = createClient();
+  const result = await client.query(
+    q.Delete(q.Ref(q.Collection(LEDGER_TABLE), id))
+  );
+  return result;
+}
+
 export async function save(ledger: Ledger & { id: string }) {
   if (!CURRENT_USER) throw "user must be signed in";
 

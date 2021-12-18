@@ -3,6 +3,7 @@ import { moveChildren, moveChildrenBefore } from "../../fun/dom.js";
 import {
   Ledger,
   LedgerItem,
+  deleteLedger,
   save as saveLedger,
   ledgers as loadAllLedgers,
 } from "../../services/gl.js";
@@ -58,6 +59,11 @@ function asModel(form: HTMLFormElement) {
         break;
     }
   }
+
+  // remove trivial items
+  result.items = result.items
+    .filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment)
+    .sort((a, b) => a.account.localeCompare(b.account));
   return result;
 }
 
@@ -124,6 +130,12 @@ function hookupHandlers(domNode: HTMLFormElement) {
 
   domNode.addEventListener("clear", async () => {
     location.href = routes.createLedger();
+  });
+
+  domNode.addEventListener("delete", async () => {
+    const id = (domNode["id"] as any as HTMLInputElement).value;
+    await deleteLedger(id);
+    location.href = routes.allLedgers();
   });
 
   domNode.addEventListener("submit", async () => {
@@ -200,6 +212,7 @@ function createRow(): HTMLElement {
         type="text"
         placeholder="comment"
       />
+      <div class="vspacer-1 col-1-6"></div>
     </form>
   );
 }
@@ -296,9 +309,9 @@ function printSummary(ledgers: (Ledger & { id: any })[]) {
   moveChildren(
     <div>
       <div class="col-1-6 line"></div>
-      <div class="col-1-6 vspacer-2"></div>
+      <div class="col-1-6 vspacer-1"></div>
       <div class="col-1-4">Imbalance</div>
-      <div class="currency col-6 bold">{noZero(grandTotal.toFixed(2))}</div>
+      <div class="currency col-6 bold">{grandTotal.toFixed(2)}</div>
     </div>,
     report
   );
@@ -366,15 +379,19 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
         name="total_error"
         value="0.00"
       />
+      <div class="col-1-6 vspacer-1"></div>
       <div class="col-1-6 flex">
         <button class="button col-1" type="button" data-event="submit">
           Save
         </button>
+        <button class="button col-1" type="button" data-event="print">
+          Save and Print
+        </button>
         <button class="button col-1" type="button" data-event="clear">
           Clear
         </button>
-        <button class="button col-1" type="button" data-event="print">
-          Save and Print
+        <button class="button col-1" type="button" data-event="delete">
+          Delete
         </button>
         <button class="button col-1" type="button" data-event="print-all">
           Show All

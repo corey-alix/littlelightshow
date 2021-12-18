@@ -2,6 +2,10 @@
   font-family: -webkit-pictograph;
 }
 
+::placeholder {
+  opacity: 0.25;
+}
+
 body {
   padding: 1rem;
   max-width: 1024px;

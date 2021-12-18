@@ -4820,6 +4820,11 @@ function createClient() {
 
 // app/services/gl.ts
 var LEDGER_TABLE = "Todos";
+async function deleteLedger(id) {
+  const client = createClient();
+  const result = await client.query(import_faunadb2.query.Delete(import_faunadb2.query.Ref(import_faunadb2.query.Collection(LEDGER_TABLE), id)));
+  return result;
+}
 async function save(ledger) {
   if (!CURRENT_USER)
     throw "user must be signed in";
@@ -4940,6 +4945,7 @@ function asModel(form) {
         break;
     }
   }
+  result.items = result.items.filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment).sort((a, b) => a.account.localeCompare(b.account));
   return result;
 }
 function hookupHandlers(domNode) {
@@ -4992,6 +4998,11 @@ function hookupHandlers(domNode) {
   });
   domNode.addEventListener("clear", async () => {
     location.href = routes.createLedger();
+  });
+  domNode.addEventListener("delete", async () => {
+    const id = domNode["id"].value;
+    await deleteLedger(id);
+    location.href = routes.allLedgers();
   });
   domNode.addEventListener("submit", async () => {
     if (!domNode.reportValidity())
@@ -5063,6 +5074,8 @@ function createRow() {
     class: "text col-1-6",
     type: "text",
     placeholder: "comment"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer-1 col-1-6"
   }));
 }
 function printDetail(ledgers2) {
@@ -5153,12 +5166,12 @@ function printSummary(ledgers2) {
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "col-1-6 line"
   }), /* @__PURE__ */ dom("div", {
-    class: "col-1-6 vspacer-2"
+    class: "col-1-6 vspacer-1"
   }), /* @__PURE__ */ dom("div", {
     class: "col-1-4"
   }, "Imbalance"), /* @__PURE__ */ dom("div", {
     class: "currency col-6 bold"
-  }, noZero(grandTotal.toFixed(2)))), report);
+  }, grandTotal.toFixed(2))), report);
   return report;
 }
 function createGeneralLedgerGrid(ledgerModel) {
@@ -5231,6 +5244,8 @@ function createGeneralLedgerGrid(ledgerModel) {
     name: "total_error",
     value: "0.00"
   }), /* @__PURE__ */ dom("div", {
+    class: "col-1-6 vspacer-1"
+  }), /* @__PURE__ */ dom("div", {
     class: "col-1-6 flex"
   }, /* @__PURE__ */ dom("button", {
     class: "button col-1",
@@ -5239,12 +5254,16 @@ function createGeneralLedgerGrid(ledgerModel) {
   }, "Save"), /* @__PURE__ */ dom("button", {
     class: "button col-1",
     type: "button",
+    "data-event": "print"
+  }, "Save and Print"), /* @__PURE__ */ dom("button", {
+    class: "button col-1",
+    type: "button",
     "data-event": "clear"
   }, "Clear"), /* @__PURE__ */ dom("button", {
     class: "button col-1",
     type: "button",
-    "data-event": "print"
-  }, "Save and Print"), /* @__PURE__ */ dom("button", {
+    "data-event": "delete"
+  }, "Delete"), /* @__PURE__ */ dom("button", {
     class: "button col-1",
     type: "button",
     "data-event": "print-all"
