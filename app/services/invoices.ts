@@ -23,6 +23,15 @@ export interface Invoice {
   items: Array<InvoiceItem>;
 }
 
+export async function deleteInvoice(id: string) {
+  if (!CURRENT_USER) throw "user must be signed in";
+  const client = createClient();
+  const result = await client.query(
+    q.Delete(q.Ref(q.Collection(INVOICE_TABLE), id))
+  );
+  debugger;
+}
+
 export async function save(invoice: Invoice) {
   if (!CURRENT_USER) throw "user must be signed in";
 

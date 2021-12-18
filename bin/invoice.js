@@ -4916,6 +4916,13 @@ function createClient() {
 
 // app/services/invoices.ts
 var INVOICE_TABLE = "invoices";
+async function deleteInvoice(id) {
+  if (!CURRENT_USER)
+    throw "user must be signed in";
+  const client = createClient();
+  const result = await client.query(import_faunadb2.query.Delete(import_faunadb2.query.Ref(import_faunadb2.query.Collection(INVOICE_TABLE), id)));
+  debugger;
+}
 async function save(invoice) {
   if (!CURRENT_USER)
     throw "user must be signed in";
@@ -4936,11 +4943,11 @@ async function invoices() {
     throw "user must be signed in";
   const client = createClient();
   const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(INVOICE_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
-  const invoices3 = result.data;
-  invoices3.forEach((invoice) => {
+  const invoices2 = result.data;
+  invoices2.forEach((invoice) => {
     invoice.data.id = invoice.ref.value.id;
   });
-  return invoices3.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
+  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
     invoice.date = invoice.date || invoice.create_date;
     invoice.labor = (invoice.labor || 0) - 0;
     invoice.additional = (invoice.additional || 0) - 0;
@@ -4963,17 +4970,25 @@ async function validate() {
   return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
 }
 
+// app/router.ts
+var routes = {
+  home: () => "/index.html",
+  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
+  createInvoice: () => `/app/invoice/invoice.html`,
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`
+};
+
 // app/identify.ts
 async function identify() {
   try {
     await validate();
   } catch (ex) {
     localStorage.setItem("FAUNADB_SERVER_SECRET", "");
-    console.log(ex);
+    routes.home();
     return false;
   }
   if (!localStorage.getItem("user")) {
-    location.href = `/app/identity.html?target=${location.href}&context=${CONTEXT}`;
+    routes.identity({ target: location.href, context: CONTEXT });
     return false;
   }
   return true;
@@ -5053,10 +5068,12 @@ function dom(tag, args, ...children) {
   }
 }
 
-// app/invoice/templates/invoice-form.tsx
-function currentDay(date = new Date()) {
+// app/fun/asDateString.ts
+function asDateString(date = new Date()) {
   return date.toISOString().split("T")[0];
 }
+
+// app/invoice/templates/invoice-form.tsx
 function create(invoice) {
   console.log({ invoice });
   const form = /* @__PURE__ */ dom("form", {
@@ -5089,7 +5106,7 @@ function create(invoice) {
     placeholder: "Date",
     name: "date",
     required: true,
-    value: currentDay(new Date(invoice.date || Date.now()))
+    value: asDateString(new Date(invoice.date || Date.now()))
   }), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-3"
   }, "Telephone"), /* @__PURE__ */ dom("label", {
@@ -5164,24 +5181,28 @@ function create(invoice) {
     id: "total_due",
     name: "total_due"
   }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1"
-  }), /* @__PURE__ */ dom("button", {
-    class: "bold button col-1-3",
+    class: "vspacer-1 col-1-6 flex"
+  }, /* @__PURE__ */ dom("button", {
+    class: "bold button",
     "data-event": "submit",
     type: "button"
   }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button col-4-2",
+    class: "button",
     "data-event": "print",
     type: "button"
-  }, "Save and Print"), /* @__PURE__ */ dom("button", {
-    class: "button col-6",
+  }, "Print"), /* @__PURE__ */ dom("button", {
+    class: "button",
     "data-event": "clear",
     type: "button"
   }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button col-1-6",
+    class: "button",
+    "data-event": "delete",
+    type: "button"
+  }, "Delete"), /* @__PURE__ */ dom("button", {
+    class: "button",
     "data-event": "list-all-invoices",
     type: "button"
-  }, "List All Invoices"));
+  }, "Show All")));
   const labor = form.querySelector("[name=labor]");
   const additional = form.querySelector("[name=additional]");
   labor.addEventListener("change", () => form.dispatchEvent(new Event("change")));
@@ -5378,8 +5399,8 @@ function renderInvoice(invoice) {
     class: "col-6 align-right"
   }, totalInvoice(invoice).toFixed(2)));
 }
-function create3(invoices3) {
-  const total = invoices3.map(totalInvoice).reduce((a, b) => a + b, 0);
+function create3(invoices2) {
+  const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
   const report = /* @__PURE__ */ dom("form", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("label", {
@@ -5391,7 +5412,7 @@ function create3(invoices3) {
   }, "Total"), /* @__PURE__ */ dom("div", {
     class: "line col-1-6"
   }));
-  invoices3.map(renderInvoice).forEach((item) => moveChildren(item, report));
+  invoices2.map(renderInvoice).forEach((item) => moveChildren(item, report));
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "vspacer-1 col-1-6"
   }), /* @__PURE__ */ dom("div", {
@@ -5439,8 +5460,8 @@ function init() {
   }
 }
 async function renderInvoices(target) {
-  const invoices3 = await invoices();
-  const formDom = create3(invoices3);
+  const invoices2 = await invoices();
+  const formDom = create3(invoices2);
   const form = formManager.domAsForm(formDom);
   target.appendChild(formDom);
   form.on("create-invoice", () => {
@@ -5450,8 +5471,8 @@ async function renderInvoices(target) {
 async function renderInvoice2(invoiceId) {
   let invoice;
   if (invoiceId) {
-    const invoices3 = await invoices();
-    invoice = invoices3.find((invoice2) => invoice2.id === invoiceId) || null;
+    const invoices2 = await invoices();
+    invoice = invoices2.find((invoice2) => invoice2.id === invoiceId) || null;
     if (!invoice)
       throw "invoice not found";
   } else {
@@ -5485,6 +5506,10 @@ async function renderInvoice2(invoiceId) {
       print(requestModel);
     }
   });
+  form.on("delete", async () => {
+    if (await tryToDeleteInvoice(form))
+      form.trigger("list-all-invoices");
+  });
   form.on("submit", async () => {
     if (await tryToSaveInvoice(form))
       form.trigger("list-all-invoices");
@@ -5504,6 +5529,13 @@ async function renderInvoice2(invoiceId) {
   });
   template.classList.remove("hidden");
   form.trigger("change");
+}
+async function tryToDeleteInvoice(form) {
+  const id = form.get("id");
+  if (!id)
+    throw "unable to delete this invoice";
+  await deleteInvoice(id);
+  return true;
 }
 async function tryToSaveInvoice(form) {
   const { formDom } = form;

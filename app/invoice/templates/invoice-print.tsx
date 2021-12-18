@@ -3,10 +3,6 @@ import { moveChildren } from "../../fun/dom.js";
 import { TAXRATE } from "../../globals.js";
 import { Invoice, InvoiceItem } from "../../services/invoices.js";
 
-function escape(text: string) {
-  return text.replaceAll("\n", "<br/>");
-}
-
 function invoiceItem(item: InvoiceItem): HTMLDivElement {
   console.log("invoiceItem", { item });
   return (

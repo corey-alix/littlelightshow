@@ -1,13 +1,10 @@
 import { dom } from "../../dom.js";
 import { forceDatalist } from "../../FormManager.js";
+import { asDateString } from "../../fun/asDateString.js";
 import { moveChildren } from "../../fun/dom.js";
 import { TAXRATE } from "../../globals.js";
 import { inventoryManager } from "../../InventoryManager.js";
 import { Invoice, InvoiceItem } from "../../services/invoices.js";
-
-function currentDay(date = new Date()) {
-  return date.toISOString().split("T")[0];
-}
 
 export function create(invoice: Invoice): HTMLFormElement {
   console.log({ invoice });
@@ -38,7 +35,7 @@ export function create(invoice: Invoice): HTMLFormElement {
         placeholder="Date"
         name="date"
         required
-        value={currentDay(new Date(invoice.date || Date.now()))}
+        value={asDateString(new Date(invoice.date || Date.now()))}
       />
       <label class="form-label col-1-3">Telephone</label>
       <label class="form-label col-4-3">Email</label>
@@ -114,23 +111,23 @@ export function create(invoice: Invoice): HTMLFormElement {
         id="total_due"
         name="total_due"
       />
-      <div class="vspacer-1"></div>
-      <button class="bold button col-1-3" data-event="submit" type="button">
-        Save
-      </button>
-      <button class="button col-4-2" data-event="print" type="button">
-        Save and Print
-      </button>
-      <button class="button col-6" data-event="clear" type="button">
-        Clear
-      </button>
-      <button
-        class="button col-1-6"
-        data-event="list-all-invoices"
-        type="button"
-      >
-        List All Invoices
-      </button>
+      <div class="vspacer-1 col-1-6 flex">
+        <button class="bold button" data-event="submit" type="button">
+          Save
+        </button>
+        <button class="button" data-event="print" type="button">
+          Print
+        </button>
+        <button class="button" data-event="clear" type="button">
+          Clear
+        </button>
+        <button class="button" data-event="delete" type="button">
+          Delete
+        </button>
+        <button class="button" data-event="list-all-invoices" type="button">
+          Show All
+        </button>
+      </div>
     </form>
   );
 

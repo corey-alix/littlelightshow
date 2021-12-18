@@ -11,8 +11,8 @@
   <body class="no-holiday">
     <script type="module">
       import { identify, run } from "../bin/admin.js";
-      if (!identify()) window.location.href = "/index.html";
-      run();
+      debugger;
+      identify().then(run);
     </script>
   </body>
 </html>

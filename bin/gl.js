@@ -5279,17 +5279,25 @@ async function validate() {
   return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
 }
 
+// app/router.ts
+var routes = {
+  home: () => "/index.html",
+  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
+  createInvoice: () => `/app/invoice/invoice.html`,
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`
+};
+
 // app/identify.ts
 async function identify() {
   try {
     await validate();
   } catch (ex) {
     localStorage.setItem("FAUNADB_SERVER_SECRET", "");
-    console.log(ex);
+    routes.home();
     return false;
   }
   if (!localStorage.getItem("user")) {
-    location.href = `/app/identity.html?target=${location.href}&context=${CONTEXT}`;
+    routes.identity({ target: location.href, context: CONTEXT });
     return false;
   }
   return true;

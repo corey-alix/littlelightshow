@@ -1,13 +1,12 @@
 import { FormFactory, FormManager } from "../FormManager.js";
 import { moveChildren } from "../fun/dom.js";
-import { TAXRATE } from "../globals.js";
 import { inventoryManager } from "../InventoryManager.js";
 import {
   save as saveInvoice,
+  deleteInvoice,
   invoices as getAllInvoices,
   Invoice,
   InvoiceItem,
-  invoices,
 } from "../services/invoices.js";
 
 export { identify } from "../identify.js";
@@ -21,22 +20,6 @@ import { create as createInvoicesGridTemplate } from "./templates/invoices-grid.
 
 const formManager = new FormFactory();
 const itemsToRemove = [] as Array<HTMLElement>;
-
-function bind(
-  form: HTMLElement,
-  inputQuerySelectors: string[],
-  outputQuerySelectors: string[],
-  cb: (args: Array<HTMLElement>) => void
-) {
-  const inputs = inputQuerySelectors.map(
-    (qs) => form.querySelector(qs) as HTMLInputElement
-  );
-  const outputs = outputQuerySelectors.map(
-    (qs) => form.querySelector(qs) as HTMLInputElement
-  );
-  const callback = () => cb([...inputs, ...outputs]);
-  inputs.forEach((input) => input.addEventListener("change", callback));
-}
 
 function addAnotherItem(form: FormManager) {
   const itemPanel = renderInvoiceItem({
@@ -118,6 +101,10 @@ export async function renderInvoice(invoiceId?: string) {
     }
   });
 
+  form.on("delete", async () => {
+    if (await tryToDeleteInvoice(form)) form.trigger("list-all-invoices");
+  });
+
   form.on("submit", async () => {
     if (await tryToSaveInvoice(form)) form.trigger("list-all-invoices");
   });
@@ -139,6 +126,13 @@ export async function renderInvoice(invoiceId?: string) {
 
   template.classList.remove("hidden");
   form.trigger("change");
+}
+
+async function tryToDeleteInvoice(form: FormManager) {
+  const id = form.get("id");
+  if (!id) throw "unable to delete this invoice";
+  await deleteInvoice(id);
+  return true;
 }
 
 async function tryToSaveInvoice(form: FormManager) {

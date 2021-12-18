@@ -1,17 +1,18 @@
 import { CONTEXT } from "./globals.js";
 import { validate } from "./services/validateAccessToken.js";
+import { routes } from "./router.js";
 
 export async function identify() {
   try {
     await validate();
   } catch (ex) {
     localStorage.setItem("FAUNADB_SERVER_SECRET", "");
-    console.log(ex);
+    routes.home();
     return false;
   }
 
   if (!localStorage.getItem("user")) {
-    location.href = `/app/identity.html?target=${location.href}&context=${CONTEXT}`;
+    routes.identity({ target: location.href, context: CONTEXT });
     return false;
   }
   return true;
