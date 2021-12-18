@@ -1,4 +1,3 @@
-import { moveChildren } from "../fun/dom.js";
 import { on, trigger } from "../fun/on.js";
 import { inventoryManager } from "../InventoryManager.js";
 import { routes } from "../router.js";
@@ -11,11 +10,7 @@ import {
 } from "../services/invoices.js";
 
 export { identify } from "../identify.js";
-import {
-  create as createInvoiceFormTemplate,
-  renderInvoiceItem,
-  setupComputeOnLineItem,
-} from "./templates/invoice-form.js";
+import { create as createInvoiceFormTemplate } from "./templates/invoice-form.js";
 import { create as createInvoicePrintTemplate } from "./templates/invoice-print.js";
 import { create as createInvoicesGridTemplate } from "./templates/invoices-grid.js";
 
@@ -34,26 +29,6 @@ function set(formDom: HTMLFormElement, values: object) {
     if (!isDefined(formDom[key])) throw `form element not found: ${key}`;
     formDom[key].value = values[key];
   });
-}
-
-const itemsToRemove = [] as Array<HTMLElement>;
-
-function addAnotherItem(formDom: HTMLFormElement) {
-  const itemPanel = renderInvoiceItem({
-    quantity: 1,
-    item: "",
-    price: 0,
-    total: 0,
-  });
-  setupComputeOnLineItem(formDom, itemPanel);
-  const toFocus = getFirstInput(itemPanel);
-  const target: HTMLElement = formDom.querySelector(".line-items") || formDom;
-  itemsToRemove.splice(0, itemsToRemove.length);
-  for (let i = 0; i < itemPanel.children.length; i++) {
-    itemsToRemove.push(itemPanel.children[i] as HTMLElement);
-  }
-  moveChildren(itemPanel, target);
-  toFocus?.focus();
 }
 
 export function init() {
@@ -98,10 +73,12 @@ export async function renderInvoice(invoiceId?: string) {
   const formDom = createInvoiceFormTemplate(invoice);
   document.body.appendChild(formDom);
 
-  on(formDom, "list-all-invoices", () => {
-    window.location.href = routes.allInvoices();
-  });
+  hookupEvents(formDom);
 
+  trigger(formDom, "change");
+}
+
+function hookupEvents(formDom: HTMLFormElement) {
   on(formDom, "print", async () => {
     if (await tryToSaveInvoice(formDom)) {
       const requestModel = asModel(formDom);
@@ -117,23 +94,6 @@ export async function renderInvoice(invoiceId?: string) {
   on(formDom, "submit", async () => {
     if (await tryToSaveInvoice(formDom)) trigger(formDom, "list-all-invoices");
   });
-
-  on(formDom, "remove-last-item", () => {
-    itemsToRemove.forEach((item) => item.remove());
-    trigger(formDom, "change");
-  });
-
-  on(formDom, "add-another-item", () => {
-    if (!formDom.checkValidity()) return;
-    addAnotherItem(formDom);
-    trigger(formDom, "change");
-  });
-
-  on(formDom, "clear", () => {
-    location.href = routes.createInvoice();
-  });
-
-  trigger(formDom, "change");
 }
 
 async function tryToDeleteInvoice(formDom: HTMLFormElement) {
@@ -217,8 +177,4 @@ export function print(invoice: Invoice) {
   document.body.appendChild(toPrint);
   window.document.title = invoice.clientname;
   window.print();
-}
-
-function getFirstInput(itemPanel: HTMLDivElement) {
-  return itemPanel.querySelector("input") as HTMLInputElement;
 }

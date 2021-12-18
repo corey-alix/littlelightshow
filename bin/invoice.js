@@ -4696,12 +4696,6 @@ var require_faunadb = __commonJS({
   }
 });
 
-// app/fun/dom.ts
-function moveChildren(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
-}
-
 // app/fun/on.ts
 function on(domNode, eventName, cb) {
   domNode.addEventListener(eventName, cb);
@@ -4942,6 +4936,12 @@ function asDateString(date = new Date()) {
   return date.toISOString().split("T")[0];
 }
 
+// app/fun/dom.ts
+function moveChildren(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
+}
+
 // app/fun/hookupTriggers.ts
 function hookupTriggers(domNode) {
   domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
@@ -4955,6 +4955,45 @@ function hookupTriggers(domNode) {
 }
 
 // app/invoice/templates/invoice-form.tsx
+var itemsToRemove = [];
+function getFirstInput(itemPanel) {
+  return itemPanel.querySelector("input");
+}
+function addAnotherItem(formDom) {
+  const itemPanel = renderInvoiceItem({
+    quantity: 1,
+    item: "",
+    price: 0,
+    total: 0
+  });
+  setupComputeOnLineItem(formDom, itemPanel);
+  const toFocus = getFirstInput(itemPanel);
+  const target = formDom.querySelector(".line-items") || formDom;
+  itemsToRemove.splice(0, itemsToRemove.length);
+  for (let i = 0; i < itemPanel.children.length; i++) {
+    itemsToRemove.push(itemPanel.children[i]);
+  }
+  moveChildren(itemPanel, target);
+  toFocus?.focus();
+}
+function hookupEvents(formDom) {
+  on(formDom, "list-all-invoices", () => {
+    window.location.href = routes.allInvoices();
+  });
+  on(formDom, "remove-last-item", () => {
+    itemsToRemove.forEach((item) => item.remove());
+    trigger(formDom, "change");
+  });
+  on(formDom, "add-another-item", () => {
+    if (!formDom.checkValidity())
+      return;
+    addAnotherItem(formDom);
+    trigger(formDom, "change");
+  });
+  on(formDom, "clear", () => {
+    location.href = routes.createInvoice();
+  });
+}
 function create(invoice) {
   console.log({ invoice });
   const form = /* @__PURE__ */ dom("form", {
@@ -5094,6 +5133,7 @@ function create(invoice) {
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
   on(form, "change", () => compute(form));
   hookupTriggers(form);
+  hookupEvents(form);
   compute(form);
   return form;
 }
@@ -5266,21 +5306,14 @@ function create2(invoice) {
   return report;
 }
 
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
 // app/invoice/templates/invoices-grid.tsx
-function totalInvoice(invoice) {
-  let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
-}
-function renderInvoice(invoice) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
-    class: "col-1-4",
-    href: `invoice?id=${invoice.id}`
-  }, invoice.clientname), /* @__PURE__ */ dom("label", {
-    class: "col-5 align-right"
-  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "col-6 align-right"
-  }, totalInvoice(invoice).toFixed(2)));
-}
 function create3(invoices2) {
   const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
   const report = /* @__PURE__ */ dom("form", {
@@ -5313,6 +5346,20 @@ function create3(invoices2) {
   hookupTriggers(report);
   return report;
 }
+function totalInvoice(invoice) {
+  const total = sum(invoice.items.map((item) => item.total || 0));
+  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
+}
+function renderInvoice(invoice) {
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
+    class: "col-1-4",
+    href: `invoice?id=${invoice.id}`
+  }, invoice.clientname), /* @__PURE__ */ dom("label", {
+    class: "col-5 align-right"
+  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
+    class: "col-6 align-right"
+  }, totalInvoice(invoice).toFixed(2)));
+}
 
 // app/invoice/invoice.ts
 function isDefined(value) {
@@ -5330,24 +5377,6 @@ function set(formDom, values) {
       throw `form element not found: ${key}`;
     formDom[key].value = values[key];
   });
-}
-var itemsToRemove = [];
-function addAnotherItem(formDom) {
-  const itemPanel = renderInvoiceItem({
-    quantity: 1,
-    item: "",
-    price: 0,
-    total: 0
-  });
-  setupComputeOnLineItem(formDom, itemPanel);
-  const toFocus = getFirstInput(itemPanel);
-  const target = formDom.querySelector(".line-items") || formDom;
-  itemsToRemove.splice(0, itemsToRemove.length);
-  for (let i = 0; i < itemPanel.children.length; i++) {
-    itemsToRemove.push(itemPanel.children[i]);
-  }
-  moveChildren(itemPanel, target);
-  toFocus?.focus();
 }
 function init() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -5388,9 +5417,10 @@ async function renderInvoice2(invoiceId) {
   }
   const formDom = create(invoice);
   document.body.appendChild(formDom);
-  on(formDom, "list-all-invoices", () => {
-    window.location.href = routes.allInvoices();
-  });
+  hookupEvents2(formDom);
+  trigger(formDom, "change");
+}
+function hookupEvents2(formDom) {
   on(formDom, "print", async () => {
     if (await tryToSaveInvoice(formDom)) {
       const requestModel = asModel(formDom);
@@ -5405,20 +5435,6 @@ async function renderInvoice2(invoiceId) {
     if (await tryToSaveInvoice(formDom))
       trigger(formDom, "list-all-invoices");
   });
-  on(formDom, "remove-last-item", () => {
-    itemsToRemove.forEach((item) => item.remove());
-    trigger(formDom, "change");
-  });
-  on(formDom, "add-another-item", () => {
-    if (!formDom.checkValidity())
-      return;
-    addAnotherItem(formDom);
-    trigger(formDom, "change");
-  });
-  on(formDom, "clear", () => {
-    location.href = routes.createInvoice();
-  });
-  trigger(formDom, "change");
 }
 async function tryToDeleteInvoice(formDom) {
   const id = get(formDom, "id");
@@ -5494,9 +5510,6 @@ function print(invoice) {
   document.body.appendChild(toPrint);
   window.document.title = invoice.clientname;
   window.print();
-}
-function getFirstInput(itemPanel) {
-  return itemPanel.querySelector("input");
 }
 export {
   identify,
