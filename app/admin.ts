@@ -11,7 +11,6 @@ export async function init() {
   hookupTriggers(domNode);
   domNode.addEventListener("invoice-to-gl", async () => {
     if (!confirm("import invoices into general ledger?")) return;
-    debugger;
     await importInvoicesToGeneralLedger();
   });
 }

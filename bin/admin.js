@@ -4895,7 +4895,6 @@ async function importInvoicesToGeneralLedger() {
       throw `ledger must exist for invoice: ${invoice.id}`;
     const newLedger = { ...createLedger(invoice), id: ledger.id };
     if (JSON.stringify([newLedger.date, newLedger.items]) !== JSON.stringify([ledger.date, ledger.items])) {
-      debugger;
       await save({ ...newLedger, id: ledger.id });
     }
   });
@@ -4903,7 +4902,6 @@ async function importInvoicesToGeneralLedger() {
     const invoice = invoicesToImport.shift();
     const ledger = createLedger(invoice);
     await save(ledger);
-    debugger;
   }
 }
 function createLedger(invoice) {
@@ -4980,7 +4978,6 @@ async function init() {
   domNode.addEventListener("invoice-to-gl", async () => {
     if (!confirm("import invoices into general ledger?"))
       return;
-    debugger;
     await importInvoicesToGeneralLedger();
   });
 }

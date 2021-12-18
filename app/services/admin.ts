@@ -24,7 +24,6 @@ export async function importInvoicesToGeneralLedger() {
       JSON.stringify([newLedger.date, newLedger.items]) !==
       JSON.stringify([ledger.date, ledger.items])
     ) {
-      debugger;
       await saveLedger({ ...newLedger, id: ledger.id });
     }
   });
@@ -33,7 +32,6 @@ export async function importInvoicesToGeneralLedger() {
     const invoice = invoicesToImport.shift()!;
     const ledger = createLedger(invoice);
     await saveLedger(ledger);
-    debugger;
   }
 }
 
