@@ -1,26 +1,10 @@
 import { dom } from "../../dom.js";
 import { moveChildren } from "../../fun/dom.js";
+import { hookupTriggers } from "../../fun/hookupTriggers.js";
+import { sum } from "../../fun/sum.js";
 import { TAXRATE } from "../../globals.js";
 import { Invoice } from "../../services/invoices.js";
 
-function totalInvoice(invoice: Invoice) {
-  let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
-}
-
-function renderInvoice(invoice: Invoice): HTMLDivElement {
-  return (
-    <div>
-      <a class="col-1-4" href={`invoice?id=${invoice.id}`}>
-        {invoice.clientname}
-      </a>
-      <label class="col-5 align-right">{invoice.labor.toFixed(2)}</label>
-      <label class="col-6 align-right">
-        {totalInvoice(invoice).toFixed(2)}
-      </label>
-    </div>
-  );
-}
 export function create(invoices: Invoice[]) {
   const total = invoices.map(totalInvoice).reduce((a, b) => a + b, 0);
 
@@ -46,5 +30,27 @@ export function create(invoices: Invoice[]) {
     </div>,
     report
   );
+
+  hookupTriggers(report);
+
   return report;
+}
+
+function totalInvoice(invoice: Invoice) {
+  const total = sum(invoice.items.map((item) => item.total || 0));
+  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
+}
+
+function renderInvoice(invoice: Invoice): HTMLDivElement {
+  return (
+    <div>
+      <a class="col-1-4" href={`invoice?id=${invoice.id}`}>
+        {invoice.clientname}
+      </a>
+      <label class="col-5 align-right">{invoice.labor.toFixed(2)}</label>
+      <label class="col-6 align-right">
+        {totalInvoice(invoice).toFixed(2)}
+      </label>
+    </div>
+  );
 }

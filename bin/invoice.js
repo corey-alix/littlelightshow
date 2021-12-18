@@ -2001,10 +2001,10 @@ var require_query = __commonJS({
         collection: wrap(collection)
       });
     }
-    function Paginate(set, opts) {
+    function Paginate(set2, opts) {
       arity.between(1, 2, arguments, Paginate.name);
       opts = util.defaults(opts, {});
-      return new Expr(objectAssign({ paginate: wrap(set) }, wrapValues(opts)));
+      return new Expr(objectAssign({ paginate: wrap(set2) }, wrapValues(opts)));
     }
     function Exists(ref, ts) {
       arity.between(1, 2, arguments, Exists.name);
@@ -2102,17 +2102,17 @@ var require_query = __commonJS({
       arity.min(1, arguments, Difference.name);
       return new Expr({ difference: wrap(varargs(arguments)) });
     }
-    function Distinct(set) {
+    function Distinct(set2) {
       arity.exact(1, arguments, Distinct.name);
-      return new Expr({ distinct: wrap(set) });
+      return new Expr({ distinct: wrap(set2) });
     }
     function Join(source, target) {
       arity.exact(2, arguments, Join.name);
       return new Expr({ join: wrap(source), with: wrap(target) });
     }
-    function Range(set, from, to) {
+    function Range(set2, from, to) {
       arity.exact(3, arguments, Range.name);
-      return new Expr({ range: wrap(set), from: wrap(from), to: wrap(to) });
+      return new Expr({ range: wrap(set2), from: wrap(from), to: wrap(to) });
     }
     function Login(ref, params2) {
       arity.exact(2, arguments, Login.name);
@@ -3083,7 +3083,7 @@ var require_PageHelper = __commonJS({
     "use strict";
     var query2 = require_query();
     var objectAssign = require_object_assign();
-    function PageHelper(client, set, params, options) {
+    function PageHelper(client, set2, params, options) {
       if (params === void 0) {
         params = {};
       }
@@ -3106,7 +3106,7 @@ var require_PageHelper = __commonJS({
       this.options = {};
       objectAssign(this.options, options);
       this.client = client;
-      this.set = set;
+      this.set = set2;
       this._faunaFunctions = [];
     }
     PageHelper.prototype.map = function(lambda) {
@@ -4696,32 +4696,13 @@ var require_faunadb = __commonJS({
   }
 });
 
-// app/EventBus.ts
-var EventBus = class {
-  constructor() {
-    this.handlers = {};
-  }
-  on(eventName, cb) {
-    if (!this.handlers[eventName])
-      this.handlers[eventName] = [];
-    this.handlers[eventName].push(cb);
-    return {
-      off: () => {
-        const i = this.handlers[eventName].indexOf(cb);
-        if (i >= 0)
-          this.handlers[eventName].splice(i, 1);
-      }
-    };
-  }
-  trigger(eventName, event) {
-    if (!this.handlers[eventName])
-      return;
-    this.handlers[eventName].forEach((cb) => cb(event));
-  }
-  destroy() {
-    this.handlers = {};
-  }
-};
+// app/fun/on.ts
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  domNode.dispatchEvent(new Event(eventName));
+}
 
 // app/InventoryManager.ts
 var InventoryManager = class {
@@ -4739,8 +4720,6 @@ var InventoryManager = class {
   }
 };
 var inventoryManager = new InventoryManager();
-
-// app/FormManager.ts
 function forceDatalist() {
   let dataList = document.querySelector(`#inventory_list`);
   if (dataList)
@@ -4754,125 +4733,6 @@ function forceDatalist() {
   });
   document.body.appendChild(dataList);
   return dataList;
-}
-var FormManager = class {
-  constructor(formDom) {
-    this.formDom = formDom;
-    this.channel = new EventBus();
-  }
-  get(name) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    return input.value;
-  }
-  set(name, value) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    if (typeof value === "number")
-      input.valueAsNumber = value;
-    else
-      input.value = value || "";
-  }
-  isValid() {
-    this.formDom.reportValidity();
-    return this.formDom.checkValidity();
-  }
-  trigger(eventName, event) {
-    this.channel.trigger(eventName, event);
-  }
-  on(eventName, cb) {
-    this.channel.on(eventName, cb);
-  }
-  createButton(options) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.classList.add("button");
-    button.innerText = options.title;
-    button.dataset.event = options.event;
-    button.addEventListener("click", () => {
-      this.trigger(options.event, { item: button });
-    });
-    return button;
-  }
-};
-var FormFactory = class {
-  domAsForm(dom2) {
-    if (!dom2)
-      throw "cannot create a form without a dom element";
-    const form = new FormManager(dom2);
-    dom2.addEventListener("change", () => {
-      form.trigger("change");
-    });
-    dom2.querySelectorAll("[data-event]").forEach((eventItem) => {
-      eventItem.addEventListener("click", () => {
-        const eventName = eventItem.dataset["event"];
-        if (!eventName)
-          throw "item must define a data-event";
-        form.trigger(eventName, { item: eventItem });
-      });
-    });
-    return form;
-  }
-  asForm(fieldInfos) {
-    const fieldNames = Object.keys(fieldInfos);
-    const form = document.createElement("div");
-    fieldNames.forEach((fieldName) => {
-      const fieldInfo = fieldInfos[fieldName];
-      const label = document.createElement("label");
-      label.classList.add("form-label");
-      label.innerText = fieldInfo.label || fieldName;
-      const input = document.createElement("input");
-      if (fieldInfo.readonly)
-        input.readOnly = true;
-      if (fieldInfo.required)
-        input.required = true;
-      label.appendChild(input);
-      input.name = input.id = fieldName;
-      input.classList.add("field", fieldName, fieldInfo.type || "text");
-      switch (fieldInfo.type) {
-        case "currency":
-          input.type = "number";
-          label.classList.add("align-right");
-          input.setAttribute("step", "0.01");
-          break;
-        case "quantity":
-          input.type = "number";
-          label.classList.add("align-right");
-          break;
-        default:
-          label.classList.add("align-left");
-      }
-      if (fieldInfo.value) {
-        const fieldValue = fieldInfo.value;
-        if (typeof fieldValue == "boolean")
-          input.checked = fieldValue;
-        else if (typeof fieldValue == "number") {
-          switch (fieldInfo.type) {
-            case "currency":
-              input.value = fieldValue.toFixed(2);
-              break;
-            default:
-              input.valueAsNumber = fieldValue;
-              break;
-          }
-        } else
-          input.value = fieldValue;
-      }
-      if (fieldInfo.lookup) {
-        input.setAttribute("list", forceDatalist().id);
-      }
-      form.appendChild(label);
-    });
-    return form;
-  }
-};
-
-// app/fun/dom.ts
-function moveChildren(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
 }
 
 // app/router.ts
@@ -5076,7 +4936,64 @@ function asDateString(date = new Date()) {
   return date.toISOString().split("T")[0];
 }
 
+// app/fun/dom.ts
+function moveChildren(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
+}
+
+// app/fun/hookupTriggers.ts
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    on(eventItem, "click", () => {
+      const eventName = eventItem.dataset["event"];
+      if (!eventName)
+        throw "item must define a data-event";
+      trigger(domNode, eventName);
+    });
+  });
+}
+
 // app/invoice/templates/invoice-form.tsx
+var itemsToRemove = [];
+function getFirstInput(itemPanel) {
+  return itemPanel.querySelector("input");
+}
+function addAnotherItem(formDom) {
+  const itemPanel = renderInvoiceItem({
+    quantity: 1,
+    item: "",
+    price: 0,
+    total: 0
+  });
+  setupComputeOnLineItem(formDom, itemPanel);
+  const toFocus = getFirstInput(itemPanel);
+  const target = formDom.querySelector(".line-items") || formDom;
+  itemsToRemove.splice(0, itemsToRemove.length);
+  for (let i = 0; i < itemPanel.children.length; i++) {
+    itemsToRemove.push(itemPanel.children[i]);
+  }
+  moveChildren(itemPanel, target);
+  toFocus?.focus();
+}
+function hookupEvents(formDom) {
+  on(formDom, "list-all-invoices", () => {
+    window.location.href = routes.allInvoices();
+  });
+  on(formDom, "remove-last-item", () => {
+    itemsToRemove.forEach((item) => item.remove());
+    trigger(formDom, "change");
+  });
+  on(formDom, "add-another-item", () => {
+    if (!formDom.checkValidity())
+      return;
+    addAnotherItem(formDom);
+    trigger(formDom, "change");
+  });
+  on(formDom, "clear", () => {
+    location.href = routes.createInvoice();
+  });
+}
 function create(invoice) {
   console.log({ invoice });
   const form = /* @__PURE__ */ dom("form", {
@@ -5208,13 +5125,15 @@ function create(invoice) {
   }, "Show All")));
   const labor = form.querySelector("[name=labor]");
   const additional = form.querySelector("[name=additional]");
-  labor.addEventListener("change", () => form.dispatchEvent(new Event("change")));
-  additional.addEventListener("change", () => form.dispatchEvent(new Event("change")));
+  on(labor, "change", () => trigger(form, "change"));
+  on(additional, "change", () => trigger(form, "change"));
   const lineItemsTarget = form.querySelector(".line-items");
   const lineItems = invoice.items.map(renderInvoiceItem);
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
-  form.addEventListener("change", () => compute(form));
+  on(form, "change", () => compute(form));
+  hookupTriggers(form);
+  hookupEvents(form);
   compute(form);
   return form;
 }
@@ -5276,18 +5195,18 @@ function setupComputeOnLineItem(event, form) {
     const value = qty * price;
     console.log({ qty, price, value });
     totalInput.value = value.toFixed(2);
-    event.dispatchEvent(new Event("change"));
+    trigger(event, "change");
   };
-  quantityInput?.addEventListener("change", computeTotal);
-  priceInput?.addEventListener("change", computeTotal);
-  itemInput.addEventListener("change", () => {
+  on(quantityInput, "change", computeTotal);
+  on(priceInput, "change", computeTotal);
+  on(itemInput, "change", () => {
     const item = inventoryManager.getInventoryItemByCode(itemInput.value);
     if (!item)
       return;
     const price = parseFloat(priceInput.value);
     if (item.price !== price) {
       priceInput.value = item.price.toFixed(2);
-      priceInput.dispatchEvent(new Event("change"));
+      trigger(priceInput, "change");
     }
   });
 }
@@ -5387,21 +5306,14 @@ function create2(invoice) {
   return report;
 }
 
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
 // app/invoice/templates/invoices-grid.tsx
-function totalInvoice(invoice) {
-  let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
-}
-function renderInvoice(invoice) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
-    class: "col-1-4",
-    href: `invoice?id=${invoice.id}`
-  }, invoice.clientname), /* @__PURE__ */ dom("label", {
-    class: "col-5 align-right"
-  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "col-6 align-right"
-  }, totalInvoice(invoice).toFixed(2)));
-}
 function create3(invoices2) {
   const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
   const report = /* @__PURE__ */ dom("form", {
@@ -5431,28 +5343,40 @@ function create3(invoices2) {
     class: "button col-1-2",
     "data-event": "create-invoice"
   }, "Create Invoice")), report);
+  hookupTriggers(report);
   return report;
+}
+function totalInvoice(invoice) {
+  const total = sum(invoice.items.map((item) => item.total || 0));
+  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
+}
+function renderInvoice(invoice) {
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
+    class: "col-1-4",
+    href: `invoice?id=${invoice.id}`
+  }, invoice.clientname), /* @__PURE__ */ dom("label", {
+    class: "col-5 align-right"
+  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
+    class: "col-6 align-right"
+  }, totalInvoice(invoice).toFixed(2)));
 }
 
 // app/invoice/invoice.ts
-var formManager = new FormFactory();
-var itemsToRemove = [];
-function addAnotherItem(form) {
-  const itemPanel = renderInvoiceItem({
-    quantity: 1,
-    item: "",
-    price: 0,
-    total: 0
+function isDefined(value) {
+  return typeof value !== "undefined";
+}
+function get(formDom, key) {
+  if (!isDefined(formDom[key]))
+    throw `form element not found: ${key}`;
+  return formDom[key].value;
+}
+function set(formDom, values) {
+  const keys = Object.keys(values);
+  keys.forEach((key) => {
+    if (!isDefined(formDom[key]))
+      throw `form element not found: ${key}`;
+    formDom[key].value = values[key];
   });
-  setupComputeOnLineItem(form.formDom, itemPanel);
-  const toFocus = getFirstInput(itemPanel);
-  const target = form.formDom.querySelector(".line-items") || form.formDom;
-  itemsToRemove.splice(0, itemsToRemove.length);
-  for (let i = 0; i < itemPanel.children.length; i++) {
-    itemsToRemove.push(itemPanel.children[i]);
-  }
-  moveChildren(itemPanel, target);
-  toFocus?.focus();
 }
 function init() {
   const queryParams = new URLSearchParams(window.location.search);
@@ -5465,9 +5389,8 @@ function init() {
 async function renderInvoices(target) {
   const invoices2 = await invoices();
   const formDom = create3(invoices2);
-  const form = formManager.domAsForm(formDom);
   target.appendChild(formDom);
-  form.on("create-invoice", () => {
+  on(formDom, "create-invoice", () => {
     location.href = routes.createInvoice();
   });
 }
@@ -5492,56 +5415,35 @@ async function renderInvoice2(invoiceId) {
       additional: 0
     };
   }
-  const template = create(invoice);
-  template.classList.add("hidden");
-  document.body.appendChild(template);
-  const formDom = document.querySelector("#invoice-form");
-  if (!formDom)
-    throw "a form must be defined with id of 'invoice-form'";
-  const form = formManager.domAsForm(formDom);
-  const target = formDom.querySelector(".line-items") || formDom;
-  form.on("list-all-invoices", () => {
-    window.location.href = routes.allInvoices();
-  });
-  form.on("print", async () => {
-    if (await tryToSaveInvoice(form)) {
+  const formDom = create(invoice);
+  document.body.appendChild(formDom);
+  hookupEvents2(formDom);
+  trigger(formDom, "change");
+}
+function hookupEvents2(formDom) {
+  on(formDom, "print", async () => {
+    if (await tryToSaveInvoice(formDom)) {
       const requestModel = asModel(formDom);
       print(requestModel);
     }
   });
-  form.on("delete", async () => {
-    if (await tryToDeleteInvoice(form))
-      form.trigger("list-all-invoices");
+  on(formDom, "delete", async () => {
+    if (await tryToDeleteInvoice(formDom))
+      trigger(formDom, "list-all-invoices");
   });
-  form.on("submit", async () => {
-    if (await tryToSaveInvoice(form))
-      form.trigger("list-all-invoices");
+  on(formDom, "submit", async () => {
+    if (await tryToSaveInvoice(formDom))
+      trigger(formDom, "list-all-invoices");
   });
-  form.on("remove-last-item", () => {
-    itemsToRemove.forEach((item) => item.remove());
-    form.trigger("change");
-  });
-  form.on("add-another-item", () => {
-    if (!form.isValid())
-      return;
-    addAnotherItem(form);
-    form.trigger("change");
-  });
-  form.on("clear", () => {
-    location.href = routes.createInvoice();
-  });
-  template.classList.remove("hidden");
-  form.trigger("change");
 }
-async function tryToDeleteInvoice(form) {
-  const id = form.get("id");
+async function tryToDeleteInvoice(formDom) {
+  const id = get(formDom, "id");
   if (!id)
     throw "unable to delete this invoice";
   await deleteInvoice(id);
   return true;
 }
-async function tryToSaveInvoice(form) {
-  const { formDom } = form;
+async function tryToSaveInvoice(formDom) {
   if (!formDom.checkValidity()) {
     formDom.reportValidity();
     return false;
@@ -5557,7 +5459,7 @@ async function tryToSaveInvoice(form) {
   const requestModel = asModel(formDom);
   console.log({ requestModel });
   await save(requestModel);
-  form.set("id", requestModel.id);
+  set(formDom, { id: requestModel.id });
   return true;
 }
 function asModel(formDom) {
@@ -5608,9 +5510,6 @@ function print(invoice) {
   document.body.appendChild(toPrint);
   window.document.title = invoice.clientname;
   window.print();
-}
-function getFirstInput(itemPanel) {
-  return itemPanel.querySelector("input");
 }
 export {
   identify,

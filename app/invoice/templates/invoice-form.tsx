@@ -1,10 +1,57 @@
 import { dom } from "../../dom.js";
-import { forceDatalist } from "../../FormManager.js";
 import { asDateString } from "../../fun/asDateString.js";
 import { moveChildren } from "../../fun/dom.js";
+import { hookupTriggers } from "../../fun/hookupTriggers.js";
+import { on, trigger } from "../../fun/on.js";
 import { TAXRATE } from "../../globals.js";
-import { inventoryManager } from "../../InventoryManager.js";
+import { forceDatalist, inventoryManager } from "../../InventoryManager.js";
+import { routes } from "../../router.js";
 import { Invoice, InvoiceItem } from "../../services/invoices.js";
+
+const itemsToRemove = [] as Array<HTMLElement>;
+
+function getFirstInput(itemPanel: HTMLDivElement) {
+  return itemPanel.querySelector("input") as HTMLInputElement;
+}
+
+function addAnotherItem(formDom: HTMLFormElement) {
+  const itemPanel = renderInvoiceItem({
+    quantity: 1,
+    item: "",
+    price: 0,
+    total: 0,
+  });
+  setupComputeOnLineItem(formDom, itemPanel);
+  const toFocus = getFirstInput(itemPanel);
+  const target: HTMLElement = formDom.querySelector(".line-items") || formDom;
+  itemsToRemove.splice(0, itemsToRemove.length);
+  for (let i = 0; i < itemPanel.children.length; i++) {
+    itemsToRemove.push(itemPanel.children[i] as HTMLElement);
+  }
+  moveChildren(itemPanel, target);
+  toFocus?.focus();
+}
+
+function hookupEvents(formDom: HTMLFormElement) {
+  on(formDom, "list-all-invoices", () => {
+    window.location.href = routes.allInvoices();
+  });
+
+  on(formDom, "remove-last-item", () => {
+    itemsToRemove.forEach((item) => item.remove());
+    trigger(formDom, "change");
+  });
+
+  on(formDom, "add-another-item", () => {
+    if (!formDom.checkValidity()) return;
+    addAnotherItem(formDom);
+    trigger(formDom, "change");
+  });
+
+  on(formDom, "clear", () => {
+    location.href = routes.createInvoice();
+  });
+}
 
 export function create(invoice: Invoice): HTMLFormElement {
   console.log({ invoice });
@@ -136,19 +183,17 @@ export function create(invoice: Invoice): HTMLFormElement {
     "[name=additional]"
   ) as HTMLInputElement;
 
-  labor.addEventListener("change", () =>
-    form.dispatchEvent(new Event("change"))
-  );
+  on(labor, "change", () => trigger(form, "change"));
 
-  additional.addEventListener("change", () =>
-    form.dispatchEvent(new Event("change"))
-  );
+  on(additional, "change", () => trigger(form, "change"));
 
   const lineItemsTarget = form.querySelector(".line-items") as HTMLElement;
   const lineItems = invoice.items.map(renderInvoiceItem);
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
-  form.addEventListener("change", () => compute(form));
+  on(form, "change", () => compute(form));
+  hookupTriggers(form);
+  hookupEvents(form);
   compute(form);
   return form;
 }
@@ -168,7 +213,7 @@ function compute(form: HTMLFormElement) {
   total_due.value = grandTotal.toFixed(2);
 }
 
-export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
+function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
   const form: HTMLDivElement = (
     <div>
       <label class="form-label col-1-6">Item</label>
@@ -211,10 +256,7 @@ export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
   return form;
 }
 
-export function setupComputeOnLineItem(
-  event: HTMLElement,
-  form: HTMLDivElement
-) {
+function setupComputeOnLineItem(event: HTMLElement, form: HTMLDivElement) {
   const itemInput = form.querySelector("[name=item]") as HTMLInputElement;
   const quantityInput = form.querySelector(
     "[name=quantity]"
@@ -227,17 +269,17 @@ export function setupComputeOnLineItem(
     const value = qty * price;
     console.log({ qty, price, value });
     totalInput.value = value.toFixed(2);
-    event.dispatchEvent(new Event("change"));
+    trigger(event, "change");
   };
-  quantityInput?.addEventListener("change", computeTotal);
-  priceInput?.addEventListener("change", computeTotal);
-  itemInput.addEventListener("change", () => {
+  on(quantityInput, "change", computeTotal);
+  on(priceInput, "change", computeTotal);
+  on(itemInput, "change", () => {
     const item = inventoryManager.getInventoryItemByCode(itemInput.value);
     if (!item) return;
     const price = parseFloat(priceInput.value);
     if (item.price !== price) {
       priceInput.value = item.price.toFixed(2);
-      priceInput.dispatchEvent(new Event("change"));
+      trigger(priceInput, "change");
     }
   });
 }

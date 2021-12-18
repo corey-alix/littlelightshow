@@ -1,5 +1,4 @@
-import { FormFactory, FormManager } from "../FormManager.js";
-import { moveChildren } from "../fun/dom.js";
+import { on, trigger } from "../fun/on.js";
 import { inventoryManager } from "../InventoryManager.js";
 import { routes } from "../router.js";
 import {
@@ -11,34 +10,25 @@ import {
 } from "../services/invoices.js";
 
 export { identify } from "../identify.js";
-import {
-  create as createInvoiceFormTemplate,
-  renderInvoiceItem,
-  setupComputeOnLineItem,
-} from "./templates/invoice-form.js";
+import { create as createInvoiceFormTemplate } from "./templates/invoice-form.js";
 import { create as createInvoicePrintTemplate } from "./templates/invoice-print.js";
 import { create as createInvoicesGridTemplate } from "./templates/invoices-grid.js";
 
-const formManager = new FormFactory();
-const itemsToRemove = [] as Array<HTMLElement>;
+function isDefined(value: any) {
+  return typeof value !== "undefined";
+}
 
-function addAnotherItem(form: FormManager) {
-  const itemPanel = renderInvoiceItem({
-    quantity: 1,
-    item: "",
-    price: 0,
-    total: 0,
+function get(formDom: HTMLFormElement, key: string) {
+  if (!isDefined(formDom[key])) throw `form element not found: ${key}`;
+  return formDom[key].value;
+}
+
+function set(formDom: HTMLFormElement, values: object) {
+  const keys = Object.keys(values);
+  keys.forEach((key) => {
+    if (!isDefined(formDom[key])) throw `form element not found: ${key}`;
+    formDom[key].value = values[key];
   });
-  setupComputeOnLineItem(form.formDom, itemPanel);
-  const toFocus = getFirstInput(itemPanel);
-  const target: HTMLElement =
-    form.formDom.querySelector(".line-items") || form.formDom;
-  itemsToRemove.splice(0, itemsToRemove.length);
-  for (let i = 0; i < itemPanel.children.length; i++) {
-    itemsToRemove.push(itemPanel.children[i] as HTMLElement);
-  }
-  moveChildren(itemPanel, target);
-  toFocus?.focus();
 }
 
 export function init() {
@@ -53,9 +43,8 @@ export function init() {
 export async function renderInvoices(target: HTMLElement) {
   const invoices = await getAllInvoices();
   const formDom = createInvoicesGridTemplate(invoices);
-  const form = formManager.domAsForm(formDom);
   target.appendChild(formDom);
-  form.on("create-invoice", () => {
+  on(formDom, "create-invoice", () => {
     location.href = routes.createInvoice();
   });
 }
@@ -81,63 +70,40 @@ export async function renderInvoice(invoiceId?: string) {
       additional: 0,
     };
   }
-  const template = createInvoiceFormTemplate(invoice);
-  template.classList.add("hidden");
-  document.body.appendChild(template);
+  const formDom = createInvoiceFormTemplate(invoice);
+  document.body.appendChild(formDom);
 
-  const formDom = document.querySelector("#invoice-form") as HTMLFormElement;
-  if (!formDom) throw "a form must be defined with id of 'invoice-form'";
+  hookupEvents(formDom);
 
-  const form = formManager.domAsForm(formDom);
-  const target = formDom.querySelector(".line-items") || formDom;
+  trigger(formDom, "change");
+}
 
-  form.on("list-all-invoices", () => {
-    window.location.href = routes.allInvoices();
-  });
-
-  form.on("print", async () => {
-    if (await tryToSaveInvoice(form)) {
+function hookupEvents(formDom: HTMLFormElement) {
+  on(formDom, "print", async () => {
+    if (await tryToSaveInvoice(formDom)) {
       const requestModel = asModel(formDom);
       print(requestModel);
     }
   });
 
-  form.on("delete", async () => {
-    if (await tryToDeleteInvoice(form)) form.trigger("list-all-invoices");
+  on(formDom, "delete", async () => {
+    if (await tryToDeleteInvoice(formDom))
+      trigger(formDom, "list-all-invoices");
   });
 
-  form.on("submit", async () => {
-    if (await tryToSaveInvoice(form)) form.trigger("list-all-invoices");
+  on(formDom, "submit", async () => {
+    if (await tryToSaveInvoice(formDom)) trigger(formDom, "list-all-invoices");
   });
-
-  form.on("remove-last-item", () => {
-    itemsToRemove.forEach((item) => item.remove());
-    form.trigger("change");
-  });
-
-  form.on("add-another-item", () => {
-    if (!form.isValid()) return;
-    addAnotherItem(form);
-    form.trigger("change");
-  });
-
-  form.on("clear", () => {
-    location.href = routes.createInvoice();
-  });
-
-  template.classList.remove("hidden");
-  form.trigger("change");
 }
 
-async function tryToDeleteInvoice(form: FormManager) {
-  const id = form.get("id");
+async function tryToDeleteInvoice(formDom: HTMLFormElement) {
+  const id = get(formDom, "id");
   if (!id) throw "unable to delete this invoice";
   await deleteInvoice(id);
   return true;
 }
 
-async function tryToSaveInvoice(form: FormManager) {
-  const { formDom } = form;
+async function tryToSaveInvoice(formDom: HTMLFormElement) {
   if (!formDom.checkValidity()) {
     formDom.reportValidity();
     return false;
@@ -155,7 +121,7 @@ async function tryToSaveInvoice(form: FormManager) {
   const requestModel = asModel(formDom);
   console.log({ requestModel });
   await saveInvoice(requestModel);
-  form.set("id", requestModel.id);
+  set(formDom, { id: requestModel.id });
   return true;
 }
 
@@ -211,8 +177,4 @@ export function print(invoice: Invoice) {
   document.body.appendChild(toPrint);
   window.document.title = invoice.clientname;
   window.print();
-}
-
-function getFirstInput(itemPanel: HTMLDivElement) {
-  return itemPanel.querySelector("input") as HTMLInputElement;
 }

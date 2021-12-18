@@ -1,8 +1,5 @@
-import {
-  createGeneralLedgerGrid,
-  print,
-  printAll,
-} from "./templates/glgrid.js";
+import { create as createLedgerForm } from "./templates/glgrid.js";
+import { create as printLedger } from "./templates/print";
 export { identify } from "../identify.js";
 import { ledgers as loadLedgers } from "../services/gl.js";
 
@@ -12,10 +9,10 @@ export async function init(domNode: HTMLElement) {
   if (printId) {
     switch (printId) {
       case "all":
-        await printAll();
+        await printLedger();
         break;
       default:
-        await print(printId);
+        await printLedger(printId);
     }
     return;
   }
@@ -24,9 +21,9 @@ export async function init(domNode: HTMLElement) {
     const ledgers = await loadLedgers();
     const ledger = ledgers.find((l) => l.id === id);
     if (!ledger) throw `cannot find ledger: ${id}`;
-    domNode.appendChild(createGeneralLedgerGrid(ledger));
+    domNode.appendChild(createLedgerForm(ledger));
   } else {
-    const ledger = createGeneralLedgerGrid();
+    const ledger = createLedgerForm();
     domNode.appendChild(ledger);
   }
 }
