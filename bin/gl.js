@@ -4926,6 +4926,7 @@ function noZero(value) {
 
 // app/gl/templates/printDetail.tsx
 function printDetail(ledgers2) {
+  ledgers2 = [...ledgers2].sort((a, b) => a.date - b.date).reverse();
   const report = /* @__PURE__ */ dom("div", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {

@@ -5,6 +5,7 @@ import { asDateString } from "../../fun/asDateString";
 import { noZero } from "../../fun/isZero";
 
 export function printDetail(ledgers: (Ledger & { id: any })[]) {
+  ledgers = [...ledgers].sort((a, b) => a.date - b.date).reverse(); // clone and sort
   const report: HTMLElement = (
     <div class="grid-6">
       <div class="col-1-4 text">Account</div>
