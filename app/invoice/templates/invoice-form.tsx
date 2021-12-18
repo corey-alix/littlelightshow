@@ -2,6 +2,7 @@ import { dom } from "../../dom.js";
 import { forceDatalist } from "../../FormManager.js";
 import { asDateString } from "../../fun/asDateString.js";
 import { moveChildren } from "../../fun/dom.js";
+import { on, trigger } from "../../fun/on.js";
 import { TAXRATE } from "../../globals.js";
 import { inventoryManager } from "../../InventoryManager.js";
 import { Invoice, InvoiceItem } from "../../services/invoices.js";
@@ -136,19 +137,15 @@ export function create(invoice: Invoice): HTMLFormElement {
     "[name=additional]"
   ) as HTMLInputElement;
 
-  labor.addEventListener("change", () =>
-    form.dispatchEvent(new Event("change"))
-  );
+  on(labor, "change", () => trigger(form, "change"));
 
-  additional.addEventListener("change", () =>
-    form.dispatchEvent(new Event("change"))
-  );
+  on(additional, "change", () => trigger(form, "change"));
 
   const lineItemsTarget = form.querySelector(".line-items") as HTMLElement;
   const lineItems = invoice.items.map(renderInvoiceItem);
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
-  form.addEventListener("change", () => compute(form));
+  on(form, "change", () => compute(form));
   compute(form);
   return form;
 }
@@ -168,6 +165,7 @@ function compute(form: HTMLFormElement) {
   total_due.value = grandTotal.toFixed(2);
 }
 
+// TODO: make private
 export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
   const form: HTMLDivElement = (
     <div>
@@ -211,6 +209,7 @@ export function renderInvoiceItem(item: InvoiceItem): HTMLDivElement {
   return form;
 }
 
+// TODO: make private
 export function setupComputeOnLineItem(
   event: HTMLElement,
   form: HTMLDivElement
@@ -227,17 +226,17 @@ export function setupComputeOnLineItem(
     const value = qty * price;
     console.log({ qty, price, value });
     totalInput.value = value.toFixed(2);
-    event.dispatchEvent(new Event("change"));
+    trigger(event, "change");
   };
-  quantityInput?.addEventListener("change", computeTotal);
-  priceInput?.addEventListener("change", computeTotal);
-  itemInput.addEventListener("change", () => {
+  on(quantityInput, "change", computeTotal);
+  on(priceInput, "change", computeTotal);
+  on(itemInput, "change", () => {
     const item = inventoryManager.getInventoryItemByCode(itemInput.value);
     if (!item) return;
     const price = parseFloat(priceInput.value);
     if (item.price !== price) {
       priceInput.value = item.price.toFixed(2);
-      priceInput.dispatchEvent(new Event("change"));
+      trigger(priceInput, "change");
     }
   });
 }

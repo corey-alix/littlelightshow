@@ -4723,6 +4723,14 @@ var EventBus = class {
   }
 };
 
+// app/fun/on.ts
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  domNode.dispatchEvent(new Event(eventName));
+}
+
 // app/InventoryManager.ts
 var InventoryManager = class {
   constructor() {
@@ -4791,7 +4799,7 @@ var FormManager = class {
     button.classList.add("button");
     button.innerText = options.title;
     button.dataset.event = options.event;
-    button.addEventListener("click", () => {
+    on(button, "click", () => {
       this.trigger(options.event, { item: button });
     });
     return button;
@@ -4802,11 +4810,9 @@ var FormFactory = class {
     if (!dom2)
       throw "cannot create a form without a dom element";
     const form = new FormManager(dom2);
-    dom2.addEventListener("change", () => {
-      form.trigger("change");
-    });
+    on(dom2, "change", () => form.trigger("change"));
     dom2.querySelectorAll("[data-event]").forEach((eventItem) => {
-      eventItem.addEventListener("click", () => {
+      on(eventItem, "click", () => {
         const eventName = eventItem.dataset["event"];
         if (!eventName)
           throw "item must define a data-event";
@@ -5209,13 +5215,13 @@ function create(invoice) {
   }, "Show All")));
   const labor = form.querySelector("[name=labor]");
   const additional = form.querySelector("[name=additional]");
-  labor.addEventListener("change", () => form.dispatchEvent(new Event("change")));
-  additional.addEventListener("change", () => form.dispatchEvent(new Event("change")));
+  on(labor, "change", () => trigger(form, "change"));
+  on(additional, "change", () => trigger(form, "change"));
   const lineItemsTarget = form.querySelector(".line-items");
   const lineItems = invoice.items.map(renderInvoiceItem);
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
-  form.addEventListener("change", () => compute(form));
+  on(form, "change", () => compute(form));
   compute(form);
   return form;
 }
@@ -5277,18 +5283,18 @@ function setupComputeOnLineItem(event, form) {
     const value = qty * price;
     console.log({ qty, price, value });
     totalInput.value = value.toFixed(2);
-    event.dispatchEvent(new Event("change"));
+    trigger(event, "change");
   };
-  quantityInput?.addEventListener("change", computeTotal);
-  priceInput?.addEventListener("change", computeTotal);
-  itemInput.addEventListener("change", () => {
+  on(quantityInput, "change", computeTotal);
+  on(priceInput, "change", computeTotal);
+  on(itemInput, "change", () => {
     const item = inventoryManager.getInventoryItemByCode(itemInput.value);
     if (!item)
       return;
     const price = parseFloat(priceInput.value);
     if (item.price !== price) {
       priceInput.value = item.price.toFixed(2);
-      priceInput.dispatchEvent(new Event("change"));
+      trigger(priceInput, "change");
     }
   });
 }
@@ -5500,7 +5506,6 @@ async function renderInvoice2(invoiceId) {
   if (!formDom)
     throw "a form must be defined with id of 'invoice-form'";
   const form = formManager.domAsForm(formDom);
-  const target = formDom.querySelector(".line-items") || formDom;
   form.on("list-all-invoices", () => {
     window.location.href = routes.allInvoices();
   });

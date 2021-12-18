@@ -4880,14 +4880,22 @@ function setCurrency(input, value) {
   input.value = (value || 0).toFixed(2);
 }
 
+// app/fun/on.ts
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  domNode.dispatchEvent(new Event(eventName));
+}
+
 // app/fun/hookupTriggers.ts
 function hookupTriggers(domNode) {
   domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
-    eventItem.addEventListener("click", () => {
+    on(eventItem, "click", () => {
       const eventName = eventItem.dataset["event"];
       if (!eventName)
         throw "item must define a data-event";
-      domNode.dispatchEvent(new Event(eventName));
+      trigger(domNode, eventName);
     });
   });
 }
@@ -4956,7 +4964,7 @@ function hookupHandlers(domNode) {
     "total_debit",
     "total_error"
   ].map((name) => domNode.querySelector(`[name=${name}]`));
-  domNode.addEventListener("change", () => {
+  on(domNode, "change", () => {
     const debits = Array.from(domNode.querySelectorAll("[name=debit]")).map(asNumber);
     const credits = Array.from(domNode.querySelectorAll("[name=credit]")).map(asNumber);
     const debitTotal = sum(debits);
@@ -4969,10 +4977,10 @@ function hookupHandlers(domNode) {
     summaryArea.innerText = "";
     summaryArea.appendChild(summaryReport);
   });
-  domNode.addEventListener("print-all", async () => {
+  on(domNode, "print-all", async () => {
     location.href = routes.allLedgers();
   });
-  domNode.addEventListener("print", async () => {
+  on(domNode, "print", async () => {
     if (!domNode.reportValidity())
       return;
     if (asNumber(domNode["total_error"]) !== 0) {
@@ -4983,27 +4991,27 @@ function hookupHandlers(domNode) {
     await save(model);
     location.href = routes.printLedger(model.id);
   });
-  domNode.addEventListener("print-detail", async () => {
+  on(domNode, "print-detail", async () => {
     const ledgers2 = await ledgers();
     const report = printDetail(ledgers2);
     document.body.innerHTML = "";
     document.body.appendChild(report);
   });
-  domNode.addEventListener("print-summary", async () => {
+  on(domNode, "print-summary", async () => {
     const ledgers2 = await ledgers();
     const report = printSummary(ledgers2);
     document.body.innerHTML = "";
     document.body.appendChild(report);
   });
-  domNode.addEventListener("clear", async () => {
+  on(domNode, "clear", async () => {
     location.href = routes.createLedger();
   });
-  domNode.addEventListener("delete", async () => {
+  on(domNode, "delete", async () => {
     const id = domNode["id"].value;
     await deleteLedger(id);
     location.href = routes.allLedgers();
   });
-  domNode.addEventListener("submit", async () => {
+  on(domNode, "submit", async () => {
     if (!domNode.reportValidity())
       return;
     if (asNumber(domNode["total_error"]) !== 0) {
@@ -5014,7 +5022,7 @@ function hookupHandlers(domNode) {
     await save(model);
     location.reload();
   });
-  domNode.addEventListener("add-row", () => {
+  on(domNode, "add-row", () => {
     const row = createRow();
     const focus = row.querySelector("[name=account]");
     moveChildrenBefore(row, lineItems);
@@ -5292,11 +5300,11 @@ function createGeneralLedgerGrid(ledgerModel) {
       moveChildrenBefore(row, lineItems);
     });
   } else {
-    ledger.dispatchEvent(new Event("add-row"));
+    trigger(ledger, "add-row");
   }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
-  ledger.dispatchEvent(new Event("change"));
+  trigger(ledger, "change");
   return ledger;
 }
 

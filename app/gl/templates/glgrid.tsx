@@ -14,6 +14,7 @@ import { asNumber } from "../../fun/asNumber";
 import { setCurrency } from "../../fun/setCurrency";
 import { hookupTriggers } from "../../fun/hookupTriggers";
 import { routes } from "../../router.js";
+import { on, trigger } from "../../fun/on.js";
 
 function isZero(value: string) {
   if (value === "0.00") return true;
@@ -77,7 +78,7 @@ function hookupHandlers(domNode: HTMLFormElement) {
     "total_error",
   ].map((name) => domNode.querySelector(`[name=${name}]`) as HTMLInputElement);
 
-  domNode.addEventListener("change", () => {
+  on(domNode, "change", () => {
     const debits = Array.from(domNode.querySelectorAll("[name=debit]")).map(
       asNumber
     );
@@ -97,11 +98,11 @@ function hookupHandlers(domNode: HTMLFormElement) {
     summaryArea.appendChild(summaryReport);
   });
 
-  domNode.addEventListener("print-all", async () => {
+  on(domNode, "print-all", async () => {
     location.href = routes.allLedgers();
   });
 
-  domNode.addEventListener("print", async () => {
+  on(domNode, "print", async () => {
     if (!domNode.reportValidity()) return;
     if (0 !== asNumber(domNode["total_error"])) {
       alert("Total error must be zero");
@@ -113,31 +114,31 @@ function hookupHandlers(domNode: HTMLFormElement) {
     location.href = routes.printLedger(model.id);
   });
 
-  domNode.addEventListener("print-detail", async () => {
+  on(domNode, "print-detail", async () => {
     const ledgers = await loadAllLedgers();
     const report: HTMLElement = printDetail(ledgers);
     document.body.innerHTML = "";
     document.body.appendChild(report);
   });
 
-  domNode.addEventListener("print-summary", async () => {
+  on(domNode, "print-summary", async () => {
     const ledgers = await loadAllLedgers();
     const report = printSummary(ledgers);
     document.body.innerHTML = "";
     document.body.appendChild(report);
   });
 
-  domNode.addEventListener("clear", async () => {
+  on(domNode, "clear", async () => {
     location.href = routes.createLedger();
   });
 
-  domNode.addEventListener("delete", async () => {
+  on(domNode, "delete", async () => {
     const id = (domNode["id"] as any as HTMLInputElement).value;
     await deleteLedger(id);
     location.href = routes.allLedgers();
   });
 
-  domNode.addEventListener("submit", async () => {
+  on(domNode, "submit", async () => {
     if (!domNode.reportValidity()) return;
     if (0 !== asNumber(domNode["total_error"])) {
       alert("Total error must be zero");
@@ -148,7 +149,7 @@ function hookupHandlers(domNode: HTMLFormElement) {
     location.reload();
   });
 
-  domNode.addEventListener("add-row", () => {
+  on(domNode, "add-row", () => {
     const row = createRow();
     const focus = row.querySelector("[name=account]") as HTMLElement;
     moveChildrenBefore(row, lineItems);
@@ -424,10 +425,10 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
       moveChildrenBefore(row, lineItems);
     });
   } else {
-    ledger.dispatchEvent(new Event("add-row"));
+    trigger(ledger, "add-row");
   }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
-  ledger.dispatchEvent(new Event("change"));
+  trigger(ledger, "change");
   return ledger;
 }

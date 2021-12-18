@@ -89,7 +89,6 @@ export async function renderInvoice(invoiceId?: string) {
   if (!formDom) throw "a form must be defined with id of 'invoice-form'";
 
   const form = formManager.domAsForm(formDom);
-  const target = formDom.querySelector(".line-items") || formDom;
 
   form.on("list-all-invoices", () => {
     window.location.href = routes.allInvoices();

@@ -1,4 +1,5 @@
 import { EventBus } from "./EventBus.js";
+import { on } from "./fun/on.js";
 import { inventoryManager } from "./InventoryManager.js";
 
 export function forceDatalist() {
@@ -55,7 +56,7 @@ export class FormManager {
     button.classList.add("button");
     button.innerText = options.title;
     button.dataset.event = options.event;
-    button.addEventListener("click", () => {
+    on(button, "click", () => {
       this.trigger(options.event, { item: button });
     });
     return button;
@@ -68,12 +69,11 @@ export class FormFactory {
   domAsForm(dom: HTMLFormElement) {
     if (!dom) throw "cannot create a form without a dom element";
     const form = new FormManager(dom);
-    dom.addEventListener("change", () => {
-      form.trigger("change");
-    });
+    on(dom, "change", () => form.trigger("change"));
+
     // find all inputs with a 'data-event'
     dom.querySelectorAll("[data-event]").forEach((eventItem) => {
-      eventItem.addEventListener("click", () => {
+      on(eventItem, "click", () => {
         const eventName = (eventItem as HTMLInputElement).dataset["event"];
         if (!eventName) throw "item must define a data-event";
         form.trigger(eventName, { item: eventItem as HTMLInputElement });
