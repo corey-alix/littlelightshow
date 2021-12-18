@@ -4875,6 +4875,18 @@ function moveChildren(items, report) {
     report.appendChild(items.firstChild);
 }
 
+// app/router.ts
+var routes = {
+  home: () => "/index.html",
+  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
+  createInvoice: () => `/app/invoice/invoice.html`,
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
+  allInvoices: () => `/app/invoice/invoices.html`,
+  allLedgers: () => `/app/gl/index.html?print=all`,
+  printLedger: (id) => `/app/gl/index.html?print=${id}`,
+  createLedger: () => "/app/gl/index.html"
+};
+
 // app/services/invoices.ts
 var import_faunadb2 = __toModule(require_faunadb());
 
@@ -4969,14 +4981,6 @@ async function validate() {
   const client = createClient();
   return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
 }
-
-// app/router.ts
-var routes = {
-  home: () => "/index.html",
-  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
-  createInvoice: () => `/app/invoice/invoice.html`,
-  invoice: (id) => `/app/invoice/invoice.html?id=${id}`
-};
 
 // app/identify.ts
 async function identify() {
@@ -5465,7 +5469,7 @@ async function renderInvoices(target) {
   const form = formManager.domAsForm(formDom);
   target.appendChild(formDom);
   form.on("create-invoice", () => {
-    location.href = "invoice.html";
+    location.href = routes.createInvoice();
   });
 }
 async function renderInvoice2(invoiceId) {
@@ -5498,7 +5502,7 @@ async function renderInvoice2(invoiceId) {
   const form = formManager.domAsForm(formDom);
   const target = formDom.querySelector(".line-items") || formDom;
   form.on("list-all-invoices", () => {
-    window.location.href = "invoices.html";
+    window.location.href = routes.allInvoices();
   });
   form.on("print", async () => {
     if (await tryToSaveInvoice(form)) {
@@ -5525,7 +5529,7 @@ async function renderInvoice2(invoiceId) {
     form.trigger("change");
   });
   form.on("clear", () => {
-    location.href = "invoice.html";
+    location.href = routes.createInvoice();
   });
   template.classList.remove("hidden");
   form.trigger("change");

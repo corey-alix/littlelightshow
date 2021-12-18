@@ -12,8 +12,9 @@
     <div class="invoices"></div>
     <script type="module">
       import { identify, renderInvoices } from "/bin/invoice.js";
-      if (identify()) renderInvoices(document.querySelector(".invoices"));
-      else window.location.href = "/index.html";
+      identify().then(() =>
+        renderInvoices(document.querySelector(".invoices"))
+      );
     </script>
   </body>
 </html>

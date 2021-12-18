@@ -4745,7 +4745,11 @@ var routes = {
   home: () => "/index.html",
   identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
   createInvoice: () => `/app/invoice/invoice.html`,
-  invoice: (id) => `/app/invoice/invoice.html?id=${id}`
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
+  allInvoices: () => `/app/invoice/invoices.html`,
+  allLedgers: () => `/app/gl/index.html?print=all`,
+  printLedger: (id) => `/app/gl/index.html?print=${id}`,
+  createLedger: () => "/app/gl/index.html"
 };
 
 // app/identify.ts

@@ -4887,6 +4887,18 @@ function hookupTriggers(domNode) {
   });
 }
 
+// app/router.ts
+var routes = {
+  home: () => "/index.html",
+  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
+  createInvoice: () => `/app/invoice/invoice.html`,
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
+  allInvoices: () => `/app/invoice/invoices.html`,
+  allLedgers: () => `/app/gl/index.html?print=all`,
+  printLedger: (id) => `/app/gl/index.html?print=${id}`,
+  createLedger: () => "/app/gl/index.html"
+};
+
 // app/gl/templates/glgrid.tsx
 function isZero(value) {
   if (value === "0.00")
@@ -4952,7 +4964,7 @@ function hookupHandlers(domNode) {
     summaryArea.appendChild(summaryReport);
   });
   domNode.addEventListener("print-all", async () => {
-    location.href = `index.html?print=all`;
+    location.href = routes.allLedgers();
     await printAll();
   });
   domNode.addEventListener("print", async () => {
@@ -4964,7 +4976,7 @@ function hookupHandlers(domNode) {
     }
     const model = asModel(domNode);
     await save(model);
-    location.href = `index.html?print=${model.id}`;
+    location.href = routes.printLedger(model.id);
   });
   domNode.addEventListener("print-detail", async () => {
     const ledgers2 = await ledgers();
@@ -4979,7 +4991,7 @@ function hookupHandlers(domNode) {
     document.body.appendChild(report);
   });
   domNode.addEventListener("clear", async () => {
-    location.href = "index.html";
+    location.href = routes.createLedger();
   });
   domNode.addEventListener("submit", async () => {
     if (!domNode.reportValidity())
@@ -5278,14 +5290,6 @@ async function validate() {
   const client = createClient();
   return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
 }
-
-// app/router.ts
-var routes = {
-  home: () => "/index.html",
-  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
-  createInvoice: () => `/app/invoice/invoice.html`,
-  invoice: (id) => `/app/invoice/invoice.html?id=${id}`
-};
 
 // app/identify.ts
 async function identify() {

@@ -1,6 +1,7 @@
 import { FormFactory, FormManager } from "../FormManager.js";
 import { moveChildren } from "../fun/dom.js";
 import { inventoryManager } from "../InventoryManager.js";
+import { routes } from "../router.js";
 import {
   save as saveInvoice,
   deleteInvoice,
@@ -55,7 +56,7 @@ export async function renderInvoices(target: HTMLElement) {
   const form = formManager.domAsForm(formDom);
   target.appendChild(formDom);
   form.on("create-invoice", () => {
-    location.href = "invoice.html";
+    location.href = routes.createInvoice();
   });
 }
 
@@ -91,7 +92,7 @@ export async function renderInvoice(invoiceId?: string) {
   const target = formDom.querySelector(".line-items") || formDom;
 
   form.on("list-all-invoices", () => {
-    window.location.href = "invoices.html";
+    window.location.href = routes.allInvoices();
   });
 
   form.on("print", async () => {
@@ -121,7 +122,7 @@ export async function renderInvoice(invoiceId?: string) {
   });
 
   form.on("clear", () => {
-    location.href = "invoice.html";
+    location.href = routes.createInvoice();
   });
 
   template.classList.remove("hidden");

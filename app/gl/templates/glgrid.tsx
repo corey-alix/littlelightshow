@@ -12,6 +12,7 @@ import { sum } from "../../fun/sum";
 import { asNumber } from "../../fun/asNumber";
 import { setCurrency } from "../../fun/setCurrency";
 import { hookupTriggers } from "../../fun/hookupTriggers";
+import { routes } from "../../router.js";
 
 function isZero(value: string) {
   if (value === "0.00") return true;
@@ -91,7 +92,7 @@ function hookupHandlers(domNode: HTMLFormElement) {
   });
 
   domNode.addEventListener("print-all", async () => {
-    location.href = `index.html?print=all`;
+    location.href = routes.allLedgers();
     await printAll();
   });
 
@@ -104,7 +105,7 @@ function hookupHandlers(domNode: HTMLFormElement) {
     const model = asModel(domNode);
     await saveLedger(model);
 
-    location.href = `index.html?print=${model.id}`;
+    location.href = routes.printLedger(model.id);
   });
 
   domNode.addEventListener("print-detail", async () => {
@@ -122,7 +123,7 @@ function hookupHandlers(domNode: HTMLFormElement) {
   });
 
   domNode.addEventListener("clear", async () => {
-    location.href = "index.html";
+    location.href = routes.createLedger();
   });
 
   domNode.addEventListener("submit", async () => {
