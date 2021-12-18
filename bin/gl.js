@@ -5023,6 +5023,7 @@ function hookupHandlers(domNode) {
 }
 async function printAll() {
   const ledgers2 = await ledgers();
+  ledgers2.forEach((l) => l.date = l.date || Date.now());
   ledgers2.sort((a, b) => a.date - b.date).reverse();
   const report2 = printDetail(ledgers2);
   const report1 = printSummary(ledgers2);

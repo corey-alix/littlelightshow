@@ -158,6 +158,7 @@ function hookupHandlers(domNode: HTMLFormElement) {
 
 export async function printAll() {
   const ledgers = await loadAllLedgers();
+  ledgers.forEach((l) => (l.date = l.date || Date.now()));
   ledgers.sort((a, b) => a.date - b.date).reverse();
   const report2 = printDetail(ledgers);
   const report1 = printSummary(ledgers);

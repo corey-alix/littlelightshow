@@ -11,6 +11,17 @@ export async function importInvoicesToGeneralLedger() {
   let invoicesToImport = invoices.filter(
     (i) => !ledgers.find((l) => l.description === `INVOICE ${i.id}`)
   );
+
+  // update these invoices
+  invoices.forEach((i) => {
+    const ledger = ledgers.find((l) => l.description === `INVOICE ${i.id}`);
+    if (!ledger) return;
+    if (ledger.date === i.date) return;
+    // todo...any changes should be logged
+    ledger.date = i.date;
+    saveLedger(ledger);
+  });
+
   while (invoicesToImport.length) {
     const invoice = invoicesToImport.shift()!;
     const inventory = sum(invoice.items.map((i) => i.total));
