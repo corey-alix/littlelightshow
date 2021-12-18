@@ -8,14 +8,14 @@
     <title>Invoices</title>
     <link rel="stylesheet" href="./baseline.css" />
   </head>
-  <body class="no-holiday">
+  <body class="dark no-holiday">
+    <button class="button" data-event="invoice-to-gl">
+      Invoices -> General Ledger
+    </button>
+
     <script type="module">
-      import {
-        identify,
-        copyGeneralLedgerEntriesFromTodo,
-      } from "../bin/admin.js";
-      debugger;
-      identify(); //.then(copyGeneralLedgerEntriesFromTodo);
+      import { init } from "../bin/admin.js";
+      init();
     </script>
   </body>
 </html>

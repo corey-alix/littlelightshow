@@ -4933,7 +4933,6 @@ async function deleteInvoice(id) {
     throw "user must be signed in";
   const client = createClient();
   const result = await client.query(import_faunadb2.query.Delete(import_faunadb2.query.Ref(import_faunadb2.query.Collection(INVOICE_TABLE), id)));
-  debugger;
 }
 async function save(invoice) {
   if (!CURRENT_USER)

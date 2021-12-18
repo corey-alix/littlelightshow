@@ -5098,7 +5098,7 @@ function printDetail(ledgers2) {
       const credit = amount < 0 && -amount;
       totals[0] += debit || 0;
       totals[1] += credit || 0;
-      let currentDate = asDateString(new Date(ledger.date || item["date"]));
+      let currentDate = asDateString(new Date(ledger.date || Date.now()));
       const lineitem = /* @__PURE__ */ dom("div", null, currentDate != priorDate && /* @__PURE__ */ dom("div", {
         class: "col-1-6 date section-title"
       }, `${priorDate = currentDate}`), /* @__PURE__ */ dom("div", {
@@ -5216,7 +5216,15 @@ function createGeneralLedgerGrid(ledgerModel) {
     class: "button col-1",
     type: "button",
     "data-event": "add-row"
-  }, "Add Row"), /* @__PURE__ */ dom("div", {
+  }, "Add Row"), /* @__PURE__ */ dom("button", {
+    class: "button col-5",
+    type: "button",
+    "data-event": "submit"
+  }, "Save"), /* @__PURE__ */ dom("button", {
+    class: "button col-6",
+    type: "button",
+    "data-event": "delete"
+  }, "Delete"), /* @__PURE__ */ dom("div", {
     class: "vspacer-1 col-1-6"
   }), /* @__PURE__ */ dom("div", {
     class: "currency col-2-2"
@@ -5249,20 +5257,12 @@ function createGeneralLedgerGrid(ledgerModel) {
   }, /* @__PURE__ */ dom("button", {
     class: "button col-1",
     type: "button",
-    "data-event": "submit"
-  }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button col-1",
-    type: "button",
     "data-event": "print"
-  }, "Save and Print"), /* @__PURE__ */ dom("button", {
+  }, "Print"), /* @__PURE__ */ dom("button", {
     class: "button col-1",
     type: "button",
     "data-event": "clear"
   }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button col-1",
-    type: "button",
-    "data-event": "delete"
-  }, "Delete"), /* @__PURE__ */ dom("button", {
     class: "button col-1",
     type: "button",
     "data-event": "print-all"
@@ -5278,7 +5278,7 @@ function createGeneralLedgerGrid(ledgerModel) {
   }));
   if (ledgerModel) {
     const lineItems = ledger.querySelector("#end-of-line-items");
-    ledger["date"].value = asDateString(new Date(ledgerModel.date || ledgerModel.items[0]["date"]));
+    ledger["date"].value = asDateString(new Date(ledgerModel.date || Date.now()));
     ledger["description"].value = ledgerModel.description;
     ledgerModel.items.forEach((item) => {
       const row = createRow();

@@ -237,7 +237,7 @@ function printDetail(ledgers: (Ledger & { id: any })[]) {
         const credit = amount < 0 && -amount;
         totals[0] += debit || 0;
         totals[1] += credit || 0;
-        let currentDate = asDateString(new Date(ledger.date || item["date"]));
+        let currentDate = asDateString(new Date(ledger.date || Date.now()));
         const lineitem = (
           <div>
             {currentDate != priorDate && (
@@ -357,6 +357,12 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
       <button class="button col-1" type="button" data-event="add-row">
         Add Row
       </button>
+      <button class="button col-5" type="button" data-event="submit">
+        Save
+      </button>
+      <button class="button col-6" type="button" data-event="delete">
+        Delete
+      </button>
       <div class="vspacer-1 col-1-6"></div>
       <div class="currency col-2-2">Total Debit</div>
       <input
@@ -384,17 +390,11 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
       />
       <div class="col-1-6 vspacer-1"></div>
       <div class="col-1-6 flex">
-        <button class="button col-1" type="button" data-event="submit">
-          Save
-        </button>
         <button class="button col-1" type="button" data-event="print">
-          Save and Print
+          Print
         </button>
         <button class="button col-1" type="button" data-event="clear">
           Clear
-        </button>
-        <button class="button col-1" type="button" data-event="delete">
-          Delete
         </button>
         <button class="button col-1" type="button" data-event="print-all">
           Show All
@@ -409,7 +409,7 @@ export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
   if (ledgerModel) {
     const lineItems = ledger.querySelector("#end-of-line-items") as HTMLElement;
     ledger["date"].value = asDateString(
-      new Date(ledgerModel.date || ledgerModel.items[0]["date"])
+      new Date(ledgerModel.date || Date.now())
     );
     ledger["description"].value = ledgerModel.description;
     ledgerModel.items.forEach((item) => {

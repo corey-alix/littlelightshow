@@ -23,7 +23,7 @@ export async function deleteLedger(id: string) {
   return result;
 }
 
-export async function save(ledger: Ledger & { id: string }) {
+export async function save(ledger: Ledger & { id?: string }) {
   if (!CURRENT_USER) throw "user must be signed in";
 
   const client = createClient();

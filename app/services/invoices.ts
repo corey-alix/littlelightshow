@@ -29,7 +29,6 @@ export async function deleteInvoice(id: string) {
   const result = await client.query(
     q.Delete(q.Ref(q.Collection(INVOICE_TABLE), id))
   );
-  debugger;
 }
 
 export async function save(invoice: Invoice) {
