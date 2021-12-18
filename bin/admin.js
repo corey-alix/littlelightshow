@@ -526,9 +526,9 @@ var require_browser_ponyfill = __commonJS({
           var form = new FormData();
           body.trim().split("&").forEach(function(bytes) {
             if (bytes) {
-              var split = bytes.split("=");
-              var name = split.shift().replace(/\+/g, " ");
-              var value = split.join("=").replace(/\+/g, " ");
+              var split2 = bytes.split("=");
+              var name = split2.shift().replace(/\+/g, " ");
+              var value = split2.join("=").replace(/\+/g, " ");
               form.append(decodeURIComponent(name), decodeURIComponent(value));
             }
           });
@@ -4696,6 +4696,29 @@ var require_faunadb = __commonJS({
   }
 });
 
+// app/fun/sort.ts
+var sortOps = {
+  number: (a, b) => a - b,
+  "-number": (a, b) => -(a - b),
+  gl: (a, b) => a >= 0 ? a - b : b - a,
+  "abs(number)": (a, b) => Math.abs(a) - Math.abs(b),
+  "-abs(number)": (a, b) => -(Math.abs(a) - Math.abs(b)),
+  string: (a, b) => a.localeCompare(b),
+  date: (a, b) => a.valueOf() - b.valueOf(),
+  noop: () => 0
+};
+Array.prototype.sortBy = function(sortBy) {
+  return sort(this, sortBy);
+};
+function sort(items, sortBy) {
+  const keys = Object.keys(sortBy);
+  return [...items].sort((a, b) => {
+    let result = 0;
+    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
+    return result;
+  });
+}
+
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.06;
@@ -4854,87 +4877,99 @@ async function invoices() {
   }).sortBy({ date: "date" }).reverse();
 }
 
+// app/fun/split.ts
+function split(items, test) {
+  const result = [[], []];
+  items.forEach((i) => result[test(i) ? 0 : 1].push(i));
+  return result;
+}
+
 // app/services/admin.ts
 async function importInvoicesToGeneralLedger() {
   const invoices2 = await invoices();
   const ledgers2 = await ledgers();
-  let invoicesToImport = invoices2.filter((i) => !ledgers2.find((l) => l.description === `INVOICE ${i.id}`));
-  invoices2.forEach((i) => {
-    const ledger = ledgers2.find((l) => l.description === `INVOICE ${i.id}`);
+  const [invoicesToImport, invoicesToUpdate] = split(invoices2, (i) => !ledgers2.find((l) => l.description === `INVOICE ${i.id}`));
+  invoicesToUpdate.forEach(async (invoice) => {
+    const ledger = ledgers2.find((l) => l.description === `INVOICE ${invoice.id}`);
     if (!ledger)
-      return;
-    if (ledger.date === i.date)
-      return;
-    ledger.date = i.date;
-    save(ledger);
+      throw `ledger must exist for invoice: ${invoice.id}`;
+    const newLedger = { ...createLedger(invoice), id: ledger.id };
+    if (JSON.stringify([newLedger.date, newLedger.items]) !== JSON.stringify([ledger.date, ledger.items])) {
+      debugger;
+      await save({ ...newLedger, id: ledger.id });
+    }
   });
   while (invoicesToImport.length) {
     const invoice = invoicesToImport.shift();
-    const inventory = sum(invoice.items.map((i) => i.total));
-    const tax = inventory * TAXRATE;
-    const labor = invoice.labor;
-    const rent = invoice.additional > 0 ? invoice.additional : 0;
-    const discount = invoice.additional < 0 ? invoice.additional : 0;
-    const ledger = {
-      date: invoice.date,
-      description: `INVOICE ${invoice.id}`,
-      items: [
-        {
-          account: "AR",
-          amount: inventory,
-          comment: "INVENTORY"
-        },
-        {
-          account: "INVENTORY",
-          amount: -inventory,
-          comment: "INVENTORY"
-        },
-        {
-          account: "AR",
-          amount: tax,
-          comment: "TAX"
-        },
-        {
-          account: "TAX",
-          amount: -tax,
-          comment: "TAX"
-        },
-        {
-          account: "AR",
-          amount: rent,
-          comment: "RENT"
-        },
-        {
-          account: "RENT",
-          amount: -rent,
-          comment: "RENT"
-        },
-        {
-          account: "AR",
-          amount: labor,
-          comment: "LABOR"
-        },
-        {
-          account: "LABOR",
-          amount: -labor,
-          comment: "LABOR"
-        },
-        {
-          account: "AR",
-          amount: discount,
-          comment: "DISCOUNT"
-        },
-        {
-          account: "LABOR",
-          amount: -discount,
-          comment: "DISCOUNT"
-        }
-      ]
-    };
-    ledger.items = ledger.items.filter((i) => i.amount != 0);
+    const ledger = createLedger(invoice);
     await save(ledger);
     debugger;
   }
+}
+function createLedger(invoice) {
+  const inventory = sum(invoice.items.map((i) => i.total));
+  const tax = inventory * TAXRATE;
+  const labor = invoice.labor;
+  const rent = invoice.additional > 0 ? invoice.additional : 0;
+  const discount = invoice.additional < 0 ? invoice.additional : 0;
+  const ledger = {
+    date: invoice.date,
+    description: `INVOICE ${invoice.id}`,
+    items: [
+      {
+        account: "AR",
+        amount: inventory,
+        comment: "INVENTORY"
+      },
+      {
+        account: "INVENTORY",
+        amount: -inventory,
+        comment: "INVENTORY"
+      },
+      {
+        account: "AR",
+        amount: tax,
+        comment: "TAX"
+      },
+      {
+        account: "TAX",
+        amount: -tax,
+        comment: "TAX"
+      },
+      {
+        account: "AR",
+        amount: rent,
+        comment: "RENT"
+      },
+      {
+        account: "RENT",
+        amount: -rent,
+        comment: "RENT"
+      },
+      {
+        account: "AR",
+        amount: labor,
+        comment: "LABOR"
+      },
+      {
+        account: "LABOR",
+        amount: -labor,
+        comment: "LABOR"
+      },
+      {
+        account: "AR",
+        amount: discount,
+        comment: "DISCOUNT"
+      },
+      {
+        account: "LABOR",
+        amount: -discount,
+        comment: "DISCOUNT"
+      }
+    ]
+  };
+  ledger.items = ledger.items.filter((i) => i.amount != 0);
+  return ledger;
 }
 
 // app/admin.ts

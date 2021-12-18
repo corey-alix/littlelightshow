@@ -1,11 +1,9 @@
+import "./fun/sort.js";
+
 import { identify } from "./identify.js";
 import { hookupTriggers } from "./fun/hookupTriggers.js";
 
-import {
-  copyInvoicesFromTodo,
-  copyGeneralLedgerEntriesFromTodo,
-  importInvoicesToGeneralLedger,
-} from "./services/admin.js";
+import { importInvoicesToGeneralLedger } from "./services/admin.js";
 
 export async function init() {
   await identify();
