@@ -4924,9 +4924,35 @@ function noZero(value) {
   return isZero(value) ? "" : value;
 }
 
+// app/fun/sort.ts
+var sortOps = {
+  number: (a, b) => a - b,
+  "-number": (a, b) => -(a - b),
+  gl: (a, b) => a >= 0 ? a - b : b - a,
+  "abs(number)": (a, b) => Math.abs(a) - Math.abs(b),
+  "-abs(number)": (a, b) => -(Math.abs(a) - Math.abs(b)),
+  string: (a, b) => a.localeCompare(b),
+  date: (a, b) => a.valueOf() - b.valueOf(),
+  noop: () => 0
+};
+Array.prototype.sortBy = function(sortBy) {
+  return sort(this, sortBy);
+};
+function sort(items, sortBy) {
+  const keys = Object.keys(sortBy);
+  return [...items].sort((a, b) => {
+    let result = 0;
+    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
+    return result;
+  });
+}
+
 // app/gl/templates/printDetail.tsx
 function printDetail(ledgers2) {
-  ledgers2 = [...ledgers2].sort((a, b) => a.date - b.date).reverse();
+  ledgers2 = sort(ledgers2, {
+    date: "date",
+    id: "number"
+  }).reverse();
   const report = /* @__PURE__ */ dom("div", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
@@ -4941,7 +4967,7 @@ function printDetail(ledgers2) {
   const totals = [0, 0];
   let priorDate = "";
   ledgers2.forEach((ledger) => {
-    ledger.items.sort((a, b) => a.account.localeCompare(b.account)).forEach((item) => {
+    ledger.items.sortBy({ account: "string", amount: "gl" }).forEach((item) => {
       const amount = item.amount;
       const debit = amount >= 0 && amount;
       const credit = amount < 0 && -amount;
@@ -4982,7 +5008,7 @@ function printDetail(ledgers2) {
 function create(ledgers2) {
   const totals = {};
   ledgers2.forEach((l) => {
-    l.items.sort((a, b) => a.account.localeCompare(b.account)).forEach((item) => {
+    l.items.sortBy({ account: "string" }).forEach((item) => {
       totals[item.account] = totals[item.account] || { debit: 0, credit: 0 };
       if (item.amount < 0) {
         totals[item.account].credit -= item.amount;
@@ -5056,7 +5082,7 @@ function asModel(form) {
         break;
     }
   }
-  result.items = result.items.filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment).sort((a, b) => a.account.localeCompare(b.account));
+  result.items = result.items.filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment).sortBy({ account: "string" });
   return result;
 }
 function hookupHandlers(domNode) {

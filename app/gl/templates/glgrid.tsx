@@ -18,6 +18,7 @@ import { on, trigger } from "../../fun/on.js";
 import { printDetail } from "./printDetail";
 import { create as printSummary } from "./printSummary";
 import { isZero } from "../../fun/isZero";
+import { sort } from "../../fun/sort.js";
 
 function asModel(form: HTMLFormElement) {
   const result: Ledger & { id: string } = {
@@ -57,7 +58,7 @@ function asModel(form: HTMLFormElement) {
   // remove trivial items
   result.items = result.items
     .filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment)
-    .sort((a, b) => a.account.localeCompare(b.account));
+    .sortBy({ account: "string" });
   return result;
 }
 

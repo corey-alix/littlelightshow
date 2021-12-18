@@ -4851,7 +4851,7 @@ async function invoices() {
       item.total = (item.total || 0) - 0;
     });
     return invoice;
-  }).sort((a, b) => a.date - b.date).reverse();
+  }).sortBy({ date: "date" }).reverse();
 }
 
 // app/services/admin.ts

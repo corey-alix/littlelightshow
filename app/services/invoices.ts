@@ -84,6 +84,6 @@ export async function invoices() {
       });
       return invoice;
     })
-    .sort((a, b) => a.date - b.date)
+    .sortBy({ date: "date" })
     .reverse();
 }
