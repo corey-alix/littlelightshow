@@ -4769,14 +4769,22 @@ async function identify() {
   return true;
 }
 
+// app/fun/on.ts
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  domNode.dispatchEvent(new Event(eventName));
+}
+
 // app/fun/hookupTriggers.ts
 function hookupTriggers(domNode) {
   domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
-    eventItem.addEventListener("click", () => {
+    on(eventItem, "click", () => {
       const eventName = eventItem.dataset["event"];
       if (!eventName)
         throw "item must define a data-event";
-      domNode.dispatchEvent(new Event(eventName));
+      trigger(domNode, eventName);
     });
   });
 }
