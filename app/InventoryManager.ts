@@ -18,3 +18,19 @@ class InventoryManager {
 }
 
 export const inventoryManager = new InventoryManager();
+
+export function forceDatalist() {
+  let dataList = document.querySelector(
+    `#inventory_list`
+  ) as HTMLDataListElement;
+  if (dataList) return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = "inventory_list";
+  Object.entries(inventoryManager.inventory).forEach(([key, value]) => {
+    const option = document.createElement("option");
+    option.value = key;
+    dataList.appendChild(option);
+  });
+  document.body.appendChild(dataList);
+  return dataList;
+}

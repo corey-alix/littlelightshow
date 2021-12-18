@@ -2001,10 +2001,10 @@ var require_query = __commonJS({
         collection: wrap(collection)
       });
     }
-    function Paginate(set, opts) {
+    function Paginate(set2, opts) {
       arity.between(1, 2, arguments, Paginate.name);
       opts = util.defaults(opts, {});
-      return new Expr(objectAssign({ paginate: wrap(set) }, wrapValues(opts)));
+      return new Expr(objectAssign({ paginate: wrap(set2) }, wrapValues(opts)));
     }
     function Exists(ref, ts) {
       arity.between(1, 2, arguments, Exists.name);
@@ -2102,17 +2102,17 @@ var require_query = __commonJS({
       arity.min(1, arguments, Difference.name);
       return new Expr({ difference: wrap(varargs(arguments)) });
     }
-    function Distinct(set) {
+    function Distinct(set2) {
       arity.exact(1, arguments, Distinct.name);
-      return new Expr({ distinct: wrap(set) });
+      return new Expr({ distinct: wrap(set2) });
     }
     function Join(source, target) {
       arity.exact(2, arguments, Join.name);
       return new Expr({ join: wrap(source), with: wrap(target) });
     }
-    function Range(set, from, to) {
+    function Range(set2, from, to) {
       arity.exact(3, arguments, Range.name);
-      return new Expr({ range: wrap(set), from: wrap(from), to: wrap(to) });
+      return new Expr({ range: wrap(set2), from: wrap(from), to: wrap(to) });
     }
     function Login(ref, params2) {
       arity.exact(2, arguments, Login.name);
@@ -3083,7 +3083,7 @@ var require_PageHelper = __commonJS({
     "use strict";
     var query2 = require_query();
     var objectAssign = require_object_assign();
-    function PageHelper(client, set, params, options) {
+    function PageHelper(client, set2, params, options) {
       if (params === void 0) {
         params = {};
       }
@@ -3106,7 +3106,7 @@ var require_PageHelper = __commonJS({
       this.options = {};
       objectAssign(this.options, options);
       this.client = client;
-      this.set = set;
+      this.set = set2;
       this._faunaFunctions = [];
     }
     PageHelper.prototype.map = function(lambda) {
@@ -4696,32 +4696,11 @@ var require_faunadb = __commonJS({
   }
 });
 
-// app/EventBus.ts
-var EventBus = class {
-  constructor() {
-    this.handlers = {};
-  }
-  on(eventName, cb) {
-    if (!this.handlers[eventName])
-      this.handlers[eventName] = [];
-    this.handlers[eventName].push(cb);
-    return {
-      off: () => {
-        const i = this.handlers[eventName].indexOf(cb);
-        if (i >= 0)
-          this.handlers[eventName].splice(i, 1);
-      }
-    };
-  }
-  trigger(eventName, event) {
-    if (!this.handlers[eventName])
-      return;
-    this.handlers[eventName].forEach((cb) => cb(event));
-  }
-  destroy() {
-    this.handlers = {};
-  }
-};
+// app/fun/dom.ts
+function moveChildren(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
+}
 
 // app/fun/on.ts
 function on(domNode, eventName, cb) {
@@ -4747,8 +4726,6 @@ var InventoryManager = class {
   }
 };
 var inventoryManager = new InventoryManager();
-
-// app/FormManager.ts
 function forceDatalist() {
   let dataList = document.querySelector(`#inventory_list`);
   if (dataList)
@@ -4762,123 +4739,6 @@ function forceDatalist() {
   });
   document.body.appendChild(dataList);
   return dataList;
-}
-var FormManager = class {
-  constructor(formDom) {
-    this.formDom = formDom;
-    this.channel = new EventBus();
-  }
-  get(name) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    return input.value;
-  }
-  set(name, value) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    if (typeof value === "number")
-      input.valueAsNumber = value;
-    else
-      input.value = value || "";
-  }
-  isValid() {
-    this.formDom.reportValidity();
-    return this.formDom.checkValidity();
-  }
-  trigger(eventName, event) {
-    this.channel.trigger(eventName, event);
-  }
-  on(eventName, cb) {
-    this.channel.on(eventName, cb);
-  }
-  createButton(options) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.classList.add("button");
-    button.innerText = options.title;
-    button.dataset.event = options.event;
-    on(button, "click", () => {
-      this.trigger(options.event, { item: button });
-    });
-    return button;
-  }
-};
-var FormFactory = class {
-  domAsForm(dom2) {
-    if (!dom2)
-      throw "cannot create a form without a dom element";
-    const form = new FormManager(dom2);
-    on(dom2, "change", () => form.trigger("change"));
-    dom2.querySelectorAll("[data-event]").forEach((eventItem) => {
-      on(eventItem, "click", () => {
-        const eventName = eventItem.dataset["event"];
-        if (!eventName)
-          throw "item must define a data-event";
-        form.trigger(eventName, { item: eventItem });
-      });
-    });
-    return form;
-  }
-  asForm(fieldInfos) {
-    const fieldNames = Object.keys(fieldInfos);
-    const form = document.createElement("div");
-    fieldNames.forEach((fieldName) => {
-      const fieldInfo = fieldInfos[fieldName];
-      const label = document.createElement("label");
-      label.classList.add("form-label");
-      label.innerText = fieldInfo.label || fieldName;
-      const input = document.createElement("input");
-      if (fieldInfo.readonly)
-        input.readOnly = true;
-      if (fieldInfo.required)
-        input.required = true;
-      label.appendChild(input);
-      input.name = input.id = fieldName;
-      input.classList.add("field", fieldName, fieldInfo.type || "text");
-      switch (fieldInfo.type) {
-        case "currency":
-          input.type = "number";
-          label.classList.add("align-right");
-          input.setAttribute("step", "0.01");
-          break;
-        case "quantity":
-          input.type = "number";
-          label.classList.add("align-right");
-          break;
-        default:
-          label.classList.add("align-left");
-      }
-      if (fieldInfo.value) {
-        const fieldValue = fieldInfo.value;
-        if (typeof fieldValue == "boolean")
-          input.checked = fieldValue;
-        else if (typeof fieldValue == "number") {
-          switch (fieldInfo.type) {
-            case "currency":
-              input.value = fieldValue.toFixed(2);
-              break;
-            default:
-              input.valueAsNumber = fieldValue;
-              break;
-          }
-        } else
-          input.value = fieldValue;
-      }
-      if (fieldInfo.lookup) {
-        input.setAttribute("list", forceDatalist().id);
-      }
-      form.appendChild(label);
-    });
-    return form;
-  }
-};
-
-// app/fun/dom.ts
-function moveChildren(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
 }
 
 // app/router.ts
@@ -4939,7 +4799,6 @@ async function deleteInvoice(id) {
     throw "user must be signed in";
   const client = createClient();
   const result = await client.query(import_faunadb2.query.Delete(import_faunadb2.query.Ref(import_faunadb2.query.Collection(INVOICE_TABLE), id)));
-  debugger;
 }
 async function save(invoice) {
   if (!CURRENT_USER)
@@ -5083,6 +4942,18 @@ function asDateString(date = new Date()) {
   return date.toISOString().split("T")[0];
 }
 
+// app/fun/hookupTriggers.ts
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    on(eventItem, "click", () => {
+      const eventName = eventItem.dataset["event"];
+      if (!eventName)
+        throw "item must define a data-event";
+      trigger(domNode, eventName);
+    });
+  });
+}
+
 // app/invoice/templates/invoice-form.tsx
 function create(invoice) {
   console.log({ invoice });
@@ -5222,6 +5093,7 @@ function create(invoice) {
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
   on(form, "change", () => compute(form));
+  hookupTriggers(form);
   compute(form);
   return form;
 }
@@ -5438,22 +5310,38 @@ function create3(invoices2) {
     class: "button col-1-2",
     "data-event": "create-invoice"
   }, "Create Invoice")), report);
+  hookupTriggers(report);
   return report;
 }
 
 // app/invoice/invoice.ts
-var formManager = new FormFactory();
+function isDefined(value) {
+  return typeof value !== "undefined";
+}
+function get(formDom, key) {
+  if (!isDefined(formDom[key]))
+    throw `form element not found: ${key}`;
+  return formDom[key].value;
+}
+function set(formDom, values) {
+  const keys = Object.keys(values);
+  keys.forEach((key) => {
+    if (!isDefined(formDom[key]))
+      throw `form element not found: ${key}`;
+    formDom[key].value = values[key];
+  });
+}
 var itemsToRemove = [];
-function addAnotherItem(form) {
+function addAnotherItem(formDom) {
   const itemPanel = renderInvoiceItem({
     quantity: 1,
     item: "",
     price: 0,
     total: 0
   });
-  setupComputeOnLineItem(form.formDom, itemPanel);
+  setupComputeOnLineItem(formDom, itemPanel);
   const toFocus = getFirstInput(itemPanel);
-  const target = form.formDom.querySelector(".line-items") || form.formDom;
+  const target = formDom.querySelector(".line-items") || formDom;
   itemsToRemove.splice(0, itemsToRemove.length);
   for (let i = 0; i < itemPanel.children.length; i++) {
     itemsToRemove.push(itemPanel.children[i]);
@@ -5472,9 +5360,8 @@ function init() {
 async function renderInvoices(target) {
   const invoices2 = await invoices();
   const formDom = create3(invoices2);
-  const form = formManager.domAsForm(formDom);
   target.appendChild(formDom);
-  form.on("create-invoice", () => {
+  on(formDom, "create-invoice", () => {
     location.href = routes.createInvoice();
   });
 }
@@ -5499,55 +5386,48 @@ async function renderInvoice2(invoiceId) {
       additional: 0
     };
   }
-  const template = create(invoice);
-  template.classList.add("hidden");
-  document.body.appendChild(template);
-  const formDom = document.querySelector("#invoice-form");
-  if (!formDom)
-    throw "a form must be defined with id of 'invoice-form'";
-  const form = formManager.domAsForm(formDom);
-  form.on("list-all-invoices", () => {
+  const formDom = create(invoice);
+  document.body.appendChild(formDom);
+  on(formDom, "list-all-invoices", () => {
     window.location.href = routes.allInvoices();
   });
-  form.on("print", async () => {
-    if (await tryToSaveInvoice(form)) {
+  on(formDom, "print", async () => {
+    if (await tryToSaveInvoice(formDom)) {
       const requestModel = asModel(formDom);
       print(requestModel);
     }
   });
-  form.on("delete", async () => {
-    if (await tryToDeleteInvoice(form))
-      form.trigger("list-all-invoices");
+  on(formDom, "delete", async () => {
+    if (await tryToDeleteInvoice(formDom))
+      trigger(formDom, "list-all-invoices");
   });
-  form.on("submit", async () => {
-    if (await tryToSaveInvoice(form))
-      form.trigger("list-all-invoices");
+  on(formDom, "submit", async () => {
+    if (await tryToSaveInvoice(formDom))
+      trigger(formDom, "list-all-invoices");
   });
-  form.on("remove-last-item", () => {
+  on(formDom, "remove-last-item", () => {
     itemsToRemove.forEach((item) => item.remove());
-    form.trigger("change");
+    trigger(formDom, "change");
   });
-  form.on("add-another-item", () => {
-    if (!form.isValid())
+  on(formDom, "add-another-item", () => {
+    if (!formDom.checkValidity())
       return;
-    addAnotherItem(form);
-    form.trigger("change");
+    addAnotherItem(formDom);
+    trigger(formDom, "change");
   });
-  form.on("clear", () => {
+  on(formDom, "clear", () => {
     location.href = routes.createInvoice();
   });
-  template.classList.remove("hidden");
-  form.trigger("change");
+  trigger(formDom, "change");
 }
-async function tryToDeleteInvoice(form) {
-  const id = form.get("id");
+async function tryToDeleteInvoice(formDom) {
+  const id = get(formDom, "id");
   if (!id)
     throw "unable to delete this invoice";
   await deleteInvoice(id);
   return true;
 }
-async function tryToSaveInvoice(form) {
-  const { formDom } = form;
+async function tryToSaveInvoice(formDom) {
   if (!formDom.checkValidity()) {
     formDom.reportValidity();
     return false;
@@ -5563,7 +5443,7 @@ async function tryToSaveInvoice(form) {
   const requestModel = asModel(formDom);
   console.log({ requestModel });
   await save(requestModel);
-  form.set("id", requestModel.id);
+  set(formDom, { id: requestModel.id });
   return true;
 }
 function asModel(formDom) {

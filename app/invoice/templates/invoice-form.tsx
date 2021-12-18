@@ -1,10 +1,10 @@
 import { dom } from "../../dom.js";
-import { forceDatalist } from "../../FormManager.js";
 import { asDateString } from "../../fun/asDateString.js";
 import { moveChildren } from "../../fun/dom.js";
+import { hookupTriggers } from "../../fun/hookupTriggers.js";
 import { on, trigger } from "../../fun/on.js";
 import { TAXRATE } from "../../globals.js";
-import { inventoryManager } from "../../InventoryManager.js";
+import { forceDatalist, inventoryManager } from "../../InventoryManager.js";
 import { Invoice, InvoiceItem } from "../../services/invoices.js";
 
 export function create(invoice: Invoice): HTMLFormElement {
@@ -146,6 +146,7 @@ export function create(invoice: Invoice): HTMLFormElement {
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
   on(form, "change", () => compute(form));
+  hookupTriggers(form);
   compute(form);
   return form;
 }

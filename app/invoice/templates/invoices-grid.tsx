@@ -1,5 +1,6 @@
 import { dom } from "../../dom.js";
 import { moveChildren } from "../../fun/dom.js";
+import { hookupTriggers } from "../../fun/hookupTriggers.js";
 import { TAXRATE } from "../../globals.js";
 import { Invoice } from "../../services/invoices.js";
 
@@ -21,6 +22,7 @@ function renderInvoice(invoice: Invoice): HTMLDivElement {
     </div>
   );
 }
+
 export function create(invoices: Invoice[]) {
   const total = invoices.map(totalInvoice).reduce((a, b) => a + b, 0);
 
@@ -46,5 +48,8 @@ export function create(invoices: Invoice[]) {
     </div>,
     report
   );
+
+  hookupTriggers(report);
+
   return report;
 }
