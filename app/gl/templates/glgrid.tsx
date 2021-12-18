@@ -1,5 +1,5 @@
 import { dom } from "../../dom.js";
-import { moveChildren, moveChildrenBefore } from "../../fun/dom.js";
+import { moveChildrenBefore } from "../../fun/dom.js";
 import {
   Ledger,
   LedgerItem,
@@ -15,16 +15,9 @@ import { setCurrency } from "../../fun/setCurrency";
 import { hookupTriggers } from "../../fun/hookupTriggers";
 import { routes } from "../../router.js";
 import { on, trigger } from "../../fun/on.js";
-
-function isZero(value: string) {
-  if (value === "0.00") return true;
-  if (value === "-0.00") return true;
-  return false;
-}
-
-function noZero(value: string) {
-  return isZero(value) ? "" : value;
-}
+import { printDetail } from "./printDetail";
+import { create as printSummary } from "./printSummary";
+import { isZero } from "../../fun/isZero";
 
 function asModel(form: HTMLFormElement) {
   const result: Ledger & { id: string } = {
@@ -157,30 +150,6 @@ function hookupHandlers(domNode: HTMLFormElement) {
   });
 }
 
-export async function printAll() {
-  const ledgers = await loadAllLedgers();
-  ledgers.sort((a, b) => a.date - b.date).reverse();
-  const report2 = printDetail(ledgers);
-  const report1 = printSummary(ledgers);
-  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
-  document.body.appendChild(report1);
-  document.body.appendChild(<div class="vspacer-2"></div>);
-  document.body.appendChild(report2);
-}
-
-export async function print(id: string) {
-  const ledgers = await loadAllLedgers();
-  const ledger = ledgers.find((l) => l.id === id);
-  if (!ledger) throw "ledger not found";
-  const report2 = printDetail([ledger]);
-  const report1 = printSummary([ledger]);
-  document.body.innerHTML = "";
-  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
-  document.body.appendChild(report1);
-  document.body.appendChild(<div class="vspacer-2"></div>);
-  document.body.appendChild(report2);
-}
-
 function createRow(): HTMLElement {
   return (
     <form>
@@ -217,112 +186,7 @@ function createRow(): HTMLElement {
   );
 }
 
-function printDetail(ledgers: (Ledger & { id: any })[]) {
-  const report: HTMLElement = (
-    <div class="grid-6">
-      <div class="col-1-4 text">Account</div>
-      <div class="col-5 currency">Debit</div>
-      <div class="col-6 currency">Credit</div>
-      <div class="line col-1-6"></div>
-    </div>
-  );
-  const totals = [0, 0];
-  let priorDate: string = "";
-
-  ledgers.forEach((ledger) => {
-    ledger.items
-      .sort((a, b) => a.account.localeCompare(b.account))
-      .forEach((item) => {
-        const amount = item.amount;
-        const debit = amount >= 0 && amount;
-        const credit = amount < 0 && -amount;
-        totals[0] += debit || 0;
-        totals[1] += credit || 0;
-        let currentDate = asDateString(new Date(ledger.date || item["date"]));
-        const lineitem = (
-          <div>
-            {currentDate != priorDate && (
-              <div class="col-1-6 date section-title">{`${(priorDate =
-                currentDate)}`}</div>
-            )}
-            <div class="col-1-4 text">{item.account}</div>
-            <div class="col-5 currency">{debit && debit.toFixed(2)}</div>
-            <div class="col-6 currency">{credit && credit.toFixed(2)}</div>
-            <div class="col-1-6 text">
-              <a href={`/app/gl/index.html?id=${ledger.id}`}>
-                {item.comment || "no comment"}
-              </a>
-            </div>
-            <div class="vspacer-2"></div>
-          </div>
-        );
-        moveChildren(lineitem, report);
-      });
-  });
-  moveChildren(
-    <div>
-      <div class="line col-1-6"></div>
-      <div class="col-5 currency">{totals[0].toFixed(2)}</div>
-      <div class="col-6 currency">{totals[1].toFixed(2)}</div>
-      <div class="col-6 currency">
-        {noZero((totals[0] - totals[1]).toFixed(2))}
-      </div>
-    </div>,
-    report
-  );
-  return report;
-}
-
-function printSummary(ledgers: (Ledger & { id: any })[]) {
-  const totals: Record<string, { debit: number; credit: number }> = {};
-  ledgers.forEach((l) => {
-    l.items
-      .sort((a, b) => a.account.localeCompare(b.account))
-      .forEach((item) => {
-        totals[item.account] = totals[item.account] || { debit: 0, credit: 0 };
-        if (item.amount < 0) {
-          totals[item.account].credit -= item.amount;
-        } else {
-          totals[item.account].debit += item.amount;
-        }
-      });
-  });
-
-  let grandTotal = 0;
-  const reportItems = Object.keys(totals)
-    .sort()
-    .map((account) => {
-      const total = totals[account];
-      grandTotal += total.debit - total.credit;
-      return (
-        <div>
-          <div class="col-1-4">{account}</div>
-          <div class="currency col-5">{noZero(total.debit.toFixed(2))}</div>
-          <div class="currency col-6">{noZero(total.credit.toFixed(2))}</div>
-        </div>
-      );
-    });
-  const report = (
-    <div class="grid-6 col-1-6">
-      <div class="col-1-4 line">Account</div>
-      <div class="col-5 line currency">Debit</div>
-      <div class="col-6 line currency">Credit</div>
-    </div>
-  );
-  reportItems.forEach((item) => moveChildren(item, report));
-  moveChildren(
-    <div>
-      <div class="col-1-6 line"></div>
-      <div class="col-1-6 vspacer-1"></div>
-      <div class="col-1-4">Imbalance</div>
-      <div class="currency col-6 bold">{grandTotal.toFixed(2)}</div>
-    </div>,
-    report
-  );
-  return report;
-}
-
-export function createGeneralLedgerGrid(ledgerModel?: Ledger & { id: string }) {
+export function create(ledgerModel?: Ledger & { id: string }) {
   const ledger: HTMLFormElement = (
     <form class="grid-6">
       <input hidden name="id" value={ledgerModel?.id || ""} />

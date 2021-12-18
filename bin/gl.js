@@ -4912,7 +4912,7 @@ var routes = {
   createLedger: () => "/app/gl/index.html"
 };
 
-// app/gl/templates/glgrid.tsx
+// app/fun/isZero.ts
 function isZero(value) {
   if (value === "0.00")
     return true;
@@ -4923,168 +4923,8 @@ function isZero(value) {
 function noZero(value) {
   return isZero(value) ? "" : value;
 }
-function asModel(form) {
-  const result = {
-    id: "",
-    items: [],
-    date: new Date().valueOf()
-  };
-  const data = new FormData(form);
-  result.id = data.get("id") || "";
-  const batchDate = data.get("date");
-  result.date = new Date(batchDate).valueOf();
-  result.description = data.get("description") || "";
-  let currentItem;
-  for (let [key, value] of data.entries()) {
-    switch (key) {
-      case "account":
-        currentItem = {};
-        result.items.push(currentItem);
-        currentItem.account = value;
-        break;
-      case "debit":
-        currentItem.amount = (currentItem.amount || 0) + parseFloat(value || "0");
-        break;
-      case "credit":
-        currentItem.amount = (currentItem.amount || 0) - parseFloat(value || "0");
-        break;
-      case "comment":
-        currentItem.comment = value;
-        break;
-    }
-  }
-  result.items = result.items.filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment).sort((a, b) => a.account.localeCompare(b.account));
-  return result;
-}
-function hookupHandlers(domNode) {
-  const lineItems = domNode.querySelector("#end-of-line-items");
-  const summaryArea = domNode.querySelector("#summary-area");
-  const [totalCredits, totalDebits, totalError] = [
-    "total_credit",
-    "total_debit",
-    "total_error"
-  ].map((name) => domNode.querySelector(`[name=${name}]`));
-  on(domNode, "change", () => {
-    const debits = Array.from(domNode.querySelectorAll("[name=debit]")).map(asNumber);
-    const credits = Array.from(domNode.querySelectorAll("[name=credit]")).map(asNumber);
-    const debitTotal = sum(debits);
-    const creditTotal = sum(credits);
-    setCurrency(totalDebits, debitTotal);
-    setCurrency(totalCredits, creditTotal);
-    setCurrency(totalError, debitTotal - creditTotal);
-    const ledger = asModel(domNode);
-    const summaryReport = printSummary([ledger]);
-    summaryArea.innerText = "";
-    summaryArea.appendChild(summaryReport);
-  });
-  on(domNode, "print-all", async () => {
-    location.href = routes.allLedgers();
-  });
-  on(domNode, "print", async () => {
-    if (!domNode.reportValidity())
-      return;
-    if (asNumber(domNode["total_error"]) !== 0) {
-      alert("Total error must be zero");
-      return;
-    }
-    const model = asModel(domNode);
-    await save(model);
-    location.href = routes.printLedger(model.id);
-  });
-  on(domNode, "print-detail", async () => {
-    const ledgers2 = await ledgers();
-    const report = printDetail(ledgers2);
-    document.body.innerHTML = "";
-    document.body.appendChild(report);
-  });
-  on(domNode, "print-summary", async () => {
-    const ledgers2 = await ledgers();
-    const report = printSummary(ledgers2);
-    document.body.innerHTML = "";
-    document.body.appendChild(report);
-  });
-  on(domNode, "clear", async () => {
-    location.href = routes.createLedger();
-  });
-  on(domNode, "delete", async () => {
-    const id = domNode["id"].value;
-    await deleteLedger(id);
-    location.href = routes.allLedgers();
-  });
-  on(domNode, "submit", async () => {
-    if (!domNode.reportValidity())
-      return;
-    if (asNumber(domNode["total_error"]) !== 0) {
-      alert("Total error must be zero");
-      return;
-    }
-    const model = asModel(domNode);
-    await save(model);
-    location.reload();
-  });
-  on(domNode, "add-row", () => {
-    const row = createRow();
-    const focus = row.querySelector("[name=account]");
-    moveChildrenBefore(row, lineItems);
-    focus.focus();
-  });
-}
-async function printAll() {
-  const ledgers2 = await ledgers();
-  ledgers2.sort((a, b) => a.date - b.date).reverse();
-  const report2 = printDetail(ledgers2);
-  const report1 = printSummary(ledgers2);
-  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
-  document.body.appendChild(report1);
-  document.body.appendChild(/* @__PURE__ */ dom("div", {
-    class: "vspacer-2"
-  }));
-  document.body.appendChild(report2);
-}
-async function print(id) {
-  const ledgers2 = await ledgers();
-  const ledger = ledgers2.find((l) => l.id === id);
-  if (!ledger)
-    throw "ledger not found";
-  const report2 = printDetail([ledger]);
-  const report1 = printSummary([ledger]);
-  document.body.innerHTML = "";
-  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
-  document.body.appendChild(report1);
-  document.body.appendChild(/* @__PURE__ */ dom("div", {
-    class: "vspacer-2"
-  }));
-  document.body.appendChild(report2);
-}
-function createRow() {
-  return /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("input", {
-    class: "col-1-2",
-    name: "account",
-    required: true,
-    type: "text",
-    placeholder: "account",
-    list: "listOfAccounts"
-  }), /* @__PURE__ */ dom("input", {
-    name: "debit",
-    class: "currency col-3-2",
-    type: "number",
-    step: "0.01",
-    placeholder: "debit"
-  }), /* @__PURE__ */ dom("input", {
-    name: "credit",
-    class: "currency col-5-2",
-    type: "number",
-    step: "0.01",
-    placeholder: "credit"
-  }), /* @__PURE__ */ dom("input", {
-    name: "comment",
-    class: "text col-1-6",
-    type: "text",
-    placeholder: "comment"
-  }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-6"
-  }));
-}
+
+// app/gl/templates/printDetail.tsx
 function printDetail(ledgers2) {
   const report = /* @__PURE__ */ dom("div", {
     class: "grid-6"
@@ -5136,7 +4976,9 @@ function printDetail(ledgers2) {
   }, noZero((totals[0] - totals[1]).toFixed(2)))), report);
   return report;
 }
-function printSummary(ledgers2) {
+
+// app/gl/templates/printSummary.tsx
+function create(ledgers2) {
   const totals = {};
   ledgers2.forEach((l) => {
     l.items.sort((a, b) => a.account.localeCompare(b.account)).forEach((item) => {
@@ -5181,7 +5023,144 @@ function printSummary(ledgers2) {
   }, grandTotal.toFixed(2))), report);
   return report;
 }
-function createGeneralLedgerGrid(ledgerModel) {
+
+// app/gl/templates/glgrid.tsx
+function asModel(form) {
+  const result = {
+    id: "",
+    items: [],
+    date: new Date().valueOf()
+  };
+  const data = new FormData(form);
+  result.id = data.get("id") || "";
+  const batchDate = data.get("date");
+  result.date = new Date(batchDate).valueOf();
+  result.description = data.get("description") || "";
+  let currentItem;
+  for (let [key, value] of data.entries()) {
+    switch (key) {
+      case "account":
+        currentItem = {};
+        result.items.push(currentItem);
+        currentItem.account = value;
+        break;
+      case "debit":
+        currentItem.amount = (currentItem.amount || 0) + parseFloat(value || "0");
+        break;
+      case "credit":
+        currentItem.amount = (currentItem.amount || 0) - parseFloat(value || "0");
+        break;
+      case "comment":
+        currentItem.comment = value;
+        break;
+    }
+  }
+  result.items = result.items.filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment).sort((a, b) => a.account.localeCompare(b.account));
+  return result;
+}
+function hookupHandlers(domNode) {
+  const lineItems = domNode.querySelector("#end-of-line-items");
+  const summaryArea = domNode.querySelector("#summary-area");
+  const [totalCredits, totalDebits, totalError] = [
+    "total_credit",
+    "total_debit",
+    "total_error"
+  ].map((name) => domNode.querySelector(`[name=${name}]`));
+  on(domNode, "change", () => {
+    const debits = Array.from(domNode.querySelectorAll("[name=debit]")).map(asNumber);
+    const credits = Array.from(domNode.querySelectorAll("[name=credit]")).map(asNumber);
+    const debitTotal = sum(debits);
+    const creditTotal = sum(credits);
+    setCurrency(totalDebits, debitTotal);
+    setCurrency(totalCredits, creditTotal);
+    setCurrency(totalError, debitTotal - creditTotal);
+    const ledger = asModel(domNode);
+    const summaryReport = create([ledger]);
+    summaryArea.innerText = "";
+    summaryArea.appendChild(summaryReport);
+  });
+  on(domNode, "print-all", async () => {
+    location.href = routes.allLedgers();
+  });
+  on(domNode, "print", async () => {
+    if (!domNode.reportValidity())
+      return;
+    if (asNumber(domNode["total_error"]) !== 0) {
+      alert("Total error must be zero");
+      return;
+    }
+    const model = asModel(domNode);
+    await save(model);
+    location.href = routes.printLedger(model.id);
+  });
+  on(domNode, "print-detail", async () => {
+    const ledgers2 = await ledgers();
+    const report = printDetail(ledgers2);
+    document.body.innerHTML = "";
+    document.body.appendChild(report);
+  });
+  on(domNode, "print-summary", async () => {
+    const ledgers2 = await ledgers();
+    const report = create(ledgers2);
+    document.body.innerHTML = "";
+    document.body.appendChild(report);
+  });
+  on(domNode, "clear", async () => {
+    location.href = routes.createLedger();
+  });
+  on(domNode, "delete", async () => {
+    const id = domNode["id"].value;
+    await deleteLedger(id);
+    location.href = routes.allLedgers();
+  });
+  on(domNode, "submit", async () => {
+    if (!domNode.reportValidity())
+      return;
+    if (asNumber(domNode["total_error"]) !== 0) {
+      alert("Total error must be zero");
+      return;
+    }
+    const model = asModel(domNode);
+    await save(model);
+    location.reload();
+  });
+  on(domNode, "add-row", () => {
+    const row = createRow();
+    const focus = row.querySelector("[name=account]");
+    moveChildrenBefore(row, lineItems);
+    focus.focus();
+  });
+}
+function createRow() {
+  return /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("input", {
+    class: "col-1-2",
+    name: "account",
+    required: true,
+    type: "text",
+    placeholder: "account",
+    list: "listOfAccounts"
+  }), /* @__PURE__ */ dom("input", {
+    name: "debit",
+    class: "currency col-3-2",
+    type: "number",
+    step: "0.01",
+    placeholder: "debit"
+  }), /* @__PURE__ */ dom("input", {
+    name: "credit",
+    class: "currency col-5-2",
+    type: "number",
+    step: "0.01",
+    placeholder: "credit"
+  }), /* @__PURE__ */ dom("input", {
+    name: "comment",
+    class: "text col-1-6",
+    type: "text",
+    placeholder: "comment"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer-1 col-1-6"
+  }));
+}
+function create2(ledgerModel) {
   const ledger = /* @__PURE__ */ dom("form", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("input", {
@@ -5308,6 +5287,25 @@ function createGeneralLedgerGrid(ledgerModel) {
   return ledger;
 }
 
+// app/gl/templates/print.tsx
+async function create3(id) {
+  let ledgers2 = await ledgers();
+  if (id) {
+    ledgers2 = ledgers2.filter((l) => l.id === id);
+  }
+  if (!ledgers2.length)
+    throw "ledger not found";
+  const report2 = printDetail(ledgers2);
+  const report1 = create(ledgers2);
+  document.body.innerHTML = "";
+  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
+  document.body.appendChild(report1);
+  document.body.appendChild(/* @__PURE__ */ dom("div", {
+    class: "vspacer-2"
+  }));
+  document.body.appendChild(report2);
+}
+
 // app/services/validateAccessToken.ts
 var import_faunadb3 = __toModule(require_faunadb());
 var { query } = import_faunadb3.default;
@@ -5340,10 +5338,10 @@ async function init(domNode) {
   if (printId) {
     switch (printId) {
       case "all":
-        await printAll();
+        await create3();
         break;
       default:
-        await print(printId);
+        await create3(printId);
     }
     return;
   }
@@ -5353,9 +5351,9 @@ async function init(domNode) {
     const ledger = ledgers2.find((l) => l.id === id);
     if (!ledger)
       throw `cannot find ledger: ${id}`;
-    domNode.appendChild(createGeneralLedgerGrid(ledger));
+    domNode.appendChild(create2(ledger));
   } else {
-    const ledger = createGeneralLedgerGrid();
+    const ledger = create2();
     domNode.appendChild(ledger);
   }
 }
