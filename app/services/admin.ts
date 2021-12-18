@@ -25,3 +25,26 @@ export async function copyInvoicesFromTodo() {
     );
   });
 }
+
+export async function copyGeneralLedgerEntriesFromTodo() {
+  const client = createClient();
+
+  const result = (await client.query(
+    q.Map(
+      q.Paginate(q.Documents(q.Collection("Todos")), { size: 25 }),
+      q.Lambda("ref", q.Get(q.Var("ref")))
+    )
+  )) as { data: Array<{ data: Invoice }> };
+
+  const records = result.data.map((v) => v.data);
+
+  records.forEach(async (record, index) => {
+    console.log("copying invoice", record);
+    const priorKey = record.id;
+    const result = await client.query(
+      q.Create(q.Collection("general_ledger"), {
+        data: { ...record, priorKey },
+      })
+    );
+  });
+}

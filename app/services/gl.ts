@@ -1,7 +1,7 @@
 import { query as q } from "faunadb";
 import { createClient, CURRENT_USER } from "../globals.js";
 
-const LEDGER_TABLE = "Todos";
+const LEDGER_TABLE = "general_ledger";
 
 export interface LedgerItem {
   comment: string;

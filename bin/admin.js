@@ -3111,15 +3111,15 @@ var require_PageHelper = __commonJS({
     }
     PageHelper.prototype.map = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q2) {
-        return query2.Map(q2, lambda);
+      rv._faunaFunctions.push(function(q3) {
+        return query2.Map(q3, lambda);
       });
       return rv;
     };
     PageHelper.prototype.filter = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q2) {
-        return query2.Filter(q2, lambda);
+      rv._faunaFunctions.push(function(q3) {
+        return query2.Filter(q3, lambda);
       });
       return rv;
     };
@@ -3188,13 +3188,13 @@ var require_PageHelper = __commonJS({
           cursorOpts.before = null;
         }
       }
-      var q2 = query2.Paginate(this.set, opts);
+      var q3 = query2.Paginate(this.set, opts);
       if (this._faunaFunctions.length > 0) {
         this._faunaFunctions.forEach(function(lambda) {
-          q2 = lambda(q2);
+          q3 = lambda(q3);
         });
       }
-      return this.client.query(q2, this.options);
+      return this.client.query(q3, this.options);
     };
     PageHelper.prototype._clone = function() {
       return Object.create(PageHelper.prototype, {
@@ -4329,7 +4329,7 @@ var require_stream = __commonJS({
     var errors = require_errors();
     var json = require_json();
     var http = require_http3();
-    var q2 = require_query();
+    var q3 = require_query();
     var util = require_util();
     var DefaultEvents = ["start", "error", "version", "history_rewrite"];
     var DocumentStreamEvents = DefaultEvents.concat(["snapshot"]);
@@ -4339,14 +4339,14 @@ var require_stream = __commonJS({
       });
       this._client = client;
       this._onEvent = onEvent;
-      this._query = q2.wrap(expression);
+      this._query = q3.wrap(expression);
       this._urlParams = options.fields ? { fields: options.fields.join(",") } : null;
       this._abort = new AbortController();
       this._state = "idle";
     }
     StreamClient.prototype.snapshot = function() {
       var self2 = this;
-      self2._client.query(q2.Get(self2._query)).then(function(doc) {
+      self2._client.query(q3.Get(self2._query)).then(function(doc) {
         self2._onEvent({
           type: "snapshot",
           event: doc
@@ -4768,13 +4768,37 @@ async function identify() {
   return true;
 }
 
-// app/admin.ts
-function run() {
-  debugger;
+// app/services/admin.ts
+var import_faunadb3 = __toModule(require_faunadb());
+async function copyInvoicesFromTodo() {
+  const client = createClient();
+  const result = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Documents(import_faunadb3.query.Collection("Todos")), { size: 25 }), import_faunadb3.query.Lambda("ref", import_faunadb3.query.Get(import_faunadb3.query.Var("ref")))));
+  const invoices = result.data.map((v) => v.data);
+  invoices.forEach(async (invoice, index) => {
+    console.log("copying invoice", invoice);
+    const priorKey = invoice.id;
+    const id = 1001 + index;
+    const result2 = await client.query(import_faunadb3.query.Create(import_faunadb3.query.Collection("invoices"), {
+      data: { ...invoice, priorKey, id }
+    }));
+  });
+}
+async function copyGeneralLedgerEntriesFromTodo() {
+  const client = createClient();
+  const result = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Documents(import_faunadb3.query.Collection("Todos")), { size: 25 }), import_faunadb3.query.Lambda("ref", import_faunadb3.query.Get(import_faunadb3.query.Var("ref")))));
+  const records = result.data.map((v) => v.data);
+  records.forEach(async (record, index) => {
+    console.log("copying invoice", record);
+    const priorKey = record.id;
+    const result2 = await client.query(import_faunadb3.query.Create(import_faunadb3.query.Collection("general_ledger"), {
+      data: { ...record, priorKey }
+    }));
+  });
 }
 export {
-  identify,
-  run
+  copyGeneralLedgerEntriesFromTodo,
+  copyInvoicesFromTodo,
+  identify
 };
 /*
 object-assign

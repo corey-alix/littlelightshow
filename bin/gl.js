@@ -4819,7 +4819,7 @@ function createClient() {
 }
 
 // app/services/gl.ts
-var LEDGER_TABLE = "Todos";
+var LEDGER_TABLE = "general_ledger";
 async function deleteLedger(id) {
   const client = createClient();
   const result = await client.query(import_faunadb2.query.Delete(import_faunadb2.query.Ref(import_faunadb2.query.Collection(LEDGER_TABLE), id)));
@@ -4971,7 +4971,6 @@ function hookupHandlers(domNode) {
   });
   domNode.addEventListener("print-all", async () => {
     location.href = routes.allLedgers();
-    await printAll();
   });
   domNode.addEventListener("print", async () => {
     if (!domNode.reportValidity())
@@ -5132,7 +5131,7 @@ function printDetail(ledgers2) {
 function printSummary(ledgers2) {
   const totals = {};
   ledgers2.forEach((l) => {
-    l.items.forEach((item) => {
+    l.items.sort((a, b) => a.account.localeCompare(b.account)).forEach((item) => {
       totals[item.account] = totals[item.account] || { debit: 0, credit: 0 };
       if (item.amount < 0) {
         totals[item.account].credit -= item.amount;

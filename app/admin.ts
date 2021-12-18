@@ -1,6 +1,5 @@
 export { identify } from "./identify.js";
-import { copyInvoicesFromTodo } from "./services/admin.js";
-
-export function run() {
-  debugger;
-}
+export {
+  copyInvoicesFromTodo,
+  copyGeneralLedgerEntriesFromTodo,
+} from "./services/admin.js";

@@ -99,7 +99,6 @@ function hookupHandlers(domNode: HTMLFormElement) {
 
   domNode.addEventListener("print-all", async () => {
     location.href = routes.allLedgers();
-    await printAll();
   });
 
   domNode.addEventListener("print", async () => {
@@ -274,14 +273,16 @@ function printDetail(ledgers: (Ledger & { id: any })[]) {
 function printSummary(ledgers: (Ledger & { id: any })[]) {
   const totals: Record<string, { debit: number; credit: number }> = {};
   ledgers.forEach((l) => {
-    l.items.forEach((item) => {
-      totals[item.account] = totals[item.account] || { debit: 0, credit: 0 };
-      if (item.amount < 0) {
-        totals[item.account].credit -= item.amount;
-      } else {
-        totals[item.account].debit += item.amount;
-      }
-    });
+    l.items
+      .sort((a, b) => a.account.localeCompare(b.account))
+      .forEach((item) => {
+        totals[item.account] = totals[item.account] || { debit: 0, credit: 0 };
+        if (item.amount < 0) {
+          totals[item.account].credit -= item.amount;
+        } else {
+          totals[item.account].debit += item.amount;
+        }
+      });
   });
 
   let grandTotal = 0;

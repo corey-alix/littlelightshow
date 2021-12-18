@@ -10,9 +10,12 @@
   </head>
   <body class="no-holiday">
     <script type="module">
-      import { identify, run } from "../bin/admin.js";
+      import {
+        identify,
+        copyGeneralLedgerEntriesFromTodo,
+      } from "../bin/admin.js";
       debugger;
-      identify().then(run);
+      identify(); //.then(copyGeneralLedgerEntriesFromTodo);
     </script>
   </body>
 </html>
