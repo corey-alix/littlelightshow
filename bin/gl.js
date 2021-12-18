@@ -5092,7 +5092,7 @@ function printDetail(ledgers2) {
   const totals = [0, 0];
   let priorDate = "";
   ledgers2.forEach((ledger) => {
-    ledger.items.forEach((item) => {
+    ledger.items.sort((a, b) => a.account.localeCompare(b.account)).forEach((item) => {
       const amount = item.amount;
       const debit = amount >= 0 && amount;
       const credit = amount < 0 && -amount;
