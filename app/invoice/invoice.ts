@@ -1,3 +1,4 @@
+import "../fun/sort.js"; // force Array.sortBy extension
 import { on, trigger } from "../fun/on.js";
 import { inventoryManager } from "../InventoryManager.js";
 import { routes } from "../router.js";

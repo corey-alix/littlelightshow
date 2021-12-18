@@ -3,13 +3,14 @@ import { moveChildren } from "../../fun/dom.js";
 import { Ledger } from "../../services/gl.js";
 import { asDateString } from "../../fun/asDateString";
 import { noZero } from "../../fun/isZero";
-import { sort } from "../../fun/sort";
 
 export function printDetail(ledgers: (Ledger & { id: any })[]) {
-  ledgers = sort(ledgers, {
-    date: "date",
-    id: "number",
-  }).reverse(); // clone and sort
+  ledgers = ledgers
+    .sortBy({
+      date: "date",
+      id: "number",
+    })
+    .reverse(); // clone and sort
   const report: HTMLElement = (
     <div class="grid-6">
       <div class="col-1-4 text">Account</div>
