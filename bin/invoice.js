@@ -4979,10 +4979,20 @@ function hookupTriggers(domNode) {
   });
 }
 
+// app/fun/behavior/select-on-focus.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+
+// app/fun/behavior/form.ts
+function selectNumericInputOnFocus(form) {
+  const items = Array.from(form.querySelectorAll("input[type=number]"));
+  items.forEach(selectOnFocus);
+}
+
 // app/invoice/templates/invoice-form.tsx
 var itemsToRemove = [];
 function create(invoice) {
-  console.log({ invoice });
   const form = /* @__PURE__ */ dom("form", {
     class: "grid-6",
     id: "invoice-form"
@@ -5121,6 +5131,7 @@ function create(invoice) {
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
   on(form, "change", () => compute(form));
+  selectNumericInputOnFocus(form);
   hookupTriggers(form);
   hookupEvents(form);
   compute(form);
@@ -5143,6 +5154,7 @@ function addAnotherItem(formDom) {
   for (let i = 0; i < itemPanel.children.length; i++) {
     itemsToRemove.push(itemPanel.children[i]);
   }
+  selectNumericInputOnFocus(itemPanel);
   moveChildren(itemPanel, target);
   toFocus?.focus();
 }

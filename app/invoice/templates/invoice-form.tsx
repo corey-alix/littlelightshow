@@ -2,6 +2,7 @@ import { dom } from "../../dom.js";
 import { asDateString } from "../../fun/asDateString.js";
 import { moveChildren } from "../../fun/dom.js";
 import { hookupTriggers } from "../../fun/hookupTriggers.js";
+import { selectNumericInputOnFocus } from "../../fun/behavior/form.js";
 import {
   on,
   trigger,
@@ -23,7 +24,6 @@ const itemsToRemove =
 export function create(
   invoice: Invoice
 ): HTMLFormElement {
-  console.log({ invoice });
   const form: HTMLFormElement = (
     <form
       class="grid-6"
@@ -239,6 +239,8 @@ export function create(
   on(form, "change", () =>
     compute(form)
   );
+
+  selectNumericInputOnFocus(form);
   hookupTriggers(form);
   hookupEvents(form);
   compute(form);
@@ -287,6 +289,7 @@ function addAnotherItem(
       ] as HTMLElement
     );
   }
+  selectNumericInputOnFocus(itemPanel);
   moveChildren(itemPanel, target);
   toFocus?.focus();
 }
