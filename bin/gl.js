@@ -4909,7 +4909,8 @@ var routes = {
   allInvoices: () => `/app/invoice/invoices.html`,
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
-  createLedger: () => "/app/gl/index.html"
+  createLedger: () => "/app/gl/index.html",
+  dashboard: () => "/app/index.html"
 };
 
 // app/fun/isZero.ts
@@ -5028,6 +5029,35 @@ function create(ledgers2) {
   return report;
 }
 
+// app/gl/AccountManager.ts
+var AccountManager = class {
+  constructor() {
+    this.accounts = {};
+  }
+  save() {
+    localStorage.setItem("accounts", JSON.stringify(this.accounts));
+  }
+  reload() {
+    this.accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
+  }
+};
+var accountManager = new AccountManager();
+accountManager.reload();
+function forceDatalist() {
+  let dataList = document.querySelector(`#inventory_list`);
+  if (dataList)
+    return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = "listOfAccounts";
+  Object.entries(accountManager.accounts).forEach(([key, value]) => {
+    const option = document.createElement("option");
+    option.value = key;
+    dataList.appendChild(option);
+  });
+  document.body.appendChild(dataList);
+  return dataList;
+}
+
 // app/gl/templates/glgrid.tsx
 function asModel(form) {
   const result = {
@@ -5041,7 +5071,10 @@ function asModel(form) {
   result.date = new Date(batchDate).valueOf();
   result.description = data.get("description") || "";
   let currentItem;
-  for (let [key, value] of data.entries()) {
+  for (let [
+    key,
+    value
+  ] of data.entries()) {
     switch (key) {
       case "account":
         currentItem = {};
@@ -5065,7 +5098,11 @@ function asModel(form) {
 function hookupHandlers(domNode) {
   const lineItems = domNode.querySelector("#end-of-line-items");
   const summaryArea = domNode.querySelector("#summary-area");
-  const [totalCredits, totalDebits, totalError] = [
+  const [
+    totalCredits,
+    totalDebits,
+    totalError
+  ] = [
     "total_credit",
     "total_debit",
     "total_error"
@@ -5079,7 +5116,9 @@ function hookupHandlers(domNode) {
     setCurrency(totalCredits, creditTotal);
     setCurrency(totalError, debitTotal - creditTotal);
     const ledger = asModel(domNode);
-    const summaryReport = create([ledger]);
+    const summaryReport = create([
+      ledger
+    ]);
     summaryArea.innerText = "";
     summaryArea.appendChild(summaryReport);
   });
@@ -5165,15 +5204,14 @@ function createRow() {
   }));
 }
 function create2(ledgerModel) {
+  forceDatalist();
   const ledger = /* @__PURE__ */ dom("form", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("input", {
     hidden: true,
     name: "id",
     value: ledgerModel?.id || ""
-  }), /* @__PURE__ */ dom("datalist", {
-    id: "listOfAccounts"
-  }, /* @__PURE__ */ dom("option", null, "AP"), /* @__PURE__ */ dom("option", null, "AR"), /* @__PURE__ */ dom("option", null, "CASH"), /* @__PURE__ */ dom("option", null, "MOM/DAD"), /* @__PURE__ */ dom("option", null, "INVENTORY")), /* @__PURE__ */ dom("div", {
+  }), /* @__PURE__ */ dom("div", {
     class: "date col-1"
   }, "Date"), /* @__PURE__ */ dom("input", {
     class: "col-2-5",

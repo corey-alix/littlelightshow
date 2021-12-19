@@ -4773,7 +4773,8 @@ var routes = {
   allInvoices: () => `/app/invoice/invoices.html`,
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
-  createLedger: () => "/app/gl/index.html"
+  createLedger: () => "/app/gl/index.html",
+  dashboard: () => "/app/index.html"
 };
 
 // app/identify.ts
@@ -4970,6 +4971,21 @@ function createLedger(invoice) {
   return ledger;
 }
 
+// app/gl/AccountManager.ts
+var AccountManager = class {
+  constructor() {
+    this.accounts = {};
+  }
+  save() {
+    localStorage.setItem("accounts", JSON.stringify(this.accounts));
+  }
+  reload() {
+    this.accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
+  }
+};
+var accountManager = new AccountManager();
+accountManager.reload();
+
 // app/admin.ts
 async function init() {
   await identify();
@@ -4979,6 +4995,19 @@ async function init() {
     if (!confirm("import invoices into general ledger?"))
       return;
     await importInvoicesToGeneralLedger();
+  });
+  domNode.addEventListener("gl-to-list-of-accounts", async () => {
+    debugger;
+    const ledgers2 = await ledgers();
+    const accounts = accountManager.accounts;
+    ledgers2.forEach((l) => l.items.forEach((item) => {
+      if (!accounts[item.account]) {
+        accounts[item.account] = {
+          code: item.account
+        };
+      }
+    }));
+    accountManager.save();
   });
 }
 export {

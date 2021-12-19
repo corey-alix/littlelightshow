@@ -6,14 +6,24 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
     />
     <title>Invoices</title>
-    <link rel="stylesheet" href="../baseline.css" />
+    <link
+      rel="stylesheet"
+      href="../baseline.css"
+    />
   </head>
   <body class="dark no-holiday">
     <div class="invoices"></div>
     <script type="module">
-      import { identify, renderInvoices } from "/bin/invoice.js";
+      import {
+        identify,
+        renderInvoices,
+      } from "/bin/invoice.js";
       identify().then(() =>
-        renderInvoices(document.querySelector(".invoices"))
+        renderInvoices(
+          document.querySelector(
+            ".invoices"
+          )
+        )
       );
     </script>
   </body>

@@ -4727,7 +4727,7 @@ function trigger(domNode, eventName) {
   domNode.dispatchEvent(new Event(eventName));
 }
 
-// app/InventoryManager.ts
+// app/inventory/InventoryManager.ts
 var InventoryManager = class {
   constructor() {
     this.inventory = JSON.parse(localStorage.getItem("inventory") || "{}");
@@ -4767,7 +4767,8 @@ var routes = {
   allInvoices: () => `/app/invoice/invoices.html`,
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
-  createLedger: () => "/app/gl/index.html"
+  createLedger: () => "/app/gl/index.html",
+  dashboard: () => "/app/index.html"
 };
 
 // app/services/invoices.ts
@@ -4979,44 +4980,6 @@ function hookupTriggers(domNode) {
 
 // app/invoice/templates/invoice-form.tsx
 var itemsToRemove = [];
-function getFirstInput(itemPanel) {
-  return itemPanel.querySelector("input");
-}
-function addAnotherItem(formDom) {
-  const itemPanel = renderInvoiceItem({
-    quantity: 1,
-    item: "",
-    price: 0,
-    total: 0
-  });
-  setupComputeOnLineItem(formDom, itemPanel);
-  const toFocus = getFirstInput(itemPanel);
-  const target = formDom.querySelector(".line-items") || formDom;
-  itemsToRemove.splice(0, itemsToRemove.length);
-  for (let i = 0; i < itemPanel.children.length; i++) {
-    itemsToRemove.push(itemPanel.children[i]);
-  }
-  moveChildren(itemPanel, target);
-  toFocus?.focus();
-}
-function hookupEvents(formDom) {
-  on(formDom, "list-all-invoices", () => {
-    window.location.href = routes.allInvoices();
-  });
-  on(formDom, "remove-last-item", () => {
-    itemsToRemove.forEach((item) => item.remove());
-    trigger(formDom, "change");
-  });
-  on(formDom, "add-another-item", () => {
-    if (!formDom.checkValidity())
-      return;
-    addAnotherItem(formDom);
-    trigger(formDom, "change");
-  });
-  on(formDom, "clear", () => {
-    location.href = routes.createInvoice();
-  });
-}
 function create(invoice) {
   console.log({ invoice });
   const form = /* @__PURE__ */ dom("form", {
@@ -5160,6 +5123,44 @@ function create(invoice) {
   compute(form);
   return form;
 }
+function getFirstInput(itemPanel) {
+  return itemPanel.querySelector("input");
+}
+function addAnotherItem(formDom) {
+  const itemPanel = renderInvoiceItem({
+    quantity: 1,
+    item: "",
+    price: 0,
+    total: 0
+  });
+  setupComputeOnLineItem(formDom, itemPanel);
+  const toFocus = getFirstInput(itemPanel);
+  const target = formDom.querySelector(".line-items") || formDom;
+  itemsToRemove.splice(0, itemsToRemove.length);
+  for (let i = 0; i < itemPanel.children.length; i++) {
+    itemsToRemove.push(itemPanel.children[i]);
+  }
+  moveChildren(itemPanel, target);
+  toFocus?.focus();
+}
+function hookupEvents(formDom) {
+  on(formDom, "list-all-invoices", () => {
+    window.location.href = routes.allInvoices();
+  });
+  on(formDom, "remove-last-item", () => {
+    itemsToRemove.forEach((item) => item.remove());
+    trigger(formDom, "change");
+  });
+  on(formDom, "add-another-item", () => {
+    if (!formDom.checkValidity())
+      return;
+    addAnotherItem(formDom);
+    trigger(formDom, "change");
+  });
+  on(formDom, "clear", () => {
+    location.href = routes.createInvoice();
+  });
+}
 function compute(form) {
   const labor = form.querySelector("[name=labor]");
   const additional = form.querySelector("[name=additional]");
@@ -5235,18 +5236,6 @@ function setupComputeOnLineItem(event, form) {
 }
 
 // app/invoice/templates/invoice-print.tsx
-function invoiceItem(item) {
-  console.log("invoiceItem", { item });
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "tall col-1-3"
-  }, item.item), /* @__PURE__ */ dom("label", {
-    class: "tall col-4 align-right"
-  }, item.quantity.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "tall col-5 align-right"
-  }, item.price.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "tall col-6 align-right"
-  }, item.total.toFixed(2)));
-}
 function create2(invoice) {
   const report = /* @__PURE__ */ dom("div", {
     class: "print page grid-6"
@@ -5328,63 +5317,20 @@ function create2(invoice) {
   }
   return report;
 }
-
-// app/fun/sum.ts
-function sum(values) {
-  if (!values.length)
-    return 0;
-  return values.reduce((a, b) => a + b, 0);
+function invoiceItem(item) {
+  console.log("invoiceItem", { item });
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
+    class: "tall col-1-3"
+  }, item.item), /* @__PURE__ */ dom("label", {
+    class: "tall col-4 align-right"
+  }, item.quantity.toFixed(2)), /* @__PURE__ */ dom("label", {
+    class: "tall col-5 align-right"
+  }, item.price.toFixed(2)), /* @__PURE__ */ dom("label", {
+    class: "tall col-6 align-right"
+  }, item.total.toFixed(2)));
 }
 
-// app/invoice/templates/invoices-grid.tsx
-function create3(invoices2) {
-  const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
-  const report = /* @__PURE__ */ dom("form", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("label", {
-    class: "bold col-1-4"
-  }, "Client"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5 align-right"
-  }, "Labor"), /* @__PURE__ */ dom("label", {
-    class: "bold col-6 align-right"
-  }, "Total"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }));
-  invoices2.map(renderInvoice).forEach((item) => moveChildren(item, report));
-  moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-6"
-  }), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1-4"
-  }, "Total"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5-2 align-right"
-  }, total.toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("button", {
-    type: "button",
-    class: "button col-1-2",
-    "data-event": "create-invoice"
-  }, "Create Invoice")), report);
-  hookupTriggers(report);
-  return report;
-}
-function totalInvoice(invoice) {
-  const total = sum(invoice.items.map((item) => item.total || 0));
-  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
-}
-function renderInvoice(invoice) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
-    class: "col-1-4",
-    href: `invoice?id=${invoice.id}`
-  }, invoice.clientname), /* @__PURE__ */ dom("label", {
-    class: "col-5 align-right"
-  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "col-6 align-right"
-  }, totalInvoice(invoice).toFixed(2)));
-}
-
-// app/invoice/invoice.ts
+// app/fun/get.ts
 function isDefined(value) {
   return typeof value !== "undefined";
 }
@@ -5401,23 +5347,17 @@ function set(formDom, values) {
     formDom[key].value = values[key];
   });
 }
+
+// app/invoice/invoice.ts
 function init() {
   const queryParams = new URLSearchParams(window.location.search);
   if (queryParams.has("id")) {
-    renderInvoice2(queryParams.get("id"));
+    renderInvoice(queryParams.get("id"));
   } else {
-    renderInvoice2();
+    renderInvoice();
   }
 }
-async function renderInvoices(target) {
-  const invoices2 = await invoices();
-  const formDom = create3(invoices2);
-  target.appendChild(formDom);
-  on(formDom, "create-invoice", () => {
-    location.href = routes.createInvoice();
-  });
-}
-async function renderInvoice2(invoiceId) {
+async function renderInvoice(invoiceId) {
   let invoice;
   if (invoiceId) {
     const invoices2 = await invoices();
@@ -5472,7 +5412,10 @@ async function tryToSaveInvoice(formDom) {
     return false;
   }
   formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
-    const [itemInput, priceInput] = ["#item", "#price"].map((id) => lineItemForm.querySelector(id));
+    const [itemInput, priceInput] = [
+      "#item",
+      "#price"
+    ].map((id) => lineItemForm.querySelector(id));
     inventoryManager.persistInventoryItem({
       code: itemInput.value,
       price: priceInput.valueAsNumber
@@ -5500,7 +5443,10 @@ function asModel(formDom) {
     additional: Number.parseFloat(data.get("additional") || "0")
   };
   let currentItem = null;
-  for (let [key, value] of data.entries()) {
+  for (let [
+    key,
+    value
+  ] of data.entries()) {
     switch (key) {
       case "item":
         currentItem = {};
@@ -5537,9 +5483,7 @@ function print(invoice) {
 export {
   identify,
   init,
-  print,
-  renderInvoice2 as renderInvoice,
-  renderInvoices
+  print
 };
 /*
 object-assign
