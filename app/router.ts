@@ -15,4 +15,5 @@ export const routes = {
   createLedger: () =>
     "/app/gl/index.html",
   dashboard: () => "/app/index.html",
+  admin: () => "/app/admin/index.html",
 };

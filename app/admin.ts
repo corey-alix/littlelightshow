@@ -4,8 +4,39 @@ import { identify } from "./identify.js";
 import { hookupTriggers } from "./fun/hookupTriggers.js";
 
 import { importInvoicesToGeneralLedger } from "./services/admin.js";
-import { ledgers as loadAllLedgers } from "./services/gl.js";
-import { accountManager } from "./gl/AccountManager.js";
+import {
+  LedgerItem,
+  ledgers as loadAllLedgers,
+} from "./services/gl.js";
+import {
+  save as saveAccounts,
+  load as loadAccounts,
+} from "./gl/AccountManager.js";
+
+// not sure what to start with
+type AccountHierarchy = Record<
+  string,
+  {
+    code?: string;
+    accounts?: AccountHierarchy;
+  }
+>;
+
+const starterAccounts = [
+  "AP",
+  "AR",
+  "CASH",
+  "INVENTORY",
+  "LABOR",
+  "OPEX",
+  "Phone",
+  "Rental",
+  "SALE TAX",
+  "SALES",
+  "STORAGE",
+  "TOOLS",
+  "Utilities",
+];
 
 export async function init() {
   await identify();
@@ -27,21 +58,32 @@ export async function init() {
   domNode.addEventListener(
     "gl-to-list-of-accounts",
     async () => {
-      debugger;
+      const accounts = loadAccounts();
+      starterAccounts.forEach(
+        (account) =>
+          addAccount(accounts, account)
+      );
       const ledgers =
         await loadAllLedgers();
-      const accounts =
-        accountManager.accounts;
       ledgers.forEach((l) =>
         l.items.forEach((item) => {
-          if (!accounts[item.account]) {
-            accounts[item.account] = {
-              code: item.account,
-            };
-          }
+          addAccount(
+            accounts,
+            item.account
+          );
         })
       );
-      accountManager.save();
+      saveAccounts(accounts);
     }
   );
+}
+function addAccount(
+  accounts: any,
+  item: string
+) {
+  if (!accounts[item]) {
+    accounts[item] = {
+      code: item,
+    };
+  }
 }

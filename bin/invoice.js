@@ -4768,7 +4768,8 @@ var routes = {
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
   createLedger: () => "/app/gl/index.html",
-  dashboard: () => "/app/index.html"
+  dashboard: () => "/app/index.html",
+  admin: () => "/app/admin/index.html"
 };
 
 // app/services/invoices.ts
@@ -5330,6 +5331,61 @@ function invoiceItem(item) {
   }, item.total.toFixed(2)));
 }
 
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
+// app/invoice/templates/invoices-grid.tsx
+function create3(invoices2) {
+  const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
+  const report = /* @__PURE__ */ dom("form", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("label", {
+    class: "bold col-1-4"
+  }, "Client"), /* @__PURE__ */ dom("label", {
+    class: "bold col-5 align-right"
+  }, "Labor"), /* @__PURE__ */ dom("label", {
+    class: "bold col-6 align-right"
+  }, "Total"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-6"
+  }));
+  invoices2.map(renderInvoice).forEach((item) => moveChildren(item, report));
+  moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "vspacer-1 col-1-6"
+  }), /* @__PURE__ */ dom("div", {
+    class: "line col-1-6"
+  }), /* @__PURE__ */ dom("label", {
+    class: "bold col-1-4"
+  }, "Total"), /* @__PURE__ */ dom("label", {
+    class: "bold col-5-2 align-right"
+  }, total.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-6"
+  }), /* @__PURE__ */ dom("button", {
+    type: "button",
+    class: "button col-1-2",
+    "data-event": "create-invoice"
+  }, "Create Invoice")), report);
+  hookupTriggers(report);
+  return report;
+}
+function totalInvoice(invoice) {
+  const total = sum(invoice.items.map((item) => item.total || 0));
+  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
+}
+function renderInvoice(invoice) {
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
+    class: "col-1-4",
+    href: `invoice?id=${invoice.id}`
+  }, invoice.clientname), /* @__PURE__ */ dom("label", {
+    class: "col-5 align-right"
+  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
+    class: "col-6 align-right"
+  }, totalInvoice(invoice).toFixed(2)));
+}
+
 // app/fun/get.ts
 function isDefined(value) {
   return typeof value !== "undefined";
@@ -5352,12 +5408,20 @@ function set(formDom, values) {
 function init() {
   const queryParams = new URLSearchParams(window.location.search);
   if (queryParams.has("id")) {
-    renderInvoice(queryParams.get("id"));
+    renderInvoice2(queryParams.get("id"));
   } else {
-    renderInvoice();
+    renderInvoice2();
   }
 }
-async function renderInvoice(invoiceId) {
+async function renderInvoices(target) {
+  const invoices2 = await invoices();
+  const formDom = create3(invoices2);
+  target.appendChild(formDom);
+  on(formDom, "create-invoice", () => {
+    location.href = routes.createInvoice();
+  });
+}
+async function renderInvoice2(invoiceId) {
   let invoice;
   if (invoiceId) {
     const invoices2 = await invoices();
@@ -5483,7 +5547,8 @@ function print(invoice) {
 export {
   identify,
   init,
-  print
+  print,
+  renderInvoices
 };
 /*
 object-assign

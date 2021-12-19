@@ -4774,7 +4774,8 @@ var routes = {
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
   createLedger: () => "/app/gl/index.html",
-  dashboard: () => "/app/index.html"
+  dashboard: () => "/app/index.html",
+  admin: () => "/app/admin/index.html"
 };
 
 // app/identify.ts
@@ -4972,21 +4973,29 @@ function createLedger(invoice) {
 }
 
 // app/gl/AccountManager.ts
-var AccountManager = class {
-  constructor() {
-    this.accounts = {};
-  }
-  save() {
-    localStorage.setItem("accounts", JSON.stringify(this.accounts));
-  }
-  reload() {
-    this.accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
-  }
-};
-var accountManager = new AccountManager();
-accountManager.reload();
+function save2(accounts) {
+  localStorage.setItem("accounts", JSON.stringify(accounts));
+}
+function load() {
+  return JSON.parse(localStorage.getItem("accounts") || "{}");
+}
 
 // app/admin.ts
+var starterAccounts = [
+  "AP",
+  "AR",
+  "CASH",
+  "INVENTORY",
+  "LABOR",
+  "OPEX",
+  "Phone",
+  "Rental",
+  "SALE TAX",
+  "SALES",
+  "STORAGE",
+  "TOOLS",
+  "Utilities"
+];
 async function init() {
   await identify();
   const domNode = document.body;
@@ -4997,18 +5006,21 @@ async function init() {
     await importInvoicesToGeneralLedger();
   });
   domNode.addEventListener("gl-to-list-of-accounts", async () => {
-    debugger;
+    const accounts = load();
+    starterAccounts.forEach((account) => addAccount(accounts, account));
     const ledgers2 = await ledgers();
-    const accounts = accountManager.accounts;
     ledgers2.forEach((l) => l.items.forEach((item) => {
-      if (!accounts[item.account]) {
-        accounts[item.account] = {
-          code: item.account
-        };
-      }
+      addAccount(accounts, item.account);
     }));
-    accountManager.save();
+    save2(accounts);
   });
+}
+function addAccount(accounts, item) {
+  if (!accounts[item]) {
+    accounts[item] = {
+      code: item
+    };
+  }
 }
 export {
   init

@@ -8,10 +8,10 @@
     <title>Invoices</title>
     <link
       rel="stylesheet"
-      href="./baseline.css"
+      href="/app/baseline.css"
     />
   </head>
-  <body class="dark no-holiday">
+  <body class="no-dark holiday">
     <button
       class="button"
       data-event="invoice-to-gl"
@@ -27,7 +27,7 @@
     </button>
 
     <script type="module">
-      import { init } from "../bin/admin.js";
+      import { init } from "/bin/admin.js";
       init();
     </script>
   </body>

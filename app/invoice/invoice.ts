@@ -33,7 +33,7 @@ export function init() {
   }
 }
 
-async function renderInvoices(
+export async function renderInvoices(
   target: HTMLElement
 ) {
   const invoices =

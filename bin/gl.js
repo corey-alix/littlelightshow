@@ -4910,7 +4910,8 @@ var routes = {
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
   createLedger: () => "/app/gl/index.html",
-  dashboard: () => "/app/index.html"
+  dashboard: () => "/app/index.html",
+  admin: () => "/app/admin/index.html"
 };
 
 // app/fun/isZero.ts
@@ -5030,26 +5031,16 @@ function create(ledgers2) {
 }
 
 // app/gl/AccountManager.ts
-var AccountManager = class {
-  constructor() {
-    this.accounts = {};
-  }
-  save() {
-    localStorage.setItem("accounts", JSON.stringify(this.accounts));
-  }
-  reload() {
-    this.accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
-  }
-};
-var accountManager = new AccountManager();
-accountManager.reload();
+function load() {
+  return JSON.parse(localStorage.getItem("accounts") || "{}");
+}
 function forceDatalist() {
   let dataList = document.querySelector(`#inventory_list`);
   if (dataList)
     return dataList;
   dataList = document.createElement("datalist");
   dataList.id = "listOfAccounts";
-  Object.entries(accountManager.accounts).forEach(([key, value]) => {
+  Object.entries(load()).sort().forEach(([key, value]) => {
     const option = document.createElement("option");
     option.value = key;
     dataList.appendChild(option);

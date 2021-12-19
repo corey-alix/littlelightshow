@@ -1,29 +1,21 @@
-class AccountManager {
+export function save(
   accounts: Record<
     string,
     { code: string }
-  > = {};
-
-  save() {
-    localStorage.setItem(
-      "accounts",
-      JSON.stringify(this.accounts)
-    );
-  }
-
-  reload() {
-    this.accounts = JSON.parse(
-      localStorage.getItem(
-        "accounts"
-      ) || "{}"
-    );
-  }
+  >
+) {
+  localStorage.setItem(
+    "accounts",
+    JSON.stringify(accounts)
+  );
 }
 
-export const accountManager =
-  new AccountManager();
-
-accountManager.reload();
+export function load() {
+  return JSON.parse(
+    localStorage.getItem("accounts") ||
+      "{}"
+  );
+}
 
 export function forceDatalist() {
   let dataList = document.querySelector(
@@ -33,14 +25,16 @@ export function forceDatalist() {
   dataList =
     document.createElement("datalist");
   dataList.id = "listOfAccounts";
-  Object.entries(
-    accountManager.accounts
-  ).forEach(([key, value]) => {
-    const option =
-      document.createElement("option");
-    option.value = key;
-    dataList.appendChild(option);
-  });
+  Object.entries(load())
+    .sort()
+    .forEach(([key, value]) => {
+      const option =
+        document.createElement(
+          "option"
+        );
+      option.value = key;
+      dataList.appendChild(option);
+    });
   document.body.appendChild(dataList);
   return dataList;
 }
