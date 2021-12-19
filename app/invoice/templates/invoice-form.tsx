@@ -144,6 +144,7 @@ export function create(
       </label>
       <input
         type="number"
+        step="0.01"
         class="currency col-1-2"
         placeholder="labor"
         name="labor"
@@ -152,6 +153,7 @@ export function create(
       />
       <input
         type="number"
+        step="0.01"
         class="currency col-3-2"
         placeholder="additional"
         name="additional"

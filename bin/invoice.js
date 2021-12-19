@@ -5070,6 +5070,7 @@ function create(invoice) {
     class: "form-label col-5-2 currency"
   }, "Total + Tax"), /* @__PURE__ */ dom("input", {
     type: "number",
+    step: "0.01",
     class: "currency col-1-2",
     placeholder: "labor",
     name: "labor",
@@ -5077,6 +5078,7 @@ function create(invoice) {
     value: invoice.labor.toFixed(2)
   }), /* @__PURE__ */ dom("input", {
     type: "number",
+    step: "0.01",
     class: "currency col-3-2",
     placeholder: "additional",
     name: "additional",
