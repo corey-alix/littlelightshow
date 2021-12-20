@@ -5354,7 +5354,8 @@ function sum(values) {
 
 // app/invoice/templates/invoices-grid.tsx
 function create3(invoices2) {
-  const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
+  const total = sum(invoices2.map(totalInvoice));
+  const labor = sum(invoices2.map((i) => i.labor));
   const report = /* @__PURE__ */ dom("form", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("label", {
@@ -5374,7 +5375,9 @@ function create3(invoices2) {
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1-4"
   }, "Total"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5-2 align-right"
+    class: "bold col-5 currency"
+  }, labor.toFixed(2)), /* @__PURE__ */ dom("label", {
+    class: "bold col-6 currency"
   }, total.toFixed(2)), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("button", {
