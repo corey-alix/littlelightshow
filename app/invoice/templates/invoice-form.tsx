@@ -171,12 +171,12 @@ export function create(
       />
       <div class="col-1 vspacer-1"></div>
 
-      <div class="col-1">
+      <div class="col-1-6">
         Method of Payment
       </div>
       <select
         type="select"
-        class="col-2-3"
+        class="col-1-4"
         name="method_of_payment"
         value={invoice.mop}
       >

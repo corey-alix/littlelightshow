@@ -5115,10 +5115,10 @@ function create(invoice) {
   }), /* @__PURE__ */ dom("div", {
     class: "col-1 vspacer-1"
   }), /* @__PURE__ */ dom("div", {
-    class: "col-1"
+    class: "col-1-6"
   }, "Method of Payment"), /* @__PURE__ */ dom("select", {
     type: "select",
-    class: "col-2-3",
+    class: "col-1-4",
     name: "method_of_payment",
     value: invoice.mop
   }, /* @__PURE__ */ dom("option", {
