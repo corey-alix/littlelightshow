@@ -74,6 +74,8 @@ async function renderInvoice(
       items: [],
       labor: 0,
       additional: 0,
+      mop: "CASH",
+      paid: 0,
     };
   }
   const formDom =
@@ -205,6 +207,12 @@ function asModel(
       (data.get(
         "additional"
       ) as string) || "0"
+    ),
+    mop: data.get(
+      "method_of_payment"
+    ) as string,
+    paid: Number.parseFloat(
+      data.get("amount_paid") + ""
     ),
   };
 

@@ -17,6 +17,7 @@ import {
   Invoice,
   InvoiceItem,
 } from "../../services/invoices.js";
+import { asCurrency } from "../../fun/asCurrency.js";
 
 const itemsToRemove =
   [] as Array<HTMLElement>;
@@ -42,14 +43,14 @@ export function create(
       <div class="section-title col-1-6">
         Client
       </div>
-      <label class="form-label col-1-4">
+      <label class="form-label col-1-3">
         Client Name
       </label>
-      <label class="form-label col-5-2">
+      <label class="form-label col-4-3">
         Date
       </label>
       <input
-        class="col-1-4"
+        class="col-1-3"
         type="text"
         placeholder="clientname"
         name="clientname"
@@ -57,7 +58,7 @@ export function create(
         value={invoice.clientname}
       />
       <input
-        class="col-5-2"
+        class="col-4-3"
         type="date"
         placeholder="Date"
         name="date"
@@ -116,14 +117,14 @@ export function create(
       </section>
       <div class="vspacer col-1-6"></div>
       <button
-        class="button col-1-4"
+        class="button col-1-3"
         data-event="add-another-item"
         type="button"
       >
         Add item
       </button>
       <button
-        class="button col-5-2"
+        class="button col-4-3"
         data-event="remove-last-item"
         type="button"
       >
@@ -167,6 +168,34 @@ export function create(
         class="currency col-5-2 bold"
         id="total_due"
         name="total_due"
+      />
+      <div class="col-1 vspacer-1"></div>
+
+      <div class="col-1">
+        Method of Payment
+      </div>
+      <select
+        type="select"
+        class="col-2-3"
+        name="method_of_payment"
+        value={invoice.mop}
+      >
+        <option value="cash">
+          Cash
+        </option>
+        <option value="check">
+          Check
+        </option>
+      </select>
+      <input
+        type="number"
+        class="col-5-2 currency"
+        name="amount_paid"
+        placeholder="amount paid"
+        step="0.01"
+        value={asCurrency(
+          invoice.paid || 0
+        )}
       />
       <div class="vspacer-1 col-1-6 flex">
         <button
@@ -384,26 +413,26 @@ function renderInvoiceItem(
         value={item.item}
         list={forceDatalist().id}
       />
-      <label class="form-label col-1 quantity">
+      <label class="form-label col-1-2 quantity">
         Quantity
       </label>
-      <label class="form-label col-2-2 currency">
+      <label class="form-label col-3-2 currency">
         Price
       </label>
-      <label class="form-label col-4-3 currency">
+      <label class="form-label col-5-2 currency">
         Total
       </label>
       <input
         name="quantity"
         required
-        class="quantity col-1"
+        class="quantity col-1-2"
         type="number"
         value={item.quantity}
       />
       <input
         name="price"
         required
-        class="currency col-2-2"
+        class="currency col-3-2"
         type="number"
         step="0.01"
         value={item.price.toFixed(2)}
@@ -411,7 +440,7 @@ function renderInvoiceItem(
       <input
         readonly
         name="total"
-        class="bold currency col-4-3"
+        class="bold currency col-5-2"
         type="number"
         value={item.total.toFixed(2)}
       />

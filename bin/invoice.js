@@ -4825,12 +4825,20 @@ async function save(invoice) {
   const client = createClient();
   if (!invoice.id) {
     const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(INVOICE_TABLE), {
-      data: { ...invoice, user: CURRENT_USER, create_date: Date.now() }
+      data: {
+        ...invoice,
+        user: CURRENT_USER,
+        create_date: Date.now()
+      }
     }));
     invoice.id = result.ref.id;
   } else {
     const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection(INVOICE_TABLE), invoice.id), {
-      data: { ...invoice, user: CURRENT_USER, update_date: Date.now() }
+      data: {
+        ...invoice,
+        user: CURRENT_USER,
+        update_date: Date.now()
+      }
     }));
   }
 }
@@ -4990,6 +4998,11 @@ function selectNumericInputOnFocus(form) {
   items.forEach(selectOnFocus);
 }
 
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return value.toFixed(2);
+}
+
 // app/invoice/templates/invoice-form.tsx
 var itemsToRemove = [];
 function create(invoice) {
@@ -5007,18 +5020,18 @@ function create(invoice) {
   }), /* @__PURE__ */ dom("div", {
     class: "section-title col-1-6"
   }, "Client"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-4"
+    class: "form-label col-1-3"
   }, "Client Name"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-5-2"
+    class: "form-label col-4-3"
   }, "Date"), /* @__PURE__ */ dom("input", {
-    class: "col-1-4",
+    class: "col-1-3",
     type: "text",
     placeholder: "clientname",
     name: "clientname",
     required: true,
     value: invoice.clientname
   }), /* @__PURE__ */ dom("input", {
-    class: "col-5-2",
+    class: "col-4-3",
     type: "date",
     placeholder: "Date",
     name: "date",
@@ -5061,11 +5074,11 @@ function create(invoice) {
   }, "Items")), /* @__PURE__ */ dom("div", {
     class: "vspacer col-1-6"
   }), /* @__PURE__ */ dom("button", {
-    class: "button col-1-4",
+    class: "button col-1-3",
     "data-event": "add-another-item",
     type: "button"
   }, "Add item"), /* @__PURE__ */ dom("button", {
-    class: "button col-5-2",
+    class: "button col-4-3",
     "data-event": "remove-last-item",
     type: "button"
   }, "Remove Last Item"), /* @__PURE__ */ dom("div", {
@@ -5099,6 +5112,26 @@ function create(invoice) {
     class: "currency col-5-2 bold",
     id: "total_due",
     name: "total_due"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1 vspacer-1"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1"
+  }, "Method of Payment"), /* @__PURE__ */ dom("select", {
+    type: "select",
+    class: "col-2-3",
+    name: "method_of_payment",
+    value: invoice.mop
+  }, /* @__PURE__ */ dom("option", {
+    value: "cash"
+  }, "Cash"), /* @__PURE__ */ dom("option", {
+    value: "check"
+  }, "Check")), /* @__PURE__ */ dom("input", {
+    type: "number",
+    class: "col-5-2 currency",
+    name: "amount_paid",
+    placeholder: "amount paid",
+    step: "0.01",
+    value: asCurrency(invoice.paid || 0)
   }), /* @__PURE__ */ dom("div", {
     class: "vspacer-1 col-1-6 flex"
   }, /* @__PURE__ */ dom("button", {
@@ -5196,28 +5229,28 @@ function renderInvoiceItem(item) {
     value: item.item,
     list: forceDatalist().id
   }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1 quantity"
+    class: "form-label col-1-2 quantity"
   }, "Quantity"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-2-2 currency"
+    class: "form-label col-3-2 currency"
   }, "Price"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3 currency"
+    class: "form-label col-5-2 currency"
   }, "Total"), /* @__PURE__ */ dom("input", {
     name: "quantity",
     required: true,
-    class: "quantity col-1",
+    class: "quantity col-1-2",
     type: "number",
     value: item.quantity
   }), /* @__PURE__ */ dom("input", {
     name: "price",
     required: true,
-    class: "currency col-2-2",
+    class: "currency col-3-2",
     type: "number",
     step: "0.01",
     value: item.price.toFixed(2)
   }), /* @__PURE__ */ dom("input", {
     readonly: true,
     name: "total",
-    class: "bold currency col-4-3",
+    class: "bold currency col-5-2",
     type: "number",
     value: item.total.toFixed(2)
   }));
@@ -5456,7 +5489,9 @@ async function renderInvoice2(invoiceId) {
       telephone: "",
       items: [],
       labor: 0,
-      additional: 0
+      additional: 0,
+      mop: "CASH",
+      paid: 0
     };
   }
   const formDom = create(invoice);
@@ -5521,7 +5556,9 @@ function asModel(formDom) {
     comments: data.get("comments"),
     items: [],
     labor: Number.parseFloat(data.get("labor") || "0"),
-    additional: Number.parseFloat(data.get("additional") || "0")
+    additional: Number.parseFloat(data.get("additional") || "0"),
+    mop: data.get("method_of_payment"),
+    paid: Number.parseFloat(data.get("amount_paid") + "")
   };
   let currentItem = null;
   for (let [
