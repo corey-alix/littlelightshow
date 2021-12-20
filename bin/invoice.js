@@ -5007,18 +5007,18 @@ function create(invoice) {
   }), /* @__PURE__ */ dom("div", {
     class: "section-title col-1-6"
   }, "Client"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-5"
+    class: "form-label col-1-4"
   }, "Client Name"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-6"
+    class: "form-label col-5-2"
   }, "Date"), /* @__PURE__ */ dom("input", {
-    class: "col-1-5",
+    class: "col-1-4",
     type: "text",
     placeholder: "clientname",
     name: "clientname",
     required: true,
     value: invoice.clientname
   }), /* @__PURE__ */ dom("input", {
-    class: "col-6",
+    class: "col-5-2",
     type: "date",
     placeholder: "Date",
     name: "date",

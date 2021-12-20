@@ -42,14 +42,14 @@ export function create(
       <div class="section-title col-1-6">
         Client
       </div>
-      <label class="form-label col-1-5">
+      <label class="form-label col-1-4">
         Client Name
       </label>
-      <label class="form-label col-6">
+      <label class="form-label col-5-2">
         Date
       </label>
       <input
-        class="col-1-5"
+        class="col-1-4"
         type="text"
         placeholder="clientname"
         name="clientname"
@@ -57,7 +57,7 @@ export function create(
         value={invoice.clientname}
       />
       <input
-        class="col-6"
+        class="col-5-2"
         type="date"
         placeholder="Date"
         name="date"

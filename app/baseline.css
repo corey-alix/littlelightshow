@@ -1,6 +1,16 @@
 * {
-  font-family: Sans-Serif;
+  font-family: "Segoe UI", Tahoma,
+    Geneva, Verdana, sans-serif;
   font-size: 16px;
+}
+
+.grid-6 {
+  display: grid;
+  grid-template-columns: repeat(
+    6,
+    auto
+  );
+  grid-column-gap: 1em;
 }
 
 ::placeholder {
@@ -240,14 +250,6 @@ form textarea {
   background-color: white !important;
   color: black !important;
   padding: 1rem;
-}
-.grid-6 {
-  display: grid;
-  grid-template-columns: repeat(
-    6,
-    auto
-  );
-  grid-column-gap: 0.5em;
 }
 
 .col-1 {
