@@ -1,5 +1,6 @@
 * {
-  font-family: -webkit-pictograph;
+  font-family: Sans-Serif;
+  font-size: 16px;
 }
 
 ::placeholder {
@@ -242,7 +243,10 @@ form textarea {
 }
 .grid-6 {
   display: grid;
-  grid-template-columns: repeat(6, auto);
+  grid-template-columns: repeat(
+    6,
+    auto
+  );
   grid-column-gap: 0.5em;
 }
 
@@ -344,7 +348,11 @@ body.dark button {
 
 .wavy {
   text-decoration: underline wavy;
-  text-decoration-color: rgb(214, 0, 28);
+  text-decoration-color: rgb(
+    214,
+    0,
+    28
+  );
 }
 
 .date {
