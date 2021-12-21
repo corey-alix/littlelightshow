@@ -19,9 +19,10 @@ import { create as createFormTemplate } from "./templates/invoice-form.js";
 import { create as createPrintTemplate } from "./templates/invoice-print.js";
 import { create as createGridTemplate } from "./templates/invoices-grid.js";
 import { get, set } from "../fun/get";
-import { asNumber } from "../fun/asNumber.js";
+import { removeCssRestrictors } from "../fun/detect.js";
 
 export function init() {
+  removeCssRestrictors();
   const queryParams =
     new URLSearchParams(
       window.location.search

@@ -192,18 +192,18 @@ export function create(
         class="hidden"
       ></div>
       <button
-        class="button col-1-2"
+        class="button col-1-2 if-desktop"
         data-event="add-method-of-payment"
         type="button"
       >
         Add Payment
       </button>
-      <div class="form-label col-5-2 currency">
+      <div class="form-label col-5-2 currency if-desktop">
         Balance Due
       </div>
       <input
         readonly
-        class="currency col-5-2 bold"
+        class="currency col-5-2 bold if-desktop"
         type="number"
         id="balance_due"
       />
@@ -216,28 +216,28 @@ export function create(
           Save
         </button>
         <button
-          class="button"
+          class="button if-print-to-pdf"
           data-event="print"
           type="button"
         >
           Print
         </button>
         <button
-          class="button"
+          class="button if-desktop"
           data-event="clear"
           type="button"
         >
           Clear
         </button>
         <button
-          class="button"
+          class="button if-desktop"
           data-event="delete"
           type="button"
         >
           Delete
         </button>
         <button
-          class="button"
+          class="button if-desktop"
           data-event="list-all-invoices"
           type="button"
         >
@@ -401,7 +401,7 @@ function hookupEvents(
     formDom,
     "add-another-item",
     () => {
-      if (!formDom.checkValidity())
+      if (!formDom.reportValidity())
         return;
       addAnotherItem(formDom);
       trigger(formDom, "change");

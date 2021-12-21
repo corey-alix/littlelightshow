@@ -3,6 +3,14 @@
     Geneva, Verdana, sans-serif;
 }
 
+.if-print-to-pdf {
+  display: none !important;
+}
+
+.if-desktop {
+  display: none !important;
+}
+
 .grid-6 {
   display: grid;
   grid-template-columns: repeat(
