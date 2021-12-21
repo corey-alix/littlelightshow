@@ -4,7 +4,7 @@ export const TAXRATE = 0.06;
 export const isDebug =
   location.href.includes("localhost");
 
-export const isOffline = false;
+export const isOffline = isDebug;
 
 export const primaryContact = {
   companyName: "Little Light Show",

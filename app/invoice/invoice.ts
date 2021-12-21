@@ -18,6 +18,7 @@ import { create as createFormTemplate } from "./templates/invoice-form.js";
 import { create as createPrintTemplate } from "./templates/invoice-print.js";
 import { create as createGridTemplate } from "./templates/invoices-grid.js";
 import { get, set } from "../fun/get";
+import { asNumber } from "../fun/asNumber.js";
 
 export function init() {
   const queryParams =
@@ -74,8 +75,7 @@ async function renderInvoice(
       items: [],
       labor: 0,
       additional: 0,
-      mop: "CASH",
-      paid: 0,
+      mops: [],
     };
   }
   const formDom =
@@ -208,13 +208,32 @@ function asModel(
         "additional"
       ) as string) || "0"
     ),
-    mop: data.get(
-      "method_of_payment"
-    ) as string,
-    paid: Number.parseFloat(
-      data.get("amount_paid") + ""
-    ),
+    mops: [] as Array<{
+      mop: string;
+      paid: number;
+    }>,
   };
+
+  const mops = data.getAll(
+    "method_of_payment"
+  );
+  const payments = data.getAll(
+    "amount_paid"
+  );
+
+  requestModel.mops = mops.map(
+    (mop, i) => ({
+      mop: mop as string,
+      paid: parseFloat(
+        payments[i] as string
+      ),
+    })
+  );
+
+  console.log(
+    "mops",
+    requestModel.mops
+  );
 
   let currentItem: InvoiceItem | null =
     null;

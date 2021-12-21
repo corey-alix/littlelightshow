@@ -30,8 +30,10 @@ export interface Invoice {
   email?: string;
   comments?: string;
   items: Array<InvoiceItem>;
-  mop: string;
-  paid: number;
+  mops: Array<{
+    mop: string;
+    paid: number;
+  }>;
 }
 
 export async function deleteInvoice(
@@ -137,11 +139,24 @@ export async function invoices() {
   const invoices =
     result.data as Array<{
       data: Invoice;
+      ref: any;
     }>;
+
   // copy ref into invoice id
-  invoices.forEach((invoice: any) => {
+  invoices.forEach((invoice) => {
     invoice.data.id =
       invoice.ref.value.id;
+    if (
+      invoice.data["paid"] &&
+      invoice.data["mop"]
+    ) {
+      invoice.data.mops.push({
+        mop: invoice.data["mop"],
+        paid: invoice.data["paid"],
+      });
+      delete invoice.data["paid"];
+      delete invoice.data["mop"];
+    }
   });
 
   const response = invoices

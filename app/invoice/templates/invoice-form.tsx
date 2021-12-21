@@ -1,6 +1,9 @@
 import { dom } from "../../dom.js";
 import { asDateString } from "../../fun/asDateString.js";
-import { moveChildren } from "../../fun/dom.js";
+import {
+  moveChildren,
+  moveChildrenBefore,
+} from "../../fun/dom.js";
 import { hookupTriggers } from "../../fun/hookupTriggers.js";
 import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
 import {
@@ -19,6 +22,8 @@ import {
 } from "../../services/invoices.js";
 import { asCurrency } from "../../fun/asCurrency.js";
 import { getValueAsNumber } from "../../fun/behavior/input.js";
+import { asNumber } from "../../fun/asNumber.js";
+import { sum } from "../../fun/sum.js";
 
 const itemsToRemove =
   [] as Array<HTMLElement>;
@@ -164,43 +169,34 @@ export function create(
       <input
         readonly
         type="number"
-        class="currency col-5-2 bold"
+        class="currency col-5-2"
         id="total_due"
         name="total_due"
+      />
+      <p class="form-label col-5-2 currency">
+        Balance Due
+      </p>
+      <input
+        readonly
+        class="currency col-5-2 bold"
+        type="number"
+        id="balance_due"
       />
       <div class="col-1 vspacer-1"></div>
 
       <div class="col-1-6">
         Method of Payment
       </div>
-      <select
-        type="select"
-        class="col-1-4"
-        name="method_of_payment"
-        value={invoice.mop}
-      >
-        <option value="cash">
-          Cash
-        </option>
-        <option value="check">
-          Check
-        </option>
-      </select>
-      <input
-        type="number"
-        class="col-5-2 currency"
-        name="amount_paid"
-        placeholder="amount paid"
-        value={asCurrency(
-          invoice.paid || 0
-        )}
-      />
+      <div
+        id="mop-line-item-end"
+        class="hidden"
+      ></div>
       <button
-        class="button col-5-2"
+        class="button col-1-2"
         data-event="add-method-of-payment"
         type="button"
       >
-        Add Another Payment
+        Add Payment
       </button>
       <div class="vspacer-1 col-1-6 flex">
         <button
@@ -257,19 +253,51 @@ export function create(
     trigger(form, "change")
   );
 
-  const lineItemsTarget =
-    form.querySelector(
-      ".line-items"
-    ) as HTMLElement;
-  const lineItems = invoice.items.map(
-    renderInvoiceItem
-  );
-  lineItems.forEach((item) =>
-    setupComputeOnLineItem(form, item)
-  );
-  lineItems.forEach((item) =>
-    moveChildren(item, lineItemsTarget)
-  );
+  // render line items
+  {
+    const lineItemsTarget =
+      form.querySelector(
+        ".line-items"
+      ) as HTMLElement;
+
+    const lineItems = invoice.items.map(
+      renderInvoiceItem
+    );
+
+    lineItems.forEach((item) =>
+      setupComputeOnLineItem(form, item)
+    );
+
+    lineItems.forEach((item) =>
+      moveChildren(
+        item,
+        lineItemsTarget
+      )
+    );
+  }
+
+  // render payments
+  {
+    const payementsTarget =
+      form.querySelector(
+        "#mop-line-item-end"
+      ) as HTMLElement;
+
+    const paymentItems =
+      invoice.mops?.map(
+        renderMopLineItem
+      );
+
+    paymentItems?.forEach((item) => {});
+
+    paymentItems?.forEach((item) =>
+      moveChildrenBefore(
+        item,
+        payementsTarget
+      )
+    );
+  }
+
   on(form, "change", () =>
     compute(form)
   );
@@ -368,7 +396,26 @@ function hookupEvents(
     formDom,
     "add-method-of-payment",
     () => {
-      alert("TODO");
+      const target: HTMLElement =
+        formDom.querySelector(
+          "#mop-line-item-end"
+        ) || formDom;
+      const mopLineItem =
+        renderMopLineItem();
+
+      extendNumericInputBehaviors(
+        mopLineItem
+      );
+
+      const focus = getFirstInput(
+        mopLineItem
+      );
+
+      moveChildrenBefore(
+        mopLineItem,
+        target
+      );
+      focus.focus();
     }
   );
 
@@ -376,6 +423,31 @@ function hookupEvents(
     location.href =
       routes.createInvoice();
   });
+}
+
+function renderMopLineItem(item?: {
+  mop: string;
+  paid: number;
+}) {
+  return (
+    <div>
+      <input
+        type="select"
+        class="col-1-4"
+        name="method_of_payment"
+        value={item?.mop || ""}
+      />
+      <input
+        type="number"
+        class="col-5-2 currency"
+        name="amount_paid"
+        placeholder="amount paid"
+        value={asCurrency(
+          item?.paid || 0
+        )}
+      />
+    </div>
+  );
 }
 
 function compute(
@@ -390,6 +462,10 @@ function compute(
   const total_due = form.querySelector(
     "[name=total_due]"
   ) as HTMLInputElement;
+  const balance_due =
+    form.querySelector(
+      "#balance_due"
+    ) as HTMLInputElement;
   const totals = Array.from(
     form.querySelectorAll(
       "input[name=total]"
@@ -410,6 +486,18 @@ function compute(
     total * (1.0 + TAXRATE);
   total_due.value =
     grandTotal.toFixed(2);
+
+  const total_payments = sum(
+    Array.from(
+      form.querySelectorAll(
+        "input[name=amount_paid]"
+      )
+    ).map(asNumber)
+  );
+
+  balance_due.value = (
+    grandTotal - total_payments
+  ).toFixed(2);
 }
 
 function renderInvoiceItem(
