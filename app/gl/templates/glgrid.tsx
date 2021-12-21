@@ -22,6 +22,7 @@ import { printDetail } from "./printDetail";
 import { create as printSummary } from "./printSummary";
 import { isZero } from "../../fun/isZero";
 import { forceDatalist } from "../AccountManager.js";
+import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
 
 function asModel(
   form: HTMLFormElement
@@ -236,6 +237,7 @@ function hookupHandlers(
 
   on(domNode, "add-row", () => {
     const row = createRow();
+    extendNumericInputBehaviors(row);
     const focus = row.querySelector(
       "[name=account]"
     ) as HTMLElement;
@@ -259,14 +261,12 @@ function createRow(): HTMLElement {
         name="debit"
         class="currency col-3-2"
         type="number"
-        step="0.01"
         placeholder="debit"
       />
       <input
         name="credit"
         class="currency col-5-2"
         type="number"
-        step="0.01"
         placeholder="credit"
       />
       <input
@@ -451,6 +451,7 @@ export function create(
   }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
+  extendNumericInputBehaviors(ledger);
   trigger(ledger, "change");
   return ledger;
 }

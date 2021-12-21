@@ -5049,6 +5049,29 @@ function forceDatalist() {
   return dataList;
 }
 
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  });
+}
+
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
+}
+
 // app/gl/templates/glgrid.tsx
 function asModel(form) {
   const result = {
@@ -5160,6 +5183,7 @@ function hookupHandlers(domNode) {
   });
   on(domNode, "add-row", () => {
     const row = createRow();
+    extendNumericInputBehaviors(row);
     const focus = row.querySelector("[name=account]");
     moveChildrenBefore(row, lineItems);
     focus.focus();
@@ -5177,13 +5201,11 @@ function createRow() {
     name: "debit",
     class: "currency col-3-2",
     type: "number",
-    step: "0.01",
     placeholder: "debit"
   }), /* @__PURE__ */ dom("input", {
     name: "credit",
     class: "currency col-5-2",
     type: "number",
-    step: "0.01",
     placeholder: "credit"
   }), /* @__PURE__ */ dom("input", {
     name: "comment",
@@ -5316,6 +5338,7 @@ function create2(ledgerModel) {
   }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
+  extendNumericInputBehaviors(ledger);
   trigger(ledger, "change");
   return ledger;
 }

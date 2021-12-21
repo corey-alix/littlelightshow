@@ -4987,15 +4987,32 @@ function hookupTriggers(domNode) {
   });
 }
 
-// app/fun/behavior/select-on-focus.ts
+// app/fun/behavior/input.ts
 function selectOnFocus(element) {
   on(element, "focus", () => element.select());
 }
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  });
+}
+function getValueAsNumber(input) {
+  if (!input.value)
+    return 0;
+  return input.valueAsNumber;
+}
 
 // app/fun/behavior/form.ts
-function selectNumericInputOnFocus(form) {
-  const items = Array.from(form.querySelectorAll("input[type=number]"));
-  items.forEach(selectOnFocus);
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
 }
 
 // app/fun/asCurrency.ts
@@ -5093,7 +5110,6 @@ function create(invoice) {
     class: "form-label col-5-2 currency"
   }, "Total + Tax"), /* @__PURE__ */ dom("input", {
     type: "number",
-    step: "0.01",
     class: "currency col-1-2",
     placeholder: "labor",
     name: "labor",
@@ -5101,7 +5117,6 @@ function create(invoice) {
     value: invoice.labor.toFixed(2)
   }), /* @__PURE__ */ dom("input", {
     type: "number",
-    step: "0.01",
     class: "currency col-3-2",
     placeholder: "additional",
     name: "additional",
@@ -5130,7 +5145,6 @@ function create(invoice) {
     class: "col-5-2 currency",
     name: "amount_paid",
     placeholder: "amount paid",
-    step: "0.01",
     value: asCurrency(invoice.paid || 0)
   }), /* @__PURE__ */ dom("div", {
     class: "vspacer-1 col-1-6 flex"
@@ -5164,7 +5178,7 @@ function create(invoice) {
   lineItems.forEach((item) => setupComputeOnLineItem(form, item));
   lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
   on(form, "change", () => compute(form));
-  selectNumericInputOnFocus(form);
+  extendNumericInputBehaviors(form);
   hookupTriggers(form);
   hookupEvents(form);
   compute(form);
@@ -5187,7 +5201,7 @@ function addAnotherItem(formDom) {
   for (let i = 0; i < itemPanel.children.length; i++) {
     itemsToRemove.push(itemPanel.children[i]);
   }
-  selectNumericInputOnFocus(itemPanel);
+  extendNumericInputBehaviors(itemPanel);
   moveChildren(itemPanel, target);
   toFocus?.focus();
 }
@@ -5245,7 +5259,6 @@ function renderInvoiceItem(item) {
     required: true,
     class: "currency col-3-2",
     type: "number",
-    step: "0.01",
     value: item.price.toFixed(2)
   }), /* @__PURE__ */ dom("input", {
     readonly: true,
@@ -5262,8 +5275,8 @@ function setupComputeOnLineItem(event, form) {
   const priceInput = form.querySelector("[name=price]");
   const totalInput = form.querySelector("[name=total]");
   const computeTotal = () => {
-    const qty = parseFloat(quantityInput.value);
-    const price = parseFloat(priceInput.value);
+    const qty = getValueAsNumber(quantityInput);
+    const price = getValueAsNumber(priceInput);
     const value = qty * price;
     console.log({ qty, price, value });
     totalInput.value = value.toFixed(2);
@@ -5275,7 +5288,7 @@ function setupComputeOnLineItem(event, form) {
     const item = inventoryManager.getInventoryItemByCode(itemInput.value);
     if (!item)
       return;
-    const price = parseFloat(priceInput.value);
+    const price = getValueAsNumber(priceInput);
     if (item.price !== price) {
       priceInput.value = item.price.toFixed(2);
       trigger(priceInput, "change");

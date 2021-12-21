@@ -1,12 +1,23 @@
-import { selectOnFocus } from "./select-on-focus";
+import {
+  formatAsCurrency,
+  selectOnFocus,
+} from "./input";
 
-export function selectNumericInputOnFocus(
+export function extendNumericInputBehaviors(
   form: HTMLElement
 ) {
-  const items = Array.from(
+  const numberInput = Array.from(
     form.querySelectorAll(
       "input[type=number]"
     )
   ) as Array<HTMLInputElement>;
-  items.forEach(selectOnFocus);
+  numberInput.forEach(selectOnFocus);
+
+  const currencyInput =
+    numberInput.filter((i) =>
+      i.classList.contains("currency")
+    );
+  currencyInput.forEach(
+    formatAsCurrency
+  );
 }

@@ -2,7 +2,7 @@ import { dom } from "../../dom.js";
 import { asDateString } from "../../fun/asDateString.js";
 import { moveChildren } from "../../fun/dom.js";
 import { hookupTriggers } from "../../fun/hookupTriggers.js";
-import { selectNumericInputOnFocus } from "../../fun/behavior/form.js";
+import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
 import {
   on,
   trigger,
@@ -18,6 +18,7 @@ import {
   InvoiceItem,
 } from "../../services/invoices.js";
 import { asCurrency } from "../../fun/asCurrency.js";
+import { getValueAsNumber } from "../../fun/behavior/input.js";
 
 const itemsToRemove =
   [] as Array<HTMLElement>;
@@ -145,7 +146,6 @@ export function create(
       </label>
       <input
         type="number"
-        step="0.01"
         class="currency col-1-2"
         placeholder="labor"
         name="labor"
@@ -154,7 +154,6 @@ export function create(
       />
       <input
         type="number"
-        step="0.01"
         class="currency col-3-2"
         placeholder="additional"
         name="additional"
@@ -192,7 +191,6 @@ export function create(
         class="col-5-2 currency"
         name="amount_paid"
         placeholder="amount paid"
-        step="0.01"
         value={asCurrency(
           invoice.paid || 0
         )}
@@ -269,7 +267,7 @@ export function create(
     compute(form)
   );
 
-  selectNumericInputOnFocus(form);
+  extendNumericInputBehaviors(form);
   hookupTriggers(form);
   hookupEvents(form);
   compute(form);
@@ -318,7 +316,9 @@ function addAnotherItem(
       ] as HTMLElement
     );
   }
-  selectNumericInputOnFocus(itemPanel);
+  extendNumericInputBehaviors(
+    itemPanel
+  );
   moveChildren(itemPanel, target);
   toFocus?.focus();
 }
@@ -434,7 +434,6 @@ function renderInvoiceItem(
         required
         class="currency col-3-2"
         type="number"
-        step="0.01"
         value={item.price.toFixed(2)}
       />
       <input
@@ -468,12 +467,11 @@ function setupComputeOnLineItem(
     "[name=total]"
   ) as HTMLInputElement;
   const computeTotal = () => {
-    const qty = parseFloat(
-      quantityInput.value
+    const qty = getValueAsNumber(
+      quantityInput
     );
-    const price = parseFloat(
-      priceInput.value
-    );
+    const price =
+      getValueAsNumber(priceInput);
     const value = qty * price;
     console.log({ qty, price, value });
     totalInput.value = value.toFixed(2);
@@ -495,9 +493,8 @@ function setupComputeOnLineItem(
         itemInput.value
       );
     if (!item) return;
-    const price = parseFloat(
-      priceInput.value
-    );
+    const price =
+      getValueAsNumber(priceInput);
     if (item.price !== price) {
       priceInput.value =
         item.price.toFixed(2);
