@@ -4785,6 +4785,7 @@ var import_faunadb2 = __toModule(require_faunadb());
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
+var isDebug = location.href.includes("localhost");
 var primaryContact = {
   companyName: "Little Light Show",
   fullName: "Nathan Alix",
@@ -4827,6 +4828,33 @@ function createClient() {
   });
 }
 
+// app/services/Cache.ts
+var maxAge = isDebug ? 3600 : 60;
+var Cache = class {
+  constructor(table) {
+    this.table = table;
+  }
+  expired() {
+    const data = this.get();
+    if (!data)
+      return true;
+    const age = ticksInSeconds(Date.now() - data.lastWrite);
+    return maxAge < age;
+  }
+  get() {
+    const raw = localStorage.getItem(`table_${this.table}`);
+    if (!raw)
+      return null;
+    return JSON.parse(raw);
+  }
+  set(data) {
+    localStorage.setItem(`table_${this.table}`, JSON.stringify({
+      lastWrite: Date.now(),
+      data
+    }));
+  }
+};
+
 // app/services/gl.ts
 var LEDGER_TABLE = "general_ledger";
 async function deleteLedger(id) {
@@ -4840,24 +4868,40 @@ async function save(ledger) {
   const client = createClient();
   if (!ledger.id) {
     const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(LEDGER_TABLE), {
-      data: { ...ledger, user: CURRENT_USER, create_date: Date.now() }
+      data: {
+        ...ledger,
+        user: CURRENT_USER,
+        create_date: Date.now()
+      }
     }));
   } else {
     const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection(LEDGER_TABLE), ledger.id), {
-      data: { ...ledger, user: CURRENT_USER, update_date: Date.now() }
+      data: {
+        ...ledger,
+        user: CURRENT_USER,
+        update_date: Date.now()
+      }
     }));
   }
+}
+function ticksInSeconds(ticks) {
+  return ticks / 1e3;
 }
 async function ledgers() {
   if (!CURRENT_USER)
     throw "user must be signed in";
+  const cache = new Cache("ledgers");
+  if (!cache.expired())
+    return cache.get().data;
   const client = createClient();
   const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(LEDGER_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
   const ledgers2 = result.data;
   ledgers2.forEach((ledger) => {
     ledger.data.id = ledger.ref.value.id;
   });
-  return ledgers2.filter((ledger) => ledger.data.items && ledger.data.items[0] && ledger.data.items[0].account).map((ledger) => ledger.data);
+  const response = ledgers2.filter((ledger) => ledger.data.items && ledger.data.items[0] && ledger.data.items[0].account).map((ledger) => ledger.data);
+  cache.set(response);
+  return response;
 }
 
 // app/fun/asCurrency.ts
@@ -4958,7 +5002,10 @@ function printDetail(ledgers2) {
   const totals = [0, 0];
   let priorDate = "";
   ledgers2.forEach((ledger) => {
-    ledger.items.sortBy({ account: "string", amount: "gl" }).forEach((item) => {
+    ledger.items.sortBy({
+      account: "string",
+      amount: "gl"
+    }).forEach((item) => {
       const amount = item.amount;
       const debit = amount >= 0 && amount;
       const credit = amount < 0 && -amount;

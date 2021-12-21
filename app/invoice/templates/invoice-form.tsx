@@ -195,6 +195,13 @@ export function create(
           invoice.paid || 0
         )}
       />
+      <button
+        class="button col-5-2"
+        data-event="add-method-of-payment"
+        type="button"
+      >
+        Add Another Payment
+      </button>
       <div class="vspacer-1 col-1-6 flex">
         <button
           class="bold button"
@@ -354,6 +361,14 @@ function hookupEvents(
         return;
       addAnotherItem(formDom);
       trigger(formDom, "change");
+    }
+  );
+
+  on(
+    formDom,
+    "add-method-of-payment",
+    () => {
+      alert("TODO");
     }
   );
 

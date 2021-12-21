@@ -1,5 +1,9 @@
 import { query as q } from "faunadb";
-import { createClient, CURRENT_USER } from "../globals.js";
+import {
+  createClient,
+  CURRENT_USER,
+} from "../globals.js";
+import { Cache } from "./Cache";
 
 const LEDGER_TABLE = "general_ledger";
 
@@ -10,60 +14,112 @@ export interface LedgerItem {
 }
 
 export interface Ledger {
+  id?: any;
   date: number;
   description?: string;
   items: Array<LedgerItem>;
 }
 
-export async function deleteLedger(id: string) {
+export async function deleteLedger(
+  id: string
+) {
   const client = createClient();
   const result = await client.query(
-    q.Delete(q.Ref(q.Collection(LEDGER_TABLE), id))
+    q.Delete(
+      q.Ref(
+        q.Collection(LEDGER_TABLE),
+        id
+      )
+    )
   );
   return result;
 }
 
-export async function save(ledger: Ledger & { id?: string }) {
-  if (!CURRENT_USER) throw "user must be signed in";
+export async function save(
+  ledger: Ledger & { id?: string }
+) {
+  if (!CURRENT_USER)
+    throw "user must be signed in";
 
   const client = createClient();
 
   if (!ledger.id) {
     const result = (await client.query(
-      q.Create(q.Collection(LEDGER_TABLE), {
-        data: { ...ledger, user: CURRENT_USER, create_date: Date.now() },
-      })
+      q.Create(
+        q.Collection(LEDGER_TABLE),
+        {
+          data: {
+            ...ledger,
+            user: CURRENT_USER,
+            create_date: Date.now(),
+          },
+        }
+      )
     )) as { data: any; ref: any };
   } else {
     const result = (await client.query(
-      q.Update(q.Ref(q.Collection(LEDGER_TABLE), ledger.id), {
-        data: { ...ledger, user: CURRENT_USER, update_date: Date.now() },
-      })
+      q.Update(
+        q.Ref(
+          q.Collection(LEDGER_TABLE),
+          ledger.id
+        ),
+        {
+          data: {
+            ...ledger,
+            user: CURRENT_USER,
+            update_date: Date.now(),
+          },
+        }
+      )
     )) as { data: any; ref: any };
   }
 }
 
+export function ticksInSeconds(
+  ticks: number
+) {
+  return ticks / 1000;
+}
+
 export async function ledgers() {
-  if (!CURRENT_USER) throw "user must be signed in";
+  if (!CURRENT_USER)
+    throw "user must be signed in";
+
+  const cache = new Cache<Ledger[]>(
+    "ledgers"
+  );
+  if (!cache.expired())
+    return cache.get()!.data;
 
   const client = createClient();
 
-  const result: any = await client.query(
-    q.Map(
-      q.Paginate(q.Documents(q.Collection(LEDGER_TABLE)), { size: 100 }),
-      q.Lambda("ref", q.Get(q.Var("ref")))
-    )
-  );
+  const result: any =
+    await client.query(
+      q.Map(
+        q.Paginate(
+          q.Documents(
+            q.Collection(LEDGER_TABLE)
+          ),
+          { size: 100 }
+        ),
+        q.Lambda(
+          "ref",
+          q.Get(q.Var("ref"))
+        )
+      )
+    );
 
   const ledgers = result.data as Array<{
-    data: Ledger & { id: any };
+    data: Ledger;
     ref: any;
   }>;
   // copy ref into ledger id
   ledgers.forEach((ledger) => {
-    ledger.data.id = ledger.ref.value.id;
+    ledger.data.id =
+      ledger.ref.value.id;
   });
-  return ledgers
+
+  const response = ledgers
     .filter(
       (ledger) =>
         ledger.data.items &&
@@ -71,4 +127,8 @@ export async function ledgers() {
         ledger.data.items[0].account
     )
     .map((ledger) => ledger.data);
+
+  cache.set(response);
+
+  return response;
 }

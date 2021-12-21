@@ -1,6 +1,9 @@
 import faunadb from "faunadb";
 export const TAXRATE = 0.06;
 
+export const isDebug =
+  location.href.includes("localhost");
+
 export const primaryContact = {
   companyName: "Little Light Show",
   fullName: "Nathan Alix",

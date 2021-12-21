@@ -1,3 +1,4 @@
+import { Cache } from "./Cache.js";
 import { query as q } from "faunadb";
 import {
   createClient,
@@ -89,6 +90,12 @@ export async function invoices() {
   if (!CURRENT_USER)
     throw "user must be signed in";
 
+  const cache = new Cache<Invoice[]>(
+    "invoices"
+  );
+  if (!cache.expired())
+    return cache.get()!.data;
+
   const client = createClient();
 
   const result: any =
@@ -116,7 +123,8 @@ export async function invoices() {
     invoice.data.id =
       invoice.ref.value.id;
   });
-  return invoices
+
+  const response = invoices
     .filter(
       (invoice) => invoice.data.items
     )
@@ -144,4 +152,7 @@ export async function invoices() {
     })
     .sortBy({ date: "date" })
     .reverse();
+
+  cache.set(response);
+  return response;
 }

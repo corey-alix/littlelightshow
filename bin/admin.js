@@ -4722,6 +4722,7 @@ function sort(items, sortBy) {
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.06;
+var isDebug = location.href.includes("localhost");
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4829,6 +4830,35 @@ function sum(values) {
 
 // app/services/gl.ts
 var import_faunadb3 = __toModule(require_faunadb());
+
+// app/services/Cache.ts
+var maxAge = isDebug ? 3600 : 60;
+var Cache = class {
+  constructor(table) {
+    this.table = table;
+  }
+  expired() {
+    const data = this.get();
+    if (!data)
+      return true;
+    const age = ticksInSeconds(Date.now() - data.lastWrite);
+    return maxAge < age;
+  }
+  get() {
+    const raw = localStorage.getItem(`table_${this.table}`);
+    if (!raw)
+      return null;
+    return JSON.parse(raw);
+  }
+  set(data) {
+    localStorage.setItem(`table_${this.table}`, JSON.stringify({
+      lastWrite: Date.now(),
+      data
+    }));
+  }
+};
+
+// app/services/gl.ts
 var LEDGER_TABLE = "general_ledger";
 async function save(ledger) {
   if (!CURRENT_USER)
@@ -4836,24 +4866,40 @@ async function save(ledger) {
   const client = createClient();
   if (!ledger.id) {
     const result = await client.query(import_faunadb3.query.Create(import_faunadb3.query.Collection(LEDGER_TABLE), {
-      data: { ...ledger, user: CURRENT_USER, create_date: Date.now() }
+      data: {
+        ...ledger,
+        user: CURRENT_USER,
+        create_date: Date.now()
+      }
     }));
   } else {
     const result = await client.query(import_faunadb3.query.Update(import_faunadb3.query.Ref(import_faunadb3.query.Collection(LEDGER_TABLE), ledger.id), {
-      data: { ...ledger, user: CURRENT_USER, update_date: Date.now() }
+      data: {
+        ...ledger,
+        user: CURRENT_USER,
+        update_date: Date.now()
+      }
     }));
   }
+}
+function ticksInSeconds(ticks) {
+  return ticks / 1e3;
 }
 async function ledgers() {
   if (!CURRENT_USER)
     throw "user must be signed in";
+  const cache = new Cache("ledgers");
+  if (!cache.expired())
+    return cache.get().data;
   const client = createClient();
   const result = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Documents(import_faunadb3.query.Collection(LEDGER_TABLE)), { size: 100 }), import_faunadb3.query.Lambda("ref", import_faunadb3.query.Get(import_faunadb3.query.Var("ref")))));
   const ledgers2 = result.data;
   ledgers2.forEach((ledger) => {
     ledger.data.id = ledger.ref.value.id;
   });
-  return ledgers2.filter((ledger) => ledger.data.items && ledger.data.items[0] && ledger.data.items[0].account).map((ledger) => ledger.data);
+  const response = ledgers2.filter((ledger) => ledger.data.items && ledger.data.items[0] && ledger.data.items[0].account).map((ledger) => ledger.data);
+  cache.set(response);
+  return response;
 }
 
 // app/services/invoices.ts
@@ -4862,13 +4908,16 @@ var INVOICE_TABLE = "invoices";
 async function invoices() {
   if (!CURRENT_USER)
     throw "user must be signed in";
+  const cache = new Cache("invoices");
+  if (!cache.expired())
+    return cache.get().data;
   const client = createClient();
   const result = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Documents(import_faunadb4.query.Collection(INVOICE_TABLE)), { size: 100 }), import_faunadb4.query.Lambda("ref", import_faunadb4.query.Get(import_faunadb4.query.Var("ref")))));
   const invoices2 = result.data;
   invoices2.forEach((invoice) => {
     invoice.data.id = invoice.ref.value.id;
   });
-  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
+  const response = invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
     invoice.date = invoice.date || invoice.create_date;
     invoice.labor = (invoice.labor || 0) - 0;
     invoice.additional = (invoice.additional || 0) - 0;
@@ -4880,6 +4929,8 @@ async function invoices() {
     });
     return invoice;
   }).sortBy({ date: "date" }).reverse();
+  cache.set(response);
+  return response;
 }
 
 // app/fun/split.ts

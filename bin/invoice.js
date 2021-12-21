@@ -3111,15 +3111,15 @@ var require_PageHelper = __commonJS({
     }
     PageHelper.prototype.map = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q3) {
-        return query2.Map(q3, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query2.Map(q4, lambda);
       });
       return rv;
     };
     PageHelper.prototype.filter = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q3) {
-        return query2.Filter(q3, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query2.Filter(q4, lambda);
       });
       return rv;
     };
@@ -3188,13 +3188,13 @@ var require_PageHelper = __commonJS({
           cursorOpts.before = null;
         }
       }
-      var q3 = query2.Paginate(this.set, opts);
+      var q4 = query2.Paginate(this.set, opts);
       if (this._faunaFunctions.length > 0) {
         this._faunaFunctions.forEach(function(lambda) {
-          q3 = lambda(q3);
+          q4 = lambda(q4);
         });
       }
-      return this.client.query(q3, this.options);
+      return this.client.query(q4, this.options);
     };
     PageHelper.prototype._clone = function() {
       return Object.create(PageHelper.prototype, {
@@ -4329,7 +4329,7 @@ var require_stream = __commonJS({
     var errors = require_errors();
     var json = require_json();
     var http = require_http3();
-    var q3 = require_query();
+    var q4 = require_query();
     var util = require_util();
     var DefaultEvents = ["start", "error", "version", "history_rewrite"];
     var DocumentStreamEvents = DefaultEvents.concat(["snapshot"]);
@@ -4339,14 +4339,14 @@ var require_stream = __commonJS({
       });
       this._client = client;
       this._onEvent = onEvent;
-      this._query = q3.wrap(expression);
+      this._query = q4.wrap(expression);
       this._urlParams = options.fields ? { fields: options.fields.join(",") } : null;
       this._abort = new AbortController();
       this._state = "idle";
     }
     StreamClient.prototype.snapshot = function() {
       var self2 = this;
-      self2._client.query(q3.Get(self2._query)).then(function(doc) {
+      self2._client.query(q4.Get(self2._query)).then(function(doc) {
         self2._onEvent({
           type: "snapshot",
           event: doc
@@ -4772,12 +4772,10 @@ var routes = {
   admin: () => "/app/admin/index.html"
 };
 
-// app/services/invoices.ts
-var import_faunadb2 = __toModule(require_faunadb());
-
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.06;
+var isDebug = location.href.includes("localhost");
 var primaryContact = {
   companyName: "Little Light Show",
   fullName: "Nathan Alix",
@@ -4820,20 +4818,54 @@ function createClient() {
   });
 }
 
+// app/services/gl.ts
+var import_faunadb2 = __toModule(require_faunadb());
+function ticksInSeconds(ticks) {
+  return ticks / 1e3;
+}
+
+// app/services/Cache.ts
+var maxAge = isDebug ? 3600 : 60;
+var Cache = class {
+  constructor(table) {
+    this.table = table;
+  }
+  expired() {
+    const data = this.get();
+    if (!data)
+      return true;
+    const age = ticksInSeconds(Date.now() - data.lastWrite);
+    return maxAge < age;
+  }
+  get() {
+    const raw = localStorage.getItem(`table_${this.table}`);
+    if (!raw)
+      return null;
+    return JSON.parse(raw);
+  }
+  set(data) {
+    localStorage.setItem(`table_${this.table}`, JSON.stringify({
+      lastWrite: Date.now(),
+      data
+    }));
+  }
+};
+
 // app/services/invoices.ts
+var import_faunadb3 = __toModule(require_faunadb());
 var INVOICE_TABLE = "invoices";
 async function deleteInvoice(id) {
   if (!CURRENT_USER)
     throw "user must be signed in";
   const client = createClient();
-  const result = await client.query(import_faunadb2.query.Delete(import_faunadb2.query.Ref(import_faunadb2.query.Collection(INVOICE_TABLE), id)));
+  const result = await client.query(import_faunadb3.query.Delete(import_faunadb3.query.Ref(import_faunadb3.query.Collection(INVOICE_TABLE), id)));
 }
 async function save(invoice) {
   if (!CURRENT_USER)
     throw "user must be signed in";
   const client = createClient();
   if (!invoice.id) {
-    const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(INVOICE_TABLE), {
+    const result = await client.query(import_faunadb3.query.Create(import_faunadb3.query.Collection(INVOICE_TABLE), {
       data: {
         ...invoice,
         user: CURRENT_USER,
@@ -4842,7 +4874,7 @@ async function save(invoice) {
     }));
     invoice.id = result.ref.id;
   } else {
-    const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection(INVOICE_TABLE), invoice.id), {
+    const result = await client.query(import_faunadb3.query.Update(import_faunadb3.query.Ref(import_faunadb3.query.Collection(INVOICE_TABLE), invoice.id), {
       data: {
         ...invoice,
         user: CURRENT_USER,
@@ -4854,13 +4886,16 @@ async function save(invoice) {
 async function invoices() {
   if (!CURRENT_USER)
     throw "user must be signed in";
+  const cache = new Cache("invoices");
+  if (!cache.expired())
+    return cache.get().data;
   const client = createClient();
-  const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(INVOICE_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
+  const result = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Documents(import_faunadb3.query.Collection(INVOICE_TABLE)), { size: 100 }), import_faunadb3.query.Lambda("ref", import_faunadb3.query.Get(import_faunadb3.query.Var("ref")))));
   const invoices2 = result.data;
   invoices2.forEach((invoice) => {
     invoice.data.id = invoice.ref.value.id;
   });
-  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
+  const response = invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
     invoice.date = invoice.date || invoice.create_date;
     invoice.labor = (invoice.labor || 0) - 0;
     invoice.additional = (invoice.additional || 0) - 0;
@@ -4872,15 +4907,17 @@ async function invoices() {
     });
     return invoice;
   }).sortBy({ date: "date" }).reverse();
+  cache.set(response);
+  return response;
 }
 
 // app/services/validateAccessToken.ts
-var import_faunadb3 = __toModule(require_faunadb());
-var { query } = import_faunadb3.default;
-var q2 = query;
+var import_faunadb4 = __toModule(require_faunadb());
+var { query } = import_faunadb4.default;
+var q3 = query;
 async function validate() {
   const client = createClient();
-  return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
+  return client.query(q3.Paginate(q3.Documents(q3.Collection("Todos"))));
 }
 
 // app/identify.ts
@@ -5155,7 +5192,11 @@ function create(invoice) {
     name: "amount_paid",
     placeholder: "amount paid",
     value: asCurrency(invoice.paid || 0)
-  }), /* @__PURE__ */ dom("div", {
+  }), /* @__PURE__ */ dom("button", {
+    class: "button col-5-2",
+    "data-event": "add-method-of-payment",
+    type: "button"
+  }, "Add Another Payment"), /* @__PURE__ */ dom("div", {
     class: "vspacer-1 col-1-6 flex"
   }, /* @__PURE__ */ dom("button", {
     class: "bold button",
@@ -5227,6 +5268,9 @@ function hookupEvents(formDom) {
       return;
     addAnotherItem(formDom);
     trigger(formDom, "change");
+  });
+  on(formDom, "add-method-of-payment", () => {
+    alert("TODO");
   });
   on(formDom, "clear", () => {
     location.href = routes.createInvoice();
