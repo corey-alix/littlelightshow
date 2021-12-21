@@ -15,9 +15,11 @@ import {
   TAXRATE,
 } from "../../globals.js";
 import {
-  forceDatalist,
+  forceDatalist as forceInventoryDataList,
   inventoryManager,
 } from "../../inventory/InventoryManager.js";
+import { forceDatalist as forceMopDataList } from "../PaymentManager.js";
+
 import { routes } from "../../router.js";
 import {
   Invoice,
@@ -452,6 +454,7 @@ function renderMopLineItem(item?: {
         class="col-1-4"
         name="method_of_payment"
         value={item?.mop || ""}
+        list={forceMopDataList().id}
       />
       <input
         type="number"
@@ -530,7 +533,9 @@ function renderInvoiceItem(
         required
         type="text"
         value={item.item}
-        list={forceDatalist().id}
+        list={
+          forceInventoryDataList().id
+        }
       />
       <label class="form-label col-1-2 quantity">
         Quantity
