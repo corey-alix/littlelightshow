@@ -19,10 +19,17 @@ export async function init(
   if (printId) {
     switch (printId) {
       case "all":
-        await printLedger();
+        document.body.innerHTML = "";
+        await printLedger(
+          document.body
+        );
         break;
       default:
-        await printLedger(printId);
+        document.body.innerHTML = "";
+        await printLedger(
+          document.body,
+          printId
+        );
     }
     return;
   }

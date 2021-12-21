@@ -5,5 +5,6 @@ const { query } = faunadb;
 const q = query;
 
 export async function validate() {
-  createClient();
+  const client = createClient();
+  await client.ping();
 }

@@ -60,6 +60,19 @@ export async function init() {
     }
   );
 
+  on(domNode, "set-api-key", () => {
+    prompt(
+      "Enter API Key",
+      (secret) => {
+        if (!secret) return;
+        localStorage.setItem(
+          "FAUNADB_SERVER_SECRET",
+          secret
+        );
+      }
+    );
+  });
+
   on(
     domNode,
     "ping-local-storage",
@@ -112,6 +125,20 @@ export async function init() {
     }
   );
 }
+function prompt(
+  label: string,
+  cb: (input: string) => void
+) {
+  const input =
+    document.createElement("input");
+  input.placeholder = label;
+  document.body.appendChild(input);
+  input.onchange = () => {
+    cb(input.value.trim());
+    input.remove();
+  };
+}
+
 function addAccount(
   accounts: any,
   item: string

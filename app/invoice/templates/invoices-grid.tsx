@@ -16,39 +16,63 @@ export function create(
     invoices.map((i) => i.labor)
   );
 
-  const report: HTMLFormElement = (
-    <form class="grid-6">
-      <label class="bold col-1-4">
-        Client
-      </label>
-      <label class="bold col-5 align-right">
-        Labor
-      </label>
-      <label class="bold col-6 align-right">
-        Total
-      </label>
-      <div class="line col-1-6"></div>
-    </form>
-  );
+  const target: HTMLFormElement =
+    invoices.length ? (
+      <form class="grid-6">
+        <label class="bold col-1-4">
+          Client
+        </label>
+        <label class="bold col-5 align-right">
+          Labor
+        </label>
+        <label class="bold col-6 align-right">
+          Total
+        </label>
+        <div class="line col-1-6"></div>
+      </form>
+    ) : (
+      <form class="grid-6">
+        <div class="col-1-6 centered">
+          No invoices defined
+        </div>
+        <div class="line col-1-6"></div>
+      </form>
+    );
+
   invoices
     .map(renderInvoice)
     .forEach((item) =>
-      moveChildren(item, report)
+      moveChildren(item, target)
     );
+
+  invoices.length &&
+    moveChildren(
+      <div>
+        <div class="vspacer-1 col-1-6"></div>
+        <div class="line col-1-6"></div>
+        <label class="bold col-1-4">
+          Total
+        </label>
+        <label class="bold col-5 currency">
+          {labor.toFixed(2)}
+        </label>
+        <label class="bold col-6 currency">
+          {total.toFixed(2)}
+        </label>
+        <div class="vspacer-2 col-1-6"></div>
+        <button
+          type="button"
+          class="button col-1-2"
+          data-event="create-invoice"
+        >
+          Create Invoice
+        </button>
+      </div>,
+      target
+    );
+
   moveChildren(
     <div>
-      <div class="vspacer-1 col-1-6"></div>
-      <div class="line col-1-6"></div>
-      <label class="bold col-1-4">
-        Total
-      </label>
-      <label class="bold col-5 currency">
-        {labor.toFixed(2)}
-      </label>
-      <label class="bold col-6 currency">
-        {total.toFixed(2)}
-      </label>
-      <div class="vspacer-2 col-1-6"></div>
       <button
         type="button"
         class="button col-1-2"
@@ -57,12 +81,12 @@ export function create(
         Create Invoice
       </button>
     </div>,
-    report
+    target
   );
 
-  hookupTriggers(report);
+  hookupTriggers(target);
 
-  return report;
+  return target;
 }
 
 function totalInvoice(
