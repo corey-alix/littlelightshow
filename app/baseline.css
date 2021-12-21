@@ -355,6 +355,8 @@ body.dark button {
 .flex {
   display: flex;
   flex-wrap: wrap;
+  grid-column-gap: 1em;
+  grid-row-gap: 1em;
 }
 
 .flex .button {
