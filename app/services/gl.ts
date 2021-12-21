@@ -38,7 +38,6 @@ export async function deleteLedger(
       )
     )
   );
-
   cache.deleteLineItem(id);
   return result;
 }
@@ -65,8 +64,11 @@ export async function save(
               },
             }
           )
-        )) as { data: any; ref: any };
-      ledger.id = result.ref;
+        )) as {
+          data: Ledger[];
+          ref: { id: string };
+        };
+      ledger.id = result.ref.id;
     } else {
       ledger.id =
         "ledger_" +
@@ -144,4 +146,35 @@ export async function ledgers() {
   cache.set(response);
 
   return response;
+}
+
+export async function get(id: string) {
+  if (!CURRENT_USER)
+    throw "user must be signed in";
+
+  if (isOffline || !cache.expired()) {
+    const hit = cache
+      .get()
+      .find((item) => item.id === id);
+    if (hit) return hit;
+  }
+
+  if (isOffline)
+    throw `cannot find ledger: ${id}`;
+
+  const client = createClient();
+
+  const result = (await client.query(
+    q.Get(
+      q.Ref(
+        q.Collection(LEDGER_TABLE),
+        id
+      )
+    )
+  )) as {
+    data: Ledger;
+    ref: { id: string };
+  };
+  result.data.id = result.ref.id;
+  cache.updateLineItem(result.data);
 }

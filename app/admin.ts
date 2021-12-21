@@ -12,6 +12,8 @@ import {
   save as saveAccounts,
   load as loadAccounts,
 } from "./gl/AccountManager.js";
+import { on } from "./fun/on.js";
+import { ServiceCache } from "./services/ServiceCache.js";
 
 // not sure what to start with
 type AccountHierarchy = Record<
@@ -42,7 +44,39 @@ export async function init() {
   await identify();
   const domNode = document.body;
   hookupTriggers(domNode);
-  domNode.addEventListener(
+
+  on(
+    domNode,
+    "clear-local-storage",
+    () => {
+      let cache = new ServiceCache(
+        "invoices"
+      );
+      cache.clear();
+      cache = new ServiceCache(
+        "general_ledger"
+      );
+      cache.clear();
+    }
+  );
+
+  on(
+    domNode,
+    "ping-local-storage",
+    () => {
+      let cache = new ServiceCache(
+        "invoices"
+      );
+      cache.renew();
+      cache = new ServiceCache(
+        "general_ledger"
+      );
+      cache.renew();
+    }
+  );
+
+  on(
+    domNode,
     "invoice-to-gl",
     async () => {
       if (
@@ -55,7 +89,8 @@ export async function init() {
     }
   );
 
-  domNode.addEventListener(
+  on(
+    domNode,
     "gl-to-list-of-accounts",
     async () => {
       const accounts = loadAccounts();

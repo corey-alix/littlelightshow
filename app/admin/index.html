@@ -26,6 +26,22 @@
       Accounts
     </button>
 
+    <button
+      class="button"
+      data-event="clear-local-storage"
+      title="clears the last-write time on the cache to force a cache miss"
+    >
+      Clear local storage
+    </button>
+
+    <button
+      class="button"
+      data-event="ping-local-storage"
+      title="Updates the last write time on the cache"
+    >
+      Ping local storage
+    </button>
+
     <script type="module">
       import { init } from "/bin/admin.js";
       init();

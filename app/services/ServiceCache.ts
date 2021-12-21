@@ -8,6 +8,16 @@ const maxAge = isDebug
 export class ServiceCache<
   T extends { id?: string }
 > {
+  clear() {
+    this.lastWrite = 0;
+    this.save();
+  }
+
+  renew() {
+    this.lastWrite = Date.now();
+    this.save();
+  }
+
   private data: Array<T>;
   private lastWrite: number;
 

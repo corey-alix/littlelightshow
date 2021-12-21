@@ -4839,6 +4839,14 @@ var ServiceCache = class {
       this.data = info.data;
     }
   }
+  clear() {
+    this.lastWrite = 0;
+    this.save();
+  }
+  renew() {
+    this.lastWrite = Date.now();
+    this.save();
+  }
   save() {
     localStorage.setItem(`table_${this.table}`, JSON.stringify({
       lastWrite: this.lastWrite,

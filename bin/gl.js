@@ -4849,6 +4849,14 @@ var ServiceCache = class {
       this.data = info.data;
     }
   }
+  clear() {
+    this.lastWrite = 0;
+    this.save();
+  }
+  renew() {
+    this.lastWrite = Date.now();
+    this.save();
+  }
   save() {
     localStorage.setItem(`table_${this.table}`, JSON.stringify({
       lastWrite: this.lastWrite,
@@ -4904,7 +4912,7 @@ async function save(ledger) {
           create_date: Date.now()
         }
       }));
-      ledger.id = result.ref;
+      ledger.id = result.ref.id;
     } else {
       ledger.id = "ledger_" + Date.now().toFixed();
     }
@@ -4935,6 +4943,21 @@ async function ledgers() {
   const response = ledgers2.filter((ledger) => ledger.data.items && ledger.data.items[0] && ledger.data.items[0].account).map((ledger) => ledger.data);
   cache.set(response);
   return response;
+}
+async function get(id) {
+  if (!CURRENT_USER)
+    throw "user must be signed in";
+  if (isOffline || !cache.expired()) {
+    const hit = cache.get().find((item) => item.id === id);
+    if (hit)
+      return hit;
+  }
+  if (isOffline)
+    throw `cannot find ledger: ${id}`;
+  const client = createClient();
+  const result = await client.query(import_faunadb2.query.Get(import_faunadb2.query.Ref(import_faunadb2.query.Collection(LEDGER_TABLE), id)));
+  result.data.id = result.ref.id;
+  cache.updateLineItem(result.data);
 }
 
 // app/fun/asCurrency.ts
@@ -5533,8 +5556,7 @@ async function init(domNode) {
   }
   if (queryParams.has("id")) {
     const id = queryParams.get("id");
-    const ledgers2 = await ledgers();
-    const ledger = ledgers2.find((l) => l.id === id);
+    const ledger = await get(id);
     if (!ledger)
       throw `cannot find ledger: ${id}`;
     domNode.appendChild(create2(ledger));

@@ -77,7 +77,10 @@ export async function save(
               },
             }
           )
-        )) as { data: any; ref: any };
+        )) as {
+          data: Invoice[];
+          ref: { id: string };
+        };
       invoice.id = result.ref.id;
     } else {
       invoice.id =

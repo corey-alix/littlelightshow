@@ -4849,6 +4849,14 @@ var ServiceCache = class {
       this.data = info.data;
     }
   }
+  clear() {
+    this.lastWrite = 0;
+    this.save();
+  }
+  renew() {
+    this.lastWrite = Date.now();
+    this.save();
+  }
   save() {
     localStorage.setItem(`table_${this.table}`, JSON.stringify({
       lastWrite: this.lastWrite,
@@ -4898,7 +4906,7 @@ async function save(ledger) {
           create_date: Date.now()
         }
       }));
-      ledger.id = result.ref;
+      ledger.id = result.ref.id;
     } else {
       ledger.id = "ledger_" + Date.now().toFixed();
     }
@@ -5083,12 +5091,24 @@ async function init() {
   await identify();
   const domNode = document.body;
   hookupTriggers(domNode);
-  domNode.addEventListener("invoice-to-gl", async () => {
+  on(domNode, "clear-local-storage", () => {
+    let cache3 = new ServiceCache("invoices");
+    cache3.clear();
+    cache3 = new ServiceCache("general_ledger");
+    cache3.clear();
+  });
+  on(domNode, "ping-local-storage", () => {
+    let cache3 = new ServiceCache("invoices");
+    cache3.renew();
+    cache3 = new ServiceCache("general_ledger");
+    cache3.renew();
+  });
+  on(domNode, "invoice-to-gl", async () => {
     if (!confirm("import invoices into general ledger?"))
       return;
     await importInvoicesToGeneralLedger();
   });
-  domNode.addEventListener("gl-to-list-of-accounts", async () => {
+  on(domNode, "gl-to-list-of-accounts", async () => {
     const accounts = load();
     starterAccounts.forEach((account) => addAccount(accounts, account));
     const ledgers2 = await ledgers();
