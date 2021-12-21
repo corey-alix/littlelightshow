@@ -57,6 +57,31 @@ export async function deleteInvoice(
   cache.deleteLineItem(id);
 }
 
+export async function get(id: string) {
+  if (!CURRENT_USER)
+    throw "user must be signed in";
+
+  if (isOffline || !cache.expired()) {
+    const result = cache.getById(id);
+    if (result) return result;
+  }
+
+  if (!isOffline) {
+    const client = createClient();
+    const result = (await client.query(
+      q.Get(
+        q.Ref(
+          q.Collection(INVOICE_TABLE),
+          id
+        )
+      )
+    )) as { data: Invoice };
+    return result.data;
+  }
+
+  throw `unable to load invoice: ${id}`;
+}
+
 export async function save(
   invoice: Invoice
 ) {

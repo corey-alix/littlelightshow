@@ -107,11 +107,11 @@ body.dark .button {
 .grid-6 input {
   width: 100%;
   min-height: 2rem;
-  border: none;
+  border: 1px solid transparent;
 }
 
 .grid-6 input:focus {
-  border: 1px solid;
+  outline: 1px solid rgb(214, 0, 28);
 }
 
 .form-label > input {

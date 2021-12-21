@@ -10,7 +10,10 @@ import {
   on,
   trigger,
 } from "../../fun/on.js";
-import { TAXRATE } from "../../globals.js";
+import {
+  primaryContact,
+  TAXRATE,
+} from "../../globals.js";
 import {
   forceDatalist,
   inventoryManager,
@@ -36,8 +39,8 @@ export function create(
       class="grid-6"
       id="invoice-form"
     >
-      <h1 class="col-1-6">
-        Create an Invoice
+      <h1 class="col-1-6 centered">
+        {`Invoice Form for ${primaryContact.companyName}`}
       </h1>
       <input
         class="form-label hidden"
@@ -173,19 +176,16 @@ export function create(
         id="total_due"
         name="total_due"
       />
-      <p class="form-label col-5-2 currency">
-        Balance Due
-      </p>
-      <input
-        readonly
-        class="currency col-5-2 bold"
-        type="number"
-        id="balance_due"
-      />
       <div class="col-1 vspacer-1"></div>
 
-      <div class="col-1-6">
+      <div class="section-title col-1-6">
         Method of Payment
+      </div>
+      <div class="col-1-4">
+        Payment Type
+      </div>
+      <div class="col-5-2 currency">
+        Amount
       </div>
       <div
         id="mop-line-item-end"
@@ -198,6 +198,15 @@ export function create(
       >
         Add Payment
       </button>
+      <div class="form-label col-5-2 currency">
+        Balance Due
+      </div>
+      <input
+        readonly
+        class="currency col-5-2 bold"
+        type="number"
+        id="balance_due"
+      />
       <div class="vspacer-1 col-1-6 flex">
         <button
           class="bold button"
@@ -305,6 +314,13 @@ export function create(
   extendNumericInputBehaviors(form);
   hookupTriggers(form);
   hookupEvents(form);
+
+  if (!invoice.mops?.length) {
+    trigger(
+      form,
+      "add-method-of-payment"
+    );
+  }
   compute(form);
   return form;
 }

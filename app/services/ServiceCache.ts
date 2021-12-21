@@ -75,6 +75,12 @@ export class ServiceCache<
     return maxAge < age;
   }
 
+  getById(id: string) {
+    return this.data.find(
+      (item) => item.id === id
+    );
+  }
+
   get() {
     return this.data;
   }

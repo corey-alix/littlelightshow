@@ -8,6 +8,7 @@ import { routes } from "../router.js";
 import {
   save as saveInvoice,
   deleteInvoice,
+  get as getInvoice,
   invoices as getAllInvoices,
   Invoice,
   InvoiceItem,
@@ -53,13 +54,9 @@ async function renderInvoice(
 ) {
   let invoice: Invoice | null;
   if (invoiceId) {
-    const invoices =
-      await getAllInvoices();
-    invoice =
-      invoices.find(
-        (invoice) =>
-          invoice.id === invoiceId
-      ) || null;
+    invoice = await getInvoice(
+      invoiceId
+    );
     if (!invoice)
       throw "invoice not found";
   } else {
