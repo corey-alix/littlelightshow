@@ -73,5 +73,6 @@ export class ServiceCache<
   set(data: T[]) {
     this.lastWrite = Date.now();
     this.data = data;
+    this.save();
   }
 }

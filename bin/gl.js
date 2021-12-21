@@ -4786,7 +4786,7 @@ var import_faunadb2 = __toModule(require_faunadb());
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var isDebug = location.href.includes("localhost");
-var isOffline = isDebug;
+var isOffline = false;
 var primaryContact = {
   companyName: "Little Light Show",
   fullName: "Nathan Alix",
@@ -4878,6 +4878,7 @@ var ServiceCache = class {
   set(data) {
     this.lastWrite = Date.now();
     this.data = data;
+    this.save();
   }
 };
 

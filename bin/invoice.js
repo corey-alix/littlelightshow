@@ -4776,7 +4776,7 @@ var routes = {
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.06;
 var isDebug = location.href.includes("localhost");
-var isOffline = isDebug;
+var isOffline = false;
 var primaryContact = {
   companyName: "Little Light Show",
   fullName: "Nathan Alix",
@@ -4868,6 +4868,7 @@ var ServiceCache = class {
   set(data) {
     this.lastWrite = Date.now();
     this.data = data;
+    this.save();
   }
 };
 

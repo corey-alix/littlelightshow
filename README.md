@@ -2,7 +2,12 @@
 
 littlelightshow
 
-#todo
+# todo
+
+## Offline Support
+
+- Add fetch service for an individual item
+- Merge items into offline collection (create, update, delete)
 
 Utilize an image optimizer service
 

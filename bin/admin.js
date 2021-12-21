@@ -4723,7 +4723,7 @@ function sort(items, sortBy) {
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.06;
 var isDebug = location.href.includes("localhost");
-var isOffline = isDebug;
+var isOffline = false;
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4878,6 +4878,7 @@ var ServiceCache = class {
   set(data) {
     this.lastWrite = Date.now();
     this.data = data;
+    this.save();
   }
 };
 
