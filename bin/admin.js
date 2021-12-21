@@ -936,12 +936,12 @@ var require_util = __commonJS({
     function checkInstanceHasProperty(obj, prop) {
       return typeof obj === "object" && obj !== null && Boolean(obj[prop]);
     }
-    function formatUrl(base, path, query2) {
-      query2 = typeof query2 === "object" ? querystringify(query2) : query2;
+    function formatUrl(base, path, query) {
+      query = typeof query === "object" ? querystringify(query) : query;
       return [
         base,
         path ? path.charAt(0) === "/" ? "" : "/" + path : "",
-        query2 ? query2.charAt(0) === "?" ? "" : "?" + query2 : ""
+        query ? query.charAt(0) === "?" ? "" : "?" + query : ""
       ].join("");
     }
     function querystringify(obj, prefix) {
@@ -3081,7 +3081,7 @@ var require_json = __commonJS({
 var require_PageHelper = __commonJS({
   "node_modules/faunadb/src/PageHelper.js"(exports, module) {
     "use strict";
-    var query2 = require_query();
+    var query = require_query();
     var objectAssign = require_object_assign();
     function PageHelper(client, set, params, options) {
       if (params === void 0) {
@@ -3111,15 +3111,15 @@ var require_PageHelper = __commonJS({
     }
     PageHelper.prototype.map = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q5) {
-        return query2.Map(q5, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query.Map(q4, lambda);
       });
       return rv;
     };
     PageHelper.prototype.filter = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q5) {
-        return query2.Filter(q5, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query.Filter(q4, lambda);
       });
       return rv;
     };
@@ -3188,13 +3188,13 @@ var require_PageHelper = __commonJS({
           cursorOpts.before = null;
         }
       }
-      var q5 = query2.Paginate(this.set, opts);
+      var q4 = query.Paginate(this.set, opts);
       if (this._faunaFunctions.length > 0) {
         this._faunaFunctions.forEach(function(lambda) {
-          q5 = lambda(q5);
+          q4 = lambda(q4);
         });
       }
-      return this.client.query(q5, this.options);
+      return this.client.query(q4, this.options);
     };
     PageHelper.prototype._clone = function() {
       return Object.create(PageHelper.prototype, {
@@ -3214,10 +3214,10 @@ var require_PageHelper = __commonJS({
 var require_RequestResult = __commonJS({
   "node_modules/faunadb/src/RequestResult.js"(exports, module) {
     "use strict";
-    function RequestResult(method, path, query2, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
+    function RequestResult(method, path, query, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
       this.method = method;
       this.path = path;
-      this.query = query2;
+      this.query = query;
       this.requestRaw = requestRaw;
       this.requestContent = requestContent;
       this.responseRaw = responseRaw;
@@ -4329,7 +4329,7 @@ var require_stream = __commonJS({
     var errors = require_errors();
     var json = require_json();
     var http = require_http3();
-    var q5 = require_query();
+    var q4 = require_query();
     var util = require_util();
     var DefaultEvents = ["start", "error", "version", "history_rewrite"];
     var DocumentStreamEvents = DefaultEvents.concat(["snapshot"]);
@@ -4339,14 +4339,14 @@ var require_stream = __commonJS({
       });
       this._client = client;
       this._onEvent = onEvent;
-      this._query = q5.wrap(expression);
+      this._query = q4.wrap(expression);
       this._urlParams = options.fields ? { fields: options.fields.join(",") } : null;
       this._abort = new AbortController();
       this._state = "idle";
     }
     StreamClient.prototype.snapshot = function() {
       var self2 = this;
-      self2._client.query(q5.Get(self2._query)).then(function(doc) {
+      self2._client.query(q4.Get(self2._query)).then(function(doc) {
         self2._onEvent({
           type: "snapshot",
           event: doc
@@ -4521,7 +4521,7 @@ var require_Client = __commonJS({
     var errors = require_errors();
     var http = require_http3();
     var json = require_json();
-    var query2 = require_query();
+    var query = require_query();
     var stream = require_stream();
     var util = require_util();
     var values = require_values();
@@ -4552,7 +4552,7 @@ var require_Client = __commonJS({
     }
     Client.apiVersion = packageJson.apiVersion;
     Client.prototype.query = function(expression, options) {
-      return this._execute("POST", "", query2.wrap(expression), null, options);
+      return this._execute("POST", "", query.wrap(expression), null, options);
     };
     Client.prototype.paginate = function(expression, params, options) {
       params = util.defaults(params, {});
@@ -4571,26 +4571,26 @@ var require_Client = __commonJS({
     Client.prototype.close = function(opts) {
       return this._http.close(opts);
     };
-    Client.prototype._execute = function(method, path, data, query3, options) {
-      query3 = util.defaults(query3, null);
+    Client.prototype._execute = function(method, path, data, query2, options) {
+      query2 = util.defaults(query2, null);
       if (path instanceof values.Ref || util.checkInstanceHasProperty(path, "_isFaunaRef")) {
         path = path.value;
       }
-      if (query3 !== null) {
-        query3 = util.removeUndefinedValues(query3);
+      if (query2 !== null) {
+        query2 = util.removeUndefinedValues(query2);
       }
       var startTime = Date.now();
       var self2 = this;
       var body = ["GET", "HEAD"].indexOf(method) >= 0 ? void 0 : JSON.stringify(data);
       return this._http.execute(Object.assign({}, options, {
         path,
-        query: query3,
+        query: query2,
         method,
         body
       })).then(function(response) {
         var endTime = Date.now();
         var responseObject = json.parseJSON(response.body);
-        var result = new RequestResult(method, path, query3, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
+        var result = new RequestResult(method, path, query2, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
         self2._handleRequestResult(response, result, options);
         return responseObject["resource"];
       });
@@ -4635,12 +4635,12 @@ var require_clientLogger = __commonJS({
       };
     }
     function showRequestResult(requestResult) {
-      var query2 = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
+      var query = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
       var out = "";
       function log(str) {
         out = out + str;
       }
-      log("Fauna " + method + " /" + path + _queryString(query2) + "\n");
+      log("Fauna " + method + " /" + path + _queryString(query) + "\n");
       if (requestContent != null) {
         log("  Request JSON: " + _showJSON(requestContent) + "\n");
       }
@@ -4656,16 +4656,16 @@ var require_clientLogger = __commonJS({
     function _showJSON(object) {
       return _indent(json.toJSON(object, true));
     }
-    function _queryString(query2) {
-      if (query2 == null) {
+    function _queryString(query) {
+      if (query == null) {
         return "";
       }
-      var keys = Object.keys(query2);
+      var keys = Object.keys(query);
       if (keys.length === 0) {
         return "";
       }
       var pairs = keys.map(function(key) {
-        return key + "=" + query2[key];
+        return key + "=" + query[key];
       });
       return "?" + pairs.join("&");
     }
@@ -4679,7 +4679,7 @@ var require_clientLogger = __commonJS({
 // node_modules/faunadb/index.js
 var require_faunadb = __commonJS({
   "node_modules/faunadb/index.js"(exports, module) {
-    var query2 = require_query();
+    var query = require_query();
     var util = require_util();
     var parseJSON = require_json().parseJSON;
     module.exports = util.mergeObjects({
@@ -4690,9 +4690,9 @@ var require_faunadb = __commonJS({
       clientLogger: require_clientLogger(),
       errors: require_errors(),
       values: require_values(),
-      query: query2,
+      query,
       parseJSON
-    }, query2);
+    }, query);
   }
 });
 
@@ -4761,11 +4761,8 @@ function createClient() {
 
 // app/services/validateAccessToken.ts
 var import_faunadb2 = __toModule(require_faunadb());
-var { query } = import_faunadb2.default;
-var q = query;
 async function validate() {
-  const client = createClient();
-  return client.query(q.Paginate(q.Documents(q.Collection("Todos"))));
+  createClient();
 }
 
 // app/router.ts
@@ -4837,6 +4834,18 @@ var Cache = class {
   constructor(table) {
     this.table = table;
   }
+  deleteLineItem(id) {
+    const data = this.get()?.data;
+    const index = data.findIndex((i) => i.id === id);
+    data.splice(index, 1);
+    this.set(data);
+  }
+  updateLineItem(lineItem) {
+    const data = this.get()?.data;
+    const index = data.findIndex((i) => i.id === lineItem.id);
+    data.push(lineItem);
+    this.set(data);
+  }
   expired() {
     const data = this.get();
     if (!data)
@@ -4888,9 +4897,9 @@ function ticksInSeconds(ticks) {
 async function ledgers() {
   if (!CURRENT_USER)
     throw "user must be signed in";
-  const cache = new Cache("ledgers");
-  if (!cache.expired())
-    return cache.get().data;
+  const cache2 = new Cache("ledgers");
+  if (!cache2.expired())
+    return cache2.get().data;
   const client = createClient();
   const result = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Documents(import_faunadb3.query.Collection(LEDGER_TABLE)), { size: 100 }), import_faunadb3.query.Lambda("ref", import_faunadb3.query.Get(import_faunadb3.query.Var("ref")))));
   const ledgers2 = result.data;
@@ -4898,17 +4907,17 @@ async function ledgers() {
     ledger.data.id = ledger.ref.value.id;
   });
   const response = ledgers2.filter((ledger) => ledger.data.items && ledger.data.items[0] && ledger.data.items[0].account).map((ledger) => ledger.data);
-  cache.set(response);
+  cache2.set(response);
   return response;
 }
 
 // app/services/invoices.ts
 var import_faunadb4 = __toModule(require_faunadb());
 var INVOICE_TABLE = "invoices";
+var cache = new Cache(INVOICE_TABLE);
 async function invoices() {
   if (!CURRENT_USER)
     throw "user must be signed in";
-  const cache = new Cache("invoices");
   if (!cache.expired())
     return cache.get().data;
   const client = createClient();

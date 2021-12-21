@@ -4,6 +4,30 @@ import { ticksInSeconds } from "./gl";
 const maxAge = isDebug ? 3600 : 60;
 
 export class Cache<T> {
+  deleteLineItem(id: string) {
+    const data = this.get()
+      ?.data as any as Array<{
+      id: string;
+    }>;
+    const index = data.findIndex(
+      (i) => i.id === id
+    );
+    data.splice(index, 1);
+    this.set(<any>data);
+  }
+
+  updateLineItem(lineItem: any) {
+    const data = this.get()
+      ?.data as any as Array<{
+      id: string;
+    }>;
+    const index = data.findIndex(
+      (i) => i.id === lineItem.id
+    );
+    data.push(lineItem);
+    this.set(<any>data);
+  }
+
   constructor(public table: string) {}
 
   expired() {

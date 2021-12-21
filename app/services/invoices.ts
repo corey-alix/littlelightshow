@@ -6,6 +6,9 @@ import {
 } from "../globals.js";
 
 const INVOICE_TABLE = "invoices";
+const cache = new Cache<Invoice[]>(
+  INVOICE_TABLE
+);
 
 export interface InvoiceItem {
   item: string;
@@ -43,6 +46,10 @@ export async function deleteInvoice(
       )
     )
   );
+
+  if (!cache.expired()) {
+    cache.deleteLineItem(id);
+  }
 }
 
 export async function save(
@@ -67,6 +74,9 @@ export async function save(
       )
     )) as { data: any; ref: any };
     invoice.id = result.ref.id;
+    if (!cache.expired()) {
+      cache.get()!.data.push(invoice);
+    }
   } else {
     const result = await client.query(
       q.Update(
@@ -83,6 +93,10 @@ export async function save(
         }
       )
     );
+
+    if (!cache.expired()) {
+      cache.updateLineItem(invoice);
+    }
   }
 }
 
@@ -90,9 +104,6 @@ export async function invoices() {
   if (!CURRENT_USER)
     throw "user must be signed in";
 
-  const cache = new Cache<Invoice[]>(
-    "invoices"
-  );
   if (!cache.expired())
     return cache.get()!.data;
 
