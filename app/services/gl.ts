@@ -2,10 +2,16 @@ import { query as q } from "faunadb";
 import {
   createClient,
   CURRENT_USER,
+  isOffline,
 } from "../globals.js";
-import { Cache } from "./Cache";
+
+import { ServiceCache } from "./ServiceCache.js";
 
 const LEDGER_TABLE = "general_ledger";
+
+const cache = new ServiceCache<Ledger>(
+  LEDGER_TABLE
+);
 
 export interface LedgerItem {
   comment: string;
@@ -14,7 +20,7 @@ export interface LedgerItem {
 }
 
 export interface Ledger {
-  id?: any;
+  id?: string;
   date: number;
   description?: string;
   items: Array<LedgerItem>;
@@ -32,6 +38,8 @@ export async function deleteLedger(
       )
     )
   );
+
+  cache.deleteLineItem(id);
   return result;
 }
 
@@ -44,52 +52,57 @@ export async function save(
   const client = createClient();
 
   if (!ledger.id) {
-    const result = (await client.query(
-      q.Create(
-        q.Collection(LEDGER_TABLE),
-        {
-          data: {
-            ...ledger,
-            user: CURRENT_USER,
-            create_date: Date.now(),
-          },
-        }
-      )
-    )) as { data: any; ref: any };
+    if (!isOffline) {
+      const result =
+        (await client.query(
+          q.Create(
+            q.Collection(LEDGER_TABLE),
+            {
+              data: {
+                ...ledger,
+                user: CURRENT_USER,
+                create_date: Date.now(),
+              },
+            }
+          )
+        )) as { data: any; ref: any };
+      ledger.id = result.ref;
+    } else {
+      ledger.id =
+        "ledger_" +
+        Date.now().toFixed();
+    }
   } else {
-    const result = (await client.query(
-      q.Update(
-        q.Ref(
-          q.Collection(LEDGER_TABLE),
-          ledger.id
-        ),
-        {
-          data: {
-            ...ledger,
-            user: CURRENT_USER,
-            update_date: Date.now(),
-          },
-        }
-      )
-    )) as { data: any; ref: any };
+    if (!isOffline) {
+      const result =
+        (await client.query(
+          q.Update(
+            q.Ref(
+              q.Collection(
+                LEDGER_TABLE
+              ),
+              ledger.id
+            ),
+            {
+              data: {
+                ...ledger,
+                user: CURRENT_USER,
+                update_date: Date.now(),
+              },
+            }
+          )
+        )) as { data: any; ref: any };
+    }
   }
-}
-
-export function ticksInSeconds(
-  ticks: number
-) {
-  return ticks / 1000;
+  cache.updateLineItem(ledger);
 }
 
 export async function ledgers() {
   if (!CURRENT_USER)
     throw "user must be signed in";
 
-  const cache = new Cache<Ledger[]>(
-    "ledgers"
-  );
-  if (!cache.expired())
-    return cache.get()!.data;
+  if (isOffline || !cache.expired())
+    return cache.get();
 
   const client = createClient();
 

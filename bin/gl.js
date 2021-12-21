@@ -4786,6 +4786,7 @@ var import_faunadb2 = __toModule(require_faunadb());
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var isDebug = location.href.includes("localhost");
+var isOffline = isDebug;
 var primaryContact = {
   companyName: "Little Light Show",
   fullName: "Nathan Alix",
@@ -4828,50 +4829,65 @@ function createClient() {
   });
 }
 
-// app/services/Cache.ts
-var maxAge = isDebug ? 3600 : 60;
-var Cache = class {
+// app/fun/ticksInSeconds.ts
+function ticksInSeconds(ticks) {
+  return ticks / 1e3;
+}
+
+// app/services/ServiceCache.ts
+var maxAge = isDebug ? 7 * 24 * 3600 : 60;
+var ServiceCache = class {
   constructor(table) {
     this.table = table;
+    const raw = localStorage.getItem(`table_${this.table}`);
+    if (!raw) {
+      this.data = [];
+      this.lastWrite = 0;
+    } else {
+      const info = JSON.parse(raw);
+      this.lastWrite = info.lastWrite;
+      this.data = info.data;
+    }
+  }
+  save() {
+    localStorage.setItem(`table_${this.table}`, JSON.stringify({
+      lastWrite: this.lastWrite,
+      data: this.data
+    }));
   }
   deleteLineItem(id) {
-    const data = this.get()?.data;
-    const index = data.findIndex((i) => i.id === id);
-    data.splice(index, 1);
-    this.set(data);
+    const index = this.data.findIndex((i) => i.id === id);
+    this.data.splice(index, 1);
+    this.save();
   }
   updateLineItem(lineItem) {
-    const data = this.get()?.data;
-    const index = data.findIndex((i) => i.id === lineItem.id);
-    data.push(lineItem);
-    this.set(data);
+    const index = this.data.findIndex((i) => i.id === lineItem.id);
+    if (-1 < index) {
+      this.data.splice(index, 1);
+    }
+    this.data.push(lineItem);
+    this.save();
   }
   expired() {
-    const data = this.get();
-    if (!data)
-      return true;
-    const age = ticksInSeconds(Date.now() - data.lastWrite);
+    const age = ticksInSeconds(Date.now() - this.lastWrite);
     return maxAge < age;
   }
   get() {
-    const raw = localStorage.getItem(`table_${this.table}`);
-    if (!raw)
-      return null;
-    return JSON.parse(raw);
+    return this.data;
   }
   set(data) {
-    localStorage.setItem(`table_${this.table}`, JSON.stringify({
-      lastWrite: Date.now(),
-      data
-    }));
+    this.lastWrite = Date.now();
+    this.data = data;
   }
 };
 
 // app/services/gl.ts
 var LEDGER_TABLE = "general_ledger";
+var cache = new ServiceCache(LEDGER_TABLE);
 async function deleteLedger(id) {
   const client = createClient();
   const result = await client.query(import_faunadb2.query.Delete(import_faunadb2.query.Ref(import_faunadb2.query.Collection(LEDGER_TABLE), id)));
+  cache.deleteLineItem(id);
   return result;
 }
 async function save(ledger) {
@@ -4879,32 +4895,36 @@ async function save(ledger) {
     throw "user must be signed in";
   const client = createClient();
   if (!ledger.id) {
-    const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(LEDGER_TABLE), {
-      data: {
-        ...ledger,
-        user: CURRENT_USER,
-        create_date: Date.now()
-      }
-    }));
+    if (!isOffline) {
+      const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(LEDGER_TABLE), {
+        data: {
+          ...ledger,
+          user: CURRENT_USER,
+          create_date: Date.now()
+        }
+      }));
+      ledger.id = result.ref;
+    } else {
+      ledger.id = "ledger_" + Date.now().toFixed();
+    }
   } else {
-    const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection(LEDGER_TABLE), ledger.id), {
-      data: {
-        ...ledger,
-        user: CURRENT_USER,
-        update_date: Date.now()
-      }
-    }));
+    if (!isOffline) {
+      const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection(LEDGER_TABLE), ledger.id), {
+        data: {
+          ...ledger,
+          user: CURRENT_USER,
+          update_date: Date.now()
+        }
+      }));
+    }
   }
-}
-function ticksInSeconds(ticks) {
-  return ticks / 1e3;
+  cache.updateLineItem(ledger);
 }
 async function ledgers() {
   if (!CURRENT_USER)
     throw "user must be signed in";
-  const cache = new Cache("ledgers");
-  if (!cache.expired())
-    return cache.get().data;
+  if (isOffline || !cache.expired())
+    return cache.get();
   const client = createClient();
   const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(LEDGER_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
   const ledgers2 = result.data;

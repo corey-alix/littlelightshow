@@ -1,12 +1,14 @@
-import { Cache } from "./Cache.js";
+import { ServiceCache } from "./ServiceCache.js";
 import { query as q } from "faunadb";
 import {
   createClient,
   CURRENT_USER,
+  isDebug,
+  isOffline,
 } from "../globals.js";
 
 const INVOICE_TABLE = "invoices";
-const cache = new Cache<Invoice[]>(
+const cache = new ServiceCache<Invoice>(
   INVOICE_TABLE
 );
 
@@ -37,19 +39,20 @@ export async function deleteInvoice(
 ) {
   if (!CURRENT_USER)
     throw "user must be signed in";
-  const client = createClient();
-  const result = await client.query(
-    q.Delete(
-      q.Ref(
-        q.Collection(INVOICE_TABLE),
-        id
-      )
-    )
-  );
 
-  if (!cache.expired()) {
-    cache.deleteLineItem(id);
+  if (!isOffline) {
+    const client = createClient();
+    const result = await client.query(
+      q.Delete(
+        q.Ref(
+          q.Collection(INVOICE_TABLE),
+          id
+        )
+      )
+    );
   }
+
+  cache.deleteLineItem(id);
 }
 
 export async function save(
@@ -61,51 +64,54 @@ export async function save(
   const client = createClient();
 
   if (!invoice.id) {
-    const result = (await client.query(
-      q.Create(
-        q.Collection(INVOICE_TABLE),
-        {
-          data: {
-            ...invoice,
-            user: CURRENT_USER,
-            create_date: Date.now(),
-          },
-        }
-      )
-    )) as { data: any; ref: any };
-    invoice.id = result.ref.id;
-    if (!cache.expired()) {
-      cache.get()!.data.push(invoice);
+    if (!isOffline) {
+      const result =
+        (await client.query(
+          q.Create(
+            q.Collection(INVOICE_TABLE),
+            {
+              data: {
+                ...invoice,
+                user: CURRENT_USER,
+                create_date: Date.now(),
+              },
+            }
+          )
+        )) as { data: any; ref: any };
+      invoice.id = result.ref.id;
+    } else {
+      invoice.id =
+        "invoice_" +
+        Date.now().toFixed();
     }
   } else {
-    const result = await client.query(
-      q.Update(
-        q.Ref(
-          q.Collection(INVOICE_TABLE),
-          invoice.id
-        ),
-        {
-          data: {
-            ...invoice,
-            user: CURRENT_USER,
-            update_date: Date.now(),
-          },
-        }
-      )
-    );
-
-    if (!cache.expired()) {
-      cache.updateLineItem(invoice);
+    if (!isOffline) {
+      const result = await client.query(
+        q.Update(
+          q.Ref(
+            q.Collection(INVOICE_TABLE),
+            invoice.id
+          ),
+          {
+            data: {
+              ...invoice,
+              user: CURRENT_USER,
+              update_date: Date.now(),
+            },
+          }
+        )
+      );
     }
   }
+  cache.updateLineItem(invoice);
 }
 
 export async function invoices() {
   if (!CURRENT_USER)
     throw "user must be signed in";
 
-  if (!cache.expired())
-    return cache.get()!.data;
+  if (isOffline || !cache.expired())
+    return cache.get();
 
   const client = createClient();
 

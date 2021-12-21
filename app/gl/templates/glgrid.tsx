@@ -281,7 +281,7 @@ function createRow(): HTMLElement {
 }
 
 export function create(
-  ledgerModel?: Ledger & { id: string }
+  ledgerModel?: Ledger
 ) {
   forceDatalist();
   const ledger: HTMLFormElement = (
