@@ -4752,7 +4752,10 @@ var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
 var CURRENT_USER = localStorage.getItem("user");
 function createClient() {
-  return new import_faunadb.default.Client({ secret: FAUNADB_SERVER_SECRET, domain });
+  return new import_faunadb.default.Client({
+    secret: FAUNADB_SERVER_SECRET,
+    domain
+  });
 }
 
 // app/services/validateAccessToken.ts

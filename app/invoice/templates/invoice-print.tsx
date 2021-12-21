@@ -1,6 +1,9 @@
 import { dom } from "../../dom.js";
 import { moveChildren } from "../../fun/dom.js";
-import { TAXRATE } from "../../globals.js";
+import {
+  primaryContact,
+  TAXRATE,
+} from "../../globals.js";
 import {
   Invoice,
   InvoiceItem,
@@ -20,19 +23,19 @@ export function create(
       <div class="line col-1-6"></div>
       <div class="col-1-6 vspacer"></div>
       <label class="col-1-2">
-        Nathan Alix
+        {primaryContact.fullName}
       </label>
       <label class="col-5-2 align-right">
         {invoice.id}
       </label>
       <label class="col-1-2">
-        4 Andrea Lane
+        {primaryContact.addressLine1}
       </label>
       <label class="col-5-2 align-right">
         {new Date().toDateString()}
       </label>
       <label class="col-1-2">
-        Greenville, SC 29615
+        {primaryContact.addressLine2}
       </label>
       <div class="vspacer-2 col-1-6"></div>
       <label class="bold col-1">

@@ -4785,6 +4785,12 @@ var import_faunadb2 = __toModule(require_faunadb());
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
+var primaryContact = {
+  companyName: "Little Light Show",
+  fullName: "Nathan Alix",
+  addressLine1: "4 Andrea Lane",
+  addressLine2: "Greenville, SC 29615"
+};
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4815,7 +4821,10 @@ var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
 var CURRENT_USER = localStorage.getItem("user");
 function createClient() {
-  return new import_faunadb.default.Client({ secret: FAUNADB_SERVER_SECRET, domain });
+  return new import_faunadb.default.Client({
+    secret: FAUNADB_SERVER_SECRET,
+    domain
+  });
 }
 
 // app/services/gl.ts
@@ -4859,6 +4868,9 @@ function asCurrency(value) {
 // app/fun/asDateString.ts
 function asDateString(date = new Date()) {
   return date.toISOString().split("T")[0];
+}
+function asTimeString(date = new Date()) {
+  return date.toISOString().split("T")[1].substring(0, 5);
 }
 
 // app/fun/sum.ts
@@ -5351,15 +5363,33 @@ async function create3(id) {
   }
   if (!ledgers2.length)
     throw "ledger not found";
-  const report2 = printDetail(ledgers2);
-  const report1 = create(ledgers2);
   document.body.innerHTML = "";
-  document.body.innerHTML = "<h1>Little Light Show General Ledger</h1>";
-  document.body.appendChild(report1);
+  document.body.appendChild(createBanner());
+  document.body.appendChild(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "vspacer-2"
+  }), /* @__PURE__ */ dom("div", {
+    class: "section-title"
+  }, "Account Summary")));
+  document.body.appendChild(create(ledgers2));
   document.body.appendChild(/* @__PURE__ */ dom("div", {
     class: "vspacer-2"
   }));
-  document.body.appendChild(report2);
+  document.body.appendChild(printDetail(ledgers2));
+}
+function createBanner() {
+  return /* @__PURE__ */ dom("div", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("address", {
+    class: "col-1-5"
+  }, primaryContact.fullName), /* @__PURE__ */ dom("div", {
+    class: "col-6 align-right"
+  }, `General Ledger for ${primaryContact.companyName}`), /* @__PURE__ */ dom("address", {
+    class: "col-1-5"
+  }, primaryContact.addressLine1), /* @__PURE__ */ dom("div", {
+    class: "align-right col-6"
+  }, `Printed on ${asDateString()} @ ${asTimeString()}`), /* @__PURE__ */ dom("address", {
+    class: "col-1-5"
+  }, primaryContact.addressLine2));
 }
 
 // app/services/validateAccessToken.ts

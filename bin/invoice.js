@@ -4778,6 +4778,12 @@ var import_faunadb2 = __toModule(require_faunadb());
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.06;
+var primaryContact = {
+  companyName: "Little Light Show",
+  fullName: "Nathan Alix",
+  addressLine1: "4 Andrea Lane",
+  addressLine2: "Greenville, SC 29615"
+};
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4808,7 +4814,10 @@ var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
 var CURRENT_USER = localStorage.getItem("user");
 function createClient() {
-  return new import_faunadb.default.Client({ secret: FAUNADB_SERVER_SECRET, domain });
+  return new import_faunadb.default.Client({
+    secret: FAUNADB_SERVER_SECRET,
+    domain
+  });
 }
 
 // app/services/invoices.ts
@@ -5310,15 +5319,15 @@ function create2(invoice) {
     class: "col-1-6 vspacer"
   }), /* @__PURE__ */ dom("label", {
     class: "col-1-2"
-  }, "Nathan Alix"), /* @__PURE__ */ dom("label", {
+  }, primaryContact.fullName), /* @__PURE__ */ dom("label", {
     class: "col-5-2 align-right"
   }, invoice.id), /* @__PURE__ */ dom("label", {
     class: "col-1-2"
-  }, "4 Andrea Lane"), /* @__PURE__ */ dom("label", {
+  }, primaryContact.addressLine1), /* @__PURE__ */ dom("label", {
     class: "col-5-2 align-right"
   }, new Date().toDateString()), /* @__PURE__ */ dom("label", {
     class: "col-1-2"
-  }, "Greenville, SC 29615"), /* @__PURE__ */ dom("div", {
+  }, primaryContact.addressLine2), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1"
