@@ -70,7 +70,8 @@ export function hookupTriggers(
       if (isCheckboxInput(eventItem)) {
         (
           eventItem as HTMLInputElement
-        ).checked = valueInfo.value;
+        ).checked =
+          true === valueInfo?.value;
         on(eventItem, "change", () => {
           setGlobalState(
             bindTo,
