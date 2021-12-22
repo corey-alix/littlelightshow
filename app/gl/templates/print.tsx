@@ -14,6 +14,7 @@ import {
 import { moveChildren } from "../../fun/dom.js";
 import { on } from "../../fun/on.js";
 import { routes } from "../../router.js";
+import { hookupTriggers } from "../../fun/hookupTriggers";
 
 export async function create(
   id?: string
@@ -68,10 +69,13 @@ export async function create(
       target
     );
   }
+
   on(target, "create-ledger", () => {
     location.href =
       routes.createLedger();
   });
+
+  hookupTriggers(target);
   return target;
 }
 

@@ -8,7 +8,8 @@ export function setMode(mode?: string) {
   if (!mode)
     mode =
       localStorage.getItem("mode") ||
-      "holiday";
+      "";
+
   localStorage.setItem("mode", mode);
 
   document.body.classList.remove(
