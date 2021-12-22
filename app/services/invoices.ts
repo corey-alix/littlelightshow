@@ -3,7 +3,6 @@ import { query as q } from "faunadb";
 import {
   createClient,
   CURRENT_USER,
-  isDebug,
   isOffline,
 } from "../globals.js";
 

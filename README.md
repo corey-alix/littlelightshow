@@ -6,8 +6,10 @@ littlelightshow
 
 ## Offline Support
 
-- Add fetch service for an individual item
-- Merge items into offline collection (create, update, delete)
+- DONE: Add fetch service for an individual item
+- DONE: Merge items into offline collection (create, update, delete)
+- DONE: works in "work_offline" mode (but must be connected to network still)
+- Works when the network is unavailable (Network tab is "offline")
 
 Utilize an image optimizer service
 

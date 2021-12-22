@@ -49,26 +49,38 @@
       Modify API key
     </button>
 
-    <button
-      class="button"
-      data-event="holiday_mode"
-    >
-      Holiday Mode
-    </button>
+    <div class="inline">
+      <button
+        class="button"
+        data-event="holiday_mode"
+      >
+        Holiday Mode
+      </button>
 
-    <button
-      class="button"
-      data-event="dark_mode"
-    >
-      Dark Mode
-    </button>
+      <button
+        class="button"
+        data-event="dark_mode"
+      >
+        Dark Mode
+      </button>
 
-    <button
-      class="button"
-      data-event="light_mode"
-    >
-      Light Mode
-    </button>
+      <button
+        class="button"
+        data-event="light_mode"
+      >
+        Light Mode
+      </button>
+    </div>
+
+    <br />
+    <label
+      >Work Offline
+      <input
+        type="checkbox"
+        name="work_offline"
+        data-event="work_offline"
+        data-todo-bind="work_offline (2-way binding to the global 'work_offline' setting)"
+    /></label>
 
     <script type="module">
       import { init } from "/bin/admin.js";

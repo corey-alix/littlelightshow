@@ -21,15 +21,18 @@
   grid-row-gap: 0.5em;
 }
 
-::placeholder {
-  opacity: 0.25;
-}
-
 body {
   padding: 1rem;
   margin: 0;
   max-width: 1024px;
-  width: 100%;
+}
+
+body.light ::placeholder {
+  color: black;
+}
+
+body.dark ::placeholder {
+  color: white;
 }
 
 body.dark {
@@ -93,6 +96,26 @@ div.section-title {
   margin: 0.5em;
 }
 
+body.dark .border {
+  border: 1px solid white;
+}
+
+body.light .border {
+  border: 1px solid black;
+}
+
+.rounded {
+  border-radius: 0.5rem;
+}
+
+.inline {
+  display: inline;
+}
+
+.padding {
+  padding: 0.5rem;
+}
+
 .netlify-identity-item,
 .button {
   display: block;
@@ -130,7 +153,7 @@ body.dark .button {
 .grid-6 input {
   width: 100%;
   min-height: 2rem;
-  border: 1px solid transparent;
+  border: 1px solid;
 }
 
 .grid-6 input:focus {
@@ -366,7 +389,7 @@ body.dark button {
 }
 
 .flex .button {
-  width: 12rem;
+  width: 8rem;
 }
 
 .wavy {

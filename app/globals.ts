@@ -4,7 +4,9 @@ export const TAXRATE = 0.06;
 export const isDebug =
   location.href.includes("localhost");
 
-export const isOffline = isDebug;
+export const isOffline =
+  true ===
+  getGlobalState("work_offline")?.value;
 
 export const primaryContact = {
   companyName: "Little Light Show",
@@ -86,4 +88,39 @@ export function createClient() {
     secret: FAUNADB_SERVER_SECRET,
     domain,
   });
+}
+
+let globalState: Record<
+  string,
+  { type: string; value: string }
+>;
+
+function forceGlobalState() {
+  return (globalState =
+    globalState ||
+    JSON.parse(
+      localStorage.getItem(
+        "__GLOBAL_STATE__"
+      ) || "{}"
+    ));
+}
+
+export function setGlobalState(
+  key: string,
+  value: any
+) {
+  const state = forceGlobalState();
+  const type = typeof value;
+  state[key] = { type, value };
+  localStorage.setItem(
+    "__GLOBAL_STATE__",
+    JSON.stringify(state)
+  );
+}
+
+export function getGlobalState(
+  key: string
+): { type: string; value: any } {
+  const state = forceGlobalState();
+  return state[key];
 }

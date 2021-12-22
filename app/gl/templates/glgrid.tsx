@@ -322,33 +322,32 @@ export function create(
         Credit (-)
       </div>
       <div class="line col-1-6"></div>
-      <div class="vspacer"></div>
       <div
         id="end-of-line-items"
-        class="vspacer-2 col-1-6"
+        class="hidden"
       ></div>
       <button
-        class="button col-1"
+        class="button col-1-2"
         type="button"
         data-event="add-row"
       >
         Add Row
       </button>
       <button
-        class="button col-5"
+        class="button col-4-2"
         type="button"
         data-event="submit"
       >
         Save
       </button>
       <button
-        class="button col-6"
+        class="button col-6 if-desktop"
         type="button"
         data-event="delete"
       >
         Delete
       </button>
-      <div class="vspacer-1 col-1-6"></div>
+      <div class="vspacer col-1-6"></div>
       <div class="currency col-2-2">
         Total Debit
       </div>
@@ -382,36 +381,37 @@ export function create(
       <div class="col-1-6 vspacer-1"></div>
       <div class="col-1-6 flex">
         <button
-          class="button col-1"
+          class="button col-1 if-desktop"
           type="button"
           data-event="print"
         >
           Print
         </button>
         <button
-          class="button col-1"
+          class="button col-1 if-desktop"
           type="button"
           data-event="clear"
         >
           Clear
         </button>
         <button
-          class="button col-1"
+          class="button col-1 if-desktop"
           type="button"
           data-event="print-all"
         >
           Show All
         </button>
       </div>
-      <div class="vspacer-2 col-1-6"></div>
+      <div class="vspacer-2 col-1-6 if-desktop"></div>
       <div class="section-title col-1-6">
         Summary
       </div>
       <div class="vspacer-2 col-1-6"></div>
       <div
         id="summary-area"
-        class="vspacer-2 col-1-6"
+        class="col-1-6"
       ></div>
+      <div class="vspacer-2 col-1-6"></div>
     </form>
   );
   if (ledgerModel) {
@@ -446,12 +446,13 @@ export function create(
         );
       }
     );
-  } else {
-    trigger(ledger, "add-row");
   }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
   extendNumericInputBehaviors(ledger);
+  if (!ledgerModel)
+    trigger(ledger, "add-row");
+
   trigger(ledger, "change");
   return ledger;
 }

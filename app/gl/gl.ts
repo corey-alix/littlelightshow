@@ -6,10 +6,16 @@ import {
   get as loadLedger,
 } from "../services/gl.js";
 import "../fun/sort.js"; // includes sortBy Array extension
+import { identify } from "../identify.js";
+import { setMode } from "../fun/setMode.js";
+import { removeCssRestrictors } from "../fun/detect.js";
 
 export async function init(
   domNode: HTMLElement
 ) {
+  await identify();
+  setMode();
+  removeCssRestrictors();
   const queryParams =
     new URLSearchParams(
       window.location.search
