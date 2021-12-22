@@ -171,6 +171,8 @@ export async function invoices() {
   invoices.forEach((invoice) => {
     invoice.data.id =
       invoice.ref.value.id;
+    invoice.data.mops =
+      invoice.data.mops || [];
     if (
       invoice.data["paid"] &&
       invoice.data["mop"]
