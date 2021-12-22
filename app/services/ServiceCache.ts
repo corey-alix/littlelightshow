@@ -2,8 +2,8 @@ import { isDebug } from "../globals";
 import { ticksInSeconds } from "../fun/ticksInSeconds";
 
 const maxAge = isDebug
-  ? 7 * 24 * 3600
-  : 60;
+  ? 365 * 24 * 3600
+  : (7 - 0.2) * 24 * 3600;
 
 export class ServiceCache<
   T extends { id?: string }
