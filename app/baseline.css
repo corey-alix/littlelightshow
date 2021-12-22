@@ -7,6 +7,26 @@ html {
     Geneva, Verdana, sans-serif;
 }
 
+.toaster {
+  background-color: white;
+}
+
+.toaster .error {
+  color: red;
+}
+
+.bottom {
+  position: absolute;
+  top: auto;
+  bottom: 1rem;
+}
+
+.right {
+  position: absolute;
+  left: auto;
+  right: 1rem;
+}
+
 .if-print-to-pdf {
   display: none !important;
 }

@@ -21,6 +21,7 @@ import { create as createGridTemplate } from "./templates/invoices-grid.js";
 import { get, set } from "../fun/get";
 import { removeCssRestrictors } from "../fun/detect.js";
 import { setMode } from "../fun/setMode.js";
+import { toast } from "../ux/Toaster.js";
 
 async function setup() {
   await identify();
@@ -29,33 +30,49 @@ async function setup() {
 }
 
 export async function init() {
-  await setup();
-  const queryParams =
-    new URLSearchParams(
-      window.location.search
-    );
-  if (queryParams.has("id")) {
-    renderInvoice(
-      queryParams.get("id")!
-    );
-  } else {
-    renderInvoice();
+  try {
+    await setup();
+    const queryParams =
+      new URLSearchParams(
+        window.location.search
+      );
+    if (queryParams.has("id")) {
+      renderInvoice(
+        queryParams.get("id")!
+      );
+    } else {
+      renderInvoice();
+    }
+  } catch (ex) {
+    toast(ex + "");
   }
 }
 
 export async function renderInvoices(
   target: HTMLElement
 ) {
-  await setup();
-  const invoices =
-    await getAllInvoices();
-  const formDom =
-    createGridTemplate(invoices);
-  target.appendChild(formDom);
-  on(formDom, "create-invoice", () => {
-    location.href =
-      routes.createInvoice();
-  });
+  try {
+    await setup();
+    const invoices =
+      await getAllInvoices();
+    const formDom =
+      createGridTemplate(invoices);
+    target.appendChild(formDom);
+    on(
+      formDom,
+      "create-invoice",
+      () => {
+        try {
+          location.href =
+            routes.createInvoice();
+        } catch (ex) {
+          toast(ex + "");
+        }
+      }
+    );
+  } catch (ex) {
+    toast(ex + "");
+  }
 }
 
 async function renderInvoice(
@@ -284,12 +301,18 @@ function asModel(
 export function print(
   invoice: Invoice
 ) {
-  document.body.classList.add("print");
-  const toPrint =
-    createPrintTemplate(invoice);
-  document.body.innerHTML = "";
-  document.body.appendChild(toPrint);
-  window.document.title =
-    invoice.clientname;
-  window.print();
+  try {
+    document.body.classList.add(
+      "print"
+    );
+    const toPrint =
+      createPrintTemplate(invoice);
+    document.body.innerHTML = "";
+    document.body.appendChild(toPrint);
+    window.document.title =
+      invoice.clientname;
+    window.print();
+  } catch (ex) {
+    toast(ex + "");
+  }
 }
