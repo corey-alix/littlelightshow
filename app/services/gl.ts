@@ -1,17 +1,6 @@
-import { query as q } from "faunadb";
-import {
-  createClient,
-  CURRENT_USER,
-  isOffline,
-} from "../globals.js";
-
-import { ServiceCache } from "./ServiceCache.js";
+import { StorageModel } from "./StorageModel.js";
 
 const LEDGER_TABLE = "general_ledger";
-
-const cache = new ServiceCache<Ledger>(
-  LEDGER_TABLE
-);
 
 export interface LedgerItem {
   comment: string;
@@ -26,155 +15,36 @@ export interface Ledger {
   items: Array<LedgerItem>;
 }
 
-export async function deleteLedger(
-  id: string
-) {
-  const client = createClient();
-  const result = await client.query(
-    q.Delete(
-      q.Ref(
-        q.Collection(LEDGER_TABLE),
-        id
-      )
-    )
-  );
-  cache.deleteLineItem(id);
-  return result;
-}
-
-export async function save(
-  ledger: Ledger & { id?: string }
-) {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-
-  const client = createClient();
-
-  if (!ledger.id) {
-    if (!isOffline) {
-      const result =
-        (await client.query(
-          q.Create(
-            q.Collection(LEDGER_TABLE),
-            {
-              data: {
-                ...ledger,
-                user: CURRENT_USER,
-                create_date: Date.now(),
-              },
-            }
-          )
-        )) as {
-          data: Ledger[];
-          ref: { id: string };
-        };
-      ledger.id = result.ref.id;
-    } else {
-      ledger.id =
-        "ledger_" +
-        Date.now().toFixed();
-    }
-  } else {
-    if (!isOffline) {
-      const result =
-        (await client.query(
-          q.Update(
-            q.Ref(
-              q.Collection(
-                LEDGER_TABLE
-              ),
-              ledger.id
-            ),
-            {
-              data: {
-                ...ledger,
-                user: CURRENT_USER,
-                update_date: Date.now(),
-              },
-            }
-          )
-        )) as { data: any; ref: any };
-    }
-  }
-  cache.updateLineItem(ledger);
-}
-
-export async function ledgers() {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-
-  if (isOffline || !cache.expired())
-    return cache.get();
-
-  const client = createClient();
-
-  const result: any =
-    await client.query(
-      q.Map(
-        q.Paginate(
-          q.Documents(
-            q.Collection(LEDGER_TABLE)
-          ),
-          { size: 100 }
-        ),
-        q.Lambda(
-          "ref",
-          q.Get(q.Var("ref"))
-        )
-      )
-    );
-
-  const ledgers = result.data as Array<{
-    data: Ledger;
-    ref: any;
-  }>;
-  // copy ref into ledger id
-  ledgers.forEach((ledger) => {
-    ledger.data.id =
-      ledger.ref.value.id;
+const ledgerModel =
+  new StorageModel<Ledger>({
+    tableName: LEDGER_TABLE,
   });
 
-  const response = ledgers
-    .filter(
-      (ledger) =>
-        ledger.data.items &&
-        ledger.data.items[0] &&
-        ledger.data.items[0].account
-    )
-    .map((ledger) => ledger.data);
-
-  cache.set(response);
-
-  return response;
+export async function removeItem(
+  id: string
+) {
+  return ledgerModel.removeItem(id);
 }
 
-export async function get(id: string) {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
+export async function getItem(
+  id: string
+) {
+  return ledgerModel.getItem(id);
+}
 
-  if (isOffline || !cache.expired()) {
-    const hit = cache
-      .get()
-      .find((item) => item.id === id);
-    if (hit) return hit;
-  }
+export async function upsertItem(
+  data: Ledger
+) {
+  return ledgerModel.upsertItem(data);
+}
 
-  if (isOffline)
-    throw `cannot find ledger: ${id}`;
-
-  const client = createClient();
-
-  const result = (await client.query(
-    q.Get(
-      q.Ref(
-        q.Collection(LEDGER_TABLE),
-        id
-      )
-    )
-  )) as {
-    data: Ledger;
-    ref: { id: string };
-  };
-  result.data.id = result.ref.id;
-  cache.updateLineItem(result.data);
+export async function getItems() {
+  const items =
+    await ledgerModel.getItems();
+  return items.filter(
+    (ledger) =>
+      ledger.items &&
+      ledger.items[0] &&
+      ledger.items[0].account
+  );
 }

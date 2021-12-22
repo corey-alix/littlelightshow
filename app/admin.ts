@@ -4,10 +4,7 @@ import { identify } from "./identify.js";
 import { hookupTriggers } from "./fun/hookupTriggers.js";
 
 import { importInvoicesToGeneralLedger } from "./services/admin.js";
-import {
-  LedgerItem,
-  ledgers as loadAllLedgers,
-} from "./services/gl.js";
+import { getItems as loadAllLedgers } from "./services/gl.js";
 import {
   save as saveAccounts,
   load as loadAccounts,

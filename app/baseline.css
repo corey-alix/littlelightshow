@@ -99,6 +99,7 @@ section.category {
 body.dark div.section-title {
   color: black;
   background: white;
+  height: 2rem;
 }
 
 div.section-title {

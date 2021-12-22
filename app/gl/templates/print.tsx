@@ -1,8 +1,8 @@
 import { dom } from "../../dom.js";
 import {
   Ledger,
-  ledgers as loadAllLedgers,
-  get as loadLedger,
+  getItems as loadAllLedgers,
+  getItem as loadLedger,
 } from "../../services/gl.js";
 import { printDetail } from "./printDetail";
 import { create as printSummary } from "./printSummary";
@@ -34,7 +34,7 @@ export async function create(
   target.appendChild(
     <div>
       <div class="vspacer-2"></div>
-      <div class="section-title">
+      <div class="section-title if-desktop">
         Account Summary
       </div>
     </div>
@@ -85,8 +85,8 @@ function createBanner() {
       <div class="col-1-6 centered">
         {`General Ledger for ${primaryContact.companyName}`}
       </div>
-      <div class="line col-1-6"></div>
-      <div class="col-1-3">
+      <div class="line col-1-6 if-desktop"></div>
+      <div class="col-1-3 if-desktop">
         <address class="col-1-5">
           {primaryContact.fullName}
         </address>
@@ -97,7 +97,7 @@ function createBanner() {
           {primaryContact.addressLine2}
         </address>
       </div>
-      <div class="col-4-3">
+      <div class="col-4-3 if-desktop">
         <div class="align-right col-6">
           {`Printed on ${asDateString()} @ ${asTimeString()}`}
         </div>

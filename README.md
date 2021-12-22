@@ -2,6 +2,10 @@
 
 littlelightshow
 
+## Change Log
+
+- 2021-12-22: create storage API (persist local, sync remotely)
+
 # todo
 
 ## Offline Support

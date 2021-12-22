@@ -3,9 +3,9 @@ import { moveChildrenBefore } from "../../fun/dom.js";
 import {
   Ledger,
   LedgerItem,
-  deleteLedger,
-  save as saveLedger,
-  ledgers as loadAllLedgers,
+  removeItem as deleteLedger,
+  upsertItem as saveLedger,
+  getItems as loadAllLedgers,
 } from "../../services/gl.js";
 import { asCurrency } from "../../fun/asCurrency";
 import { asDateString } from "../../fun/asDateString";

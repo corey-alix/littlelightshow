@@ -1,15 +1,6 @@
-import { ServiceCache } from "./ServiceCache.js";
-import { query as q } from "faunadb";
-import {
-  createClient,
-  CURRENT_USER,
-  isOffline,
-} from "../globals.js";
+import { StorageModel } from "./StorageModel";
 
 const INVOICE_TABLE = "invoices";
-const cache = new ServiceCache<Invoice>(
-  INVOICE_TABLE
-);
 
 export interface InvoiceItem {
   item: string;
@@ -19,15 +10,17 @@ export interface InvoiceItem {
 }
 
 export interface Invoice {
+  id?: string;
   clientname: string;
-  date: number;
-  labor: number;
-  additional: number;
-  id: string;
   billto: string;
   telephone?: string;
   email?: string;
+  date: number;
   comments?: string;
+  // TODO: labor + additional should become mobs (method of billing)
+  labor: number;
+  // TODO: labor + additional should become mobs (method of billing)
+  additional: number;
   items: Array<InvoiceItem>;
   mops: Array<{
     mop: string;
@@ -35,161 +28,50 @@ export interface Invoice {
   }>;
 }
 
-export async function deleteInvoice(
+const invoiceModel =
+  new StorageModel<Invoice>({
+    tableName: INVOICE_TABLE,
+  });
+
+export async function removeItem(
   id: string
 ) {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-
-  if (!isOffline) {
-    const client = createClient();
-    const result = await client.query(
-      q.Delete(
-        q.Ref(
-          q.Collection(INVOICE_TABLE),
-          id
-        )
-      )
-    );
-  }
-
-  cache.deleteLineItem(id);
+  return invoiceModel.removeItem(id);
 }
 
-export async function get(id: string) {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-
-  if (isOffline || !cache.expired()) {
-    const result = cache.getById(id);
-    if (result) return result;
-  }
-
-  if (!isOffline) {
-    const client = createClient();
-    const result = (await client.query(
-      q.Get(
-        q.Ref(
-          q.Collection(INVOICE_TABLE),
-          id
-        )
-      )
-    )) as { data: Invoice };
-    return result.data;
-  }
-
-  throw `unable to load invoice: ${id}`;
-}
-
-export async function save(
-  invoice: Invoice
+export async function getItem(
+  id: string
 ) {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-
-  const client = createClient();
-
-  if (!invoice.id) {
-    if (!isOffline) {
-      const result =
-        (await client.query(
-          q.Create(
-            q.Collection(INVOICE_TABLE),
-            {
-              data: {
-                ...invoice,
-                user: CURRENT_USER,
-                create_date: Date.now(),
-              },
-            }
-          )
-        )) as {
-          data: Invoice[];
-          ref: { id: string };
-        };
-      invoice.id = result.ref.id;
-    } else {
-      invoice.id =
-        "invoice_" +
-        Date.now().toFixed();
-    }
-  } else {
-    if (!isOffline) {
-      const result = await client.query(
-        q.Update(
-          q.Ref(
-            q.Collection(INVOICE_TABLE),
-            invoice.id
-          ),
-          {
-            data: {
-              ...invoice,
-              user: CURRENT_USER,
-              update_date: Date.now(),
-            },
-          }
-        )
-      );
-    }
-  }
-  cache.updateLineItem(invoice);
+  return invoiceModel.getItem(id);
 }
 
-export async function invoices() {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
+export async function upsertItem(
+  data: Invoice
+) {
+  return invoiceModel.upsertItem(data);
+}
 
-  if (isOffline || !cache.expired())
-    return cache.get();
-
-  const client = createClient();
-
-  const result: any =
-    await client.query(
-      q.Map(
-        q.Paginate(
-          q.Documents(
-            q.Collection(INVOICE_TABLE)
-          ),
-          { size: 100 }
-        ),
-        q.Lambda(
-          "ref",
-          q.Get(q.Var("ref"))
-        )
-      )
-    );
-
+export async function getItems() {
   const invoices =
-    result.data as Array<{
-      data: Invoice;
-      ref: any;
-    }>;
+    await invoiceModel.getItems();
 
-  // copy ref into invoice id
   invoices.forEach((invoice) => {
-    invoice.data.id =
-      invoice.ref.value.id;
-    invoice.data.mops =
-      invoice.data.mops || [];
+    invoice.mops = invoice.mops || [];
     if (
-      invoice.data["paid"] &&
-      invoice.data["mop"]
+      invoice["paid"] &&
+      invoice["mop"]
     ) {
-      invoice.data.mops.push({
-        mop: invoice.data["mop"],
-        paid: invoice.data["paid"],
+      invoice.mops.push({
+        mop: invoice["mop"],
+        paid: invoice["paid"],
       });
-      delete invoice.data["paid"];
-      delete invoice.data["mop"];
+      delete invoice["paid"];
+      delete invoice["mop"];
     }
   });
 
   const response = invoices
-    .filter(
-      (invoice) => invoice.data.items
-    )
-    .map((invoice) => invoice.data)
+    .filter((invoice) => invoice.items)
     .map((invoice) => {
       invoice.date =
         invoice.date ||
@@ -214,6 +96,5 @@ export async function invoices() {
     .sortBy({ date: "date" })
     .reverse();
 
-  cache.set(response);
   return response;
 }

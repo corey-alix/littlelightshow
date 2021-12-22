@@ -2,8 +2,8 @@ import { create as createLedgerForm } from "./templates/glgrid.js";
 import { create as printLedger } from "./templates/print";
 export { identify } from "../identify.js";
 import {
-  ledgers as loadLedgers,
-  get as loadLedger,
+  getItems as loadLedgers,
+  getItem as loadLedger,
 } from "../services/gl.js";
 import "../fun/sort.js"; // includes sortBy Array extension
 import { identify } from "../identify.js";

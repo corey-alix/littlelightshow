@@ -6,10 +6,10 @@ import {
 import { inventoryManager } from "../inventory/InventoryManager.js";
 import { routes } from "../router.js";
 import {
-  save as saveInvoice,
-  deleteInvoice,
-  get as getInvoice,
-  invoices as getAllInvoices,
+  upsertItem as saveInvoice,
+  removeItem,
+  getItem as getInvoice,
+  getItems as getAllInvoices,
   Invoice,
   InvoiceItem,
 } from "../services/invoices.js";
@@ -133,7 +133,7 @@ async function tryToDeleteInvoice(
   const id = get(formDom, "id");
   if (!id)
     throw "unable to delete this invoice";
-  await deleteInvoice(id);
+  await removeItem(id);
   return true;
 }
 

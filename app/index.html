@@ -13,32 +13,53 @@
       href="/app/baseline.css"
     />
   </head>
-  <body class="flex grid-6">
-    <a
-      class="button col-1-6"
-      href="/app/invoice/invoice.html"
-      >Create an Invoice</a
-    >
-    <a
-      class="button col-1-6"
-      href="/app/invoice/invoices.html"
-      >List all Invoices</a
-    >
-    <a
-      class="button col-1-6"
-      href="/app/gl/index.html"
-      >Create General Ledger</a
-    >
-    <a
-      class="button col-1-6"
-      href="/app/gl/index.html?print=all"
-      >List all Ledger Entries</a
-    >
-    <a
-      class="button col-1-6"
-      href="/app/admin/index.html"
-      >Admin</a
-    >
+  <body class="flex">
+    <div class="grid-6">
+      <div
+        class="section-title col-1-6"
+      >
+        Invoices
+      </div>
+      <a
+        class="button col-1-6"
+        href="/app/invoice/invoice.html"
+        >Create an Invoice</a
+      >
+      <a
+        class="button col-1-6"
+        href="/app/invoice/invoices.html"
+        >List all Invoices</a
+      >
+    </div>
+    <div class="grid-6">
+      <div
+        class="section-title col-1-6"
+      >
+        General Ledger
+      </div>
+      <a
+        class="button col-1-6"
+        href="/app/gl/index.html"
+        >Create General Ledger</a
+      >
+      <a
+        class="button col-1-6"
+        href="/app/gl/index.html?print=all"
+        >List all Ledger Entries</a
+      >
+    </div>
+    <div class="grid-6">
+      <div
+        class="section-title col-1-6"
+      >
+        Admin
+      </div>
+      <a
+        class="button col-1-6"
+        href="/app/admin/index.html"
+        >Admin</a
+      >
+    </div>
     <script type="module">
       import { init } from "/bin/index.js";
       init();
