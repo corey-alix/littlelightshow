@@ -14,14 +14,17 @@ import {
   InvoiceItem,
 } from "../services/invoices.js";
 
-export { identify } from "../identify.js";
+import { identify } from "../identify.js";
 import { create as createFormTemplate } from "./templates/invoice-form.js";
 import { create as createPrintTemplate } from "./templates/invoice-print.js";
 import { create as createGridTemplate } from "./templates/invoices-grid.js";
 import { get, set } from "../fun/get";
 import { removeCssRestrictors } from "../fun/detect.js";
+import { setMode } from "../fun/setMode.js";
 
-export function init() {
+export async function init() {
+  await identify();
+  setMode();
   removeCssRestrictors();
   const queryParams =
     new URLSearchParams(

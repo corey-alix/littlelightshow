@@ -12,11 +12,13 @@ import {
   asTimeString,
 } from "../../fun/asDateString.js";
 import { moveChildren } from "../../fun/dom.js";
+import { on } from "../../fun/on.js";
+import { routes } from "../../router.js";
 
 export async function create(
-  target: HTMLElement,
   id?: string
 ) {
+  const target = <div></div>;
   let ledgers: Array<Ledger>;
   if (id) {
     const ledger = await loadLedger(id);
@@ -51,14 +53,26 @@ export async function create(
     );
   } else {
     moveChildren(
-      <div>
-        <div class="center">
+      <div class="grid-6">
+        <div class="centered row-1-6">
           No ledgers have been defined
         </div>
+        <div class="vspacer-2 row-1-6" />
+        <button
+          class="button row-1"
+          data-event="create-ledger"
+        >
+          Create General Ledger
+        </button>
       </div>,
       target
     );
   }
+  on(target, "create-ledger", () => {
+    location.href =
+      routes.createLedger();
+  });
+  return target;
 }
 
 function createBanner() {

@@ -17,19 +17,21 @@ export async function init(
   const printId =
     queryParams.get("print");
   if (printId) {
+    const target = document.body;
     switch (printId) {
-      case "all":
-        document.body.innerHTML = "";
-        await printLedger(
-          document.body
-        );
+      case "all": {
+        target.innerHTML = "";
+        const ledger =
+          await printLedger();
+        target.appendChild(ledger);
         break;
-      default:
-        document.body.innerHTML = "";
-        await printLedger(
-          document.body,
-          printId
-        );
+      }
+      default: {
+        target.innerHTML = "";
+        const ledger =
+          await printLedger(printId);
+        target.appendChild(ledger);
+      }
     }
     return;
   }

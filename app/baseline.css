@@ -41,6 +41,19 @@ body.holiday {
   text-shadow: 0px 0px 1px black;
 }
 
+a {
+  color: black;
+  text-decoration: none;
+}
+
+body.holiday a {
+  color: rgba(253, 244, 220, 0.9);
+}
+
+body.dark a {
+  color: white;
+}
+
 .hidden {
   display: none;
 }
@@ -207,10 +220,6 @@ body.dark .button {
   grid-template-rows: auto auto auto auto;
 }
 
-a {
-  color: white;
-}
-
 form textarea {
   width: 100%;
 }
@@ -229,11 +238,6 @@ form textarea {
 
 .netlify-identity-menu {
   list-style: none;
-}
-
-.holiday a {
-  color: rgba(253, 244, 220, 0.9);
-  text-decoration: none;
 }
 
 .column1 {

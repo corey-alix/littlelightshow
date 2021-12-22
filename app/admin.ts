@@ -14,6 +14,10 @@ import {
 } from "./gl/AccountManager.js";
 import { on } from "./fun/on.js";
 import { ServiceCache } from "./services/ServiceCache.js";
+import {
+  modes,
+  setMode,
+} from "./fun/setMode";
 
 // not sure what to start with
 type AccountHierarchy = Record<
@@ -43,7 +47,14 @@ const starterAccounts = [
 export async function init() {
   await identify();
   const domNode = document.body;
+
   hookupTriggers(domNode);
+
+  Object.keys(modes).forEach((mode) =>
+    on(domNode, mode, () => {
+      setMode(modes[mode]);
+    })
+  );
 
   on(
     domNode,

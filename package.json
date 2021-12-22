@@ -6,11 +6,12 @@
   "main": "index.js",
   "scripts": {
     "debug": "netlify dev --inspect",
-    "build:admin": "  esbuild --watch --minify --sourcemap --format=esm --bundle app/admin.ts --outfile=bin/admin.js",
-    "build:test": "   esbuild --watch --minify --sourcemap --format=esm --bundle test/test.ts --outfile=bin/test.js",
+    "build:admin": "  esbuild --watch --minify --sourcemap --format=esm --bundle app/admin.ts           --outfile=bin/admin.js",
+    "build:index": "  esbuild --watch --minify --sourcemap --format=esm --bundle app/index.ts           --outfile=bin/index.js",
+    "build:test": "   esbuild --watch --minify --sourcemap --format=esm --bundle test/test.ts           --outfile=bin/test.js",
     "build:invoice": "esbuild --watch --minify --sourcemap --format=esm --bundle app/invoice/invoice.ts --outfile=bin/invoice.js",
-    "build:gl": "     esbuild --watch --minify --sourcemap --format=esm --bundle app/gl/gl.ts --outfile=bin/gl.js",
-    "build": "npm-run-all -p build:gl build:invoice build:admin"
+    "build:gl": "     esbuild --watch --minify --sourcemap --format=esm --bundle app/gl/gl.ts           --outfile=bin/gl.js",
+    "build": "npm-run-all -p build:index build:gl build:invoice build:admin"
   },
   "repository": {
     "type": "git",

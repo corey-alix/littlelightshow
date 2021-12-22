@@ -14,15 +14,10 @@
   <body class="no-dark holiday">
     <div class="invoices"></div>
     <script type="module">
-      import {
-        identify,
-        renderInvoices,
-      } from "/bin/invoice.js";
-      identify().then(() =>
-        renderInvoices(
-          document.querySelector(
-            ".invoices"
-          )
+      import { renderInvoices } from "/bin/invoice.js";
+      renderInvoices(
+        document.querySelector(
+          ".invoices"
         )
       );
     </script>

@@ -11,15 +11,15 @@
       href="/app/baseline.css"
     />
   </head>
-  <body class="no-dark holiday grid-6">
+  <body class="no-dark holiday flex">
     <button
-      class="button col-1-6"
+      class="button"
       data-event="invoice-to-gl"
     >
       Invoices -> General Ledger
     </button>
     <button
-      class="button col-1-6"
+      class="button"
       data-event="gl-to-list-of-accounts"
     >
       General Ledger Accounts -> List of
@@ -27,7 +27,7 @@
     </button>
 
     <button
-      class="button col-1-6"
+      class="button"
       data-event="clear-local-storage"
       title="clears the last-write time on the cache to force a cache miss"
     >
@@ -35,7 +35,7 @@
     </button>
 
     <button
-      class="button col-1-6"
+      class="button"
       data-event="ping-local-storage"
       title="Updates the last write time on the cache"
     >
@@ -43,10 +43,31 @@
     </button>
 
     <button
-      class="button col-1-6"
+      class="button"
       data-event="set-api-key"
     >
       Modify API key
+    </button>
+
+    <button
+      class="button"
+      data-event="holiday_mode"
+    >
+      Holiday Mode
+    </button>
+
+    <button
+      class="button"
+      data-event="dark_mode"
+    >
+      Dark Mode
+    </button>
+
+    <button
+      class="button"
+      data-event="light_mode"
+    >
+      Light Mode
     </button>
 
     <script type="module">
