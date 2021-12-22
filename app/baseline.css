@@ -59,10 +59,12 @@ body.holiday {
 
 body.light ::placeholder {
   color: black;
+  opacity: 0.5;
 }
 
 body.dark ::placeholder {
   color: white;
+  opacity: 0.5;
 }
 
 a {

@@ -15,7 +15,7 @@ export interface Ledger {
   items: Array<LedgerItem>;
 }
 
-const ledgerModel =
+export const ledgerModel =
   new StorageModel<Ledger>({
     tableName: LEDGER_TABLE,
   });

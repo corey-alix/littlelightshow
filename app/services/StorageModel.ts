@@ -6,6 +6,40 @@ import {
   isOffline,
 } from "../globals.js";
 
+const statusFlags = {
+  DELETED: "___DELETED___",
+  UPDATED: "___UPDATED___",
+};
+
+function clearMarkings(item: any) {
+  Object.values(statusFlags).forEach(
+    (key) =>
+      item[key] && delete item[key]
+  );
+}
+
+function IsTemporaryId(itemId: string) {
+  return "9" < itemId[0];
+}
+
+function markForUpsert(item: any) {
+  item[statusFlags.UPDATED] =
+    Date.now();
+}
+
+function isMarkedForUpsert(item: any) {
+  return !!item[statusFlags.UPDATED];
+}
+
+function markForDelete(item: any) {
+  item[statusFlags.DELETED] =
+    Date.now();
+}
+
+function isMarkedForDelete(item: any) {
+  return !!item[statusFlags.DELETED];
+}
+
 export class StorageModel<
   T extends { id?: string }
 > {
@@ -21,23 +55,68 @@ export class StorageModel<
     );
   }
 
+  async synchronize() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+
+    if (isOffline())
+      throw "cannot synchronize in offline mode";
+
+    this.cache
+      .get()
+      .filter(isMarkedForDelete)
+      .forEach(async (item) => {
+        if (!item.id)
+          throw "all items must have an id";
+        if (IsTemporaryId(item.id)) {
+          this.cache.deleteLineItem(
+            item.id
+          );
+        } else {
+          await this.removeItem(
+            item.id
+          );
+        }
+      });
+
+    this.cache
+      .get()
+      .filter(isMarkedForUpsert)
+      .forEach(async (item) => {
+        debugger;
+        clearMarkings(item);
+        await this.upsertItem(item);
+      });
+  }
+
   async removeItem(id: string) {
     if (!CURRENT_USER)
       throw "user must be signed in";
 
-    if (!isOffline) {
-      const client = createClient();
-      await client.query(
-        q.Delete(
-          q.Ref(
-            q.Collection(
-              this.tableName
-            ),
-            id
-          )
-        )
-      );
+    if (isOffline()) {
+      const item =
+        this.cache.getById(id);
+      if (!item)
+        throw "cannot remove an item that is not already there";
+      markForDelete(item);
+      if (IsTemporaryId(id)) {
+        this.cache.deleteLineItem(id);
+      } else {
+        this.cache.updateLineItem(item);
+      }
+      return;
     }
+
+    // online
+    const client = createClient();
+    await client.query(
+      q.Delete(
+        q.Ref(
+          q.Collection(this.tableName),
+          id
+        )
+      )
+    );
     this.cache.deleteLineItem(id);
   }
 
@@ -46,31 +125,35 @@ export class StorageModel<
       throw "user must be signed in";
 
     if (
-      isOffline ||
+      isOffline() ||
       !this.cache.expired()
     ) {
       const result =
         this.cache.getById(id);
-      if (result) return result;
+
+      if (!!result) {
+        if (isMarkedForDelete(result))
+          throw "item marked for deletion";
+        return result;
+      }
     }
 
-    if (!isOffline) {
-      const client = createClient();
-      const result =
-        (await client.query(
-          q.Get(
-            q.Ref(
-              q.Collection(
-                this.tableName
-              ),
-              id
-            )
-          )
-        )) as { data: T };
-      return result.data;
-    }
+    if (isOffline())
+      throw `unable to load item: ${this.tableName} ${id}`;
 
-    throw `unable to load item: ${this.tableName} ${id}`;
+    const client = createClient();
+    const result = (await client.query(
+      q.Get(
+        q.Ref(
+          q.Collection(this.tableName),
+          id
+        )
+      )
+    )) as { data: T };
+    this.cache.updateLineItem(
+      result.data
+    );
+    return result.data;
   }
 
   async upsertItem(data: T) {
@@ -79,55 +162,60 @@ export class StorageModel<
 
     const client = createClient();
 
-    if (!data.id) {
-      if (!isOffline) {
-        const result =
-          (await client.query(
-            q.Create(
-              q.Collection(
-                this.tableName
-              ),
-              {
-                data: {
-                  ...data,
-                  user: CURRENT_USER,
-                  create_date:
-                    Date.now(),
-                },
-              }
-            )
-          )) as {
-            data: T[];
-            ref: { id: string };
-          };
-        data.id = result.ref.id;
-      } else {
-        data.id =
-          "invoice_" +
-          Date.now().toFixed();
-      }
+    if (isOffline()) {
+      data.id =
+        data.id ||
+        `${
+          this.tableName
+        }:${Date.now().toFixed()}`;
+      markForUpsert(data);
+      this.cache.updateLineItem(data);
+      return;
+    }
+
+    if (
+      !data.id ||
+      (isMarkedForUpsert(data) &&
+        IsTemporaryId(data.id))
+    ) {
+      const result =
+        (await client.query(
+          q.Create(
+            q.Collection(
+              this.tableName
+            ),
+            {
+              data: {
+                ...data,
+                user: CURRENT_USER,
+                create_date: Date.now(),
+              },
+            }
+          )
+        )) as {
+          data: T[];
+          ref: { id: string };
+        };
+      data.id = result.ref.id;
+      this.cache.updateLineItem(data);
     } else {
-      if (!isOffline) {
-        const result =
-          await client.query(
-            q.Update(
-              q.Ref(
-                q.Collection(
-                  this.tableName
-                ),
-                data.id
-              ),
-              {
-                data: {
-                  ...data,
-                  user: CURRENT_USER,
-                  update_date:
-                    Date.now(),
-                },
-              }
-            )
-          );
-      }
+      await client.query(
+        q.Update(
+          q.Ref(
+            q.Collection(
+              this.tableName
+            ),
+            data.id
+          ),
+          {
+            data: {
+              ...data,
+              user: CURRENT_USER,
+              update_date: Date.now(),
+            },
+          }
+        )
+      );
     }
     this.cache.updateLineItem(data);
   }
@@ -137,15 +225,23 @@ export class StorageModel<
       throw "user must be signed in";
 
     if (
-      isOffline ||
+      isOffline() ||
       !this.cache.expired()
     )
-      return this.cache.get();
+      return this.cache
+        .get()
+        .filter(
+          (item) =>
+            !isMarkedForDelete(item)
+        );
 
     const client = createClient();
 
-    const result: any =
-      await client.query(
+    // save offline changes before fetching new items
+    await this.synchronize();
+
+    const response =
+      (await client.query(
         q.Map(
           q.Paginate(
             q.Documents(
@@ -160,18 +256,25 @@ export class StorageModel<
             q.Get(q.Var("ref"))
           )
         )
-      );
+      )) as {
+        data: Array<{
+          data: T;
+          ref: any;
+        }>;
+      };
 
-    const items = result.data as Array<{
-      data: T;
-      ref: any;
-    }>;
+    const items = response.data;
 
     // copy ref into invoice id
     items.forEach((item) => {
       item.data.id = item.ref.value.id;
+      clearMarkings(item.data);
     });
 
-    return items.map((i) => i.data);
+    const result = items.map(
+      (i) => i.data
+    );
+    this.cache.set(result);
+    return result;
   }
 }

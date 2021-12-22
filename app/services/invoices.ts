@@ -28,7 +28,7 @@ export interface Invoice {
   }>;
 }
 
-const invoiceModel =
+export const invoiceModel =
   new StorageModel<Invoice>({
     tableName: INVOICE_TABLE,
   });

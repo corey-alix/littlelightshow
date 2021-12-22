@@ -4,7 +4,10 @@ import { identify } from "./identify.js";
 import { hookupTriggers } from "./fun/hookupTriggers.js";
 
 import { importInvoicesToGeneralLedger } from "./services/admin.js";
-import { getItems as loadAllLedgers } from "./services/gl.js";
+import {
+  getItems as loadAllLedgers,
+  ledgerModel,
+} from "./services/gl.js";
 import {
   save as saveAccounts,
   load as loadAccounts,
@@ -15,6 +18,7 @@ import {
   modes,
   setMode,
 } from "./fun/setMode.js";
+import { invoiceModel } from "./services/invoices.js";
 
 // not sure what to start with
 type AccountHierarchy = Record<
@@ -55,17 +59,16 @@ export async function init() {
 
   on(
     domNode,
-    "clear-local-storage",
-    () => {
-      let cache = new ServiceCache(
-        "invoices"
-      );
-      cache.clear();
-      cache = new ServiceCache(
-        "general_ledger"
-      );
-      cache.clear();
-    }
+    "synchronize-invoice-data",
+    async () =>
+      await invoiceModel.synchronize()
+  );
+
+  on(
+    domNode,
+    "synchronize-ledger-data",
+    async () =>
+      await ledgerModel.synchronize()
   );
 
   on(domNode, "set-api-key", () => {

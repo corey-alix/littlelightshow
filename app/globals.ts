@@ -4,7 +4,7 @@ export const TAXRATE = 0.06;
 export const isDebug =
   location.href.includes("localhost");
 
-export const isOffline =
+export const isOffline = () =>
   true ===
   getGlobalState("work_offline")?.value;
 
