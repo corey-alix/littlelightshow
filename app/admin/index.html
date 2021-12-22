@@ -31,7 +31,7 @@
       data-event="clear-local-storage"
       title="clears the last-write time on the cache to force a cache miss"
     >
-      Clear local storage
+      Synchronize Data
     </button>
 
     <button
@@ -77,9 +77,7 @@
       >Work Offline
       <input
         type="checkbox"
-        name="work_offline"
-        data-event="work_offline"
-        data-todo-bind="work_offline (2-way binding to the global 'work_offline' setting)"
+        data-bind="work_offline"
     /></label>
 
     <script type="module">

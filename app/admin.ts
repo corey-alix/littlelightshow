@@ -18,10 +18,6 @@ import {
   modes,
   setMode,
 } from "./fun/setMode.js";
-import {
-  isOffline,
-  setGlobalState,
-} from "./globals.js";
 
 // not sure what to start with
 type AccountHierarchy = Record<
@@ -52,13 +48,6 @@ export async function init() {
   await identify();
   const domNode = document.body;
 
-  const workOffline =
-    domNode.querySelector(
-      "[name=work_offline]"
-    ) as HTMLInputElement;
-  if (workOffline)
-    workOffline.checked = isOffline;
-
   hookupTriggers(domNode);
 
   Object.keys(modes).forEach((mode) =>
@@ -66,24 +55,6 @@ export async function init() {
       setMode(modes[mode]);
     })
   );
-
-  on(
-    domNode,
-    "work_offline:yes",
-    () => {
-      setGlobalState(
-        "work_offline",
-        true
-      );
-    }
-  );
-
-  on(domNode, "work_offline:no", () => {
-    setGlobalState(
-      "work_offline",
-      false
-    );
-  });
 
   on(
     domNode,
@@ -164,7 +135,10 @@ export async function init() {
       saveAccounts(accounts);
     }
   );
+
+  setMode();
 }
+
 function prompt(
   label: string,
   cb: (input: string) => void

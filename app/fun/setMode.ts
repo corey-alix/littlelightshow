@@ -18,8 +18,3 @@ export function setMode(mode?: string) {
 
   document.body.classList.add(mode);
 }
-
-setMode(
-  localStorage.getItem("mode") ||
-    modes.holiday_mode
-);

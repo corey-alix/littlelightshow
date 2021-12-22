@@ -22,10 +22,14 @@ import { get, set } from "../fun/get";
 import { removeCssRestrictors } from "../fun/detect.js";
 import { setMode } from "../fun/setMode.js";
 
-export async function init() {
+async function setup() {
   await identify();
   setMode();
   removeCssRestrictors();
+}
+
+export async function init() {
+  await setup();
   const queryParams =
     new URLSearchParams(
       window.location.search
@@ -42,6 +46,7 @@ export async function init() {
 export async function renderInvoices(
   target: HTMLElement
 ) {
+  await setup();
   const invoices =
     await getAllInvoices();
   const formDom =

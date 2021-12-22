@@ -1,3 +1,7 @@
+html {
+  background-color: black;
+}
+
 * {
   font-family: "Segoe UI", Tahoma,
     Geneva, Verdana, sans-serif;
@@ -22,17 +26,24 @@
 }
 
 body {
+  visibility: hidden;
   padding: 1rem;
   margin: 0;
   max-width: 1024px;
 }
 
-body.light ::placeholder {
-  color: black;
+body.light {
+  visibility: visible;
+  background-color: white;
 }
 
-body.dark ::placeholder {
-  color: white;
+body.dark {
+  visibility: visible;
+  background-color: black;
+}
+
+body.holiday {
+  visibility: visible;
 }
 
 body.dark {
@@ -44,6 +55,14 @@ body.holiday {
   background-color: rgb(0, 135, 62);
   color: rgba(253, 244, 220, 0.9);
   text-shadow: 0px 0px 1px black;
+}
+
+body.light ::placeholder {
+  color: black;
+}
+
+body.dark ::placeholder {
+  color: white;
 }
 
 a {

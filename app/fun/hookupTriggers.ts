@@ -1,3 +1,7 @@
+import {
+  getGlobalState,
+  setGlobalState,
+} from "../globals.js";
 import { on, trigger } from "./on.js";
 
 export function hookupTriggers(
@@ -14,22 +18,18 @@ export function hookupTriggers(
         throw "item must define a data-event";
 
       const isInput =
-        eventItem.tagName === "INPUT";
+        isInputElement(eventItem);
 
       const inputType =
-        isInput &&
-        (eventItem as HTMLInputElement)
-          .type;
+        getInputType(eventItem);
 
-      const isButton =
-        eventItem.tagName ===
-          "BUTTON" ||
-        (isInput &&
-          inputType === "button");
+      const isButton = isButtonElement(
+        eventItem,
+        isInput
+      );
 
       const isCheckbox =
-        isInput &&
-        inputType === "checkbox";
+        isCheckboxInput(eventItem);
 
       if (isButton)
         on(eventItem, "click", () => {
@@ -53,4 +53,70 @@ export function hookupTriggers(
       else
         throw `data-event not supported for this item: ${eventItem.outerHTML}`;
     });
+
+  domNode
+    .querySelectorAll("[data-bind]")
+    .forEach((eventItem) => {
+      const bindTo = (
+        eventItem as HTMLElement
+      ).dataset["bind"];
+
+      if (!bindTo)
+        throw "item must define a data-bind";
+
+      const valueInfo =
+        getGlobalState(bindTo);
+
+      if (isCheckboxInput(eventItem)) {
+        (
+          eventItem as HTMLInputElement
+        ).checked = valueInfo.value;
+        on(eventItem, "change", () => {
+          setGlobalState(
+            bindTo,
+            (
+              eventItem as HTMLInputElement
+            ).checked
+          );
+        });
+      } else {
+        throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
+      }
+    });
+}
+function isCheckboxInput(
+  eventItem: Element
+) {
+  return (
+    isInputElement(eventItem) &&
+    getInputType(eventItem) ===
+      "checkbox"
+  );
+}
+
+function isButtonElement(
+  eventItem: Element,
+  isInput: boolean
+) {
+  return (
+    eventItem.tagName === "BUTTON" ||
+    (isInput &&
+      getInputType(eventItem) ===
+        "button")
+  );
+}
+
+function getInputType(
+  eventItem: Element
+) {
+  return (
+    isInputElement(eventItem) &&
+    (eventItem as HTMLInputElement).type
+  );
+}
+
+function isInputElement(
+  eventItem: Element
+) {
+  return eventItem.tagName === "INPUT";
 }

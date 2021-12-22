@@ -1,2 +1,2 @@
-var t={light_mode:"light",dark_mode:"dark",holiday_mode:"holiday"};function e(o){o||(o=localStorage.getItem("mode")||""),localStorage.setItem("mode",o),document.body.classList.remove(...Object.values(t)),document.body.classList.add(o)}e(localStorage.getItem("mode")||t.holiday_mode);function i(){e()}export{i as init};
+var e={light_mode:"light",dark_mode:"dark",holiday_mode:"holiday"};function t(o){o||(o=localStorage.getItem("mode")||""),localStorage.setItem("mode",o),document.body.classList.remove(...Object.values(e)),document.body.classList.add(o)}function i(){t()}export{i as init};
 //# sourceMappingURL=index.js.map
