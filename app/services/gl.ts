@@ -18,6 +18,7 @@ export interface Ledger {
 export const ledgerModel =
   new StorageModel<Ledger>({
     tableName: LEDGER_TABLE,
+    offline: false,
   });
 
 export async function removeItem(

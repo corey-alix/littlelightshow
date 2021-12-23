@@ -1,18 +1,12 @@
 import { create as createLedgerForm } from "./templates/glgrid.js";
 import { create as printLedger } from "./templates/print";
 export { identify } from "../identify.js";
-import {
-  getItems as loadLedgers,
-  getItem as loadLedger,
-} from "../services/gl.js";
+import { getItem as loadLedger } from "../services/gl.js";
 import "../fun/sort.js"; // includes sortBy Array extension
 import { identify } from "../identify.js";
 import { setMode } from "../fun/setMode.js";
 import { removeCssRestrictors } from "../fun/detect.js";
-import {
-  reportError,
-  toast,
-} from "../ux/Toaster.js";
+import { reportError } from "../ux/Toaster.js";
 
 export async function init(
   domNode: HTMLElement

@@ -4,7 +4,7 @@ import {
   BATCH_SIZE,
   createClient,
   CURRENT_USER,
-  isOffline,
+  isOffline as globalIsOffline,
 } from "../globals.js";
 
 const statusFlags = {
@@ -53,10 +53,13 @@ export class StorageModel<
   private tableName: string;
   private cache: ServiceCache<T>;
 
-  constructor(options: {
-    tableName: string;
-    maxAge?: number;
-  }) {
+  constructor(
+    private options: {
+      tableName: string;
+      maxAge?: number;
+      offline: boolean;
+    }
+  ) {
     this.tableName = options.tableName;
     this.cache = new ServiceCache<T>({
       table: options.tableName,
@@ -64,11 +67,18 @@ export class StorageModel<
     });
   }
 
+  private isOffline() {
+    return (
+      this.options.offline ||
+      globalIsOffline()
+    );
+  }
+
   async synchronize() {
     if (!CURRENT_USER)
       throw "user must be signed in";
 
-    if (isOffline())
+    if (this.isOffline())
       throw "cannot synchronize in offline mode";
 
     this.cache
@@ -100,7 +110,7 @@ export class StorageModel<
     if (!CURRENT_USER)
       throw "user must be signed in";
 
-    if (isOffline()) {
+    if (this.isOffline()) {
       const item =
         this.cache.getById(id);
       if (!item)
@@ -132,7 +142,7 @@ export class StorageModel<
       throw "user must be signed in";
 
     if (
-      isOffline() ||
+      this.isOffline() ||
       !this.cache.expired()
     ) {
       const result =
@@ -145,7 +155,7 @@ export class StorageModel<
       }
     }
 
-    if (isOffline())
+    if (this.isOffline())
       throw `unable to load item: ${this.tableName} ${id}`;
 
     const client = createClient();
@@ -169,7 +179,7 @@ export class StorageModel<
 
     const client = createClient();
 
-    if (isOffline()) {
+    if (this.isOffline()) {
       data.id =
         data.id ||
         `${
@@ -185,7 +195,6 @@ export class StorageModel<
       (isMarkedForUpsert(data) &&
         IsTemporaryId(data.id))
     ) {
-      debugger;
       clearMarkings(data);
       clearTemporaryId(data);
       const result =
@@ -235,7 +244,7 @@ export class StorageModel<
       throw "user must be signed in";
 
     if (
-      isOffline() ||
+      this.isOffline() ||
       !this.cache.expired()
     )
       return this.cache

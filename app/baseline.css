@@ -8,27 +8,33 @@ html {
 }
 
 .toaster {
-  background-color: white;
-  color: black;
+  opacity: 0.8;
+}
+
+body.light .toaster {
+  background-color: black;
+  color: white;
 }
 
 body.dark .toaster {
-  background-color: black;
-  color: white;
+  background-color: white;
+  color: black;
 }
 
 .toaster .error {
   color: red;
 }
 
+.fixed {
+  position: fixed;
+}
+
 .bottom {
-  position: absolute;
   top: auto;
   bottom: 1rem;
 }
 
 .right {
-  position: absolute;
   left: auto;
   right: 1rem;
 }

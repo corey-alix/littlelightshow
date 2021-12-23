@@ -10,7 +10,8 @@ interface Account {
 export const accountModel =
   new StorageModel<Account>({
     tableName: ACCOUNT_TABLE,
-    maxAge: Number.MIN_SAFE_INTEGER,
+    maxAge: Number.MAX_SAFE_INTEGER,
+    offline: true,
   });
 
 export async function forceDatalist() {

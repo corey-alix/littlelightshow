@@ -23,6 +23,7 @@ import { create as printSummary } from "./printSummary";
 import { isZero } from "../../fun/isZero";
 import { forceDatalist } from "../../services/accounts.js";
 import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
+import { toast } from "../../ux/Toaster.js";
 
 function asModel(
   form: HTMLFormElement
@@ -232,7 +233,7 @@ function hookupHandlers(
     }
     const model = asModel(domNode);
     await saveLedger(model);
-    location.reload();
+    toast(`saved ${model.id}`);
   });
 
   on(domNode, "add-row", () => {

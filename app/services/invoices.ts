@@ -31,6 +31,7 @@ export interface Invoice {
 export const invoiceModel =
   new StorageModel<Invoice>({
     tableName: INVOICE_TABLE,
+    offline: false,
   });
 
 export async function removeItem(

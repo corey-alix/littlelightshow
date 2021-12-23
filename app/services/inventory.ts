@@ -11,7 +11,8 @@ interface Inventory {
 export const inventoryModel =
   new StorageModel<Inventory>({
     tableName: INVENTORY_TABLE,
-    maxAge: Number.MIN_SAFE_INTEGER,
+    maxAge: Number.MAX_SAFE_INTEGER,
+    offline: true,
   });
 
 export async function forceDatalist() {

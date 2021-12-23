@@ -17,6 +17,7 @@ class Toaster {
         "toaster",
         "border",
         "rounded",
+        "fixed",
         "bottom",
         "right"
       );
