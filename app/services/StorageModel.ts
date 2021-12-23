@@ -104,6 +104,11 @@ export class StorageModel<
       .forEach(async (item) => {
         await this.upsertItem(item);
       });
+
+    const result =
+      await this.forceFetchAllItems();
+    this.cache.set(result);
+    return result;
   }
 
   async removeItem(id: string) {
@@ -254,11 +259,12 @@ export class StorageModel<
             !isMarkedForDelete(item)
         );
 
-    const client = createClient();
-
     // save offline changes before fetching new items
-    await this.synchronize();
+    return await this.synchronize();
+  }
 
+  private async forceFetchAllItems() {
+    const client = createClient();
     const response =
       (await client.query(
         q.Map(
@@ -293,7 +299,6 @@ export class StorageModel<
     const result = items.map(
       (i) => i.data
     );
-    this.cache.set(result);
     return result;
   }
 }
