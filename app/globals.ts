@@ -1,5 +1,6 @@
 import faunadb from "faunadb";
 export const TAXRATE = 0.06;
+export const BATCH_SIZE = 20;
 
 export const isDebug =
   location.href.includes("localhost");
@@ -120,7 +121,7 @@ export function setGlobalState(
 
 export function getGlobalState(
   key: string
-): { type: string; value: any } {
+): { type: string; value: any } | null {
   const state = forceGlobalState();
   return state[key];
 }

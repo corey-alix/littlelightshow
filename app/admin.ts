@@ -19,6 +19,8 @@ import {
   setMode,
 } from "./fun/setMode.js";
 import { invoiceModel } from "./services/invoices.js";
+import { toast } from "./ux/Toaster.js";
+import { inventoryModel } from "./services/inventory.js";
 
 // not sure what to start with
 type AccountHierarchy = Record<
@@ -60,15 +62,27 @@ export async function init() {
   on(
     domNode,
     "synchronize-invoice-data",
-    async () =>
-      await invoiceModel.synchronize()
+    async () => {
+      try {
+        await invoiceModel.synchronize();
+        toast("sync completed");
+      } catch (ex) {
+        toast(ex + "");
+      }
+    }
   );
 
   on(
     domNode,
     "synchronize-ledger-data",
-    async () =>
-      await ledgerModel.synchronize()
+    async () => {
+      try {
+        await ledgerModel.synchronize();
+        toast("sync completed");
+      } catch (ex) {
+        toast(ex + "");
+      }
+    }
   );
 
   on(domNode, "set-api-key", () => {
@@ -88,14 +102,40 @@ export async function init() {
     domNode,
     "ping-local-storage",
     () => {
-      let cache = new ServiceCache(
-        "invoices"
-      );
+      let cache = new ServiceCache({
+        table: "invoices",
+      });
       cache.renew();
-      cache = new ServiceCache(
-        "general_ledger"
-      );
+      cache = new ServiceCache({
+        table: "general_ledger",
+      });
       cache.renew();
+    }
+  );
+
+  on(
+    domNode,
+    "invoice-to-inventory",
+    async () => {
+      await importInvoicesToGeneralLedger();
+      const invoices =
+        await invoiceModel.getItems();
+      invoices.forEach((invoice) => {
+        invoice.items.forEach(
+          async (item) => {
+            await inventoryModel.upsertItem(
+              {
+                id: item.item,
+                code: item.item,
+                price: item.price,
+              }
+            );
+          }
+        );
+      });
+      toast(
+        "inventory updated with invoice line items"
+      );
     }
   );
 

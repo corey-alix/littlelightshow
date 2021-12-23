@@ -1,7 +1,7 @@
 import { isDebug } from "../globals";
 import { ticksInSeconds } from "../fun/ticksInSeconds";
 
-const maxAge = isDebug
+const MAX_AGE = isDebug
   ? 365 * 24 * 3600
   : (7 - 0.2) * 24 * 3600;
 
@@ -20,8 +20,17 @@ export class ServiceCache<
 
   private data: Array<T>;
   private lastWrite: number;
+  private readonly table: string;
 
-  constructor(private table: string) {
+  constructor(
+    private options: {
+      table: string;
+      maxAge?: number;
+    }
+  ) {
+    options.maxAge =
+      options.maxAge || MAX_AGE;
+    this.table = options.table;
     const raw = localStorage.getItem(
       `table_${this.table}`
     );
@@ -72,7 +81,7 @@ export class ServiceCache<
     const age = ticksInSeconds(
       Date.now() - this.lastWrite
     );
-    return maxAge < age;
+    return this.options.maxAge! < age;
   }
 
   getById(id: string) {

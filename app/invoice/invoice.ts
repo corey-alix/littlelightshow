@@ -3,7 +3,7 @@ import {
   on,
   trigger,
 } from "../fun/on.js";
-import { inventoryManager } from "../inventory/InventoryManager.js";
+import { inventoryModel } from "../services/inventory.js";
 import { routes } from "../router.js";
 import {
   upsertItem as saveInvoice,
@@ -102,7 +102,7 @@ async function renderInvoice(
     };
   }
   const formDom =
-    createFormTemplate(invoice);
+    await createFormTemplate(invoice);
   document.body.appendChild(formDom);
 
   hookupEvents(formDom);
@@ -173,15 +173,12 @@ async function tryToSaveInvoice(
             id
           ) as HTMLInputElement
       );
-      inventoryManager.persistInventoryItem(
-        {
-          code: itemInput.value,
-          price:
-            priceInput.valueAsNumber,
-        }
-      );
+      inventoryModel.upsertItem({
+        id: itemInput.value,
+        code: itemInput.value,
+        price: priceInput.valueAsNumber,
+      });
     });
-  inventoryManager.persistInventoryItems();
   const requestModel = asModel(formDom);
   console.log({ requestModel });
   await saveInvoice(requestModel);

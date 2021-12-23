@@ -16,8 +16,8 @@ import {
 } from "../../globals.js";
 import {
   forceDatalist as forceInventoryDataList,
-  inventoryManager,
-} from "../../inventory/InventoryManager.js";
+  inventoryModel,
+} from "../../services/inventory.js";
 import { forceDatalist as forceMopDataList } from "../PaymentManager.js";
 
 import { routes } from "../../router.js";
@@ -33,9 +33,11 @@ import { sum } from "../../fun/sum.js";
 const itemsToRemove =
   [] as Array<HTMLElement>;
 
-export function create(
+export async function create(
   invoice: Invoice
-): HTMLFormElement {
+) {
+  await forceInventoryDataList();
+
   const form: HTMLFormElement = (
     <form
       class="grid-6"
@@ -522,7 +524,7 @@ function compute(
 
 function renderInvoiceItem(
   item: InvoiceItem
-): HTMLDivElement {
+) {
   const form: HTMLDivElement = (
     <div>
       <label class="form-label col-1-6">
@@ -534,9 +536,7 @@ function renderInvoiceItem(
         required
         type="text"
         value={item.item}
-        list={
-          forceInventoryDataList().id
-        }
+        list="inventory_list"
       />
       <label class="form-label col-1-2 quantity">
         Quantity
@@ -612,9 +612,9 @@ function setupComputeOnLineItem(
     "change",
     computeTotal
   );
-  on(itemInput, "change", () => {
+  on(itemInput, "change", async () => {
     const item =
-      inventoryManager.getInventoryItemByCode(
+      await getInventoryItemByCode(
         itemInput.value
       );
     if (!item) return;
@@ -626,4 +626,14 @@ function setupComputeOnLineItem(
       trigger(priceInput, "change");
     }
   });
+}
+
+async function getInventoryItemByCode(
+  code: string
+) {
+  const items =
+    await inventoryModel.getItems();
+  return items.find(
+    (item) => item.code === code
+  );
 }

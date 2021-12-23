@@ -1,6 +1,7 @@
 import { ServiceCache } from "./ServiceCache.js";
 import { query as q } from "faunadb";
 import {
+  BATCH_SIZE,
   createClient,
   CURRENT_USER,
   isOffline,
@@ -16,6 +17,12 @@ function clearMarkings(item: any) {
     (key) =>
       item[key] && delete item[key]
   );
+}
+
+function clearTemporaryId(item: {
+  id?: string;
+}) {
+  delete item.id;
 }
 
 function IsTemporaryId(itemId: string) {
@@ -48,11 +55,13 @@ export class StorageModel<
 
   constructor(options: {
     tableName: string;
+    maxAge?: number;
   }) {
     this.tableName = options.tableName;
-    this.cache = new ServiceCache<T>(
-      this.tableName
-    );
+    this.cache = new ServiceCache<T>({
+      table: options.tableName,
+      maxAge: options.maxAge,
+    });
   }
 
   async synchronize() {
@@ -83,8 +92,6 @@ export class StorageModel<
       .get()
       .filter(isMarkedForUpsert)
       .forEach(async (item) => {
-        debugger;
-        clearMarkings(item);
         await this.upsertItem(item);
       });
   }
@@ -178,6 +185,9 @@ export class StorageModel<
       (isMarkedForUpsert(data) &&
         IsTemporaryId(data.id))
     ) {
+      debugger;
+      clearMarkings(data);
+      clearTemporaryId(data);
       const result =
         (await client.query(
           q.Create(
@@ -249,7 +259,7 @@ export class StorageModel<
                 this.tableName
               )
             ),
-            { size: 100 }
+            { size: BATCH_SIZE }
           ),
           q.Lambda(
             "ref",
