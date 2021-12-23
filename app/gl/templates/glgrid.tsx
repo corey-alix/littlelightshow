@@ -21,7 +21,7 @@ import {
 import { printDetail } from "./printDetail";
 import { create as printSummary } from "./printSummary";
 import { isZero } from "../../fun/isZero";
-import { forceDatalist } from "../AccountManager.js";
+import { forceDatalist } from "../../services/accounts.js";
 import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
 
 function asModel(

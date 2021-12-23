@@ -21,7 +21,10 @@ import { create as createGridTemplate } from "./templates/invoices-grid.js";
 import { get, set } from "../fun/get";
 import { removeCssRestrictors } from "../fun/detect.js";
 import { setMode } from "../fun/setMode.js";
-import { toast } from "../ux/Toaster.js";
+import {
+  reportError,
+  toast,
+} from "../ux/Toaster.js";
 
 async function setup() {
   await identify();
@@ -44,7 +47,7 @@ export async function init() {
       renderInvoice();
     }
   } catch (ex) {
-    toast(ex + "");
+    reportError(ex);
   }
 }
 
@@ -66,12 +69,12 @@ export async function renderInvoices(
           location.href =
             routes.createInvoice();
         } catch (ex) {
-          toast(ex + "");
+          reportError(ex);
         }
       }
     );
   } catch (ex) {
-    toast(ex + "");
+    reportError(ex);
   }
 }
 
@@ -310,6 +313,6 @@ export function print(
       invoice.clientname;
     window.print();
   } catch (ex) {
-    toast(ex + "");
+    reportError(ex);
   }
 }

@@ -1,7 +1,10 @@
 const DEFAULT_DELAY = 5000;
 
 class Toaster {
-  toast(options: { message: string }) {
+  toast(options: {
+    message: string;
+    mode: string;
+  }) {
     let target =
       document.querySelector(
         "#toaster"
@@ -9,6 +12,7 @@ class Toaster {
     if (!target) {
       target =
         document.createElement("div");
+      target.id = "toaster";
       target.classList.add(
         "toaster",
         "border",
@@ -22,7 +26,7 @@ class Toaster {
     const message =
       document.createElement("div");
     message.classList.add(
-      "error",
+      options.mode || "error",
       "padding",
       "margin"
     );
@@ -42,6 +46,22 @@ class Toaster {
 
 const toaster = new Toaster();
 
-export function toast(message: string) {
-  toaster.toast({ message });
+export function toast(
+  message: string,
+  options?: { mode: string }
+) {
+  if (!options)
+    options = { mode: "info" };
+  toaster.toast({
+    message,
+    ...options,
+  });
+}
+
+export function reportError(
+  message: any
+) {
+  toast(message + "", {
+    mode: "error",
+  });
 }

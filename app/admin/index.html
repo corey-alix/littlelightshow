@@ -5,66 +5,24 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
     />
-    <title>Invoices</title>
+    <title>Administration</title>
     <link
       rel="stylesheet"
       href="/app/baseline.css"
     />
   </head>
   <body class="flex">
-    <div>
-      <button
-        class="button"
-        data-event="invoice-to-inventory"
-      >
-        Invoices -> Inventory
-      </button>
-      <button
-        class="button"
-        data-event="invoice-to-gl"
-      >
-        Invoices -> General Ledger
-      </button>
-    </div>
-    <button
-      class="button"
-      data-event="gl-to-list-of-accounts"
+    <div
+      class="
+        border
+        padding
+        rounded
+        flex
+      "
     >
-      General Ledger Accounts -> List of
-      Accounts
-    </button>
-
-    <div>
-      <button
-        class="button"
-        data-event="synchronize-invoice-data"
-      >
-        Synchronize Invoices
-      </button>
-      <button
-        class="button"
-        data-event="synchronize-ledger-data"
-      >
-        Synchronize General Ledger
-      </button>
-    </div>
-
-    <button
-      class="button"
-      data-event="ping-local-storage"
-      title="Updates the last write time on the cache"
-    >
-      Ping local storage
-    </button>
-
-    <button
-      class="button"
-      data-event="set-api-key"
-    >
-      Modify API key
-    </button>
-
-    <div class="inline">
+      <div class="section-title">
+        UX Themes
+      </div>
       <button
         class="button"
         data-event="holiday_mode"
@@ -87,13 +45,101 @@
       </button>
     </div>
 
-    <br />
-    <label
-      >Work Offline
-      <input
-        type="checkbox"
-        data-bind="work_offline"
-    /></label>
+    <div
+      class="
+        border
+        padding
+        rounded
+        flex
+      "
+    >
+      <div class="section-title">
+        Invoice Utilities
+      </div>
+      <button
+        class="button"
+        data-event="invoice-to-inventory"
+      >
+        Invoices -> Inventory
+      </button>
+      <button
+        class="button"
+        data-event="invoice-to-gl"
+      >
+        Invoices -> General Ledger
+      </button>
+      <button
+        class="button"
+        data-event="synchronize-invoice-data"
+      >
+        Synchronize Invoices
+      </button>
+    </div>
+
+    <div
+      class="
+        border
+        padding
+        rounded
+        flex
+      "
+    >
+      <div class="section-title">
+        General Ledger Utilities
+      </div>
+
+      <button
+        class="button"
+        data-event="gl-to-list-of-accounts"
+      >
+        General Ledger Accounts -> List
+        of Accounts
+      </button>
+      <button
+        class="button"
+        data-event="synchronize-ledger-data"
+      >
+        Synchronize General Ledger
+      </button>
+    </div>
+
+    <div
+      class="
+        border
+        padding
+        rounded
+        flex
+      "
+    >
+      <div class="section-title">
+        Diagnostics
+      </div>
+
+      <button
+        class="button"
+        data-event="ping-local-storage"
+        title="Updates the last write time on the cache"
+      >
+        Ping local storage
+      </button>
+
+      <button
+        class="button"
+        data-event="set-api-key"
+      >
+        Modify API key
+      </button>
+
+      <br />
+      <label
+        >Work Offline
+        <input
+          type="checkbox"
+          data-bind="work_offline"
+      /></label>
+
+      <div class="vspacer-2"></div>
+    </div>
 
     <script type="module">
       import { init } from "/bin/admin.js";

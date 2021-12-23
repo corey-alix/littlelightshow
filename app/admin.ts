@@ -8,10 +8,7 @@ import {
   getItems as loadAllLedgers,
   ledgerModel,
 } from "./services/gl.js";
-import {
-  save as saveAccounts,
-  load as loadAccounts,
-} from "./gl/AccountManager.js";
+import { accountModel } from "./services/accounts.js";
 import { on } from "./fun/on.js";
 import { ServiceCache } from "./services/ServiceCache.js";
 import {
@@ -19,7 +16,10 @@ import {
   setMode,
 } from "./fun/setMode.js";
 import { invoiceModel } from "./services/invoices.js";
-import { toast } from "./ux/Toaster.js";
+import {
+  reportError,
+  toast,
+} from "./ux/Toaster.js";
 import { inventoryModel } from "./services/inventory.js";
 
 // not sure what to start with
@@ -56,6 +56,7 @@ export async function init() {
   Object.keys(modes).forEach((mode) =>
     on(domNode, mode, () => {
       setMode(modes[mode]);
+      toast(`theme changed to ${mode}`);
     })
   );
 
@@ -67,7 +68,7 @@ export async function init() {
         await invoiceModel.synchronize();
         toast("sync completed");
       } catch (ex) {
-        toast(ex + "");
+        reportError(ex);
       }
     }
   );
@@ -80,7 +81,7 @@ export async function init() {
         await ledgerModel.synchronize();
         toast("sync completed");
       } catch (ex) {
-        toast(ex + "");
+        reportError(ex);
       }
     }
   );
@@ -157,25 +158,31 @@ export async function init() {
     domNode,
     "gl-to-list-of-accounts",
     async () => {
-      const accounts = loadAccounts();
       starterAccounts.forEach(
-        (account) =>
-          addAccount(accounts, account)
+        async (account) =>
+          await accountModel.upsertItem(
+            {
+              id: account,
+              code: account,
+            }
+          )
       );
       const ledgers =
         await loadAllLedgers();
-      ledgers.forEach((l) =>
-        l.items.forEach((item) => {
-          addAccount(
-            accounts,
-            item.account
-          );
-        })
+      ledgers.forEach(async (l) =>
+        l.items.forEach(
+          async (item) =>
+            await accountModel.upsertItem(
+              {
+                id: item.account,
+                code: item.account,
+              }
+            )
+        )
       );
-      saveAccounts(accounts);
+      toast("accounts generated");
     }
   );
-
   setMode();
 }
 

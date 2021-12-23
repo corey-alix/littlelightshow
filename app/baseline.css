@@ -9,6 +9,12 @@ html {
 
 .toaster {
   background-color: white;
+  color: black;
+}
+
+body.dark .toaster {
+  background-color: black;
+  color: white;
 }
 
 .toaster .error {
@@ -118,12 +124,6 @@ section.category {
   padding: 0;
 }
 
-body.dark div.section-title {
-  color: black;
-  background: white;
-  height: 2rem;
-}
-
 div.section-title {
   width: 100%;
   min-height: 2rem;
@@ -132,6 +132,11 @@ div.section-title {
   background: black;
   text-align: center;
   vertical-align: middle;
+}
+
+body.dark div.section-title {
+  color: black;
+  background: white;
 }
 
 .margin {
@@ -427,7 +432,7 @@ body.dark button {
   display: flex;
   flex-wrap: wrap;
   grid-column-gap: 1em;
-  grid-row-gap: 1em;
+  grid-row-gap: 0.5em;
 }
 
 .flex .button {

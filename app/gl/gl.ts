@@ -9,7 +9,10 @@ import "../fun/sort.js"; // includes sortBy Array extension
 import { identify } from "../identify.js";
 import { setMode } from "../fun/setMode.js";
 import { removeCssRestrictors } from "../fun/detect.js";
-import { toast } from "../ux/Toaster.js";
+import {
+  reportError,
+  toast,
+} from "../ux/Toaster.js";
 
 export async function init(
   domNode: HTMLElement
@@ -58,6 +61,6 @@ export async function init(
       domNode.appendChild(ledger);
     }
   } catch (ex) {
-    toast(ex + "");
+    reportError(ex);
   }
 }
