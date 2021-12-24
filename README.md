@@ -10,7 +10,17 @@ littlelightshow
 
 ## Offline Support
 
+- TODO: load GL entries sorted by date desc to see latest activities
+  Can now query for changes _since_ a certain time and that time will be when the user last synchronized. The sync process:
+
+  - `next_updatestamp` timestamp is set for future sync
+  - server changes since `updatestamp` -> local
+  - merge conflicts are reported
+  - local changes -> server
+  - deleted records must be _marked_ deleted but preserved until all clients sync
+
 - TODO: Works when the network is unavailable (Network tab is "offline")
+- TODO: do not replace, but merge remote batch with local storage
 
 ## Portfolio
 

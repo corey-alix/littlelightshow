@@ -105,9 +105,16 @@ export class StorageModel<
         await this.upsertItem(item);
       });
 
+    // actually this only fetches the 25 most recently changed.
+    // TODO: deleted items should be marked "deleted" instead of actually deleted
     const result =
       await this.forceFetchAllItems();
-    this.cache.set(result);
+
+    // items delete by other users will remain in the cache...
+    result.forEach((item) =>
+      this.cache.updateLineItem(item)
+    );
+
     return result;
   }
 
@@ -132,11 +139,18 @@ export class StorageModel<
     // online
     const client = createClient();
     await client.query(
-      q.Delete(
+      q.Update(
         q.Ref(
           q.Collection(this.tableName),
           id
-        )
+        ),
+        {
+          data: {
+            user: CURRENT_USER,
+            update_date: Date.now(),
+            delete_date: Date.now(),
+          },
+        }
       )
     );
     this.cache.deleteLineItem(id);
@@ -213,6 +227,7 @@ export class StorageModel<
                 ...data,
                 user: CURRENT_USER,
                 create_date: Date.now(),
+                update_date: Date.now(),
               },
             }
           )

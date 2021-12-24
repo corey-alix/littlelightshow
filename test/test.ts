@@ -17,19 +17,49 @@ function reportError(
 }
 
 async function loadLatestData(args: {
-  tableName;
+  tableName: string;
+  update_date: number;
 }) {
   const client = createClient();
   let response = await client.query(
-    q.Paginate(
-      q.Match(
-        q.Index(
-          `${args.tableName}_updates`
+    q.Filter(
+      q.Map(
+        q.Paginate(
+          q.Match(
+            q.Index(
+              `${args.tableName}_updates`
+            )
+          ),
+          { size: 10 }
+        ),
+        q.Lambda(
+          "item",
+          q.Get(
+            q.Select([1], q.Var("item"))
+          )
+        )
+      ),
+      q.Lambda(
+        "item",
+        q.And(
+          q.ContainsField(
+            "update_date",
+            q.Select(
+              ["data"],
+              q.Var("item")
+            )
+          ),
+          q.GT(
+            q.Select(
+              ["data", "update_date"],
+              q.Var("item")
+            ),
+            args.update_date
+          )
         )
       )
     )
   );
-  debugger;
   return response;
 }
 
@@ -43,14 +73,11 @@ async function createUpdateStampIndexOnTable(args: {
       source: q.Collection(
         args.tableName
       ),
-      unique: false,
-      serialized: true,
-      terms: [],
       values: [
         {
           field: [
             "data",
-            "updatestamp",
+            "update_date",
           ],
           reverse: true,
         },
@@ -99,57 +126,115 @@ export function init() {
 async function run() {
   const tableName = "Todos";
 
-  try {
-    if (
-      !localStorage.getItem(
-        "test1.createUpdateStampIndexOnTable"
-      )
-    ) {
-      const response =
-        await createUpdateStampIndexOnTable(
-          {
-            tableName,
-          }
-        );
-
-      localStorage.setItem(
-        "test1.createUpdateStampIndexOnTable",
-        JSON.stringify(response)
-      );
-    }
-
-    {
-      const response =
-        await loadLatestData({
+  if (false) {
+    const response =
+      await removeItemsWithoutUpdateInfo(
+        {
           tableName,
-        });
-      localStorage.setItem(
-        "test1.loadLatestData",
-        JSON.stringify(response)
+        }
       );
-    }
-    if (
-      !localStorage.getItem(
-        "test1.injectDataWithTimestamp"
-      )
-    ) {
-      debugger;
-      const response =
-        await injectDataWithTimestamp({
-          tableName,
-          data: {
-            value: "test1",
-          },
-        });
 
-      debugger;
-
-      localStorage.setItem(
-        "test1.injectDataWithTimestamp",
-        JSON.stringify(response)
-      );
-    }
-  } catch (ex) {
-    reportError(ex as FaunaException);
+    localStorage.setItem(
+      "test1.setUpdateDateOnAllItems",
+      JSON.stringify(response)
+    );
+    return;
   }
+
+  if (
+    false &&
+    !localStorage.getItem(
+      "test1.createUpdateStampIndexOnTable"
+    )
+  ) {
+    const response =
+      await createUpdateStampIndexOnTable(
+        {
+          tableName,
+        }
+      );
+
+    localStorage.setItem(
+      "test1.createUpdateStampIndexOnTable",
+      JSON.stringify(response)
+    );
+  }
+
+  if (
+    true ||
+    !localStorage.getItem(
+      "test1.loadLatestData"
+    )
+  ) {
+    const response =
+      await loadLatestData({
+        tableName,
+        update_date: 1639791009133,
+      });
+
+    localStorage.setItem(
+      "test1.loadLatestData",
+      JSON.stringify(response)
+    );
+  }
+  if (
+    false &&
+    !localStorage.getItem(
+      "test1.injectDataWithTimestamp"
+    )
+  ) {
+    const response =
+      await injectDataWithTimestamp({
+        tableName,
+        data: {
+          value: "test1",
+        },
+      });
+
+    localStorage.setItem(
+      "test1.injectDataWithTimestamp",
+      JSON.stringify(response)
+    );
+  }
+}
+async function removeItemsWithoutUpdateInfo(args: {
+  tableName: string;
+}) {
+  const client = createClient();
+
+  const getItems = q.Map(
+    q.Paginate(
+      q.Documents(
+        q.Collection(args.tableName)
+      )
+    ),
+    q.Lambda("x", q.Get(q.Var("x")))
+  );
+  const filterItems = q.Filter(
+    getItems,
+    q.Lambda(
+      "x",
+      q.Not(
+        q.ContainsField(
+          "update_date",
+          q.Select(["data"], q.Var("x"))
+        )
+      )
+    )
+  );
+
+  const deleteItems = q.Map(
+    filterItems,
+    q.Lambda(
+      "x",
+      q.Delete(
+        q.Select(["ref"], q.Var("x"))
+      )
+    )
+  );
+
+  const itemsWithNoUpdateInfo =
+    await client.query(deleteItems);
+
+  return itemsWithNoUpdateInfo;
 }
