@@ -307,7 +307,8 @@ export class StorageModel<
       timeOfCurrentSynchronization
     );
 
-    return result;
+    // reset the cache expiration stamp
+    this.cache.renew();
   }
 
   async removeItem(id: string) {
@@ -456,18 +457,17 @@ export class StorageModel<
       throw "user must be signed in";
 
     if (
-      this.isOffline() ||
-      !this.cache.expired()
+      this.cache.expired() &&
+      !this.isOffline()
     )
-      return this.cache
-        .get()
-        .filter(
-          (item) =>
-            !isMarkedForDelete(item)
-        );
+      await this.synchronize();
 
-    // save offline changes before fetching new items
-    return await this.synchronize();
+    return this.cache
+      .get()
+      .filter(
+        (item) =>
+          !isMarkedForDelete(item)
+      );
   }
 
   private async forceFetchAllItems() {

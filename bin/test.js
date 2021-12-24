@@ -594,9 +594,9 @@ var require_browser_ponyfill = __commonJS({
           exports2.DOMException.prototype = Object.create(Error.prototype);
           exports2.DOMException.prototype.constructor = exports2.DOMException;
         }
-        function fetch(input, init) {
+        function fetch(input, init2) {
           return new Promise(function(resolve, reject) {
-            var request = new Request(input, init);
+            var request = new Request(input, init2);
             if (request.signal && request.signal.aborted) {
               return reject(new exports2.DOMException("Aborted", "AbortError"));
             }
@@ -4698,6 +4698,7 @@ var require_faunadb = __commonJS({
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
+var isDebug = location.href.includes("localhost");
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4727,45 +4728,69 @@ var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
 var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
 var CURRENT_USER = localStorage.getItem("user");
-
-// app/meta/tables.js
-var tables = {
-  lls_customers: {
-    telephone: { primary: true, type: "string" },
-    fullName: "Alice",
-    address: {
-      street: "87856 Mendota Court",
-      city: "Washington",
-      state: "DC",
-      zipCode: "20220"
-    }
-  },
-  lls_products: {
-    code: { primary: true, type: "string" },
-    description: "100CT White Mini"
-  }
-};
+function createClient() {
+  return new import_faunadb.default.Client({
+    secret: FAUNADB_SERVER_SECRET,
+    domain
+  });
+}
 
 // test/test.ts
 var import_faunadb2 = __toModule(require_faunadb());
 var q = import_faunadb2.default.query;
-function createDatabase() {
-  if (CONTEXT !== "dev")
-    return;
-  const client = new import_faunadb2.default.Client({
-    secret: FAUNADB_SERVER_SECRET,
-    domain
-  });
-  const tableNames = Object.keys(tables);
-  tableNames.forEach(async (tableName) => {
-    const response = await client.query(q.Create(q.Ref("classes"), { name: tableName }));
+async function loadLatestData(args) {
+  const client = createClient();
+  let response = await client.query(q.Map(q.Paginate(q.Filter(q.Match(q.Index(`${args.tableName}_updates`)), q.Lambda("item", q.And(q.ContainsField("update_date", q.Select(["data"], q.Var("item"))), q.GT(q.Select([
+    "data",
+    "update_date"
+  ], q.Var("item")), args.update_date)))), { size: 10 }), q.Lambda("item", q.Get(q.Select([1], q.Var("item"))))));
+  return response;
+}
+function init() {
+  const runButton = document.querySelector("#run");
+  runButton.addEventListener("click", () => {
+    run();
   });
 }
+async function run() {
+  const tableName = "Todos";
+  if (false) {
+    const response = await updateItemsWithoutUpdateInfo({
+      tableName
+    });
+    localStorage.setItem("test1.updateItemsWithoutCreateInfo", JSON.stringify(response));
+    return;
+  }
+  if (false) {
+    const response = await createUpdateStampIndexOnTable({
+      tableName
+    });
+    localStorage.setItem("test1.createUpdateStampIndexOnTable", JSON.stringify(response));
+  }
+  if (true) {
+    const response = await loadLatestData({
+      tableName,
+      update_date: 1639791009133
+    });
+    localStorage.setItem("test1.loadLatestData", JSON.stringify(response));
+    return;
+  }
+  if (false) {
+    const response = await injectDataWithTimestamp({
+      tableName,
+      data: {
+        value: "test1"
+      }
+    });
+    localStorage.setItem("test1.injectDataWithTimestamp", JSON.stringify(response));
+  }
+}
 export {
-  createDatabase
+  init
 };
 /*
 object-assign
 (c) Sindre Sorhus
 @license MIT
 */
+//# sourceMappingURL=test.js.map

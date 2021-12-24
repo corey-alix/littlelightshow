@@ -1,14 +1,5528 @@
-var zo=Object.create;var gt=Object.defineProperty;var Yo=Object.getOwnPropertyDescriptor;var Ko=Object.getOwnPropertyNames;var Qo=Object.getPrototypeOf,Zo=Object.prototype.hasOwnProperty;var eu=e=>gt(e,"__esModule",{value:!0});var y=(e,t)=>()=>(t||e((t={exports:{}}).exports,t),t.exports);var tu=(e,t,n)=>{if(t&&typeof t=="object"||typeof t=="function")for(let r of Ko(t))!Zo.call(e,r)&&r!=="default"&&gt(e,r,{get:()=>t[r],enumerable:!(n=Yo(t,r))||n.enumerable});return e},We=e=>tu(eu(gt(e!=null?zo(Qo(e)):{},"default",e&&e.__esModule&&"default"in e?{get:()=>e.default,enumerable:!0}:{value:e,enumerable:!0})),e);var dn=y((Jc,fn)=>{"use strict";fn.exports=au;function au(e){if(typeof e!="function")throw new Error("Could not parse function signature for injection dependencies: Object is not a function");if(!e.length)return[];var t=/^()\(?([^)=]*)\)? *=>/.exec(e+"")||/^[^(]+([^ \(]*) *\(([^\)]*)\)/.exec(e+"");if(!t)throw new Error("Could not parse function signature for injection dependencies: "+e+"");var n=t[2].replace(/\/\*[\S\s]*?\*\//g," ").replace(/\/\/.*/g," ");function r(i,u,l){return u+l.split(",").map(function(f){return f&&f.trim()}).filter(Boolean).join("@")}return n=n.replace(/(\{)([^}]*)\}/g,r),n=n.replace(/(\[)([^}]*)\]/g,r),n.split(",").map(function(i){return i&&i.trim()}).map(function(i){return i[0]==="{"?i.substring(1).split("@"):i[0]==="["?{items:i.substring(1).split("@")}:i}).filter(Boolean)}});var vt=y((Xc,mn)=>{mn.exports=iu;function iu(e,t){if(yt("noDeprecation"))return e;var n=!1;function r(){if(!n){if(yt("throwDeprecation"))throw new Error(t);yt("traceDeprecation")?console.trace(t):console.warn(t),n=!0}return e.apply(this,arguments)}return r}function yt(e){try{if(!global.localStorage)return!1}catch{return!1}var t=global.localStorage[e];return t==null?!1:String(t).toLowerCase()==="true"}});var Ge=y(($c,su)=>{su.exports={name:"faunadb",version:"4.4.1",apiVersion:"4",description:"FaunaDB Javascript driver for Node.JS and Browsers",homepage:"https://fauna.com",repository:"fauna/faunadb-js",license:"MPL-2.0",keywords:["database","fauna","official","driver"],bugs:{url:"https://github.com/fauna/faunadb-js/issues"},files:["index.d.ts","src/","dist/","tools/printReleaseNotes.js"],main:"index.js",scripts:{doc:"jsdoc -c ./jsdoc.json",browserify:"browserify index.js --standalone faunadb -o dist/faunadb.js","browserify-min":"browserify index.js --standalone faunadb | terser -c -m --keep-fnames --keep-classnames -o dist/faunadb-min.js",prettify:'prettier --write "{src,test}/**/*.{js,ts}"',test:"jest --env=node --verbose=false --forceExit ./test","semantic-release":"semantic-release",wp:"webpack",postinstall:"node ./tools/printReleaseNotes",postupdate:"node ./tools/printReleaseNotes","load-test":"node ./tools/loadTest"},types:"index.d.ts",dependencies:{"abort-controller":"^3.0.0","base64-js":"^1.2.0",boxen:"^5.0.1","btoa-lite":"^1.0.0",chalk:"^4.1.1","cross-fetch":"^3.0.6",dotenv:"^8.2.0","fn-annotate":"^1.1.3","object-assign":"^4.1.0","util-deprecate":"^1.0.2"},devDependencies:{browserify:"^16.2.2",eslint:"^5.3.0","eslint-config-prettier":"^6.5.0","eslint-plugin-prettier":"^3.1.1",husky:">=1","ink-docstrap":"^1.2.1",jest:"^24.9.0",jsdoc:"^3.6.3","lint-staged":">=8",prettier:"1.18.2","semantic-release":"^17.1.2",terser:"^4.3.9",webpack:"^5.23.0","webpack-cli":"^4.5.0",yargs:"^16.2.0"},husky:{hooks:{"pre-commit":"lint-staged"}},"lint-staged":{"*.{js,css,json,md}":["prettier --write","git add"],"*.js":["eslint --fix","git add"]},release:{branches:["main"]},browser:{http2:!1,http:!1,https:!1,os:!1,util:!1,boxen:!1,chalk:!1}}});var pn=y(()=>{});var hn=y(()=>{});var vn=y((z,yn)=>{var gn=typeof self!="undefined"?self:z,Je=function(){function e(){this.fetch=!1,this.DOMException=gn.DOMException}return e.prototype=gn,new e}();(function(e){var t=function(n){var r={searchParams:"URLSearchParams"in e,iterable:"Symbol"in e&&"iterator"in Symbol,blob:"FileReader"in e&&"Blob"in e&&function(){try{return new Blob,!0}catch{return!1}}(),formData:"FormData"in e,arrayBuffer:"ArrayBuffer"in e};function i(c){return c&&DataView.prototype.isPrototypeOf(c)}if(r.arrayBuffer)var u=["[object Int8Array]","[object Uint8Array]","[object Uint8ClampedArray]","[object Int16Array]","[object Uint16Array]","[object Int32Array]","[object Uint32Array]","[object Float32Array]","[object Float64Array]"],l=ArrayBuffer.isView||function(c){return c&&u.indexOf(Object.prototype.toString.call(c))>-1};function f(c){if(typeof c!="string"&&(c=String(c)),/[^a-z0-9\-#$%&'*+.^_`|~]/i.test(c))throw new TypeError("Invalid character in header field name");return c.toLowerCase()}function m(c){return typeof c!="string"&&(c=String(c)),c}function h(c){var d={next:function(){var g=c.shift();return{done:g===void 0,value:g}}};return r.iterable&&(d[Symbol.iterator]=function(){return d}),d}function p(c){this.map={},c instanceof p?c.forEach(function(d,g){this.append(g,d)},this):Array.isArray(c)?c.forEach(function(d){this.append(d[0],d[1])},this):c&&Object.getOwnPropertyNames(c).forEach(function(d){this.append(d,c[d])},this)}p.prototype.append=function(c,d){c=f(c),d=m(d);var g=this.map[c];this.map[c]=g?g+", "+d:d},p.prototype.delete=function(c){delete this.map[f(c)]},p.prototype.get=function(c){return c=f(c),this.has(c)?this.map[c]:null},p.prototype.has=function(c){return this.map.hasOwnProperty(f(c))},p.prototype.set=function(c,d){this.map[f(c)]=m(d)},p.prototype.forEach=function(c,d){for(var g in this.map)this.map.hasOwnProperty(g)&&c.call(d,this.map[g],g,this)},p.prototype.keys=function(){var c=[];return this.forEach(function(d,g){c.push(g)}),h(c)},p.prototype.values=function(){var c=[];return this.forEach(function(d){c.push(d)}),h(c)},p.prototype.entries=function(){var c=[];return this.forEach(function(d,g){c.push([g,d])}),h(c)},r.iterable&&(p.prototype[Symbol.iterator]=p.prototype.entries);function A(c){if(c.bodyUsed)return Promise.reject(new TypeError("Already read"));c.bodyUsed=!0}function _(c){return new Promise(function(d,g){c.onload=function(){d(c.result)},c.onerror=function(){g(c.error)}})}function W(c){var d=new FileReader,g=_(d);return d.readAsArrayBuffer(c),g}function k(c){var d=new FileReader,g=_(d);return d.readAsText(c),g}function G(c){for(var d=new Uint8Array(c),g=new Array(d.length),I=0;I<d.length;I++)g[I]=String.fromCharCode(d[I]);return g.join("")}function te(c){if(c.slice)return c.slice(0);var d=new Uint8Array(c.byteLength);return d.set(new Uint8Array(c)),d.buffer}function J(){return this.bodyUsed=!1,this._initBody=function(c){this._bodyInit=c,c?typeof c=="string"?this._bodyText=c:r.blob&&Blob.prototype.isPrototypeOf(c)?this._bodyBlob=c:r.formData&&FormData.prototype.isPrototypeOf(c)?this._bodyFormData=c:r.searchParams&&URLSearchParams.prototype.isPrototypeOf(c)?this._bodyText=c.toString():r.arrayBuffer&&r.blob&&i(c)?(this._bodyArrayBuffer=te(c.buffer),this._bodyInit=new Blob([this._bodyArrayBuffer])):r.arrayBuffer&&(ArrayBuffer.prototype.isPrototypeOf(c)||l(c))?this._bodyArrayBuffer=te(c):this._bodyText=c=Object.prototype.toString.call(c):this._bodyText="",this.headers.get("content-type")||(typeof c=="string"?this.headers.set("content-type","text/plain;charset=UTF-8"):this._bodyBlob&&this._bodyBlob.type?this.headers.set("content-type",this._bodyBlob.type):r.searchParams&&URLSearchParams.prototype.isPrototypeOf(c)&&this.headers.set("content-type","application/x-www-form-urlencoded;charset=UTF-8"))},r.blob&&(this.blob=function(){var c=A(this);if(c)return c;if(this._bodyBlob)return Promise.resolve(this._bodyBlob);if(this._bodyArrayBuffer)return Promise.resolve(new Blob([this._bodyArrayBuffer]));if(this._bodyFormData)throw new Error("could not read FormData body as blob");return Promise.resolve(new Blob([this._bodyText]))},this.arrayBuffer=function(){return this._bodyArrayBuffer?A(this)||Promise.resolve(this._bodyArrayBuffer):this.blob().then(W)}),this.text=function(){var c=A(this);if(c)return c;if(this._bodyBlob)return k(this._bodyBlob);if(this._bodyArrayBuffer)return Promise.resolve(G(this._bodyArrayBuffer));if(this._bodyFormData)throw new Error("could not read FormData body as text");return Promise.resolve(this._bodyText)},r.formData&&(this.formData=function(){return this.text().then(be)}),this.json=function(){return this.text().then(JSON.parse)},this}var L=["DELETE","GET","HEAD","OPTIONS","POST","PUT"];function X(c){var d=c.toUpperCase();return L.indexOf(d)>-1?d:c}function $(c,d){d=d||{};var g=d.body;if(c instanceof $){if(c.bodyUsed)throw new TypeError("Already read");this.url=c.url,this.credentials=c.credentials,d.headers||(this.headers=new p(c.headers)),this.method=c.method,this.mode=c.mode,this.signal=c.signal,!g&&c._bodyInit!=null&&(g=c._bodyInit,c.bodyUsed=!0)}else this.url=String(c);if(this.credentials=d.credentials||this.credentials||"same-origin",(d.headers||!this.headers)&&(this.headers=new p(d.headers)),this.method=X(d.method||this.method||"GET"),this.mode=d.mode||this.mode||null,this.signal=d.signal||this.signal,this.referrer=null,(this.method==="GET"||this.method==="HEAD")&&g)throw new TypeError("Body not allowed for GET or HEAD requests");this._initBody(g)}$.prototype.clone=function(){return new $(this,{body:this._bodyInit})};function be(c){var d=new FormData;return c.trim().split("&").forEach(function(g){if(g){var I=g.split("="),O=I.shift().replace(/\+/g," "),w=I.join("=").replace(/\+/g," ");d.append(decodeURIComponent(O),decodeURIComponent(w))}}),d}function He(c){var d=new p,g=c.replace(/\r?\n[\t ]+/g," ");return g.split(/\r?\n/).forEach(function(I){var O=I.split(":"),w=O.shift().trim();if(w){var Ve=O.join(":").trim();d.append(w,Ve)}}),d}J.call($.prototype);function B(c,d){d||(d={}),this.type="default",this.status=d.status===void 0?200:d.status,this.ok=this.status>=200&&this.status<300,this.statusText="statusText"in d?d.statusText:"OK",this.headers=new p(d.headers),this.url=d.url||"",this._initBody(c)}J.call(B.prototype),B.prototype.clone=function(){return new B(this._bodyInit,{status:this.status,statusText:this.statusText,headers:new p(this.headers),url:this.url})},B.error=function(){var c=new B(null,{status:0,statusText:""});return c.type="error",c};var pt=[301,302,303,307,308];B.redirect=function(c,d){if(pt.indexOf(d)===-1)throw new RangeError("Invalid status code");return new B(null,{status:d,headers:{location:c}})},n.DOMException=e.DOMException;try{new n.DOMException}catch{n.DOMException=function(d,g){this.message=d,this.name=g;var I=Error(d);this.stack=I.stack},n.DOMException.prototype=Object.create(Error.prototype),n.DOMException.prototype.constructor=n.DOMException}function fe(c,d){return new Promise(function(g,I){var O=new $(c,d);if(O.signal&&O.signal.aborted)return I(new n.DOMException("Aborted","AbortError"));var w=new XMLHttpRequest;function Ve(){w.abort()}w.onload=function(){var Ee={status:w.status,statusText:w.statusText,headers:He(w.getAllResponseHeaders()||"")};Ee.url="responseURL"in w?w.responseURL:Ee.headers.get("X-Request-URL");var ht="response"in w?w.response:w.responseText;g(new B(ht,Ee))},w.onerror=function(){I(new TypeError("Network request failed"))},w.ontimeout=function(){I(new TypeError("Network request failed"))},w.onabort=function(){I(new n.DOMException("Aborted","AbortError"))},w.open(O.method,O.url,!0),O.credentials==="include"?w.withCredentials=!0:O.credentials==="omit"&&(w.withCredentials=!1),"responseType"in w&&r.blob&&(w.responseType="blob"),O.headers.forEach(function(Ee,ht){w.setRequestHeader(ht,Ee)}),O.signal&&(O.signal.addEventListener("abort",Ve),w.onreadystatechange=function(){w.readyState===4&&O.signal.removeEventListener("abort",Ve)}),w.send(typeof O._bodyInit=="undefined"?null:O._bodyInit)})}return fe.polyfill=!0,e.fetch||(e.fetch=fe,e.Headers=p,e.Request=$,e.Response=B),n.Headers=p,n.Request=$,n.Response=B,n.fetch=fe,Object.defineProperty(n,"__esModule",{value:!0}),n}({})})(Je);Je.fetch.ponyfill=!0;delete Je.fetch.polyfill;var de=Je;z=de.fetch;z.default=de.fetch;z.fetch=de.fetch;z.Headers=de.Headers;z.Request=de.Request;z.Response=de.Response;yn.exports=z});var j=y((Zc,_n)=>{"use strict";var Ae=Ge(),wt=pn(),ou=hn(),Te=typeof window!="undefined"?window:typeof globalThis!="undefined"?globalThis:typeof global!="undefined"?global:self;function uu(e,t){if(e==null)throw new TypeError('The constructor to "inherits" must not be null or undefined');if(t==null)throw new TypeError('The super constructor to "inherits" must not be null or undefined');if(t.prototype===void 0)throw new TypeError('The super constructor to "inherits" must have a prototype');e.super_=t,e.prototype=Object.create(t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}})}function wn(){return typeof window=="undefined"&&typeof process!="undefined"&&process.versions!=null&&process.versions.node!=null}function cu(e){var t=!!(typeof process!="undefined"&&process&&process.env);if(t&&process.env[e]!=null)return process.env[e]}function lu(){var e=navigator.appName,t=""+parseFloat(navigator.appVersion),n,r,i;return(r=navigator.userAgent.indexOf("Opera"))!=-1?(e="Opera",t=navigator.userAgent.substring(r+6),(r=navigator.userAgent.indexOf("Version"))!=-1&&(t=navigator.userAgent.substring(r+8))):(r=navigator.userAgent.indexOf("MSIE"))!=-1?(e="Microsoft Internet Explorer",t=navigator.userAgent.substring(r+5)):e=="Netscape"&&navigator.userAgent.indexOf("Trident/")!=-1?(e="Microsoft Internet Explorer",t=navigator.userAgent.substring(r+5),(r=navigator.userAgent.indexOf("rv:"))!=-1&&(t=navigator.userAgent.substring(r+3))):(r=navigator.userAgent.indexOf("Chrome"))!=-1?(e="Chrome",t=navigator.userAgent.substring(r+7)):(r=navigator.userAgent.indexOf("Safari"))!=-1?(e="Safari",t=navigator.userAgent.substring(r+7),(r=navigator.userAgent.indexOf("Version"))!=-1&&(t=navigator.userAgent.substring(r+8)),navigator.userAgent.indexOf("CriOS")!=-1&&(e="Chrome")):(r=navigator.userAgent.indexOf("Firefox"))!=-1?(e="Firefox",t=navigator.userAgent.substring(r+8)):(n=navigator.userAgent.lastIndexOf(" ")+1)<(r=navigator.userAgent.lastIndexOf("/"))&&(e=navigator.userAgent.substring(n,r),t=navigator.userAgent.substring(r+1),e.toLowerCase()==e.toUpperCase()&&(e=navigator.appName)),(i=t.indexOf(";"))!=-1&&(t=t.substring(0,i)),(i=t.indexOf(" "))!=-1&&(t=t.substring(0,i)),(i=t.indexOf(")"))!=-1&&(t=t.substring(0,i)),[e,t].join("-")}function fu(){var e="unknown",t=[{s:"Windows 10",r:/(Windows 10.0|Windows NT 10.0)/},{s:"Windows 8.1",r:/(Windows 8.1|Windows NT 6.3)/},{s:"Windows 8",r:/(Windows 8|Windows NT 6.2)/},{s:"Windows 7",r:/(Windows 7|Windows NT 6.1)/},{s:"Windows Vista",r:/Windows NT 6.0/},{s:"Windows Server 2003",r:/Windows NT 5.2/},{s:"Windows XP",r:/(Windows NT 5.1|Windows XP)/},{s:"Windows 2000",r:/(Windows NT 5.0|Windows 2000)/},{s:"Windows ME",r:/(Win 9x 4.90|Windows ME)/},{s:"Windows 98",r:/(Windows 98|Win98)/},{s:"Windows 95",r:/(Windows 95|Win95|Windows_95)/},{s:"Windows NT 4.0",r:/(Windows NT 4.0|WinNT4.0|WinNT|Windows NT)/},{s:"Windows CE",r:/Windows CE/},{s:"Windows 3.11",r:/Win16/},{s:"Android",r:/Android/},{s:"Open BSD",r:/OpenBSD/},{s:"Sun OS",r:/SunOS/},{s:"Chrome OS",r:/CrOS/},{s:"Linux",r:/(Linux|X11(?!.*CrOS))/},{s:"iOS",r:/(iPhone|iPad|iPod)/},{s:"Mac OS X",r:/Mac OS X/},{s:"Mac OS",r:/(Mac OS|MacPPC|MacIntel|Mac_PowerPC|Macintosh)/},{s:"QNX",r:/QNX/},{s:"UNIX",r:/UNIX/},{s:"BeOS",r:/BeOS/},{s:"OS/2",r:/OS\/2/},{s:"Search Bot",r:/(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/}];for(var n in t){var r=t[n];if(r.r.test(navigator.userAgent)){e=r.s;break}}var i="unknown";switch(/Windows/.test(e)&&(i=/Windows (.*)/.exec(e)[1],e="Windows"),e){case"Mac OS":case"Mac OS X":case"Android":i=/(?:Android|Mac OS|Mac OS X|MacPPC|MacIntel|Mac_PowerPC|Macintosh) ([\.\_\d]+)/.exec(navigator.userAgent)[1];break;case"iOS":i=/OS (\d+)_(\d+)_?(\d+)?/.exec(navigator.appVersion),i=i[1]+"."+i[2]+"."+(i[3]|0);break}return[e,i].join("-")}function du(){var e=[{name:"Netlify",check:function(){return process.env.hasOwnProperty("NETLIFY_IMAGES_CDN_DOMAIN")}},{name:"Vercel",check:function(){return process.env.hasOwnProperty("VERCEL")}},{name:"Heroku",check:function(){return process.env.hasOwnProperty("PATH")&&process.env.PATH.indexOf(".heroku")!==-1}},{name:"AWS Lambda",check:function(){return process.env.hasOwnProperty("AWS_LAMBDA_FUNCTION_VERSION")}},{name:"GCP Cloud Functions",check:function(){return process.env.hasOwnProperty("_")&&process.env._.indexOf("google")!==-1}},{name:"GCP Compute Instances",check:function(){return process.env.hasOwnProperty("GOOGLE_CLOUD_PROJECT")}},{name:"Azure Cloud Functions",check:function(){return process.env.hasOwnProperty("WEBSITE_FUNCTIONS_AZUREMONITOR_CATEGORIES")}},{name:"Azure Compute",check:function(){return process.env.hasOwnProperty("ORYX_ENV_TYPE")&&process.env.hasOwnProperty("WEBSITE_INSTANCE_ID")&&process.env.ORYX_ENV_TYPE==="AppService"}},{name:"Mongo Stitch",check:function(){return typeof Te.StitchError=="function"}},{name:"Render",check:function(){return process.env.hasOwnProperty("RENDER_SERVICE_ID")}},{name:"Begin",check:function(){return process.env.hasOwnProperty("BEGIN_DATA_SCOPE_ID")}}],t=e.find(n=>n.check());return t?t.name:"unknown"}function mu(e,t){return e===void 0?t:e}function pu(e,t){var n={};for(var r in e){if(!(r in t))throw new Error("No such option "+r);n[r]=e[r]}for(var i in t)i in n||(n[i]=t[i]);return n}function hu(e){var t={};for(var n in e){var r=e[n];r!=null&&(t[n]=r)}return t}function gu(e){var t={};for(var n in e){var r=e[n];r!==void 0&&(t[n]=r)}return t}function bn(e,t){return typeof e=="object"&&e!==null&&Boolean(e[t])}function yu(e,t,n){return n=typeof n=="object"?En(n):n,[e,t?t.charAt(0)==="/"?"":"/"+t:"",n?n.charAt(0)==="?"?"":"?"+n:""].join("")}function En(e,t){t=t||"";var n=[],r,i;typeof t!="string"&&(t="?");for(i in e)if(bn(e,i)){if(r=e[i],!r&&(r==null||isNaN(r))&&(r=""),i=An(i),r=An(r),i===null||r===null)continue;n.push(i+"="+r)}return n.length?t+n.join("&"):""}function An(e){try{return encodeURIComponent(e)}catch{return null}}function vu(e,t){var n={};for(var r in e)n[r]=e[r];for(var r in t)n[r]=t[r];return n}function Tn(e){return typeof e=="function"?e:typeof Te.fetch=="function"?Te.fetch.bind(Te):vn()}function wu(){var e;return n=>{if(!wn()||e||!n)return;function r(i){var u=i>Ae.version;u&&console.info(ou("New "+Ae.name+" version available "+wt.dim(Ae.version)+wt.reset(" \u2192 ")+wt.green(i)+`
-Changelog: https://github.com/${Ae.repository}/blob/main/CHANGELOG.md`,{padding:1,borderColor:"yellow"}))}e=!0,Tn()("https://registry.npmjs.org/"+Ae.name).then(i=>i.json()).then(i=>r(i["dist-tags"].latest)).catch(i=>{console.error("Unable to check new driver version"),console.error(i)})}}_n.exports={notifyAboutNewVersion:wu,crossGlobal:Te,mergeObjects:vu,formatUrl:yu,querystringify:En,inherits:uu,isNodeEnv:wn,getEnvVariable:cu,defaults:mu,applyDefaults:pu,removeNullAndUndefinedValues:hu,removeUndefinedValues:gu,checkInstanceHasProperty:bn,getBrowserDetails:lu,getBrowserOsDetails:fu,getNodeRuntimeEnv:du,resolveFetch:Tn}});var $e=y((el,Cn)=>{"use strict";var bu=j();function me(e){this.raw=e}me.prototype._isFaunaExpr=!0;me.prototype.toJSON=function(){return this.raw};me.prototype.toFQL=function(){return b(this.raw)};var Eu=["Do","Call","Union","Intersection","Difference","Equals","Add","BitAnd","BitOr","BitXor","Divide","Max","Min","Modulo","Multiply","Subtract","LT","LTE","GT","GTE","And","Or"],xn={containsstrregex:"ContainsStrRegex",endswith:"EndsWith",findstr:"FindStr",findstrregex:"FindStrRegex",gt:"GT",gte:"GTE",is_nonempty:"is_non_empty",lowercase:"LowerCase",lt:"LT",lte:"LTE",ltrim:"LTrim",ngram:"NGram",rtrim:"RTrim",regexescape:"RegexEscape",replacestr:"ReplaceStr",replacestrregex:"ReplaceStrRegex",startswith:"StartsWith",substring:"SubString",titlecase:"TitleCase",uppercase:"UpperCase"};function Sn(e){return e instanceof me||bu.checkInstanceHasProperty(e,"_isFaunaExpr")}function Xe(e){return"{"+Object.keys(e).map(function(t){return'"'+t+'": '+b(e[t])}).join(", ")+"}"}function bt(e,t){return e.map(function(n){return t(n)}).join(", ")}function Au(e){return e in xn&&(e=xn[e]),e.split("_").map(function(t){return t.charAt(0).toUpperCase()+t.slice(1)}).join("")}var b=function(e,t){if(Sn(e)){if("value"in e)return e.toString();e=e.raw}if(e===null)return"null";switch(typeof e){case"string":return JSON.stringify(e);case"symbol":case"number":case"boolean":return e.toString();case"undefined":return"undefined"}if(Array.isArray(e)){var n=bt(e,b);return Eu.indexOf(t)!=-1?n:"["+n+"]"}if("match"in e){var r=b(e.match),i=e.terms||[];return Sn(i)&&(i=i.raw),Array.isArray(i)&&i.length==0?"Match("+r+")":Array.isArray(i)?"Match("+r+", ["+bt(i,b)+"])":"Match("+r+", "+b(i)+")"}if("paginate"in e){var u=Object.keys(e);if(u.length===1)return"Paginate("+b(e.paginate)+")";var l=Object.assign({},e);return delete l.paginate,"Paginate("+b(e.paginate)+", "+Xe(l)+")"}if("let"in e&&"in"in e){var f="";return Array.isArray(e.let)?f="["+bt(e.let,Xe)+"]":f=Xe(e.let),"Let("+f+", "+b(e.in)+")"}if("object"in e)return Xe(e.object);if("merge"in e)return e.lambda?"Merge("+b(e.merge)+", "+b(e.with)+", "+b(e.lambda)+")":"Merge("+b(e.merge)+", "+b(e.with)+")";if("lambda"in e)return"Lambda("+b(e.lambda)+", "+b(e.expr)+")";if("filter"in e)return"Filter("+b(e.collection)+", "+b(e.filter)+")";if("call"in e)return"Call("+b(e.call)+", "+b(e.arguments)+")";if("map"in e)return"Map("+b(e.collection)+", "+b(e.map)+")";if("foreach"in e)return"Foreach("+b(e.collection)+", "+b(e.foreach)+")";var m=Object.keys(e),h=m[0];h=Au(h);var p=m.filter(A=>e[A]!==null||m.length>1).map(A=>b(e[A],h)).join(", ");return h+"("+p+")"};me.toString=b;Cn.exports=me});var ne=y((tl,Pn)=>{"use strict";var N=j();function D(e,t,n){Error.call(this),this.name=e,this.message=t,this.description=n}N.inherits(D,Error);function On(e){D.call(this,"InvalidValue",e)}N.inherits(On,D);function In(e,t,n,r){var i=`${r} function requires ${l(e,t)} argument(s) but ${n} were given`,u=f(r);D.call(this,"InvalidArity",`${i}
-${u}`),this.min=e,this.max=t,this.actual=n;function l(m,h){return h===null?"at least "+m:m===null?"up to "+h:m===h?m:"from "+m+" to "+h}function f(m){var h="https://docs.fauna.com/fauna/current/api/fql/functions/";return`For more info, see the docs: ${h}${m.toLowerCase()}`}}N.inherits(In,D);function x(e,t){var n=t.responseContent,r=n.errors,i=r.length===0?'(empty "errors")':r[0].code,u=r.length===0?'(empty "errors")':r[0].description;D.call(this,e,i,u),this.requestResult=t}N.inherits(x,D);x.prototype.errors=function(){return this.requestResult.responseContent.errors};x.raiseForStatusCode=function(e){var t=e.statusCode;if(t<200||t>=300)switch(t){case 400:throw new Et(e);case 401:throw new At(e);case 403:throw new Tt(e);case 404:throw new _t(e);case 405:throw new xt(e);case 429:throw new St(e);case 500:throw new Ct(e);case 503:throw new Ot(e);default:throw new x("UnknownError",e)}};function Et(e){x.call(this,"BadRequest",e)}N.inherits(Et,x);function At(e){x.call(this,"Unauthorized",e)}N.inherits(At,x);function Tt(e){x.call(this,"PermissionDenied",e)}N.inherits(Tt,x);function _t(e){x.call(this,"NotFound",e)}N.inherits(_t,x);function xt(e){x.call(this,"MethodNotAllowed",e)}N.inherits(xt,x);function St(e){x.call(this,"TooManyRequests",e)}N.inherits(St,x);function Ct(e){x.call(this,"InternalError",e)}N.inherits(Ct,x);function Ot(e){x.call(this,"UnavailableError",e)}N.inherits(Ot,x);function ze(e,t,n){D.call(this,e,t,n)}N.inherits(ze,D);function Nn(e){D.call(this,"StreamsNotSupported","streams not supported",e)}N.inherits(Nn,ze);function Rn(e){var t=e.data||{};D.call(this,"StreamErrorEvent",t.code,t.description),this.event=e}N.inherits(Rn,ze);function Dn(e,t){D.call(this,"ClientClosed",e,t)}N.inherits(Dn,D);Pn.exports={FaunaError:D,ClientClosed:Dn,FaunaHTTPError:x,InvalidValue:On,InvalidArity:In,BadRequest:Et,Unauthorized:At,PermissionDenied:Tt,NotFound:_t,MethodNotAllowed:xt,TooManyRequests:St,InternalError:Ct,UnavailableError:Ot,StreamError:ze,StreamsNotSupported:Nn,StreamErrorEvent:Rn}});var Bn=y(Ye=>{"use strict";Ye.byteLength=_u;Ye.toByteArray=Su;Ye.fromByteArray=Iu;var H=[],F=[],Tu=typeof Uint8Array!="undefined"?Uint8Array:Array,It="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";for(se=0,Ln=It.length;se<Ln;++se)H[se]=It[se],F[It.charCodeAt(se)]=se;var se,Ln;F["-".charCodeAt(0)]=62;F["_".charCodeAt(0)]=63;function jn(e){var t=e.length;if(t%4>0)throw new Error("Invalid string. Length must be a multiple of 4");var n=e.indexOf("=");n===-1&&(n=t);var r=n===t?0:4-n%4;return[n,r]}function _u(e){var t=jn(e),n=t[0],r=t[1];return(n+r)*3/4-r}function xu(e,t,n){return(t+n)*3/4-n}function Su(e){var t,n=jn(e),r=n[0],i=n[1],u=new Tu(xu(e,r,i)),l=0,f=i>0?r-4:r,m;for(m=0;m<f;m+=4)t=F[e.charCodeAt(m)]<<18|F[e.charCodeAt(m+1)]<<12|F[e.charCodeAt(m+2)]<<6|F[e.charCodeAt(m+3)],u[l++]=t>>16&255,u[l++]=t>>8&255,u[l++]=t&255;return i===2&&(t=F[e.charCodeAt(m)]<<2|F[e.charCodeAt(m+1)]>>4,u[l++]=t&255),i===1&&(t=F[e.charCodeAt(m)]<<10|F[e.charCodeAt(m+1)]<<4|F[e.charCodeAt(m+2)]>>2,u[l++]=t>>8&255,u[l++]=t&255),u}function Cu(e){return H[e>>18&63]+H[e>>12&63]+H[e>>6&63]+H[e&63]}function Ou(e,t,n){for(var r,i=[],u=t;u<n;u+=3)r=(e[u]<<16&16711680)+(e[u+1]<<8&65280)+(e[u+2]&255),i.push(Cu(r));return i.join("")}function Iu(e){for(var t,n=e.length,r=n%3,i=[],u=16383,l=0,f=n-r;l<f;l+=u)i.push(Ou(e,l,l+u>f?f:l+u));return r===1?(t=e[n-1],i.push(H[t>>2]+H[t<<4&63]+"==")):r===2&&(t=(e[n-2]<<8)+e[n-1],i.push(H[t>>10]+H[t>>4&63]+H[t<<2&63]+"=")),i.join("")}});var Fn=y(()=>{});var Se=y((il,kn)=>{"use strict";var Nt=Bn(),Nu=vt(),Rt=ne(),Dt=$e(),Y=j(),Ke=Y.isNodeEnv()?Fn():null,qn=Ke&&Ke.inspect.custom,Ru=Ke?Ke.inspect:JSON.stringify;function K(){}K.prototype._isFaunaValue=!0;Y.inherits(K,Dt);function S(e,t,n){if(!e)throw new Rt.InvalidValue("id cannot be null or undefined");this.value={id:e},t&&(this.value.collection=t),n&&(this.value.database=n)}S.prototype._isFaunaRef=!0;Y.inherits(S,K);Object.defineProperty(S.prototype,"collection",{get:function(){return this.value.collection}});Object.defineProperty(S.prototype,"class",{get:Nu(function(){return this.value.collection},"class is deprecated, use collection instead")});Object.defineProperty(S.prototype,"database",{get:function(){return this.value.database}});Object.defineProperty(S.prototype,"id",{get:function(){return this.value.id}});S.prototype.toJSON=function(){return{"@ref":this.value}};pe(S,function(){var e={collections:"Collection",databases:"Database",indexes:"Index",functions:"Function",roles:"Role",access_providers:"AccessProvider"},t=function(r){return r.collection===void 0},n=function(r){if(t(r)){var i=r.database!==void 0?r.database.toString():"";return r.id==="access_providers"?"AccessProviders("+i+")":r.id.charAt(0).toUpperCase()+r.id.slice(1)+"("+i+")"}if(t(r.collection)){var u=e[r.collection.id];if(u!==void 0){var i=r.database!==void 0?", "+r.database.toString():"";return u+'("'+r.id+'"'+i+")"}}return"Ref("+n(r.collection)+', "'+r.id+'")'};return n(this)});S.prototype.valueOf=function(){return this.value};S.prototype.equals=function(e){return(e instanceof S||Y.checkInstanceHasProperty(e,"_isFaunaRef"))&&this.id===e.id&&(this.collection===void 0&&e.collection===void 0||this.collection.equals(e.collection))&&(this.database===void 0&&e.database===void 0||this.database.equals(e.database))};var Q={COLLECTIONS:new S("collections"),INDEXES:new S("indexes"),DATABASES:new S("databases"),FUNCTIONS:new S("functions"),ROLES:new S("roles"),KEYS:new S("keys"),ACCESS_PROVIDERS:new S("access_providers")};Q.fromName=function(e){switch(e){case"collections":return Q.COLLECTIONS;case"indexes":return Q.INDEXES;case"databases":return Q.DATABASES;case"functions":return Q.FUNCTIONS;case"roles":return Q.ROLES;case"keys":return Q.KEYS;case"access_providers":return Q.ACCESS_PROVIDERS}return new S(e)};function Qe(e){this.value=e}Y.inherits(Qe,K);pe(Qe,function(){return Dt.toString(this.value)});Qe.prototype.toJSON=function(){return{"@set":this.value}};function _e(e){if(e instanceof Date)e=e.toISOString();else if(e.charAt(e.length-1)!=="Z")throw new Rt.InvalidValue("Only allowed timezone is 'Z', got: "+e);this.value=e}Y.inherits(_e,K);Object.defineProperty(_e.prototype,"date",{get:function(){return new Date(this.value)}});pe(_e,function(){return'Time("'+this.value+'")'});_e.prototype.toJSON=function(){return{"@ts":this.value}};function xe(e){e instanceof Date&&(e=e.toISOString().slice(0,10)),this.value=e}Y.inherits(xe,K);Object.defineProperty(xe.prototype,"date",{get:function(){return new Date(this.value)}});pe(xe,function(){return'Date("'+this.value+'")'});xe.prototype.toJSON=function(){return{"@date":this.value}};function Ze(e){if(e instanceof ArrayBuffer)this.value=new Uint8Array(e);else if(typeof e=="string")this.value=Nt.toByteArray(e);else if(e instanceof Uint8Array)this.value=e;else throw new Rt.InvalidValue("Bytes type expect argument to be either Uint8Array|ArrayBuffer|string, got: "+Ru(e))}Y.inherits(Ze,K);pe(Ze,function(){return'Bytes("'+Nt.fromByteArray(this.value)+'")'});Ze.prototype.toJSON=function(){return{"@bytes":Nt.fromByteArray(this.value)}};function et(e){this.value=e}Y.inherits(et,K);pe(et,function(){return"Query("+Dt.toString(this.value)+")"});et.prototype.toJSON=function(){return{"@query":this.value}};function pe(e,t){e.prototype.toString=t,e.prototype.inspect=t,qn&&(e.prototype[qn]=t)}kn.exports={Value:K,Ref:S,Native:Q,SetRef:Qe,FaunaTime:_e,FaunaDate:xe,Bytes:Ze,Query:et}});var Pt=y((sl,Un)=>{"use strict";var Mn=Object.getOwnPropertySymbols,Du=Object.prototype.hasOwnProperty,Pu=Object.prototype.propertyIsEnumerable;function Lu(e){if(e==null)throw new TypeError("Object.assign cannot be called with null or undefined");return Object(e)}function ju(){try{if(!Object.assign)return!1;var e=new String("abc");if(e[5]="de",Object.getOwnPropertyNames(e)[0]==="5")return!1;for(var t={},n=0;n<10;n++)t["_"+String.fromCharCode(n)]=n;var r=Object.getOwnPropertyNames(t).map(function(u){return t[u]});if(r.join("")!=="0123456789")return!1;var i={};return"abcdefghijklmnopqrst".split("").forEach(function(u){i[u]=u}),Object.keys(Object.assign({},i)).join("")==="abcdefghijklmnopqrst"}catch{return!1}}Un.exports=ju()?Object.assign:function(e,t){for(var n,r=Lu(e),i,u=1;u<arguments.length;u++){n=Object(arguments[u]);for(var l in n)Du.call(n,l)&&(r[l]=n[l]);if(Mn){i=Mn(n);for(var f=0;f<i.length;f++)Pu.call(n,i[f])&&(r[i[f]]=n[i[f]])}}return r}});var Ce=y((ol,Rs)=>{"use strict";var Bu=dn(),re=vt(),s=$e(),Lt=ne(),Hn=Se(),Fu=Pt(),v=j();function Vn(){switch(o.between(1,2,arguments,Vn.name),arguments.length){case 1:return new s({"@ref":a(arguments[0])});case 2:return new s({ref:a(arguments[0]),id:a(arguments[1])})}}function Wn(e){return o.exact(1,arguments,Wn.name),new Hn.Bytes(e)}function Gn(e){return o.exact(1,arguments,Gn.name),new s({abort:a(e)})}function Jn(e,t){return o.exact(2,arguments,Jn.name),new s({at:a(e),expr:a(t)})}function Xn(e,t){o.exact(2,arguments,Xn.name);var n=[];if(Array.isArray(e)?n=e.map(function(i){return nt(i)}):n=Object.keys(e).filter(function(i){return e[i]!==void 0}).map(function(i){var u={};return u[i]=a(e[i]),u}),typeof t=="function")if(Array.isArray(e)){var r=[];e.forEach(function(i){Object.keys(i).forEach(function(u){r.push(he(u))})}),t=t.apply(null,r)}else t=t.apply(null,Object.keys(e).map(function(i){return he(i)}));return new s({let:n,in:a(t)})}function he(e){return o.exact(1,arguments,he.name),new s({var:a(e)})}function $n(e,t,n){return o.exact(3,arguments,$n.name),new s({if:a(e),then:a(t),else:a(n)})}function zn(){o.min(1,arguments,zn.name);var e=tt(arguments);return new s({do:a(e)})}var Yn=function(e){return o.exact(1,arguments,Yn.name),new s({object:nt(e)})};function jt(){switch(o.between(1,2,arguments,jt.name),arguments.length){case 1:var e=arguments[0];if(typeof e=="function")return qu(e);if(e instanceof s||v.checkInstanceHasProperty(e,"_isFaunaExpr"))return e;throw new Lt.InvalidValue("Lambda function takes either a Function or an Expr.");case 2:var t=arguments[0],n=arguments[1];return Bt(t,n)}}function qu(e){var t=Bu(e);switch(t.length){case 0:throw new Lt.InvalidValue("Provided Function must take at least 1 argument.");case 1:return Bt(t[0],e(he(t[0])));default:return Bt(t,e.apply(null,t.map(function(n){return he(n)})))}}function Bt(e,t){return new s({lambda:a(e),expr:a(t)})}function Kn(e){o.min(1,arguments,Kn.name);var t=tt(arguments);return t.shift(),new s({call:a(e),arguments:a(T(t))})}function Qn(e){return o.exact(1,arguments,Qn.name),new s({query:a(e)})}function Zn(e,t){return o.exact(2,arguments,Zn.name),new s({map:a(t),collection:a(e)})}function er(e,t){return o.exact(2,arguments,er.name),new s({foreach:a(t),collection:a(e)})}function tr(e,t){return o.exact(2,arguments,tr.name),new s({filter:a(t),collection:a(e)})}function nr(e,t){return o.exact(2,arguments,nr.name),new s({take:a(e),collection:a(t)})}function rr(e,t){return o.exact(2,arguments,rr.name),new s({drop:a(e),collection:a(t)})}function ar(e,t){return o.exact(2,arguments,ar.name),new s({prepend:a(e),collection:a(t)})}function ir(e,t){return o.exact(2,arguments,ir.name),new s({append:a(e),collection:a(t)})}function sr(e){return o.exact(1,arguments,sr.name),new s({is_empty:a(e)})}function or(e){return o.exact(1,arguments,or.name),new s({is_nonempty:a(e)})}function ur(e){return o.exact(1,arguments,ur.name),new s({is_number:a(e)})}function cr(e){return o.exact(1,arguments,cr.name),new s({is_double:a(e)})}function lr(e){return o.exact(1,arguments,lr.name),new s({is_integer:a(e)})}function fr(e){return o.exact(1,arguments,fr.name),new s({is_boolean:a(e)})}function dr(e){return o.exact(1,arguments,dr.name),new s({is_null:a(e)})}function mr(e){return o.exact(1,arguments,mr.name),new s({is_bytes:a(e)})}function pr(e){return o.exact(1,arguments,pr.name),new s({is_timestamp:a(e)})}function hr(e){return o.exact(1,arguments,hr.name),new s({is_date:a(e)})}function gr(e){return o.exact(1,arguments,gr.name),new s({is_string:a(e)})}function yr(e){return o.exact(1,arguments,yr.name),new s({is_array:a(e)})}function vr(e){return o.exact(1,arguments,vr.name),new s({is_object:a(e)})}function wr(e){return o.exact(1,arguments,wr.name),new s({is_ref:a(e)})}function br(e){return o.exact(1,arguments,br.name),new s({is_set:a(e)})}function Er(e){return o.exact(1,arguments,Er.name),new s({is_doc:a(e)})}function Ar(e){return o.exact(1,arguments,Ar.name),new s({is_lambda:a(e)})}function Tr(e){return o.exact(1,arguments,Tr.name),new s({is_collection:a(e)})}function _r(e){return o.exact(1,arguments,_r.name),new s({is_database:a(e)})}function xr(e){return o.exact(1,arguments,xr.name),new s({is_index:a(e)})}function Sr(e){return o.exact(1,arguments,Sr.name),new s({is_function:a(e)})}function Cr(e){return o.exact(1,arguments,Cr.name),new s({is_key:a(e)})}function Or(e){return o.exact(1,arguments,Or.name),new s({is_token:a(e)})}function Ir(e){return o.exact(1,arguments,Ir.name),new s({is_credentials:a(e)})}function Nr(e){return o.exact(1,arguments,Nr.name),new s({is_role:a(e)})}function Rr(e,t){return o.between(1,2,arguments,Rr.name),t=v.defaults(t,null),new s(R({get:a(e)},{ts:a(t)}))}function Dr(e){return o.exact(1,arguments,Dr.name),new s({key_from_secret:a(e)})}function Pr(e,t,n){return o.exact(3,arguments,Pr.name),new s({reduce:a(e),initial:a(t),collection:a(n)})}function Lr(e,t){return o.between(1,2,arguments,Lr.name),t=v.defaults(t,{}),new s(Fu({paginate:a(e)},nt(t)))}function jr(e,t){return o.between(1,2,arguments,jr.name),t=v.defaults(t,null),new s(R({exists:a(e)},{ts:a(t)}))}function Br(e,t){return o.between(1,2,arguments,Br.name),new s({create:a(e),params:a(t)})}function Fr(e,t){return o.exact(2,arguments,Fr.name),new s({update:a(e),params:a(t)})}function qr(e,t){return o.exact(2,arguments,qr.name),new s({replace:a(e),params:a(t)})}function kr(e){return o.exact(1,arguments,kr.name),new s({delete:a(e)})}function Mr(e,t,n,r){return o.exact(4,arguments,Mr.name),new s({insert:a(e),ts:a(t),action:a(n),params:a(r)})}function Ur(e,t,n){return o.exact(3,arguments,Ur.name),new s({remove:a(e),ts:a(t),action:a(n)})}function Hr(e){return o.exact(1,arguments,Hr.name),new s({create_class:a(e)})}function Vr(e){return o.exact(1,arguments,Vr.name),new s({create_collection:a(e)})}function Wr(e){return o.exact(1,arguments,Wr.name),new s({create_database:a(e)})}function Gr(e){return o.exact(1,arguments,Gr.name),new s({create_index:a(e)})}function Jr(e){return o.exact(1,arguments,Jr.name),new s({create_key:a(e)})}function Xr(e){return o.exact(1,arguments,Xr.name),new s({create_function:a(e)})}function $r(e){return o.exact(1,arguments,$r.name),new s({create_role:a(e)})}function zr(e){return o.exact(1,arguments,zr.name),new s({create_access_provider:a(e)})}function Yr(e){return o.exact(1,arguments,Yr.name),new s({singleton:a(e)})}function Kr(e){return o.exact(1,arguments,Kr.name),new s({events:a(e)})}function Qr(e){o.min(1,arguments,Qr.name);var t=tt(arguments);return t.shift(),new s({match:a(e),terms:a(T(t))})}function Zr(){return o.min(1,arguments,Zr.name),new s({union:a(T(arguments))})}function ea(e,t,n){return o.between(2,3,arguments,ea.name),new s(R({merge:a(e),with:a(t)},{lambda:a(n)}))}function ta(){return o.min(1,arguments,ta.name),new s({intersection:a(T(arguments))})}function na(){return o.min(1,arguments,na.name),new s({difference:a(T(arguments))})}function ra(e){return o.exact(1,arguments,ra.name),new s({distinct:a(e)})}function aa(e,t){return o.exact(2,arguments,aa.name),new s({join:a(e),with:a(t)})}function ia(e,t,n){return o.exact(3,arguments,ia.name),new s({range:a(e),from:a(t),to:a(n)})}function sa(e,t){return o.exact(2,arguments,sa.name),new s({login:a(e),params:a(t)})}function oa(e){return o.exact(1,arguments,oa.name),new s({logout:a(e)})}function ua(e,t){return o.exact(2,arguments,ua.name),new s({identify:a(e),password:a(t)})}function ca(){return o.exact(0,arguments,ca.name),new s({identity:null})}function la(){return o.exact(0,arguments,la.name),new s({current_identity:null})}function fa(){return o.exact(0,arguments,fa.name),new s({has_identity:null})}function da(){return o.exact(0,arguments,da.name),new s({has_current_identity:null})}function ma(){return o.exact(0,arguments,ma.name),new s({current_token:null})}function pa(){return o.exact(0,arguments,pa.name),new s({has_current_token:null})}function ha(e,t){return o.min(1,arguments,ha.name),t=v.defaults(t,null),new s(R({concat:a(e)},{separator:a(t)}))}function ga(e,t){return o.min(1,arguments,ga.name),new s(R({casefold:a(e)},{normalizer:a(t)}))}function ya(e,t){return o.exact(2,arguments,ya.name),new s({containsstr:a(e),search:a(t)})}function va(e,t){return o.exact(2,arguments,va.name),new s({containsstrregex:a(e),pattern:a(t)})}function wa(e,t){return o.exact(2,arguments,wa.name),new s({startswith:a(e),search:a(t)})}function ba(e,t){return o.exact(2,arguments,ba.name),new s({endswith:a(e),search:a(t)})}function Ea(e){return o.exact(1,arguments,Ea.name),new s({regexescape:a(e)})}function Aa(e,t,n){return o.between(2,3,arguments,Aa.name),n=v.defaults(n,null),new s(R({findstr:a(e),find:a(t)},{start:a(n)}))}function Ta(e,t,n,r){return o.between(2,4,arguments,Ta.name),n=v.defaults(n,null),new s(R({findstrregex:a(e),pattern:a(t)},{start:a(n),num_results:a(r)}))}function _a(e){return o.exact(1,arguments,_a.name),new s({length:a(e)})}function xa(e){return o.exact(1,arguments,xa.name),new s({lowercase:a(e)})}function Sa(e){return o.exact(1,arguments,Sa.name),new s({ltrim:a(e)})}function Ca(e,t,n){return o.between(1,3,arguments,Ca.name),t=v.defaults(t,null),n=v.defaults(n,null),new s(R({ngram:a(e)},{min:a(t),max:a(n)}))}function Oa(e,t){return o.between(1,2,arguments,Oa.name),t=v.defaults(t,null),new s(R({repeat:a(e)},{number:a(t)}))}function Ia(e,t,n){return o.exact(3,arguments,Ia.name),new s({replacestr:a(e),find:a(t),replace:a(n)})}function Na(e,t,n,r){return o.between(3,4,arguments,Na.name),r=v.defaults(r,null),new s(R({replacestrregex:a(e),pattern:a(t),replace:a(n)},{first:a(r)}))}function Ra(e){return o.exact(1,arguments,Ra.name),new s({rtrim:a(e)})}function Da(e){return o.exact(1,arguments,Da.name),new s({space:a(e)})}function Pa(e,t,n){return o.between(1,3,arguments,Pa.name),t=v.defaults(t,null),n=v.defaults(n,null),new s(R({substring:a(e)},{start:a(t),length:a(n)}))}function La(e){return o.exact(1,arguments,La.name),new s({titlecase:a(e)})}function ja(e){return o.exact(1,arguments,ja.name),new s({trim:a(e)})}function Ba(e){return o.exact(1,arguments,Ba.name),new s({uppercase:a(e)})}function Fa(e){o.min(1,arguments,Fa.name);var t=tt(arguments);return t.shift(),new s({format:a(e),values:a(T(t))})}function qa(e){return o.exact(1,arguments,qa.name),new s({time:a(e)})}function ka(e,t){return o.exact(2,arguments,ka.name),new s({epoch:a(e),unit:a(t)})}function Ma(e,t,n){return o.exact(3,arguments,Ma.name),new s({time_add:a(e),offset:a(t),unit:a(n)})}function Ua(e,t,n){return o.exact(3,arguments,Ua.name),new s({time_subtract:a(e),offset:a(t),unit:a(n)})}function Ha(e,t,n){return o.exact(3,arguments,Ha.name),new s({time_diff:a(e),other:a(t),unit:a(n)})}function Va(e){return o.exact(1,arguments,Va.name),new s({date:a(e)})}function Wa(){return o.exact(0,arguments,Wa.name),new s({now:a(null)})}function Ga(){return o.exact(0,arguments,Ga.name),new s({next_id:null})}function Ja(){return o.exact(0,arguments,Ja.name),new s({new_id:null})}function Xa(e,t){switch(o.between(1,2,arguments,Xa.name),arguments.length){case 1:return new s({database:a(e)});case 2:return new s({database:a(e),scope:a(t)})}}function $a(e,t){switch(o.between(1,2,arguments,$a.name),arguments.length){case 1:return new s({index:a(e)});case 2:return new s({index:a(e),scope:a(t)})}}function za(e,t){switch(o.between(1,2,arguments,za.name),arguments.length){case 1:return new s({class:a(e)});case 2:return new s({class:a(e),scope:a(t)})}}function Ya(e,t){switch(o.between(1,2,arguments,Ya.name),arguments.length){case 1:return new s({collection:a(e)});case 2:return new s({collection:a(e),scope:a(t)})}}function Ka(e,t){switch(o.between(1,2,arguments,Ka.name),arguments.length){case 1:return new s({function:a(e)});case 2:return new s({function:a(e),scope:a(t)})}}function Qa(e,t){return o.between(1,2,arguments,Qa.name),t=v.defaults(t,null),new s(R({role:a(e)},{scope:a(t)}))}function Za(e){return o.max(1,arguments,Za.name),e=v.defaults(e,null),new s({access_providers:a(e)})}function ei(e){return o.max(1,arguments,ei.name),e=v.defaults(e,null),new s({classes:a(e)})}function ti(e){return o.max(1,arguments,ti.name),e=v.defaults(e,null),new s({collections:a(e)})}function ni(e){return o.max(1,arguments,ni.name),e=v.defaults(e,null),new s({databases:a(e)})}function ri(e){return o.max(1,arguments,ri.name),e=v.defaults(e,null),new s({indexes:a(e)})}function ai(e){return o.max(1,arguments,ai.name),e=v.defaults(e,null),new s({functions:a(e)})}function ii(e){return o.max(1,arguments,ii.name),e=v.defaults(e,null),new s({roles:a(e)})}function si(e){return o.max(1,arguments,si.name),e=v.defaults(e,null),new s({keys:a(e)})}function oi(e){return o.max(1,arguments,oi.name),e=v.defaults(e,null),new s({tokens:a(e)})}function ui(e){return o.max(1,arguments,ui.name),e=v.defaults(e,null),new s({credentials:a(e)})}function ci(){return o.min(1,arguments,ci.name),new s({equals:a(T(arguments))})}function li(e,t){return o.exact(2,arguments,li.name),new s({contains:a(e),in:a(t)})}function fi(e,t){return o.exact(2,arguments,fi.name),new s({contains_value:a(e),in:a(t)})}function di(e,t){return o.exact(2,arguments,di.name),new s({contains_field:a(e),in:a(t)})}function mi(e,t){return o.exact(2,arguments,mi.name),new s({contains_path:a(e),in:a(t)})}function pi(e,t,n){o.between(2,3,arguments,pi.name);var r={select:a(e),from:a(t)};return n!==void 0&&(r.default=a(n)),new s(r)}function hi(e,t){return o.exact(2,arguments,hi.name),new s({select_all:a(e),from:a(t)})}function gi(e){return o.exact(1,arguments,gi.name),new s({abs:a(e)})}function yi(){return o.min(1,arguments,yi.name),new s({add:a(T(arguments))})}function vi(){return o.min(1,arguments,vi.name),new s({bitand:a(T(arguments))})}function wi(e){return o.exact(1,arguments,wi.name),new s({bitnot:a(e)})}function bi(){return o.min(1,arguments,bi.name),new s({bitor:a(T(arguments))})}function Ei(){return o.min(1,arguments,Ei.name),new s({bitxor:a(T(arguments))})}function Ai(e){return o.exact(1,arguments,Ai.name),new s({ceil:a(e)})}function Ti(){return o.min(1,arguments,Ti.name),new s({divide:a(T(arguments))})}function _i(e){return o.exact(1,arguments,_i.name),new s({floor:a(e)})}function xi(){return o.min(1,arguments,xi.name),new s({max:a(T(arguments))})}function Si(){return o.min(1,arguments,Si.name),new s({min:a(T(arguments))})}function Ci(){return o.min(1,arguments,Ci.name),new s({modulo:a(T(arguments))})}function Oi(){return o.min(1,arguments,Oi.name),new s({multiply:a(T(arguments))})}function Ii(e,t){return o.min(1,arguments,Ii.name),t=v.defaults(t,null),new s(R({round:a(e)},{precision:a(t)}))}function Ni(){return o.min(1,arguments,Ni.name),new s({subtract:a(T(arguments))})}function Ri(e){return o.exact(1,arguments,Ri.name),new s({sign:a(e)})}function Di(e){return o.exact(1,arguments,Di.name),new s({sqrt:a(e)})}function Pi(e,t){return o.min(1,arguments,Pi.name),t=v.defaults(t,null),new s(R({trunc:a(e)},{precision:a(t)}))}function Li(e){return o.exact(1,arguments,Li.name),new s({count:a(e)})}function ji(e){return o.exact(1,arguments,ji.name),new s({sum:a(e)})}function Bi(e){return o.exact(1,arguments,Bi.name),new s({mean:a(e)})}function Fi(e){return o.exact(1,arguments,Fi.name),new s({any:a(e)})}function qi(e){return o.exact(1,arguments,qi.name),new s({all:a(e)})}function ki(e){return o.exact(1,arguments,ki.name),new s({acos:a(e)})}function Mi(e){return o.exact(1,arguments,Mi.name),new s({asin:a(e)})}function Ui(e){return o.exact(1,arguments,Ui.name),new s({atan:a(e)})}function Hi(e){return o.exact(1,arguments,Hi.name),new s({cos:a(e)})}function Vi(e){return o.exact(1,arguments,Vi.name),new s({cosh:a(e)})}function Wi(e){return o.exact(1,arguments,Wi.name),new s({degrees:a(e)})}function Gi(e){return o.exact(1,arguments,Gi.name),new s({exp:a(e)})}function Ji(e,t){return o.min(1,arguments,Ji.name),t=v.defaults(t,null),new s(R({hypot:a(e)},{b:a(t)}))}function Xi(e){return o.exact(1,arguments,Xi.name),new s({ln:a(e)})}function $i(e){return o.exact(1,arguments,$i.name),new s({log:a(e)})}function zi(e,t){return o.min(1,arguments,zi.name),t=v.defaults(t,null),new s(R({pow:a(e)},{exp:a(t)}))}function Yi(e){return o.exact(1,arguments,Yi.name),new s({radians:a(e)})}function Ki(e){return o.exact(1,arguments,Ki.name),new s({sin:a(e)})}function Qi(e){return o.exact(1,arguments,Qi.name),new s({sinh:a(e)})}function Zi(e){return o.exact(1,arguments,Zi.name),new s({tan:a(e)})}function es(e){return o.exact(1,arguments,es.name),new s({tanh:a(e)})}function ts(){return o.min(1,arguments,ts.name),new s({lt:a(T(arguments))})}function ns(){return o.min(1,arguments,ns.name),new s({lte:a(T(arguments))})}function rs(){return o.min(1,arguments,rs.name),new s({gt:a(T(arguments))})}function as(){return o.min(1,arguments,as.name),new s({gte:a(T(arguments))})}function is(){return o.min(1,arguments,is.name),new s({and:a(T(arguments))})}function ss(){return o.min(1,arguments,ss.name),new s({or:a(T(arguments))})}function os(e){return o.exact(1,arguments,os.name),new s({not:a(e)})}function us(e){return o.exact(1,arguments,us.name),new s({to_string:a(e)})}function cs(e){return o.exact(1,arguments,cs.name),new s({to_number:a(e)})}function ls(e){return o.exact(1,arguments,ls.name),new s({to_object:a(e)})}function fs(e){return o.exact(1,arguments,fs.name),new s({to_array:a(e)})}function ds(e){return o.exact(1,arguments,ds.name),new s({to_double:a(e)})}function ms(e){return o.exact(1,arguments,ms.name),new s({to_integer:a(e)})}function ps(e){return o.exact(1,arguments,ps.name),new s({to_time:a(e)})}function hs(e){return o.exact(1,arguments,hs.name),new s({to_seconds:a(e)})}function gs(e){return o.exact(1,arguments,gs.name),new s({to_millis:a(e)})}function ys(e){return o.exact(1,arguments,ys.name),new s({to_micros:a(e)})}function vs(e){return o.exact(1,arguments,vs.name),new s({day_of_week:a(e)})}function ws(e){return o.exact(1,arguments,ws.name),new s({day_of_year:a(e)})}function bs(e){return o.exact(1,arguments,bs.name),new s({day_of_month:a(e)})}function Es(e){return o.exact(1,arguments,Es.name),new s({hour:a(e)})}function As(e){return o.exact(1,arguments,As.name),new s({minute:a(e)})}function Ts(e){return o.exact(1,arguments,Ts.name),new s({second:a(e)})}function _s(e){return o.exact(1,arguments,_s.name),new s({month:a(e)})}function xs(e){return o.exact(1,arguments,xs.name),new s({year:a(e)})}function Ss(e){return o.exact(1,arguments,Ss.name),new s({to_date:a(e)})}function Cs(e,t){return o.exact(2,arguments,Cs.name),new s({move_database:a(e),to:a(t)})}function Os(e){return o.exact(1,arguments,Os.name),new s({documents:a(e)})}function Is(e){return o.exact(1,arguments,Is.name),new s({reverse:a(e)})}function Ns(e){return o.exact(1,arguments,Ns.name),new s({access_provider:a(e)})}function o(e,t,n,r){if(e!==null&&n.length<e||t!==null&&n.length>t)throw new Lt.InvalidArity(e,t,n.length,r)}o.exact=function(e,t,n){o(e,e,t,n)};o.max=function(e,t,n){o(null,e,t,n)};o.min=function(e,t,n){o(e,null,t,n)};o.between=function(e,t,n,r){o(e,t,n,r)};function R(e,t){for(var n in t){var r=t[n];r!=null&&(e[n]=r)}return e}function T(e){var t=Array.isArray(e)?e:Array.prototype.slice.call(e);return e.length===1?e[0]:t}function tt(e){var t=[];return t.push.apply(t,e),t}function a(e){return o.exact(1,arguments,a.name),e===null?null:e instanceof s||v.checkInstanceHasProperty(e,"_isFaunaExpr")?e:typeof e=="symbol"?e.toString().replace(/Symbol\((.*)\)/,function(t,n){return n}):typeof e=="function"?jt(e):Array.isArray(e)?new s(e.map(function(t){return a(t)})):e instanceof Uint8Array||e instanceof ArrayBuffer?new Hn.Bytes(e):typeof e=="object"?new s({object:nt(e)}):e}function nt(e){if(e!==null){var t={};return Object.keys(e).forEach(function(n){t[n]=a(e[n])}),t}else return null}Rs.exports={Ref:Vn,Bytes:Wn,Abort:Gn,At:Jn,Let:Xn,Var:he,If:$n,Do:zn,Object:Yn,Lambda:jt,Call:Kn,Query:Qn,Map:Zn,Foreach:er,Filter:tr,Take:nr,Drop:rr,Prepend:ar,Append:ir,IsEmpty:sr,IsNonEmpty:or,IsNumber:ur,IsDouble:cr,IsInteger:lr,IsBoolean:fr,IsNull:dr,IsBytes:mr,IsTimestamp:pr,IsDate:hr,IsString:gr,IsArray:yr,IsObject:vr,IsRef:wr,IsSet:br,IsDoc:Er,IsLambda:Ar,IsCollection:Tr,IsDatabase:_r,IsIndex:xr,IsFunction:Sr,IsKey:Cr,IsToken:Or,IsCredentials:Ir,IsRole:Nr,Get:Rr,KeyFromSecret:Dr,Reduce:Pr,Paginate:Lr,Exists:jr,Create:Br,Update:Fr,Replace:qr,Delete:kr,Insert:Mr,Remove:Ur,CreateClass:re(Hr,"CreateClass() is deprecated, use CreateCollection() instead"),CreateCollection:Vr,CreateDatabase:Wr,CreateIndex:Gr,CreateKey:Jr,CreateFunction:Xr,CreateRole:$r,CreateAccessProvider:zr,Singleton:Yr,Events:Kr,Match:Qr,Union:Zr,Merge:ea,Intersection:ta,Difference:na,Distinct:ra,Join:aa,Range:ia,Login:sa,Logout:oa,Identify:ua,Identity:re(ca,"Identity() is deprecated, use CurrentIdentity() instead"),CurrentIdentity:la,HasIdentity:re(fa,"HasIdentity() is deprecated, use HasCurrentIdentity() instead"),HasCurrentIdentity:da,CurrentToken:ma,HasCurrentToken:pa,Concat:ha,Casefold:ga,ContainsStr:ya,ContainsStrRegex:va,StartsWith:wa,EndsWith:ba,FindStr:Aa,FindStrRegex:Ta,Length:_a,LowerCase:xa,LTrim:Sa,NGram:Ca,Repeat:Oa,ReplaceStr:Ia,ReplaceStrRegex:Na,RegexEscape:Ea,RTrim:Ra,Space:Da,SubString:Pa,TitleCase:La,Trim:ja,UpperCase:Ba,Format:Fa,Time:qa,TimeAdd:Ma,TimeSubtract:Ua,TimeDiff:Ha,Epoch:ka,Date:Va,Now:Wa,NextId:re(Ga,"NextId() is deprecated, use NewId() instead"),NewId:Ja,Database:Xa,Index:$a,Class:re(za,"Class() is deprecated, use Collection() instead"),Collection:Ya,Function:Ka,Role:Qa,AccessProviders:Za,Classes:re(ei,"Classes() is deprecated, use Collections() instead"),Collections:ti,Databases:ni,Indexes:ri,Functions:ai,Roles:ii,Keys:si,Tokens:oi,Credentials:ui,Equals:ci,Contains:re(li,"Contains() is deprecated, use ContainsPath() instead"),ContainsPath:mi,ContainsField:di,ContainsValue:fi,Select:pi,SelectAll:re(hi,"SelectAll() is deprecated. Avoid use."),Abs:gi,Add:yi,BitAnd:vi,BitNot:wi,BitOr:bi,BitXor:Ei,Ceil:Ai,Divide:Ti,Floor:_i,Max:xi,Min:Si,Modulo:Ci,Multiply:Oi,Round:Ii,Subtract:Ni,Sign:Ri,Sqrt:Di,Trunc:Pi,Count:Li,Sum:ji,Mean:Bi,Any:Fi,All:qi,Acos:ki,Asin:Mi,Atan:Ui,Cos:Hi,Cosh:Vi,Degrees:Wi,Exp:Gi,Hypot:Ji,Ln:Xi,Log:$i,Pow:zi,Radians:Yi,Sin:Ki,Sinh:Qi,Tan:Zi,Tanh:es,LT:ts,LTE:ns,GT:rs,GTE:as,And:is,Or:ss,Not:os,ToString:us,ToNumber:cs,ToObject:ls,ToArray:fs,ToDouble:ds,ToInteger:ms,ToTime:ps,ToSeconds:hs,ToMicros:ys,ToMillis:gs,DayOfMonth:bs,DayOfWeek:vs,DayOfYear:ws,Second:Ts,Minute:As,Hour:Es,Month:_s,Year:xs,ToDate:Ss,MoveDatabase:Cs,Documents:Os,Reverse:Is,AccessProvider:Ns,wrap:a}});var Oe=y((ul,Ds)=>{"use strict";var oe=Se();function ku(e,t){return t=typeof t!="undefined"?t:!1,t?JSON.stringify(e,null,"  "):JSON.stringify(e)}function Ft(e){return JSON.parse(e,qt)}function Mu(e){var t=[];try{t.push(Ft(e)),e=""}catch{for(;;){var n=e.indexOf(`
-`)+1;if(n<=0)break;var r=e.slice(0,n).trim();r.length>0&&t.push(Ft(r)),e=e.slice(n)}}return{values:t,buffer:e}}function qt(e,t){if(typeof t!="object"||t===null)return t;if("@ref"in t){var n=t["@ref"];if(!("collection"in n)&&!("database"in n))return oe.Native.fromName(n.id);var r=qt("collection",n.collection),i=qt("database",n.database);return new oe.Ref(n.id,r,i)}else return"@obj"in t?t["@obj"]:"@set"in t?new oe.SetRef(t["@set"]):"@ts"in t?new oe.FaunaTime(t["@ts"]):"@date"in t?new oe.FaunaDate(t["@date"]):"@bytes"in t?new oe.Bytes(t["@bytes"]):"@query"in t?new oe.Query(t["@query"]):t}Ds.exports={toJSON:ku,parseJSON:Ft,parseJSONStreaming:Mu}});var Ut=y((cl,Ps)=>{"use strict";var kt=Ce(),Mt=Pt();function q(e,t,n,r){n===void 0&&(n={}),r===void 0&&(r={}),this.reverse=!1,this.params={},this.before=void 0,this.after=void 0,Mt(this.params,n);var i=this.params.cursor||this.params;"before"in i?(this.before=i.before,delete i.before):"after"in i&&(this.after=i.after,delete i.after),this.options={},Mt(this.options,r),this.client=e,this.set=t,this._faunaFunctions=[]}q.prototype.map=function(e){var t=this._clone();return t._faunaFunctions.push(function(n){return kt.Map(n,e)}),t};q.prototype.filter=function(e){var t=this._clone();return t._faunaFunctions.push(function(n){return kt.Filter(n,e)}),t};q.prototype.each=function(e){return this._retrieveNextPage(this.after,!1).then(this._consumePages(e,!1))};q.prototype.eachReverse=function(e){return this._retrieveNextPage(this.before,!0).then(this._consumePages(e,!0))};q.prototype.previousPage=function(){var e=this;return this._retrieveNextPage(this.before,!0).then(this._adjustCursors.bind(e))};q.prototype.nextPage=function(){var e=this;return this._retrieveNextPage(this.after,!1).then(this._adjustCursors.bind(e))};q.prototype._adjustCursors=function(e){return e.after!==void 0&&(this.after=e.after),e.before!==void 0&&(this.before=e.before),e.data};q.prototype._consumePages=function(e,t){var n=this;return function(r){var i=[];r.data.forEach(function(l){l.document&&(l.instance=l.document),l.value&&l.value.document&&(l.value.instance=l.value.document),i.push(l)}),e(i);var u;return t?u=r.before:u=r.after,u!==void 0?n._retrieveNextPage(u,t).then(n._consumePages(e,t)):Promise.resolve()}};q.prototype._retrieveNextPage=function(e,t){var n={};Mt(n,this.params);var r=n.cursor||n;e!==void 0?t?r.before=e:r.after=e:t&&(r.before=null);var i=kt.Paginate(this.set,n);return this._faunaFunctions.length>0&&this._faunaFunctions.forEach(function(u){i=u(i)}),this.client.query(i,this.options)};q.prototype._clone=function(){return Object.create(q.prototype,{client:{value:this.client},set:{value:this.set},_faunaFunctions:{value:this._faunaFunctions},before:{value:this.before},after:{value:this.after},params:{value:this.params}})};Ps.exports=q});var rt=y((ll,js)=>{"use strict";function Ls(e,t,n,r,i,u,l,f,m,h,p){this.method=e,this.path=t,this.query=n,this.requestRaw=r,this.requestContent=i,this.responseRaw=u,this.responseContent=l,this.statusCode=f,this.responseHeaders=m,this.startTime=h,this.endTime=p}Object.defineProperty(Ls.prototype,"timeTaken",{get:function(){return this.endTime-this.startTime}});js.exports=Ls});var at=y((fl,ks)=>{"use strict";var Bs=j();function Fs(e){Error.call(this),this.message=e||"Request aborted due to timeout",this.isTimeoutError=!0}Bs.inherits(Fs,Error);function qs(e){Error.call(this),this.message=e||"Request aborted",this.isAbortError=!0}Bs.inherits(qs,Error);ks.exports={TimeoutError:Fs,AbortError:qs}});var Ht=y(()=>{});var Ws=y((pl,Vs)=>{"use strict";var ge=Ht(),Ms=at(),Us=ne(),Uu=j(),Hs="stream::";function Ie(e){this.type="http2",this._sessionMap={},this._http2SessionIdleTime=e.http2SessionIdleTime,this._closed=!1}Ie.prototype._resolveSessionFor=function(e,t){var n=t?Hs+e:e;if(this._sessionMap[n])return this._sessionMap[n];var r=this,i=null,u=0,l=function(){r._cleanupSessionFor(e,t)},f=function(){i&&(clearTimeout(i),i=null)},m=function(){if(f(),r._http2SessionIdleTime!==1/0){var k=function(){i=null,u===0&&l()};i=setTimeout(k,r._http2SessionIdleTime)}},h=function(k){f();var G=k||t;return G?(_.destroy(),Promise.resolve()):new Promise(function(te){_.close(te)})},p=function(){++u,f()},A=function(){--u;var k=u===0,G=r._closed||_.closed||_.destroyed;k&&!G&&m()},_=ge.connect(e).once("error",l).once("goaway",l),W={session:_,close:h,onRequestStart:p,onRequestEnd:A};return this._sessionMap[n]=W,W};Ie.prototype._cleanupSessionFor=function(e,t){var n=t?Hs+e:e;this._sessionMap[n]&&(this._sessionMap[n].session.close(),delete this._sessionMap[n])};Ie.prototype.execute=function(e){if(this._closed)return Promise.reject(new Us.ClientClosed("The Client has already been closed","No subsequent requests can be issued after the .close method is called. Consider creating a new Client instance"));var t=this,n=e.streamConsumer!=null;return new Promise(function(r,i){var u=!1,l=!1,f=function(L){u=!0,r(L)},m=function(L){var X=Hu({error:L,isClosed:t._closed});if(u&&n)return e.streamConsumer.onError(X);u=!0,i(X)},h=function(){te.onRequestEnd(),e.signal&&e.signal.removeEventListener("abort",A)},p=function(L){h(),m(L)},A=function(){l=!0,h(),J.close(ge.constants.NGHTTP2_CANCEL),m(new Ms.AbortError)},_=function(){l=!0,h(),J.close(ge.constants.NGHTTP2_CANCEL),m(new Ms.TimeoutError)},W=function(L){var X=L[ge.constants.HTTP2_HEADER_STATUS],$=X>=200&&X<400,be=$&&n,He="",B=function(fe){if(be)return e.streamConsumer.onData(fe);He+=fe},pt=function(){if(l||h(),!be)return f({body:He,headers:L,status:X});!l&&!t._closed&&e.streamConsumer.onError(new TypeError("network error"))};be&&f({body:"[stream]",headers:L,status:X}),J.on("data",B).on("end",pt)};try{var k=(e.path[0]==="/"?e.path:"/"+e.path)+Uu.querystringify(e.query,"?"),G=Object.assign({},e.headers,{[ge.constants.HTTP2_HEADER_PATH]:k,[ge.constants.HTTP2_HEADER_METHOD]:e.method}),te=t._resolveSessionFor(e.origin,n),J=te.session.request(G).setEncoding("utf8").on("error",p).on("response",W);te.onRequestStart(),!e.signal&&e.timeout&&J.setTimeout(e.timeout,_),e.signal&&e.signal.addEventListener("abort",A),e.body!=null&&J.write(e.body),J.end()}catch(L){t._cleanupSessionFor(e.origin,n),m(L)}})};Ie.prototype.close=function(e){e=e||{},this._closed=!0;var t=function(){};return Promise.all(Object.values(this._sessionMap).map(function(n){return n.close(e.force)})).then(t)};function Hu({error:e,isClosed:t}){var n=t&&(e.code==="ERR_HTTP2_GOAWAY_SESSION"||e.code==="ERR_HTTP2_STREAM_CANCEL");return n?new Us.ClientClosed("The request is aborted due to the Client#close call"):e}Vs.exports=Ie});var eo=y((Re,De)=>{"use strict";Object.defineProperty(Re,"__esModule",{value:!0});var Gs=new WeakMap,Vt=new WeakMap;function E(e){let t=Gs.get(e);return console.assert(t!=null,"'this' is expected an Event object, but got",e),t}function Js(e){if(e.passiveListener!=null){typeof console!="undefined"&&typeof console.error=="function"&&console.error("Unable to preventDefault inside passive event listener invocation.",e.passiveListener);return}!e.event.cancelable||(e.canceled=!0,typeof e.event.preventDefault=="function"&&e.event.preventDefault())}function ye(e,t){Gs.set(this,{eventTarget:e,event:t,eventPhase:2,currentTarget:e,canceled:!1,stopped:!1,immediateStopped:!1,passiveListener:null,timeStamp:t.timeStamp||Date.now()}),Object.defineProperty(this,"isTrusted",{value:!1,enumerable:!0});let n=Object.keys(t);for(let r=0;r<n.length;++r){let i=n[r];i in this||Object.defineProperty(this,i,Xs(i))}}ye.prototype={get type(){return E(this).event.type},get target(){return E(this).eventTarget},get currentTarget(){return E(this).currentTarget},composedPath(){let e=E(this).currentTarget;return e==null?[]:[e]},get NONE(){return 0},get CAPTURING_PHASE(){return 1},get AT_TARGET(){return 2},get BUBBLING_PHASE(){return 3},get eventPhase(){return E(this).eventPhase},stopPropagation(){let e=E(this);e.stopped=!0,typeof e.event.stopPropagation=="function"&&e.event.stopPropagation()},stopImmediatePropagation(){let e=E(this);e.stopped=!0,e.immediateStopped=!0,typeof e.event.stopImmediatePropagation=="function"&&e.event.stopImmediatePropagation()},get bubbles(){return Boolean(E(this).event.bubbles)},get cancelable(){return Boolean(E(this).event.cancelable)},preventDefault(){Js(E(this))},get defaultPrevented(){return E(this).canceled},get composed(){return Boolean(E(this).event.composed)},get timeStamp(){return E(this).timeStamp},get srcElement(){return E(this).eventTarget},get cancelBubble(){return E(this).stopped},set cancelBubble(e){if(!e)return;let t=E(this);t.stopped=!0,typeof t.event.cancelBubble=="boolean"&&(t.event.cancelBubble=!0)},get returnValue(){return!E(this).canceled},set returnValue(e){e||Js(E(this))},initEvent(){}};Object.defineProperty(ye.prototype,"constructor",{value:ye,configurable:!0,writable:!0});typeof window!="undefined"&&typeof window.Event!="undefined"&&(Object.setPrototypeOf(ye.prototype,window.Event.prototype),Vt.set(window.Event.prototype,ye));function Xs(e){return{get(){return E(this).event[e]},set(t){E(this).event[e]=t},configurable:!0,enumerable:!0}}function Vu(e){return{value(){let t=E(this).event;return t[e].apply(t,arguments)},configurable:!0,enumerable:!0}}function Wu(e,t){let n=Object.keys(t);if(n.length===0)return e;function r(i,u){e.call(this,i,u)}r.prototype=Object.create(e.prototype,{constructor:{value:r,configurable:!0,writable:!0}});for(let i=0;i<n.length;++i){let u=n[i];if(!(u in e.prototype)){let f=typeof Object.getOwnPropertyDescriptor(t,u).value=="function";Object.defineProperty(r.prototype,u,f?Vu(u):Xs(u))}}return r}function $s(e){if(e==null||e===Object.prototype)return ye;let t=Vt.get(e);return t==null&&(t=Wu($s(Object.getPrototypeOf(e)),e),Vt.set(e,t)),t}function Gu(e,t){let n=$s(Object.getPrototypeOf(t));return new n(e,t)}function Ju(e){return E(e).immediateStopped}function Xu(e,t){E(e).eventPhase=t}function $u(e,t){E(e).currentTarget=t}function zs(e,t){E(e).passiveListener=t}var Ys=new WeakMap,Ks=1,Qs=2,it=3;function st(e){return e!==null&&typeof e=="object"}function Ne(e){let t=Ys.get(e);if(t==null)throw new TypeError("'this' is expected an EventTarget object, but got another value.");return t}function zu(e){return{get(){let n=Ne(this).get(e);for(;n!=null;){if(n.listenerType===it)return n.listener;n=n.next}return null},set(t){typeof t!="function"&&!st(t)&&(t=null);let n=Ne(this),r=null,i=n.get(e);for(;i!=null;)i.listenerType===it?r!==null?r.next=i.next:i.next!==null?n.set(e,i.next):n.delete(e):r=i,i=i.next;if(t!==null){let u={listener:t,listenerType:it,passive:!1,once:!1,next:null};r===null?n.set(e,u):r.next=u}},configurable:!0,enumerable:!0}}function Wt(e,t){Object.defineProperty(e,`on${t}`,zu(t))}function Zs(e){function t(){M.call(this)}t.prototype=Object.create(M.prototype,{constructor:{value:t,configurable:!0,writable:!0}});for(let n=0;n<e.length;++n)Wt(t.prototype,e[n]);return t}function M(){if(this instanceof M){Ys.set(this,new Map);return}if(arguments.length===1&&Array.isArray(arguments[0]))return Zs(arguments[0]);if(arguments.length>0){let e=new Array(arguments.length);for(let t=0;t<arguments.length;++t)e[t]=arguments[t];return Zs(e)}throw new TypeError("Cannot call a class as a function")}M.prototype={addEventListener(e,t,n){if(t==null)return;if(typeof t!="function"&&!st(t))throw new TypeError("'listener' should be a function or an object.");let r=Ne(this),i=st(n),l=Boolean(i?n.capture:n)?Ks:Qs,f={listener:t,listenerType:l,passive:i&&Boolean(n.passive),once:i&&Boolean(n.once),next:null},m=r.get(e);if(m===void 0){r.set(e,f);return}let h=null;for(;m!=null;){if(m.listener===t&&m.listenerType===l)return;h=m,m=m.next}h.next=f},removeEventListener(e,t,n){if(t==null)return;let r=Ne(this),u=(st(n)?Boolean(n.capture):Boolean(n))?Ks:Qs,l=null,f=r.get(e);for(;f!=null;){if(f.listener===t&&f.listenerType===u){l!==null?l.next=f.next:f.next!==null?r.set(e,f.next):r.delete(e);return}l=f,f=f.next}},dispatchEvent(e){if(e==null||typeof e.type!="string")throw new TypeError('"event.type" should be a string.');let t=Ne(this),n=e.type,r=t.get(n);if(r==null)return!0;let i=Gu(this,e),u=null;for(;r!=null;){if(r.once?u!==null?u.next=r.next:r.next!==null?t.set(n,r.next):t.delete(n):u=r,zs(i,r.passive?r.listener:null),typeof r.listener=="function")try{r.listener.call(this,i)}catch(l){typeof console!="undefined"&&typeof console.error=="function"&&console.error(l)}else r.listenerType!==it&&typeof r.listener.handleEvent=="function"&&r.listener.handleEvent(i);if(Ju(i))break;r=r.next}return zs(i,null),Xu(i,0),$u(i,null),!i.defaultPrevented}};Object.defineProperty(M.prototype,"constructor",{value:M,configurable:!0,writable:!0});typeof window!="undefined"&&typeof window.EventTarget!="undefined"&&Object.setPrototypeOf(M.prototype,window.EventTarget.prototype);Re.defineEventAttribute=Wt;Re.EventTarget=M;Re.default=M;De.exports=M;De.exports.EventTarget=De.exports.default=M;De.exports.defineEventAttribute=Wt});var ro=y((Pe,Le)=>{"use strict";Object.defineProperty(Pe,"__esModule",{value:!0});var Gt=eo(),ue=class extends Gt.EventTarget{constructor(){super();throw new TypeError("AbortSignal cannot be constructed directly")}get aborted(){let t=ot.get(this);if(typeof t!="boolean")throw new TypeError(`Expected 'this' to be an 'AbortSignal' object, but got ${this===null?"null":typeof this}`);return t}};Gt.defineEventAttribute(ue.prototype,"abort");function Yu(){let e=Object.create(ue.prototype);return Gt.EventTarget.call(e),ot.set(e,!1),e}function Ku(e){ot.get(e)===!1&&(ot.set(e,!0),e.dispatchEvent({type:"abort"}))}var ot=new WeakMap;Object.defineProperties(ue.prototype,{aborted:{enumerable:!0}});typeof Symbol=="function"&&typeof Symbol.toStringTag=="symbol"&&Object.defineProperty(ue.prototype,Symbol.toStringTag,{configurable:!0,value:"AbortSignal"});var ce=class{constructor(){to.set(this,Yu())}get signal(){return no(this)}abort(){Ku(no(this))}},to=new WeakMap;function no(e){let t=to.get(e);if(t==null)throw new TypeError(`Expected 'this' to be an 'AbortController' object, but got ${e===null?"null":typeof e}`);return t}Object.defineProperties(ce.prototype,{signal:{enumerable:!0},abort:{enumerable:!0}});typeof Symbol=="function"&&typeof Symbol.toStringTag=="symbol"&&Object.defineProperty(ce.prototype,Symbol.toStringTag,{configurable:!0,value:"AbortController"});Pe.AbortController=ce;Pe.AbortSignal=ue;Pe.default=ce;Le.exports=ce;Le.exports.AbortController=Le.exports.default=ce;Le.exports.AbortSignal=ue});var Jt=y(()=>{"use strict";var ao=ro(),je=typeof self!="undefined"?self:typeof window!="undefined"?window:typeof global!="undefined"?global:void 0;je&&(typeof je.AbortController=="undefined"&&(je.AbortController=ao.AbortController),typeof je.AbortSignal=="undefined"&&(je.AbortSignal=ao.AbortSignal))});var io=y(()=>{});var so=y(()=>{});var co=y((El,uo)=>{"use strict";Jt();var ut=j(),Xt=ne(),$t=at();function zt(e){e=e||{},this.type="fetch",this._closed=!1,this._fetch=ut.resolveFetch(e.fetch),this._pendingRequests=new Map,ut.isNodeEnv()&&e.keepAlive&&(this._keepAliveEnabledAgent=new(e.isHttps?io():so()).Agent({keepAlive:!0}))}zt.prototype.execute=function(e){if(this._closed)return Promise.reject(new Xt.ClientClosed("The Client has already been closed","No subsequent requests can be issued after the .close method is called. Consider creating a new Client instance"));var t=this,n=null,r=e.streamConsumer!=null,i=!e.signal&&!!e.timeout,u=new AbortController,l={isStreaming:r,isAbortedByClose:!1,onComplete:null};t._pendingRequests.set(u,l);var f=function(){t._pendingRequests.delete(u),e.signal&&e.signal.removeEventListener("abort",A),l.onComplete&&l.onComplete()},m=function(){n&&clearTimeout(n)},h=function(_){m();var W=Zu(_.headers),k=r&&_.ok;return k?(Qu(_,e.streamConsumer,f),{body:"[stream]",headers:W,status:_.status}):(f(),_.text().then(function(G){return{body:G,headers:W,status:_.status}}))},p=function(_){return m(),f(),Promise.reject(oo(_,function(){return!r&&l.isAbortedByClose?new Xt.ClientClosed("The request is aborted due to the Client#close call with the force=true option"):i?new $t.TimeoutError:new $t.AbortError}))},A=function(){u.abort()};return i&&(n=setTimeout(function(){n=null,u.abort()},e.timeout)),e.signal&&e.signal.addEventListener("abort",A),this._fetch(ut.formatUrl(e.origin,e.path,e.query),{method:e.method,headers:e.headers,body:e.body,agent:this._keepAliveEnabledAgent,signal:u.signal}).then(h).catch(p)};zt.prototype.close=function(e){e=e||{},this._closed=!0;var t=[],n=function(i,u){var l=i.isStreaming||e.force;if(l)return i.isAbortedByClose=!0,u.abort();t.push(new Promise(function(f){i.onComplete=f}))};this._pendingRequests.forEach(n);var r=function(){};return Promise.all(t).then(r)};function Qu(e,t,n){var r=function(l){n(),t.onError(oo(l))};if(ut.isNodeEnv()){e.body.on("error",r).on("data",t.onData).on("end",function(){n(),t.onError(new TypeError("network error"))});return}try{let l=function(){return i.read().then(function(f){if(!f.done){var m=u.decode(f.value,{stream:!0});return t.onData(m),l()}n(),t.onError(new TypeError("network error"))})};var i=e.body.getReader(),u=new TextDecoder("utf-8");l().catch(r)}catch(l){throw new Xt.StreamsNotSupported("Please, consider providing a Fetch API-compatible function with streamable response bodies. "+l)}}function oo(e,t){var n=e&&e.name==="AbortError";return n?t?t():new $t.AbortError:e}function Zu(e){var t={};for(var n of e.entries()){var r=n[0],i=n[1];t[r]=i}return t}uo.exports=zt});var lo=y(()=>{});var Yt=y((_l,po)=>{"use strict";var fo=Ge(),{getBrowserOsDetails:ec}=j(),ve=j(),mo=at();function Be(e){var t=e.scheme==="https";e.port||(e.port=t?443:80);var n=!e.fetch&&ve.isNodeEnv()&&rc();this._adapter=n?new(Ws())({http2SessionIdleTime:e.http2SessionIdleTime}):new(co())({isHttps:t,fetch:e.fetch,keepAlive:e.keepAlive}),this._baseUrl=e.scheme+"://"+e.domain+":"+e.port,this._secret=e.secret,this._headers=Object.assign({},e.headers,nc()),this._queryTimeout=e.queryTimeout,this._lastSeen=null,this._timeout=Math.floor(e.timeout*1e3)}Be.prototype.getLastTxnTime=function(){return this._lastSeen};Be.prototype.syncLastTxnTime=function(e){(this._lastSeen==null||this._lastSeen<e)&&(this._lastSeen=e)};Be.prototype.close=function(e){return this._adapter.close(e)};Be.prototype.execute=function(e){e=e||{};var t=e.streamConsumer&&(typeof e.streamConsumer.onData!="function"||typeof e.streamConsumer.onError!="function");if(t)return Promise.reject(new TypeError('Invalid "streamConsumer" provided'));var n=e.secret||this._secret,r=e.queryTimeout||this._queryTimeout,i=this._headers;return i.Authorization=n&&tc(n),i["X-Last-Seen-Txn"]=this._lastSeen,i["X-Query-Timeout"]=r,this._adapter.execute({origin:this._baseUrl,path:e.path||"/",query:e.query,method:e.method||"GET",headers:ve.removeNullAndUndefinedValues(i),body:e.body,signal:e.signal,timeout:this._timeout,streamConsumer:e.streamConsumer})};function tc(e){return"Bearer "+e}function nc(){var e={driver:["javascript",fo.version].join("-")},t;try{t=global instanceof ServiceWorkerGlobalScope}catch{t=!1}try{if(ve.isNodeEnv()){e.runtime=["nodejs",process.version].join("-"),e.env=ve.getNodeRuntimeEnv();var n=lo();e.os=[n.platform(),n.release()].join("-")}else t?e.runtime="Service Worker":(e.runtime=ve.getBrowserDetails(),e.env="browser",e.os=ec())}catch{}var r={"X-FaunaDB-API-Version":fo.apiVersion};return ve.isNodeEnv()&&(r["X-Driver-Env"]=Object.keys(e).map(i=>[i,e[i].toLowerCase()].join("=")).join("; ")),r}function rc(){try{return Ht(),!0}catch{return!1}}po.exports={HttpClient:Be,TimeoutError:mo.TimeoutError,AbortError:mo.AbortError}});var wo=y((xl,vo)=>{"use strict";Jt();var ac=rt(),ic=ne(),ho=Oe(),sc=Yt(),go=Ce(),oc=j(),yo=["start","error","version","history_rewrite"],uc=yo.concat(["snapshot"]);function Fe(e,t,n,r){n=oc.applyDefaults(n,{fields:null}),this._client=e,this._onEvent=r,this._query=go.wrap(t),this._urlParams=n.fields?{fields:n.fields.join(",")}:null,this._abort=new AbortController,this._state="idle"}Fe.prototype.snapshot=function(){var e=this;e._client.query(go.Get(e._query)).then(function(t){e._onEvent({type:"snapshot",event:t})}).catch(function(t){e._onEvent({type:"error",event:t})})};Fe.prototype.subscribe=function(){var e=this;if(e._state==="idle")e._state="open";else throw new Error("Subscription#start should not be called several times, consider instantiating a new stream instead.");var t=JSON.stringify(e._query),n=Date.now(),r="";function i(f){var m=Date.now(),h;try{h=ho.parseJSON(f.body)}catch{h=f.body}var p=new ac("POST","stream",e._urlParams,t,e._query,f.body,h,f.status,f.headers,n,m);e._client._handleRequestResult(f,p)}function u(f){var m=ho.parseJSONStreaming(r+f);r=m.buffer,m.values.forEach(function(h){h.txn!==void 0&&e._client.syncLastTxnTime(h.txn),h.event==="error"?l(new ic.StreamErrorEvent(h)):e._onEvent(h)})}function l(f){f instanceof sc.AbortError||e._onEvent({type:"error",event:f})}e._client._http.execute({method:"POST",path:"stream",body:t,query:e._urlParams,signal:this._abort.signal,streamConsumer:{onError:l,onData:u}}).then(i).catch(l)};Fe.prototype.close=function(){this._state!=="closed"&&(this._state="closed",this._abort.abort())};function ct(e){this._allowedEvents=e,this._listeners={}}ct.prototype.on=function(e,t){if(this._allowedEvents.indexOf(e)===-1)throw new Error("Unknown event type: "+e);this._listeners[e]===void 0&&(this._listeners[e]=[]),this._listeners[e].push(t)};ct.prototype.dispatch=function(e){var t=this._listeners[e.type];if(!!t)for(var n=0;n<t.length;n++)t[n].call(null,e.event,e)};function qe(e,t){this._client=e,this._dispatcher=t}qe.prototype.on=function(e,t){return this._dispatcher.on(e,t),this};qe.prototype.start=function(){return this._client.subscribe(),this};qe.prototype.close=function(){this._client.close()};function cc(e){var t=function(n,r){var i=new ct(yo),u=new Fe(e,n,r,function(l){i.dispatch(l)});return new qe(u,i)};return t.document=function(n,r){var i=[],u=!0,l=new ct(uc),f=new Fe(e,n,r,m);function m(p){switch(p.type){case"start":l.dispatch(p),f.snapshot();break;case"snapshot":h(p);break;case"error":l.dispatch(p);break;default:u?i.push(p):l.dispatch(p)}}function h(p){l.dispatch(p);for(var A=0;A<i.length;A++){var _=i[A];_.txn>p.event.ts&&l.dispatch(_)}u=!1,i=null}return new qe(f,l)},t}vo.exports={StreamAPI:cc}});var Eo=y((Sl,Kt)=>{"use strict";var lc=Ge(),fc=Ut(),dc=rt(),mc=ne(),pc=Yt(),hc=Oe(),gc=Ce(),yc=wo(),Z=j(),vc=Se(),bo=Z.notifyAboutNewVersion();function V(e){var t=wc();e=Z.applyDefaults(e,{domain:"db.fauna.com",scheme:"https",port:null,secret:null,timeout:60,observer:null,keepAlive:!0,headers:{},fetch:void 0,queryTimeout:null,http2SessionIdleTime:t.value,checkNewVersion:!0}),bo(e.checkNewVersion),t.shouldOverride&&(e.http2SessionIdleTime=t.value),this._observer=e.observer,this._http=new pc.HttpClient(e),this.stream=yc.StreamAPI(this)}V.apiVersion=lc.apiVersion;V.prototype.query=function(e,t){return this._execute("POST","",gc.wrap(e),null,t)};V.prototype.paginate=function(e,t,n){return t=Z.defaults(t,{}),n=Z.defaults(n,{}),new fc(this,e,t,n)};V.prototype.ping=function(e,t){return this._execute("GET","ping",null,{scope:e,timeout:t})};V.prototype.getLastTxnTime=function(){return this._http.getLastTxnTime()};V.prototype.syncLastTxnTime=function(e){this._http.syncLastTxnTime(e)};V.prototype.close=function(e){return this._http.close(e)};V.prototype._execute=function(e,t,n,r,i){r=Z.defaults(r,null),(t instanceof vc.Ref||Z.checkInstanceHasProperty(t,"_isFaunaRef"))&&(t=t.value),r!==null&&(r=Z.removeUndefinedValues(r));var u=Date.now(),l=this,f=["GET","HEAD"].indexOf(e)>=0?void 0:JSON.stringify(n);return this._http.execute(Object.assign({},i,{path:t,query:r,method:e,body:f})).then(function(m){var h=Date.now(),p=hc.parseJSON(m.body),A=new dc(e,t,r,f,n,m.body,p,m.status,m.headers,u,h);return l._handleRequestResult(m,A,i),p.resource})};V.prototype._handleRequestResult=function(e,t,n){var r="x-txn-time";e.headers[r]!=null&&this.syncLastTxnTime(parseInt(e.headers[r],10));var i=[this._observer,n&&n.observer];i.forEach(u=>{typeof u=="function"&&u(t,this)}),mc.FaunaHTTPError.raiseForStatusCode(t)};function wc(){var e=Z.getEnvVariable("FAUNADB_HTTP2_SESSION_IDLE_TIME"),t=e==="Infinity"?1/0:parseInt(e,10),n=!isNaN(t);return{shouldOverride:n,value:n?t:500}}Kt.exports=V;Kt.exports.resetNotifyAboutNewVersion=function(){bo=Z.notifyAboutNewVersion()}});var _o=y((Cl,To)=>{"use strict";var bc=Oe();function Ec(e){return function(t,n){return e(Ao(t),n)}}function Ao(e){var t=e.query,n=e.method,r=e.path,i=e.requestContent,u=e.responseHeaders,l=e.responseContent,f=e.statusCode,m=e.timeTaken,h="";function p(A){h=h+A}return p("Fauna "+n+" /"+r+Tc(t)+`
-`),i!=null&&p("  Request JSON: "+Qt(i)+`
-`),p("  Response headers: "+Qt(u)+`
-`),p("  Response JSON: "+Qt(l)+`
-`),p("  Response ("+f+"): Network latency "+m+`ms
-`),h}function Ac(e){var t="  ";return e.split(`
-`).join(`
-`+t)}function Qt(e){return Ac(bc.toJSON(e,!0))}function Tc(e){if(e==null)return"";var t=Object.keys(e);if(t.length===0)return"";var n=t.map(function(r){return r+"="+e[r]});return"?"+n.join("&")}To.exports={logger:Ec,showRequestResult:Ao}});var ke=y((Ol,So)=>{var xo=Ce(),_c=j(),xc=Oe().parseJSON;So.exports=_c.mergeObjects({Client:Eo(),Expr:$e(),PageHelper:Ut(),RequestResult:rt(),clientLogger:_o(),errors:ne(),values:Se(),query:xo,parseJSON:xc},xo)});var nu={number:(e,t)=>e-t,"-number":(e,t)=>-(e-t),gl:(e,t)=>e>=0?e-t:t-e,"abs(number)":(e,t)=>Math.abs(e)-Math.abs(t),"-abs(number)":(e,t)=>-(Math.abs(e)-Math.abs(t)),string:(e,t)=>e.localeCompare(t),date:(e,t)=>e.valueOf()-t.valueOf(),noop:()=>0};Array.prototype.sortBy=function(e){return ru(this,e)};function ru(e,t){let n=Object.keys(t);return[...e].sort((r,i)=>{let u=0;return n.some(l=>!!(u=nu[t[l]](r[l],i[l]))),u})}var Co=We(ke()),Oo=.06,Io=20,No=location.href.includes("localhost"),Ro=()=>Zt("work_offline")?.value===!0;var U={FAUNADB_SERVER_SECRET:"",FAUNADB_ADMIN_SECRET:"",FAUNADB_DOMAIN:"db.us.fauna.com"};if(globalThis.process?.env)U.FAUNADB_SERVER_SECRET=process.env.FAUNADB_SERVER_SECRET,U.FAUNADB_ADMIN_SECRET=process.env.FAUNADB_ADMIN_SECRET;else if(localStorage){if(U.FAUNADB_SERVER_SECRET=localStorage.getItem("FAUNADB_SERVER_SECRET"),U.FAUNADB_ADMIN_SECRET=localStorage.getItem("FAUNADB_ADMIN_SECRET"),!U.FAUNADB_SERVER_SECRET){let e=prompt("Provide the FAUNADB_SERVER_SECRET")||"";U.FAUNADB_SERVER_SECRET=e,localStorage.setItem("FAUNADB_SERVER_SECRET",e)}U.FAUNADB_SERVER_SECRET||console.error("set FAUNADB_SERVER_SECRET in local storage"),U.FAUNADB_ADMIN_SECRET||console.error("set FAUNADB_ADMIN_SECRET in local storage")}function Sc(){return 0<=location.href.indexOf("netlify")}var Cc=U.FAUNADB_DOMAIN,Oc=U.FAUNADB_SERVER_SECRET,Il=U.FAUNADB_ADMIN_SECRET,Do=Sc()?"NETLIFY":"dev",ae=localStorage.getItem("user");function ie(){return new Co.default.Client({secret:Oc,domain:Cc})}var Po;function Lo(){return Po=Po||JSON.parse(localStorage.getItem("__GLOBAL_STATE__")||"{}")}function jo(e,t){let n=Lo(),r=typeof t;n[e]={type:r,value:t},localStorage.setItem("__GLOBAL_STATE__",JSON.stringify(n))}function Zt(e){return Lo()[e]}var Ic=We(ke());async function Bo(){await ie().ping()}var en={home:()=>"/index.html",identity:({context:e,target:t})=>`/app/identity.html?target=${t}&context=${e}`,createInvoice:()=>"/app/invoice/invoice.html",invoice:e=>`/app/invoice/invoice.html?id=${e}`,allInvoices:()=>"/app/invoice/invoices.html",allLedgers:()=>"/app/gl/index.html?print=all",printLedger:e=>`/app/gl/index.html?print=${e}`,createLedger:()=>"/app/gl/index.html",dashboard:()=>"/app/index.html",admin:()=>"/app/admin/index.html"};async function Fo(){if(!localStorage.getItem("user"))return location.href=en.identity({target:location.href,context:Do}),!1;try{await Bo()}catch{return localStorage.setItem("FAUNADB_SERVER_SECRET",""),en.home(),!1}return!0}function P(e,t,n){e.addEventListener(t,n)}function lt(e,t){console.log("trigger",t),e.dispatchEvent(new Event(t))}function qo(e){e.querySelectorAll("[data-event]").forEach(t=>{let n=t.dataset.event;if(!n)throw"item must define a data-event";let r=nn(t),i=tn(t),u=Nc(t,r),l=ko(t);if(u)P(t,"click",()=>{lt(e,n)});else if(l)P(t,"click",()=>{let f=t.checked;lt(e,n+(f?":yes":":no"))});else if(r)P(t,"change",()=>{lt(e,n)});else throw`data-event not supported for this item: ${t.outerHTML}`}),e.querySelectorAll("[data-bind]").forEach(t=>{let n=t.dataset.bind;if(!n)throw"item must define a data-bind";let r=Zt(n);if(ko(t))t.checked=r?.value===!0,P(t,"change",()=>{jo(n,t.checked)});else throw`unimplemented data-bind on element: ${t.outerHTML}`})}function ko(e){return nn(e)&&tn(e)==="checkbox"}function Nc(e,t){return e.tagName==="BUTTON"||t&&tn(e)==="button"}function tn(e){return nn(e)&&e.type}function nn(e){return e.tagName==="INPUT"}var Fc=We(ke());function Mo(e){return e.length?e.reduce((t,n)=>t+n,0):0}function Uo(e){return e/1e3}var Rc=No?365*24*3600:(7-.2)*24*3600,we=class{constructor(t){this.options=t;t.maxAge=t.maxAge||Rc,this.table=t.table;let n=localStorage.getItem(`table_${this.table}`);if(!n)this.data=[],this.lastWrite=0;else{let r=JSON.parse(n);this.lastWrite=r.lastWrite,this.data=r.data}}clear(){this.lastWrite=0,this.save()}renew(){this.lastWrite=Date.now(),this.save()}save(){localStorage.setItem(`table_${this.table}`,JSON.stringify({lastWrite:this.lastWrite,data:this.data}))}deleteLineItem(t){let n=this.data.findIndex(r=>r.id===t);this.data.splice(n,1),this.save()}updateLineItem(t){let n=this.data.findIndex(r=>r.id===t.id);-1<n&&this.data.splice(n,1),this.data.push(t),this.save()}expired(){let t=Uo(Date.now()-this.lastWrite);return this.options.maxAge<t}getById(t){return this.data.find(n=>n.id===t)}get(){return this.data}set(t){this.lastWrite=Date.now(),this.data=t,this.save()}};var C=We(ke());var Me={DELETED:"___DELETED___",UPDATED:"___UPDATED___"};function Ho(e){Object.values(Me).forEach(t=>e[t]&&delete e[t])}function Dc(e){delete e.id}function rn(e){return"9"<e[0]}function Pc(e){e[Me.UPDATED]=Date.now()}function Vo(e){return!!e[Me.UPDATED]}function Lc(e){e[Me.DELETED]=Date.now()}function an(e){return!!e[Me.DELETED]}var ee=class{constructor(t){this.options=t;this.tableName=t.tableName,this.cache=new we({table:t.tableName,maxAge:t.maxAge})}isOffline(){return this.options.offline||Ro()}async synchronize(){if(!ae)throw"user must be signed in";if(this.isOffline())throw"cannot synchronize in offline mode";this.cache.get().filter(an).forEach(async n=>{if(!n.id)throw"all items must have an id";rn(n.id)?this.cache.deleteLineItem(n.id):await this.removeItem(n.id)}),this.cache.get().filter(Vo).forEach(async n=>{await this.upsertItem(n)});let t=await this.forceFetchAllItems();return this.cache.set(t),t}async removeItem(t){if(!ae)throw"user must be signed in";if(this.isOffline()){let r=this.cache.getById(t);if(!r)throw"cannot remove an item that is not already there";Lc(r),rn(t)?this.cache.deleteLineItem(t):this.cache.updateLineItem(r);return}await ie().query(C.query.Delete(C.query.Ref(C.query.Collection(this.tableName),t))),this.cache.deleteLineItem(t)}async getItem(t){if(!ae)throw"user must be signed in";if(this.isOffline()||!this.cache.expired()){let i=this.cache.getById(t);if(i){if(an(i))throw"item marked for deletion";return i}}if(this.isOffline())throw`unable to load item: ${this.tableName} ${t}`;let r=await ie().query(C.query.Get(C.query.Ref(C.query.Collection(this.tableName),t)));return this.cache.updateLineItem(r.data),r.data}async upsertItem(t){if(!ae)throw"user must be signed in";let n=ie();if(this.isOffline()){t.id=t.id||`${this.tableName}:${Date.now().toFixed()}`,Pc(t),this.cache.updateLineItem(t);return}if(!t.id||Vo(t)&&rn(t.id)){Ho(t),Dc(t);let r=await n.query(C.query.Create(C.query.Collection(this.tableName),{data:{...t,user:ae,create_date:Date.now()}}));t.id=r.ref.id,this.cache.updateLineItem(t)}else await n.query(C.query.Update(C.query.Ref(C.query.Collection(this.tableName),t.id),{data:{...t,user:ae,update_date:Date.now()}}));this.cache.updateLineItem(t)}async getItems(){if(!ae)throw"user must be signed in";return this.isOffline()||!this.cache.expired()?this.cache.get().filter(t=>!an(t)):await this.synchronize()}async forceFetchAllItems(){let r=(await ie().query(C.query.Map(C.query.Paginate(C.query.Documents(C.query.Collection(this.tableName)),{size:Io}),C.query.Lambda("ref",C.query.Get(C.query.Var("ref")))))).data;return r.forEach(u=>{u.data.id=u.ref.value.id,Ho(u.data)}),r.map(u=>u.data)}};var jc="general_ledger",ft=new ee({tableName:jc,offline:!1});async function sn(e){return ft.upsertItem(e)}async function dt(){return(await ft.getItems()).filter(t=>t.items&&t.items[0]&&t.items[0].account)}var Bc="invoices",mt=new ee({tableName:Bc,offline:!1});async function Wo(){let e=await mt.getItems();return e.forEach(n=>{n.mops=n.mops||[],n.paid&&n.mop&&(n.mops.push({mop:n.mop,paid:n.paid}),delete n.paid,delete n.mop)}),e.filter(n=>n.items).map(n=>(n.date=n.date||n.create_date,n.labor=(n.labor||0)-0,n.additional=(n.additional||0)-0,n.items.forEach(r=>{r.item=(r.item||"").toLocaleUpperCase(),r.quantity=(r.quantity||0)-0,r.price=(r.price||0)-0,r.total=(r.total||0)-0}),n)).sortBy({date:"date"}).reverse()}function Go(e,t){let n=[[],[]];return e.forEach(r=>n[t(r)?0:1].push(r)),n}async function on(){let e=await Wo(),t=await dt(),[n,r]=Go(e,i=>!t.find(u=>u.description===`INVOICE ${i.id}`));for(r.forEach(async i=>{let u=t.find(f=>f.description===`INVOICE ${i.id}`);if(!u)throw`ledger must exist for invoice: ${i.id}`;let l={...Jo(i),id:u.id};JSON.stringify([l.date,l.items])!==JSON.stringify([u.date,u.items])&&await sn({...l,id:u.id})});n.length;){let i=n.shift(),u=Jo(i);await sn(u)}}function Jo(e){let t=Mo(e.items.map(f=>f.total)),n=t*Oo,r=e.labor,i=e.additional>0?e.additional:0,u=e.additional<0?e.additional:0,l={date:e.date,description:`INVOICE ${e.id}`,items:[{account:"AR",amount:t,comment:"INVENTORY"},{account:"INVENTORY",amount:-t,comment:"INVENTORY"},{account:"AR",amount:n,comment:"TAX"},{account:"TAX",amount:-n,comment:"TAX"},{account:"AR",amount:i,comment:"RENT"},{account:"RENT",amount:-i,comment:"RENT"},{account:"AR",amount:r,comment:"LABOR"},{account:"LABOR",amount:-r,comment:"LABOR"},{account:"AR",amount:u,comment:"DISCOUNT"},{account:"LABOR",amount:-u,comment:"DISCOUNT"}]};return l.items=l.items.filter(f=>f.amount!=0),l}var qc="accounts",un=new ee({tableName:qc,maxAge:Number.MAX_SAFE_INTEGER,offline:!0});var Ue={light_mode:"light",dark_mode:"dark",holiday_mode:"holiday"};function cn(e){e||(e=localStorage.getItem("mode")||Ue.light_mode),localStorage.setItem("mode",e),document.body.classList.remove(...Object.values(Ue)),document.body.classList.add(e)}var kc=5e3,Xo=class{toast(t){let n=document.querySelector("#toaster");n||(n=document.createElement("div"),n.id="toaster",n.classList.add("toaster","border","rounded","fixed","bottom","right"),document.body.appendChild(n));let r=document.createElement("div");r.classList.add(t.mode||"error","padding","margin"),r.innerHTML=t.message,r.addEventListener("click",()=>r.remove()),setTimeout(()=>r.remove(),kc),n.insertBefore(r,null)}},Mc=new Xo;function le(e,t){t||(t={mode:"info"}),Mc.toast({message:e,...t})}function ln(e){le(e+"",{mode:"error"})}var Uc="inventory",$o=new ee({tableName:Uc,maxAge:Number.MAX_SAFE_INTEGER,offline:!0});var Hc=["AP","AR","CASH","INVENTORY","LABOR","OPEX","Phone","Rental","SALE TAX","SALES","STORAGE","TOOLS","Utilities"];async function Of(){await Fo();let e=document.body;qo(e),Object.keys(Ue).forEach(t=>P(e,t,()=>{cn(Ue[t]),le(`theme changed to ${t}`)})),P(e,"synchronize-invoice-data",async()=>{try{await mt.synchronize(),le("sync completed")}catch(t){ln(t)}}),P(e,"synchronize-ledger-data",async()=>{try{await ft.synchronize(),le("sync completed")}catch(t){ln(t)}}),P(e,"set-api-key",()=>{Vc("Enter API Key",t=>{!t||localStorage.setItem("FAUNADB_SERVER_SECRET",t)})}),P(e,"ping-local-storage",()=>{let t=new we({table:"invoices"});t.renew(),t=new we({table:"general_ledger"}),t.renew()}),P(e,"invoice-to-inventory",async()=>{await on(),(await mt.getItems()).forEach(n=>{n.items.forEach(async r=>{await $o.upsertItem({id:r.item,code:r.item,price:r.price})})}),le("inventory updated with invoice line items")}),P(e,"invoice-to-gl",async()=>{!confirm("import invoices into general ledger?")||await on()}),P(e,"gl-to-list-of-accounts",async()=>{Hc.forEach(async n=>await un.upsertItem({id:n,code:n})),(await dt()).forEach(async n=>n.items.forEach(async r=>await un.upsertItem({id:r.account,code:r.account}))),le("accounts generated")}),cn()}function Vc(e,t){let n=document.createElement("input");n.placeholder=e,document.body.appendChild(n),n.onchange=()=>{t(n.value.trim()),n.remove()}}export{Of as init};
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
+var __commonJS = (cb, mod) => function __require() {
+  return mod || (0, cb[Object.keys(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __reExport = (target, module, desc) => {
+  if (module && typeof module === "object" || typeof module === "function") {
+    for (let key of __getOwnPropNames(module))
+      if (!__hasOwnProp.call(target, key) && key !== "default")
+        __defProp(target, key, { get: () => module[key], enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable });
+  }
+  return target;
+};
+var __toModule = (module) => {
+  return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
+};
+
+// node_modules/fn-annotate/index.js
+var require_fn_annotate = __commonJS({
+  "node_modules/fn-annotate/index.js"(exports, module) {
+    "use strict";
+    module.exports = annotate;
+    function annotate(fn) {
+      if (typeof fn !== "function") {
+        throw new Error("Could not parse function signature for injection dependencies: Object is not a function");
+      }
+      if (!fn.length)
+        return [];
+      var injects = /^()\(?([^)=]*)\)? *=>/.exec(fn + "") || /^[^(]+([^ \(]*) *\(([^\)]*)\)/.exec(fn + "");
+      if (!injects) {
+        throw new Error("Could not parse function signature for injection dependencies: " + fn + "");
+      }
+      var argumentString = injects[2].replace(/\/\*[\S\s]*?\*\//g, " ").replace(/\/\/.*/g, " ");
+      function groupSubArguments(_, type, keys) {
+        return type + keys.split(",").map(function(arg) {
+          return arg && arg.trim();
+        }).filter(Boolean).join("@");
+      }
+      argumentString = argumentString.replace(/(\{)([^}]*)\}/g, groupSubArguments);
+      argumentString = argumentString.replace(/(\[)([^}]*)\]/g, groupSubArguments);
+      return argumentString.split(",").map(function(arg) {
+        return arg && arg.trim();
+      }).map(function(arg) {
+        if (arg[0] === "{") {
+          return arg.substring(1).split("@");
+        }
+        if (arg[0] === "[") {
+          return { items: arg.substring(1).split("@") };
+        }
+        return arg;
+      }).filter(Boolean);
+    }
+  }
+});
+
+// node_modules/util-deprecate/browser.js
+var require_browser = __commonJS({
+  "node_modules/util-deprecate/browser.js"(exports, module) {
+    module.exports = deprecate;
+    function deprecate(fn, msg) {
+      if (config("noDeprecation")) {
+        return fn;
+      }
+      var warned = false;
+      function deprecated() {
+        if (!warned) {
+          if (config("throwDeprecation")) {
+            throw new Error(msg);
+          } else if (config("traceDeprecation")) {
+            console.trace(msg);
+          } else {
+            console.warn(msg);
+          }
+          warned = true;
+        }
+        return fn.apply(this, arguments);
+      }
+      return deprecated;
+    }
+    function config(name) {
+      try {
+        if (!global.localStorage)
+          return false;
+      } catch (_) {
+        return false;
+      }
+      var val = global.localStorage[name];
+      if (val == null)
+        return false;
+      return String(val).toLowerCase() === "true";
+    }
+  }
+});
+
+// node_modules/faunadb/package.json
+var require_package = __commonJS({
+  "node_modules/faunadb/package.json"(exports, module) {
+    module.exports = {
+      name: "faunadb",
+      version: "4.4.1",
+      apiVersion: "4",
+      description: "FaunaDB Javascript driver for Node.JS and Browsers",
+      homepage: "https://fauna.com",
+      repository: "fauna/faunadb-js",
+      license: "MPL-2.0",
+      keywords: [
+        "database",
+        "fauna",
+        "official",
+        "driver"
+      ],
+      bugs: {
+        url: "https://github.com/fauna/faunadb-js/issues"
+      },
+      files: [
+        "index.d.ts",
+        "src/",
+        "dist/",
+        "tools/printReleaseNotes.js"
+      ],
+      main: "index.js",
+      scripts: {
+        doc: "jsdoc -c ./jsdoc.json",
+        browserify: "browserify index.js --standalone faunadb -o dist/faunadb.js",
+        "browserify-min": "browserify index.js --standalone faunadb | terser -c -m --keep-fnames --keep-classnames -o dist/faunadb-min.js",
+        prettify: 'prettier --write "{src,test}/**/*.{js,ts}"',
+        test: "jest --env=node --verbose=false --forceExit ./test",
+        "semantic-release": "semantic-release",
+        wp: "webpack",
+        postinstall: "node ./tools/printReleaseNotes",
+        postupdate: "node ./tools/printReleaseNotes",
+        "load-test": "node ./tools/loadTest"
+      },
+      types: "index.d.ts",
+      dependencies: {
+        "abort-controller": "^3.0.0",
+        "base64-js": "^1.2.0",
+        boxen: "^5.0.1",
+        "btoa-lite": "^1.0.0",
+        chalk: "^4.1.1",
+        "cross-fetch": "^3.0.6",
+        dotenv: "^8.2.0",
+        "fn-annotate": "^1.1.3",
+        "object-assign": "^4.1.0",
+        "util-deprecate": "^1.0.2"
+      },
+      devDependencies: {
+        browserify: "^16.2.2",
+        eslint: "^5.3.0",
+        "eslint-config-prettier": "^6.5.0",
+        "eslint-plugin-prettier": "^3.1.1",
+        husky: ">=1",
+        "ink-docstrap": "^1.2.1",
+        jest: "^24.9.0",
+        jsdoc: "^3.6.3",
+        "lint-staged": ">=8",
+        prettier: "1.18.2",
+        "semantic-release": "^17.1.2",
+        terser: "^4.3.9",
+        webpack: "^5.23.0",
+        "webpack-cli": "^4.5.0",
+        yargs: "^16.2.0"
+      },
+      husky: {
+        hooks: {
+          "pre-commit": "lint-staged"
+        }
+      },
+      "lint-staged": {
+        "*.{js,css,json,md}": [
+          "prettier --write",
+          "git add"
+        ],
+        "*.js": [
+          "eslint --fix",
+          "git add"
+        ]
+      },
+      release: {
+        branches: [
+          "main"
+        ]
+      },
+      browser: {
+        http2: false,
+        http: false,
+        https: false,
+        os: false,
+        util: false,
+        boxen: false,
+        chalk: false
+      }
+    };
+  }
+});
+
+// (disabled):node_modules/faunadb/node_modules/chalk/source/index.js
+var require_source = __commonJS({
+  "(disabled):node_modules/faunadb/node_modules/chalk/source/index.js"() {
+  }
+});
+
+// (disabled):node_modules/boxen/index.js
+var require_boxen = __commonJS({
+  "(disabled):node_modules/boxen/index.js"() {
+  }
+});
+
+// node_modules/cross-fetch/dist/browser-ponyfill.js
+var require_browser_ponyfill = __commonJS({
+  "node_modules/cross-fetch/dist/browser-ponyfill.js"(exports, module) {
+    var global2 = typeof self !== "undefined" ? self : exports;
+    var __self__ = function() {
+      function F() {
+        this.fetch = false;
+        this.DOMException = global2.DOMException;
+      }
+      F.prototype = global2;
+      return new F();
+    }();
+    (function(self2) {
+      var irrelevant = function(exports2) {
+        var support = {
+          searchParams: "URLSearchParams" in self2,
+          iterable: "Symbol" in self2 && "iterator" in Symbol,
+          blob: "FileReader" in self2 && "Blob" in self2 && function() {
+            try {
+              new Blob();
+              return true;
+            } catch (e) {
+              return false;
+            }
+          }(),
+          formData: "FormData" in self2,
+          arrayBuffer: "ArrayBuffer" in self2
+        };
+        function isDataView(obj) {
+          return obj && DataView.prototype.isPrototypeOf(obj);
+        }
+        if (support.arrayBuffer) {
+          var viewClasses = [
+            "[object Int8Array]",
+            "[object Uint8Array]",
+            "[object Uint8ClampedArray]",
+            "[object Int16Array]",
+            "[object Uint16Array]",
+            "[object Int32Array]",
+            "[object Uint32Array]",
+            "[object Float32Array]",
+            "[object Float64Array]"
+          ];
+          var isArrayBufferView = ArrayBuffer.isView || function(obj) {
+            return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1;
+          };
+        }
+        function normalizeName(name) {
+          if (typeof name !== "string") {
+            name = String(name);
+          }
+          if (/[^a-z0-9\-#$%&'*+.^_`|~]/i.test(name)) {
+            throw new TypeError("Invalid character in header field name");
+          }
+          return name.toLowerCase();
+        }
+        function normalizeValue(value) {
+          if (typeof value !== "string") {
+            value = String(value);
+          }
+          return value;
+        }
+        function iteratorFor(items) {
+          var iterator = {
+            next: function() {
+              var value = items.shift();
+              return { done: value === void 0, value };
+            }
+          };
+          if (support.iterable) {
+            iterator[Symbol.iterator] = function() {
+              return iterator;
+            };
+          }
+          return iterator;
+        }
+        function Headers(headers) {
+          this.map = {};
+          if (headers instanceof Headers) {
+            headers.forEach(function(value, name) {
+              this.append(name, value);
+            }, this);
+          } else if (Array.isArray(headers)) {
+            headers.forEach(function(header) {
+              this.append(header[0], header[1]);
+            }, this);
+          } else if (headers) {
+            Object.getOwnPropertyNames(headers).forEach(function(name) {
+              this.append(name, headers[name]);
+            }, this);
+          }
+        }
+        Headers.prototype.append = function(name, value) {
+          name = normalizeName(name);
+          value = normalizeValue(value);
+          var oldValue = this.map[name];
+          this.map[name] = oldValue ? oldValue + ", " + value : value;
+        };
+        Headers.prototype["delete"] = function(name) {
+          delete this.map[normalizeName(name)];
+        };
+        Headers.prototype.get = function(name) {
+          name = normalizeName(name);
+          return this.has(name) ? this.map[name] : null;
+        };
+        Headers.prototype.has = function(name) {
+          return this.map.hasOwnProperty(normalizeName(name));
+        };
+        Headers.prototype.set = function(name, value) {
+          this.map[normalizeName(name)] = normalizeValue(value);
+        };
+        Headers.prototype.forEach = function(callback, thisArg) {
+          for (var name in this.map) {
+            if (this.map.hasOwnProperty(name)) {
+              callback.call(thisArg, this.map[name], name, this);
+            }
+          }
+        };
+        Headers.prototype.keys = function() {
+          var items = [];
+          this.forEach(function(value, name) {
+            items.push(name);
+          });
+          return iteratorFor(items);
+        };
+        Headers.prototype.values = function() {
+          var items = [];
+          this.forEach(function(value) {
+            items.push(value);
+          });
+          return iteratorFor(items);
+        };
+        Headers.prototype.entries = function() {
+          var items = [];
+          this.forEach(function(value, name) {
+            items.push([name, value]);
+          });
+          return iteratorFor(items);
+        };
+        if (support.iterable) {
+          Headers.prototype[Symbol.iterator] = Headers.prototype.entries;
+        }
+        function consumed(body) {
+          if (body.bodyUsed) {
+            return Promise.reject(new TypeError("Already read"));
+          }
+          body.bodyUsed = true;
+        }
+        function fileReaderReady(reader) {
+          return new Promise(function(resolve, reject) {
+            reader.onload = function() {
+              resolve(reader.result);
+            };
+            reader.onerror = function() {
+              reject(reader.error);
+            };
+          });
+        }
+        function readBlobAsArrayBuffer(blob) {
+          var reader = new FileReader();
+          var promise = fileReaderReady(reader);
+          reader.readAsArrayBuffer(blob);
+          return promise;
+        }
+        function readBlobAsText(blob) {
+          var reader = new FileReader();
+          var promise = fileReaderReady(reader);
+          reader.readAsText(blob);
+          return promise;
+        }
+        function readArrayBufferAsText(buf) {
+          var view = new Uint8Array(buf);
+          var chars = new Array(view.length);
+          for (var i = 0; i < view.length; i++) {
+            chars[i] = String.fromCharCode(view[i]);
+          }
+          return chars.join("");
+        }
+        function bufferClone(buf) {
+          if (buf.slice) {
+            return buf.slice(0);
+          } else {
+            var view = new Uint8Array(buf.byteLength);
+            view.set(new Uint8Array(buf));
+            return view.buffer;
+          }
+        }
+        function Body() {
+          this.bodyUsed = false;
+          this._initBody = function(body) {
+            this._bodyInit = body;
+            if (!body) {
+              this._bodyText = "";
+            } else if (typeof body === "string") {
+              this._bodyText = body;
+            } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
+              this._bodyBlob = body;
+            } else if (support.formData && FormData.prototype.isPrototypeOf(body)) {
+              this._bodyFormData = body;
+            } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+              this._bodyText = body.toString();
+            } else if (support.arrayBuffer && support.blob && isDataView(body)) {
+              this._bodyArrayBuffer = bufferClone(body.buffer);
+              this._bodyInit = new Blob([this._bodyArrayBuffer]);
+            } else if (support.arrayBuffer && (ArrayBuffer.prototype.isPrototypeOf(body) || isArrayBufferView(body))) {
+              this._bodyArrayBuffer = bufferClone(body);
+            } else {
+              this._bodyText = body = Object.prototype.toString.call(body);
+            }
+            if (!this.headers.get("content-type")) {
+              if (typeof body === "string") {
+                this.headers.set("content-type", "text/plain;charset=UTF-8");
+              } else if (this._bodyBlob && this._bodyBlob.type) {
+                this.headers.set("content-type", this._bodyBlob.type);
+              } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
+                this.headers.set("content-type", "application/x-www-form-urlencoded;charset=UTF-8");
+              }
+            }
+          };
+          if (support.blob) {
+            this.blob = function() {
+              var rejected = consumed(this);
+              if (rejected) {
+                return rejected;
+              }
+              if (this._bodyBlob) {
+                return Promise.resolve(this._bodyBlob);
+              } else if (this._bodyArrayBuffer) {
+                return Promise.resolve(new Blob([this._bodyArrayBuffer]));
+              } else if (this._bodyFormData) {
+                throw new Error("could not read FormData body as blob");
+              } else {
+                return Promise.resolve(new Blob([this._bodyText]));
+              }
+            };
+            this.arrayBuffer = function() {
+              if (this._bodyArrayBuffer) {
+                return consumed(this) || Promise.resolve(this._bodyArrayBuffer);
+              } else {
+                return this.blob().then(readBlobAsArrayBuffer);
+              }
+            };
+          }
+          this.text = function() {
+            var rejected = consumed(this);
+            if (rejected) {
+              return rejected;
+            }
+            if (this._bodyBlob) {
+              return readBlobAsText(this._bodyBlob);
+            } else if (this._bodyArrayBuffer) {
+              return Promise.resolve(readArrayBufferAsText(this._bodyArrayBuffer));
+            } else if (this._bodyFormData) {
+              throw new Error("could not read FormData body as text");
+            } else {
+              return Promise.resolve(this._bodyText);
+            }
+          };
+          if (support.formData) {
+            this.formData = function() {
+              return this.text().then(decode);
+            };
+          }
+          this.json = function() {
+            return this.text().then(JSON.parse);
+          };
+          return this;
+        }
+        var methods = ["DELETE", "GET", "HEAD", "OPTIONS", "POST", "PUT"];
+        function normalizeMethod(method) {
+          var upcased = method.toUpperCase();
+          return methods.indexOf(upcased) > -1 ? upcased : method;
+        }
+        function Request(input, options) {
+          options = options || {};
+          var body = options.body;
+          if (input instanceof Request) {
+            if (input.bodyUsed) {
+              throw new TypeError("Already read");
+            }
+            this.url = input.url;
+            this.credentials = input.credentials;
+            if (!options.headers) {
+              this.headers = new Headers(input.headers);
+            }
+            this.method = input.method;
+            this.mode = input.mode;
+            this.signal = input.signal;
+            if (!body && input._bodyInit != null) {
+              body = input._bodyInit;
+              input.bodyUsed = true;
+            }
+          } else {
+            this.url = String(input);
+          }
+          this.credentials = options.credentials || this.credentials || "same-origin";
+          if (options.headers || !this.headers) {
+            this.headers = new Headers(options.headers);
+          }
+          this.method = normalizeMethod(options.method || this.method || "GET");
+          this.mode = options.mode || this.mode || null;
+          this.signal = options.signal || this.signal;
+          this.referrer = null;
+          if ((this.method === "GET" || this.method === "HEAD") && body) {
+            throw new TypeError("Body not allowed for GET or HEAD requests");
+          }
+          this._initBody(body);
+        }
+        Request.prototype.clone = function() {
+          return new Request(this, { body: this._bodyInit });
+        };
+        function decode(body) {
+          var form = new FormData();
+          body.trim().split("&").forEach(function(bytes) {
+            if (bytes) {
+              var split2 = bytes.split("=");
+              var name = split2.shift().replace(/\+/g, " ");
+              var value = split2.join("=").replace(/\+/g, " ");
+              form.append(decodeURIComponent(name), decodeURIComponent(value));
+            }
+          });
+          return form;
+        }
+        function parseHeaders(rawHeaders) {
+          var headers = new Headers();
+          var preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, " ");
+          preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+            var parts = line.split(":");
+            var key = parts.shift().trim();
+            if (key) {
+              var value = parts.join(":").trim();
+              headers.append(key, value);
+            }
+          });
+          return headers;
+        }
+        Body.call(Request.prototype);
+        function Response(bodyInit, options) {
+          if (!options) {
+            options = {};
+          }
+          this.type = "default";
+          this.status = options.status === void 0 ? 200 : options.status;
+          this.ok = this.status >= 200 && this.status < 300;
+          this.statusText = "statusText" in options ? options.statusText : "OK";
+          this.headers = new Headers(options.headers);
+          this.url = options.url || "";
+          this._initBody(bodyInit);
+        }
+        Body.call(Response.prototype);
+        Response.prototype.clone = function() {
+          return new Response(this._bodyInit, {
+            status: this.status,
+            statusText: this.statusText,
+            headers: new Headers(this.headers),
+            url: this.url
+          });
+        };
+        Response.error = function() {
+          var response = new Response(null, { status: 0, statusText: "" });
+          response.type = "error";
+          return response;
+        };
+        var redirectStatuses = [301, 302, 303, 307, 308];
+        Response.redirect = function(url, status) {
+          if (redirectStatuses.indexOf(status) === -1) {
+            throw new RangeError("Invalid status code");
+          }
+          return new Response(null, { status, headers: { location: url } });
+        };
+        exports2.DOMException = self2.DOMException;
+        try {
+          new exports2.DOMException();
+        } catch (err) {
+          exports2.DOMException = function(message, name) {
+            this.message = message;
+            this.name = name;
+            var error = Error(message);
+            this.stack = error.stack;
+          };
+          exports2.DOMException.prototype = Object.create(Error.prototype);
+          exports2.DOMException.prototype.constructor = exports2.DOMException;
+        }
+        function fetch(input, init2) {
+          return new Promise(function(resolve, reject) {
+            var request = new Request(input, init2);
+            if (request.signal && request.signal.aborted) {
+              return reject(new exports2.DOMException("Aborted", "AbortError"));
+            }
+            var xhr = new XMLHttpRequest();
+            function abortXhr() {
+              xhr.abort();
+            }
+            xhr.onload = function() {
+              var options = {
+                status: xhr.status,
+                statusText: xhr.statusText,
+                headers: parseHeaders(xhr.getAllResponseHeaders() || "")
+              };
+              options.url = "responseURL" in xhr ? xhr.responseURL : options.headers.get("X-Request-URL");
+              var body = "response" in xhr ? xhr.response : xhr.responseText;
+              resolve(new Response(body, options));
+            };
+            xhr.onerror = function() {
+              reject(new TypeError("Network request failed"));
+            };
+            xhr.ontimeout = function() {
+              reject(new TypeError("Network request failed"));
+            };
+            xhr.onabort = function() {
+              reject(new exports2.DOMException("Aborted", "AbortError"));
+            };
+            xhr.open(request.method, request.url, true);
+            if (request.credentials === "include") {
+              xhr.withCredentials = true;
+            } else if (request.credentials === "omit") {
+              xhr.withCredentials = false;
+            }
+            if ("responseType" in xhr && support.blob) {
+              xhr.responseType = "blob";
+            }
+            request.headers.forEach(function(value, name) {
+              xhr.setRequestHeader(name, value);
+            });
+            if (request.signal) {
+              request.signal.addEventListener("abort", abortXhr);
+              xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                  request.signal.removeEventListener("abort", abortXhr);
+                }
+              };
+            }
+            xhr.send(typeof request._bodyInit === "undefined" ? null : request._bodyInit);
+          });
+        }
+        fetch.polyfill = true;
+        if (!self2.fetch) {
+          self2.fetch = fetch;
+          self2.Headers = Headers;
+          self2.Request = Request;
+          self2.Response = Response;
+        }
+        exports2.Headers = Headers;
+        exports2.Request = Request;
+        exports2.Response = Response;
+        exports2.fetch = fetch;
+        Object.defineProperty(exports2, "__esModule", { value: true });
+        return exports2;
+      }({});
+    })(__self__);
+    __self__.fetch.ponyfill = true;
+    delete __self__.fetch.polyfill;
+    var ctx = __self__;
+    exports = ctx.fetch;
+    exports.default = ctx.fetch;
+    exports.fetch = ctx.fetch;
+    exports.Headers = ctx.Headers;
+    exports.Request = ctx.Request;
+    exports.Response = ctx.Response;
+    module.exports = exports;
+  }
+});
+
+// node_modules/faunadb/src/_util.js
+var require_util = __commonJS({
+  "node_modules/faunadb/src/_util.js"(exports, module) {
+    "use strict";
+    var packageJson = require_package();
+    var chalk = require_source();
+    var boxen = require_boxen();
+    var crossGlobal = typeof window !== "undefined" ? window : typeof globalThis !== "undefined" ? globalThis : typeof global !== "undefined" ? global : self;
+    function inherits(ctor, superCtor) {
+      if (ctor === void 0 || ctor === null) {
+        throw new TypeError('The constructor to "inherits" must not be null or undefined');
+      }
+      if (superCtor === void 0 || superCtor === null) {
+        throw new TypeError('The super constructor to "inherits" must not be null or undefined');
+      }
+      if (superCtor.prototype === void 0) {
+        throw new TypeError('The super constructor to "inherits" must have a prototype');
+      }
+      ctor.super_ = superCtor;
+      ctor.prototype = Object.create(superCtor.prototype, {
+        constructor: {
+          value: ctor,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      });
+    }
+    function isNodeEnv() {
+      return typeof window === "undefined" && typeof process !== "undefined" && process.versions != null && process.versions.node != null;
+    }
+    function getEnvVariable(envKey) {
+      var areEnvVarsAvailable = !!(typeof process !== "undefined" && process && process.env);
+      if (areEnvVarsAvailable && process.env[envKey] != null) {
+        return process.env[envKey];
+      }
+    }
+    function getBrowserDetails() {
+      var browser = navigator.appName;
+      var browserVersion = "" + parseFloat(navigator.appVersion);
+      var nameOffset, verOffset, ix;
+      if ((verOffset = navigator.userAgent.indexOf("Opera")) != -1) {
+        browser = "Opera";
+        browserVersion = navigator.userAgent.substring(verOffset + 6);
+        if ((verOffset = navigator.userAgent.indexOf("Version")) != -1) {
+          browserVersion = navigator.userAgent.substring(verOffset + 8);
+        }
+      } else if ((verOffset = navigator.userAgent.indexOf("MSIE")) != -1) {
+        browser = "Microsoft Internet Explorer";
+        browserVersion = navigator.userAgent.substring(verOffset + 5);
+      } else if (browser == "Netscape" && navigator.userAgent.indexOf("Trident/") != -1) {
+        browser = "Microsoft Internet Explorer";
+        browserVersion = navigator.userAgent.substring(verOffset + 5);
+        if ((verOffset = navigator.userAgent.indexOf("rv:")) != -1) {
+          browserVersion = navigator.userAgent.substring(verOffset + 3);
+        }
+      } else if ((verOffset = navigator.userAgent.indexOf("Chrome")) != -1) {
+        browser = "Chrome";
+        browserVersion = navigator.userAgent.substring(verOffset + 7);
+      } else if ((verOffset = navigator.userAgent.indexOf("Safari")) != -1) {
+        browser = "Safari";
+        browserVersion = navigator.userAgent.substring(verOffset + 7);
+        if ((verOffset = navigator.userAgent.indexOf("Version")) != -1) {
+          browserVersion = navigator.userAgent.substring(verOffset + 8);
+        }
+        if (navigator.userAgent.indexOf("CriOS") != -1) {
+          browser = "Chrome";
+        }
+      } else if ((verOffset = navigator.userAgent.indexOf("Firefox")) != -1) {
+        browser = "Firefox";
+        browserVersion = navigator.userAgent.substring(verOffset + 8);
+      } else if ((nameOffset = navigator.userAgent.lastIndexOf(" ") + 1) < (verOffset = navigator.userAgent.lastIndexOf("/"))) {
+        browser = navigator.userAgent.substring(nameOffset, verOffset);
+        browserVersion = navigator.userAgent.substring(verOffset + 1);
+        if (browser.toLowerCase() == browser.toUpperCase()) {
+          browser = navigator.appName;
+        }
+      }
+      if ((ix = browserVersion.indexOf(";")) != -1)
+        browserVersion = browserVersion.substring(0, ix);
+      if ((ix = browserVersion.indexOf(" ")) != -1)
+        browserVersion = browserVersion.substring(0, ix);
+      if ((ix = browserVersion.indexOf(")")) != -1)
+        browserVersion = browserVersion.substring(0, ix);
+      return [browser, browserVersion].join("-");
+    }
+    function getBrowserOsDetails() {
+      var os = "unknown";
+      var clientStrings = [
+        { s: "Windows 10", r: /(Windows 10.0|Windows NT 10.0)/ },
+        { s: "Windows 8.1", r: /(Windows 8.1|Windows NT 6.3)/ },
+        { s: "Windows 8", r: /(Windows 8|Windows NT 6.2)/ },
+        { s: "Windows 7", r: /(Windows 7|Windows NT 6.1)/ },
+        { s: "Windows Vista", r: /Windows NT 6.0/ },
+        { s: "Windows Server 2003", r: /Windows NT 5.2/ },
+        { s: "Windows XP", r: /(Windows NT 5.1|Windows XP)/ },
+        { s: "Windows 2000", r: /(Windows NT 5.0|Windows 2000)/ },
+        { s: "Windows ME", r: /(Win 9x 4.90|Windows ME)/ },
+        { s: "Windows 98", r: /(Windows 98|Win98)/ },
+        { s: "Windows 95", r: /(Windows 95|Win95|Windows_95)/ },
+        { s: "Windows NT 4.0", r: /(Windows NT 4.0|WinNT4.0|WinNT|Windows NT)/ },
+        { s: "Windows CE", r: /Windows CE/ },
+        { s: "Windows 3.11", r: /Win16/ },
+        { s: "Android", r: /Android/ },
+        { s: "Open BSD", r: /OpenBSD/ },
+        { s: "Sun OS", r: /SunOS/ },
+        { s: "Chrome OS", r: /CrOS/ },
+        { s: "Linux", r: /(Linux|X11(?!.*CrOS))/ },
+        { s: "iOS", r: /(iPhone|iPad|iPod)/ },
+        { s: "Mac OS X", r: /Mac OS X/ },
+        { s: "Mac OS", r: /(Mac OS|MacPPC|MacIntel|Mac_PowerPC|Macintosh)/ },
+        { s: "QNX", r: /QNX/ },
+        { s: "UNIX", r: /UNIX/ },
+        { s: "BeOS", r: /BeOS/ },
+        { s: "OS/2", r: /OS\/2/ },
+        {
+          s: "Search Bot",
+          r: /(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/
+        }
+      ];
+      for (var id in clientStrings) {
+        var cs = clientStrings[id];
+        if (cs.r.test(navigator.userAgent)) {
+          os = cs.s;
+          break;
+        }
+      }
+      var osVersion = "unknown";
+      if (/Windows/.test(os)) {
+        osVersion = /Windows (.*)/.exec(os)[1];
+        os = "Windows";
+      }
+      switch (os) {
+        case "Mac OS":
+        case "Mac OS X":
+        case "Android":
+          osVersion = /(?:Android|Mac OS|Mac OS X|MacPPC|MacIntel|Mac_PowerPC|Macintosh) ([\.\_\d]+)/.exec(navigator.userAgent)[1];
+          break;
+        case "iOS":
+          osVersion = /OS (\d+)_(\d+)_?(\d+)?/.exec(navigator.appVersion);
+          osVersion = osVersion[1] + "." + osVersion[2] + "." + (osVersion[3] | 0);
+          break;
+      }
+      return [os, osVersion].join("-");
+    }
+    function getNodeRuntimeEnv() {
+      var runtimeEnvs = [
+        {
+          name: "Netlify",
+          check: function() {
+            return process.env.hasOwnProperty("NETLIFY_IMAGES_CDN_DOMAIN");
+          }
+        },
+        {
+          name: "Vercel",
+          check: function() {
+            return process.env.hasOwnProperty("VERCEL");
+          }
+        },
+        {
+          name: "Heroku",
+          check: function() {
+            return process.env.hasOwnProperty("PATH") && process.env.PATH.indexOf(".heroku") !== -1;
+          }
+        },
+        {
+          name: "AWS Lambda",
+          check: function() {
+            return process.env.hasOwnProperty("AWS_LAMBDA_FUNCTION_VERSION");
+          }
+        },
+        {
+          name: "GCP Cloud Functions",
+          check: function() {
+            return process.env.hasOwnProperty("_") && process.env._.indexOf("google") !== -1;
+          }
+        },
+        {
+          name: "GCP Compute Instances",
+          check: function() {
+            return process.env.hasOwnProperty("GOOGLE_CLOUD_PROJECT");
+          }
+        },
+        {
+          name: "Azure Cloud Functions",
+          check: function() {
+            return process.env.hasOwnProperty("WEBSITE_FUNCTIONS_AZUREMONITOR_CATEGORIES");
+          }
+        },
+        {
+          name: "Azure Compute",
+          check: function() {
+            return process.env.hasOwnProperty("ORYX_ENV_TYPE") && process.env.hasOwnProperty("WEBSITE_INSTANCE_ID") && process.env.ORYX_ENV_TYPE === "AppService";
+          }
+        },
+        {
+          name: "Mongo Stitch",
+          check: function() {
+            return typeof crossGlobal.StitchError === "function";
+          }
+        },
+        {
+          name: "Render",
+          check: function() {
+            return process.env.hasOwnProperty("RENDER_SERVICE_ID");
+          }
+        },
+        {
+          name: "Begin",
+          check: function() {
+            return process.env.hasOwnProperty("BEGIN_DATA_SCOPE_ID");
+          }
+        }
+      ];
+      var detectedEnv = runtimeEnvs.find((env) => env.check());
+      return detectedEnv ? detectedEnv.name : "unknown";
+    }
+    function defaults(obj, def) {
+      if (obj === void 0) {
+        return def;
+      } else {
+        return obj;
+      }
+    }
+    function applyDefaults(provided, defaults2) {
+      var out = {};
+      for (var providedKey in provided) {
+        if (!(providedKey in defaults2)) {
+          throw new Error("No such option " + providedKey);
+        }
+        out[providedKey] = provided[providedKey];
+      }
+      for (var defaultsKey in defaults2) {
+        if (!(defaultsKey in out)) {
+          out[defaultsKey] = defaults2[defaultsKey];
+        }
+      }
+      return out;
+    }
+    function removeNullAndUndefinedValues(object) {
+      var res = {};
+      for (var key in object) {
+        var val = object[key];
+        if (val !== null && val !== void 0) {
+          res[key] = val;
+        }
+      }
+      return res;
+    }
+    function removeUndefinedValues(object) {
+      var res = {};
+      for (var key in object) {
+        var val = object[key];
+        if (val !== void 0) {
+          res[key] = val;
+        }
+      }
+      return res;
+    }
+    function checkInstanceHasProperty(obj, prop) {
+      return typeof obj === "object" && obj !== null && Boolean(obj[prop]);
+    }
+    function formatUrl(base, path, query) {
+      query = typeof query === "object" ? querystringify(query) : query;
+      return [
+        base,
+        path ? path.charAt(0) === "/" ? "" : "/" + path : "",
+        query ? query.charAt(0) === "?" ? "" : "?" + query : ""
+      ].join("");
+    }
+    function querystringify(obj, prefix) {
+      prefix = prefix || "";
+      var pairs = [], value, key;
+      if (typeof prefix !== "string")
+        prefix = "?";
+      for (key in obj) {
+        if (checkInstanceHasProperty(obj, key)) {
+          value = obj[key];
+          if (!value && (value === null || value === void 0 || isNaN(value))) {
+            value = "";
+          }
+          key = encode(key);
+          value = encode(value);
+          if (key === null || value === null)
+            continue;
+          pairs.push(key + "=" + value);
+        }
+      }
+      return pairs.length ? prefix + pairs.join("&") : "";
+    }
+    function encode(input) {
+      try {
+        return encodeURIComponent(input);
+      } catch (e) {
+        return null;
+      }
+    }
+    function mergeObjects(obj1, obj2) {
+      var obj3 = {};
+      for (var attrname in obj1) {
+        obj3[attrname] = obj1[attrname];
+      }
+      for (var attrname in obj2) {
+        obj3[attrname] = obj2[attrname];
+      }
+      return obj3;
+    }
+    function resolveFetch(fetchOverride) {
+      if (typeof fetchOverride === "function") {
+        return fetchOverride;
+      }
+      if (typeof crossGlobal.fetch === "function") {
+        return crossGlobal.fetch.bind(crossGlobal);
+      }
+      return require_browser_ponyfill();
+    }
+    function notifyAboutNewVersion() {
+      var isNotified;
+      const checkAndNotify = (checkNewVersion) => {
+        if (!isNodeEnv() || isNotified || !checkNewVersion)
+          return;
+        function onResponse(latestVersion) {
+          var isNewVersionAvailable = latestVersion > packageJson.version;
+          if (isNewVersionAvailable) {
+            console.info(boxen("New " + packageJson.name + " version available " + chalk.dim(packageJson.version) + chalk.reset(" \u2192 ") + chalk.green(latestVersion) + `
+Changelog: https://github.com/${packageJson.repository}/blob/main/CHANGELOG.md`, { padding: 1, borderColor: "yellow" }));
+          }
+        }
+        isNotified = true;
+        resolveFetch()("https://registry.npmjs.org/" + packageJson.name).then((resp) => resp.json()).then((json) => onResponse(json["dist-tags"].latest)).catch((err) => {
+          console.error("Unable to check new driver version");
+          console.error(err);
+        });
+      };
+      return checkAndNotify;
+    }
+    module.exports = {
+      notifyAboutNewVersion,
+      crossGlobal,
+      mergeObjects,
+      formatUrl,
+      querystringify,
+      inherits,
+      isNodeEnv,
+      getEnvVariable,
+      defaults,
+      applyDefaults,
+      removeNullAndUndefinedValues,
+      removeUndefinedValues,
+      checkInstanceHasProperty,
+      getBrowserDetails,
+      getBrowserOsDetails,
+      getNodeRuntimeEnv,
+      resolveFetch
+    };
+  }
+});
+
+// node_modules/faunadb/src/Expr.js
+var require_Expr = __commonJS({
+  "node_modules/faunadb/src/Expr.js"(exports, module) {
+    "use strict";
+    var util = require_util();
+    function Expr(obj) {
+      this.raw = obj;
+    }
+    Expr.prototype._isFaunaExpr = true;
+    Expr.prototype.toJSON = function() {
+      return this.raw;
+    };
+    Expr.prototype.toFQL = function() {
+      return exprToString(this.raw);
+    };
+    var varArgsFunctions = [
+      "Do",
+      "Call",
+      "Union",
+      "Intersection",
+      "Difference",
+      "Equals",
+      "Add",
+      "BitAnd",
+      "BitOr",
+      "BitXor",
+      "Divide",
+      "Max",
+      "Min",
+      "Modulo",
+      "Multiply",
+      "Subtract",
+      "LT",
+      "LTE",
+      "GT",
+      "GTE",
+      "And",
+      "Or"
+    ];
+    var specialCases = {
+      containsstrregex: "ContainsStrRegex",
+      endswith: "EndsWith",
+      findstr: "FindStr",
+      findstrregex: "FindStrRegex",
+      gt: "GT",
+      gte: "GTE",
+      is_nonempty: "is_non_empty",
+      lowercase: "LowerCase",
+      lt: "LT",
+      lte: "LTE",
+      ltrim: "LTrim",
+      ngram: "NGram",
+      rtrim: "RTrim",
+      regexescape: "RegexEscape",
+      replacestr: "ReplaceStr",
+      replacestrregex: "ReplaceStrRegex",
+      startswith: "StartsWith",
+      substring: "SubString",
+      titlecase: "TitleCase",
+      uppercase: "UpperCase"
+    };
+    function isExpr(expression) {
+      return expression instanceof Expr || util.checkInstanceHasProperty(expression, "_isFaunaExpr");
+    }
+    function printObject(obj) {
+      return "{" + Object.keys(obj).map(function(k) {
+        return '"' + k + '": ' + exprToString(obj[k]);
+      }).join(", ") + "}";
+    }
+    function printArray(arr, toStr) {
+      return arr.map(function(item) {
+        return toStr(item);
+      }).join(", ");
+    }
+    function convertToCamelCase(fn) {
+      if (fn in specialCases)
+        fn = specialCases[fn];
+      return fn.split("_").map(function(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+      }).join("");
+    }
+    var exprToString = function(expr, caller) {
+      if (isExpr(expr)) {
+        if ("value" in expr)
+          return expr.toString();
+        expr = expr.raw;
+      }
+      if (expr === null) {
+        return "null";
+      }
+      switch (typeof expr) {
+        case "string":
+          return JSON.stringify(expr);
+        case "symbol":
+        case "number":
+        case "boolean":
+          return expr.toString();
+        case "undefined":
+          return "undefined";
+      }
+      if (Array.isArray(expr)) {
+        var array = printArray(expr, exprToString);
+        return varArgsFunctions.indexOf(caller) != -1 ? array : "[" + array + "]";
+      }
+      if ("match" in expr) {
+        var matchStr = exprToString(expr["match"]);
+        var terms = expr["terms"] || [];
+        if (isExpr(terms))
+          terms = terms.raw;
+        if (Array.isArray(terms) && terms.length == 0)
+          return "Match(" + matchStr + ")";
+        if (Array.isArray(terms)) {
+          return "Match(" + matchStr + ", [" + printArray(terms, exprToString) + "])";
+        }
+        return "Match(" + matchStr + ", " + exprToString(terms) + ")";
+      }
+      if ("paginate" in expr) {
+        var exprKeys = Object.keys(expr);
+        if (exprKeys.length === 1) {
+          return "Paginate(" + exprToString(expr["paginate"]) + ")";
+        }
+        var expr2 = Object.assign({}, expr);
+        delete expr2["paginate"];
+        return "Paginate(" + exprToString(expr["paginate"]) + ", " + printObject(expr2) + ")";
+      }
+      if ("let" in expr && "in" in expr) {
+        var letExpr = "";
+        if (Array.isArray(expr["let"]))
+          letExpr = "[" + printArray(expr["let"], printObject) + "]";
+        else
+          letExpr = printObject(expr["let"]);
+        return "Let(" + letExpr + ", " + exprToString(expr["in"]) + ")";
+      }
+      if ("object" in expr)
+        return printObject(expr["object"]);
+      if ("merge" in expr) {
+        if (expr.lambda) {
+          return "Merge(" + exprToString(expr.merge) + ", " + exprToString(expr.with) + ", " + exprToString(expr.lambda) + ")";
+        }
+        return "Merge(" + exprToString(expr.merge) + ", " + exprToString(expr.with) + ")";
+      }
+      if ("lambda" in expr) {
+        return "Lambda(" + exprToString(expr["lambda"]) + ", " + exprToString(expr["expr"]) + ")";
+      }
+      if ("filter" in expr) {
+        return "Filter(" + exprToString(expr["collection"]) + ", " + exprToString(expr["filter"]) + ")";
+      }
+      if ("call" in expr) {
+        return "Call(" + exprToString(expr["call"]) + ", " + exprToString(expr["arguments"]) + ")";
+      }
+      if ("map" in expr) {
+        return "Map(" + exprToString(expr["collection"]) + ", " + exprToString(expr["map"]) + ")";
+      }
+      if ("foreach" in expr) {
+        return "Foreach(" + exprToString(expr["collection"]) + ", " + exprToString(expr["foreach"]) + ")";
+      }
+      var keys = Object.keys(expr);
+      var fn = keys[0];
+      fn = convertToCamelCase(fn);
+      var args = keys.filter((k) => expr[k] !== null || keys.length > 1).map((k) => exprToString(expr[k], fn)).join(", ");
+      return fn + "(" + args + ")";
+    };
+    Expr.toString = exprToString;
+    module.exports = Expr;
+  }
+});
+
+// node_modules/faunadb/src/errors.js
+var require_errors = __commonJS({
+  "node_modules/faunadb/src/errors.js"(exports, module) {
+    "use strict";
+    var util = require_util();
+    function FaunaError(name, message, description) {
+      Error.call(this);
+      this.name = name;
+      this.message = message;
+      this.description = description;
+    }
+    util.inherits(FaunaError, Error);
+    function InvalidValue(message) {
+      FaunaError.call(this, "InvalidValue", message);
+    }
+    util.inherits(InvalidValue, FaunaError);
+    function InvalidArity(min, max, actual, callerFunc) {
+      var arityInfo = `${callerFunc} function requires ${messageForArity(min, max)} argument(s) but ${actual} were given`;
+      var documentationLink = logDocumentationLink(callerFunc);
+      FaunaError.call(this, "InvalidArity", `${arityInfo}
+${documentationLink}`);
+      this.min = min;
+      this.max = max;
+      this.actual = actual;
+      function messageForArity(min2, max2) {
+        if (max2 === null)
+          return "at least " + min2;
+        if (min2 === null)
+          return "up to " + max2;
+        if (min2 === max2)
+          return min2;
+        return "from " + min2 + " to " + max2;
+      }
+      function logDocumentationLink(functionName) {
+        var docsURL = "https://docs.fauna.com/fauna/current/api/fql/functions/";
+        return `For more info, see the docs: ${docsURL}${functionName.toLowerCase()}`;
+      }
+    }
+    util.inherits(InvalidArity, FaunaError);
+    function FaunaHTTPError(name, requestResult) {
+      var response = requestResult.responseContent;
+      var errors = response.errors;
+      var message = errors.length === 0 ? '(empty "errors")' : errors[0].code;
+      var description = errors.length === 0 ? '(empty "errors")' : errors[0].description;
+      FaunaError.call(this, name, message, description);
+      this.requestResult = requestResult;
+    }
+    util.inherits(FaunaHTTPError, FaunaError);
+    FaunaHTTPError.prototype.errors = function() {
+      return this.requestResult.responseContent.errors;
+    };
+    FaunaHTTPError.raiseForStatusCode = function(requestResult) {
+      var code = requestResult.statusCode;
+      if (code < 200 || code >= 300) {
+        switch (code) {
+          case 400:
+            throw new BadRequest(requestResult);
+          case 401:
+            throw new Unauthorized(requestResult);
+          case 403:
+            throw new PermissionDenied(requestResult);
+          case 404:
+            throw new NotFound(requestResult);
+          case 405:
+            throw new MethodNotAllowed(requestResult);
+          case 429:
+            throw new TooManyRequests(requestResult);
+          case 500:
+            throw new InternalError(requestResult);
+          case 503:
+            throw new UnavailableError(requestResult);
+          default:
+            throw new FaunaHTTPError("UnknownError", requestResult);
+        }
+      }
+    };
+    function BadRequest(requestResult) {
+      FaunaHTTPError.call(this, "BadRequest", requestResult);
+    }
+    util.inherits(BadRequest, FaunaHTTPError);
+    function Unauthorized(requestResult) {
+      FaunaHTTPError.call(this, "Unauthorized", requestResult);
+    }
+    util.inherits(Unauthorized, FaunaHTTPError);
+    function PermissionDenied(requestResult) {
+      FaunaHTTPError.call(this, "PermissionDenied", requestResult);
+    }
+    util.inherits(PermissionDenied, FaunaHTTPError);
+    function NotFound(requestResult) {
+      FaunaHTTPError.call(this, "NotFound", requestResult);
+    }
+    util.inherits(NotFound, FaunaHTTPError);
+    function MethodNotAllowed(requestResult) {
+      FaunaHTTPError.call(this, "MethodNotAllowed", requestResult);
+    }
+    util.inherits(MethodNotAllowed, FaunaHTTPError);
+    function TooManyRequests(requestResult) {
+      FaunaHTTPError.call(this, "TooManyRequests", requestResult);
+    }
+    util.inherits(TooManyRequests, FaunaHTTPError);
+    function InternalError(requestResult) {
+      FaunaHTTPError.call(this, "InternalError", requestResult);
+    }
+    util.inherits(InternalError, FaunaHTTPError);
+    function UnavailableError(requestResult) {
+      FaunaHTTPError.call(this, "UnavailableError", requestResult);
+    }
+    util.inherits(UnavailableError, FaunaHTTPError);
+    function StreamError(name, message, description) {
+      FaunaError.call(this, name, message, description);
+    }
+    util.inherits(StreamError, FaunaError);
+    function StreamsNotSupported(description) {
+      FaunaError.call(this, "StreamsNotSupported", "streams not supported", description);
+    }
+    util.inherits(StreamsNotSupported, StreamError);
+    function StreamErrorEvent(event) {
+      var error = event.data || {};
+      FaunaError.call(this, "StreamErrorEvent", error.code, error.description);
+      this.event = event;
+    }
+    util.inherits(StreamErrorEvent, StreamError);
+    function ClientClosed(message, description) {
+      FaunaError.call(this, "ClientClosed", message, description);
+    }
+    util.inherits(ClientClosed, FaunaError);
+    module.exports = {
+      FaunaError,
+      ClientClosed,
+      FaunaHTTPError,
+      InvalidValue,
+      InvalidArity,
+      BadRequest,
+      Unauthorized,
+      PermissionDenied,
+      NotFound,
+      MethodNotAllowed,
+      TooManyRequests,
+      InternalError,
+      UnavailableError,
+      StreamError,
+      StreamsNotSupported,
+      StreamErrorEvent
+    };
+  }
+});
+
+// node_modules/base64-js/index.js
+var require_base64_js = __commonJS({
+  "node_modules/base64-js/index.js"(exports) {
+    "use strict";
+    exports.byteLength = byteLength;
+    exports.toByteArray = toByteArray;
+    exports.fromByteArray = fromByteArray;
+    var lookup = [];
+    var revLookup = [];
+    var Arr = typeof Uint8Array !== "undefined" ? Uint8Array : Array;
+    var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    for (i = 0, len = code.length; i < len; ++i) {
+      lookup[i] = code[i];
+      revLookup[code.charCodeAt(i)] = i;
+    }
+    var i;
+    var len;
+    revLookup["-".charCodeAt(0)] = 62;
+    revLookup["_".charCodeAt(0)] = 63;
+    function getLens(b64) {
+      var len2 = b64.length;
+      if (len2 % 4 > 0) {
+        throw new Error("Invalid string. Length must be a multiple of 4");
+      }
+      var validLen = b64.indexOf("=");
+      if (validLen === -1)
+        validLen = len2;
+      var placeHoldersLen = validLen === len2 ? 0 : 4 - validLen % 4;
+      return [validLen, placeHoldersLen];
+    }
+    function byteLength(b64) {
+      var lens = getLens(b64);
+      var validLen = lens[0];
+      var placeHoldersLen = lens[1];
+      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+    }
+    function _byteLength(b64, validLen, placeHoldersLen) {
+      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+    }
+    function toByteArray(b64) {
+      var tmp;
+      var lens = getLens(b64);
+      var validLen = lens[0];
+      var placeHoldersLen = lens[1];
+      var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
+      var curByte = 0;
+      var len2 = placeHoldersLen > 0 ? validLen - 4 : validLen;
+      var i2;
+      for (i2 = 0; i2 < len2; i2 += 4) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 18 | revLookup[b64.charCodeAt(i2 + 1)] << 12 | revLookup[b64.charCodeAt(i2 + 2)] << 6 | revLookup[b64.charCodeAt(i2 + 3)];
+        arr[curByte++] = tmp >> 16 & 255;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+      }
+      if (placeHoldersLen === 2) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 2 | revLookup[b64.charCodeAt(i2 + 1)] >> 4;
+        arr[curByte++] = tmp & 255;
+      }
+      if (placeHoldersLen === 1) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 10 | revLookup[b64.charCodeAt(i2 + 1)] << 4 | revLookup[b64.charCodeAt(i2 + 2)] >> 2;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+      }
+      return arr;
+    }
+    function tripletToBase64(num) {
+      return lookup[num >> 18 & 63] + lookup[num >> 12 & 63] + lookup[num >> 6 & 63] + lookup[num & 63];
+    }
+    function encodeChunk(uint8, start, end) {
+      var tmp;
+      var output = [];
+      for (var i2 = start; i2 < end; i2 += 3) {
+        tmp = (uint8[i2] << 16 & 16711680) + (uint8[i2 + 1] << 8 & 65280) + (uint8[i2 + 2] & 255);
+        output.push(tripletToBase64(tmp));
+      }
+      return output.join("");
+    }
+    function fromByteArray(uint8) {
+      var tmp;
+      var len2 = uint8.length;
+      var extraBytes = len2 % 3;
+      var parts = [];
+      var maxChunkLength = 16383;
+      for (var i2 = 0, len22 = len2 - extraBytes; i2 < len22; i2 += maxChunkLength) {
+        parts.push(encodeChunk(uint8, i2, i2 + maxChunkLength > len22 ? len22 : i2 + maxChunkLength));
+      }
+      if (extraBytes === 1) {
+        tmp = uint8[len2 - 1];
+        parts.push(lookup[tmp >> 2] + lookup[tmp << 4 & 63] + "==");
+      } else if (extraBytes === 2) {
+        tmp = (uint8[len2 - 2] << 8) + uint8[len2 - 1];
+        parts.push(lookup[tmp >> 10] + lookup[tmp >> 4 & 63] + lookup[tmp << 2 & 63] + "=");
+      }
+      return parts.join("");
+    }
+  }
+});
+
+// (disabled):node_modules/util/util.js
+var require_util2 = __commonJS({
+  "(disabled):node_modules/util/util.js"() {
+  }
+});
+
+// node_modules/faunadb/src/values.js
+var require_values = __commonJS({
+  "node_modules/faunadb/src/values.js"(exports, module) {
+    "use strict";
+    var base64 = require_base64_js();
+    var deprecate = require_browser();
+    var errors = require_errors();
+    var Expr = require_Expr();
+    var util = require_util();
+    var nodeUtil = util.isNodeEnv() ? require_util2() : null;
+    var customInspect = nodeUtil && nodeUtil.inspect.custom;
+    var stringify = nodeUtil ? nodeUtil.inspect : JSON.stringify;
+    function Value() {
+    }
+    Value.prototype._isFaunaValue = true;
+    util.inherits(Value, Expr);
+    function Ref(id, collection, database) {
+      if (!id)
+        throw new errors.InvalidValue("id cannot be null or undefined");
+      this.value = { id };
+      if (collection)
+        this.value["collection"] = collection;
+      if (database)
+        this.value["database"] = database;
+    }
+    Ref.prototype._isFaunaRef = true;
+    util.inherits(Ref, Value);
+    Object.defineProperty(Ref.prototype, "collection", {
+      get: function() {
+        return this.value["collection"];
+      }
+    });
+    Object.defineProperty(Ref.prototype, "class", {
+      get: deprecate(function() {
+        return this.value["collection"];
+      }, "class is deprecated, use collection instead")
+    });
+    Object.defineProperty(Ref.prototype, "database", {
+      get: function() {
+        return this.value["database"];
+      }
+    });
+    Object.defineProperty(Ref.prototype, "id", {
+      get: function() {
+        return this.value["id"];
+      }
+    });
+    Ref.prototype.toJSON = function() {
+      return { "@ref": this.value };
+    };
+    wrapToString(Ref, function() {
+      var constructors = {
+        collections: "Collection",
+        databases: "Database",
+        indexes: "Index",
+        functions: "Function",
+        roles: "Role",
+        access_providers: "AccessProvider"
+      };
+      var isNative = function(ref) {
+        return ref.collection === void 0;
+      };
+      var toString = function(ref) {
+        if (isNative(ref)) {
+          var db = ref.database !== void 0 ? ref.database.toString() : "";
+          if (ref.id === "access_providers")
+            return "AccessProviders(" + db + ")";
+          return ref.id.charAt(0).toUpperCase() + ref.id.slice(1) + "(" + db + ")";
+        }
+        if (isNative(ref.collection)) {
+          var constructor = constructors[ref.collection.id];
+          if (constructor !== void 0) {
+            var db = ref.database !== void 0 ? ", " + ref.database.toString() : "";
+            return constructor + '("' + ref.id + '"' + db + ")";
+          }
+        }
+        return "Ref(" + toString(ref.collection) + ', "' + ref.id + '")';
+      };
+      return toString(this);
+    });
+    Ref.prototype.valueOf = function() {
+      return this.value;
+    };
+    Ref.prototype.equals = function(other) {
+      return (other instanceof Ref || util.checkInstanceHasProperty(other, "_isFaunaRef")) && this.id === other.id && (this.collection === void 0 && other.collection === void 0 || this.collection.equals(other.collection)) && (this.database === void 0 && other.database === void 0 || this.database.equals(other.database));
+    };
+    var Native = {
+      COLLECTIONS: new Ref("collections"),
+      INDEXES: new Ref("indexes"),
+      DATABASES: new Ref("databases"),
+      FUNCTIONS: new Ref("functions"),
+      ROLES: new Ref("roles"),
+      KEYS: new Ref("keys"),
+      ACCESS_PROVIDERS: new Ref("access_providers")
+    };
+    Native.fromName = function(name) {
+      switch (name) {
+        case "collections":
+          return Native.COLLECTIONS;
+        case "indexes":
+          return Native.INDEXES;
+        case "databases":
+          return Native.DATABASES;
+        case "functions":
+          return Native.FUNCTIONS;
+        case "roles":
+          return Native.ROLES;
+        case "keys":
+          return Native.KEYS;
+        case "access_providers":
+          return Native.ACCESS_PROVIDERS;
+      }
+      return new Ref(name);
+    };
+    function SetRef(value) {
+      this.value = value;
+    }
+    util.inherits(SetRef, Value);
+    wrapToString(SetRef, function() {
+      return Expr.toString(this.value);
+    });
+    SetRef.prototype.toJSON = function() {
+      return { "@set": this.value };
+    };
+    function FaunaTime(value) {
+      if (value instanceof Date) {
+        value = value.toISOString();
+      } else if (!(value.charAt(value.length - 1) === "Z")) {
+        throw new errors.InvalidValue("Only allowed timezone is 'Z', got: " + value);
+      }
+      this.value = value;
+    }
+    util.inherits(FaunaTime, Value);
+    Object.defineProperty(FaunaTime.prototype, "date", {
+      get: function() {
+        return new Date(this.value);
+      }
+    });
+    wrapToString(FaunaTime, function() {
+      return 'Time("' + this.value + '")';
+    });
+    FaunaTime.prototype.toJSON = function() {
+      return { "@ts": this.value };
+    };
+    function FaunaDate(value) {
+      if (value instanceof Date) {
+        value = value.toISOString().slice(0, 10);
+      }
+      this.value = value;
+    }
+    util.inherits(FaunaDate, Value);
+    Object.defineProperty(FaunaDate.prototype, "date", {
+      get: function() {
+        return new Date(this.value);
+      }
+    });
+    wrapToString(FaunaDate, function() {
+      return 'Date("' + this.value + '")';
+    });
+    FaunaDate.prototype.toJSON = function() {
+      return { "@date": this.value };
+    };
+    function Bytes(value) {
+      if (value instanceof ArrayBuffer) {
+        this.value = new Uint8Array(value);
+      } else if (typeof value === "string") {
+        this.value = base64.toByteArray(value);
+      } else if (value instanceof Uint8Array) {
+        this.value = value;
+      } else {
+        throw new errors.InvalidValue("Bytes type expect argument to be either Uint8Array|ArrayBuffer|string, got: " + stringify(value));
+      }
+    }
+    util.inherits(Bytes, Value);
+    wrapToString(Bytes, function() {
+      return 'Bytes("' + base64.fromByteArray(this.value) + '")';
+    });
+    Bytes.prototype.toJSON = function() {
+      return { "@bytes": base64.fromByteArray(this.value) };
+    };
+    function Query(value) {
+      this.value = value;
+    }
+    util.inherits(Query, Value);
+    wrapToString(Query, function() {
+      return "Query(" + Expr.toString(this.value) + ")";
+    });
+    Query.prototype.toJSON = function() {
+      return { "@query": this.value };
+    };
+    function wrapToString(type, fn) {
+      type.prototype.toString = fn;
+      type.prototype.inspect = fn;
+      if (customInspect) {
+        type.prototype[customInspect] = fn;
+      }
+    }
+    module.exports = {
+      Value,
+      Ref,
+      Native,
+      SetRef,
+      FaunaTime,
+      FaunaDate,
+      Bytes,
+      Query
+    };
+  }
+});
+
+// node_modules/object-assign/index.js
+var require_object_assign = __commonJS({
+  "node_modules/object-assign/index.js"(exports, module) {
+    "use strict";
+    var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+    var hasOwnProperty = Object.prototype.hasOwnProperty;
+    var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+    function toObject(val) {
+      if (val === null || val === void 0) {
+        throw new TypeError("Object.assign cannot be called with null or undefined");
+      }
+      return Object(val);
+    }
+    function shouldUseNative() {
+      try {
+        if (!Object.assign) {
+          return false;
+        }
+        var test1 = new String("abc");
+        test1[5] = "de";
+        if (Object.getOwnPropertyNames(test1)[0] === "5") {
+          return false;
+        }
+        var test2 = {};
+        for (var i = 0; i < 10; i++) {
+          test2["_" + String.fromCharCode(i)] = i;
+        }
+        var order2 = Object.getOwnPropertyNames(test2).map(function(n) {
+          return test2[n];
+        });
+        if (order2.join("") !== "0123456789") {
+          return false;
+        }
+        var test3 = {};
+        "abcdefghijklmnopqrst".split("").forEach(function(letter) {
+          test3[letter] = letter;
+        });
+        if (Object.keys(Object.assign({}, test3)).join("") !== "abcdefghijklmnopqrst") {
+          return false;
+        }
+        return true;
+      } catch (err) {
+        return false;
+      }
+    }
+    module.exports = shouldUseNative() ? Object.assign : function(target, source) {
+      var from;
+      var to = toObject(target);
+      var symbols;
+      for (var s = 1; s < arguments.length; s++) {
+        from = Object(arguments[s]);
+        for (var key in from) {
+          if (hasOwnProperty.call(from, key)) {
+            to[key] = from[key];
+          }
+        }
+        if (getOwnPropertySymbols) {
+          symbols = getOwnPropertySymbols(from);
+          for (var i = 0; i < symbols.length; i++) {
+            if (propIsEnumerable.call(from, symbols[i])) {
+              to[symbols[i]] = from[symbols[i]];
+            }
+          }
+        }
+      }
+      return to;
+    };
+  }
+});
+
+// node_modules/faunadb/src/query.js
+var require_query = __commonJS({
+  "node_modules/faunadb/src/query.js"(exports, module) {
+    "use strict";
+    var annotate = require_fn_annotate();
+    var deprecate = require_browser();
+    var Expr = require_Expr();
+    var errors = require_errors();
+    var values = require_values();
+    var objectAssign = require_object_assign();
+    var util = require_util();
+    function Ref() {
+      arity.between(1, 2, arguments, Ref.name);
+      switch (arguments.length) {
+        case 1:
+          return new Expr({ "@ref": wrap(arguments[0]) });
+        case 2:
+          return new Expr({ ref: wrap(arguments[0]), id: wrap(arguments[1]) });
+      }
+    }
+    function Bytes(bytes) {
+      arity.exact(1, arguments, Bytes.name);
+      return new values.Bytes(bytes);
+    }
+    function Abort(msg) {
+      arity.exact(1, arguments, Abort.name);
+      return new Expr({ abort: wrap(msg) });
+    }
+    function At(timestamp, expr) {
+      arity.exact(2, arguments, At.name);
+      return new Expr({ at: wrap(timestamp), expr: wrap(expr) });
+    }
+    function Let(vars, expr) {
+      arity.exact(2, arguments, Let.name);
+      var bindings = [];
+      if (Array.isArray(vars)) {
+        bindings = vars.map(function(item) {
+          return wrapValues(item);
+        });
+      } else {
+        bindings = Object.keys(vars).filter(function(k) {
+          return vars[k] !== void 0;
+        }).map(function(k) {
+          var b = {};
+          b[k] = wrap(vars[k]);
+          return b;
+        });
+      }
+      if (typeof expr === "function") {
+        if (Array.isArray(vars)) {
+          var expr_vars = [];
+          vars.forEach(function(item) {
+            Object.keys(item).forEach(function(name) {
+              expr_vars.push(Var(name));
+            });
+          });
+          expr = expr.apply(null, expr_vars);
+        } else {
+          expr = expr.apply(null, Object.keys(vars).map(function(name) {
+            return Var(name);
+          }));
+        }
+      }
+      return new Expr({ let: bindings, in: wrap(expr) });
+    }
+    function Var(varName) {
+      arity.exact(1, arguments, Var.name);
+      return new Expr({ var: wrap(varName) });
+    }
+    function If(condition, then, _else) {
+      arity.exact(3, arguments, If.name);
+      return new Expr({ if: wrap(condition), then: wrap(then), else: wrap(_else) });
+    }
+    function Do() {
+      arity.min(1, arguments, Do.name);
+      var args = argsToArray(arguments);
+      return new Expr({ do: wrap(args) });
+    }
+    var objectFunction = function(fields) {
+      arity.exact(1, arguments, objectFunction.name);
+      return new Expr({ object: wrapValues(fields) });
+    };
+    function Lambda() {
+      arity.between(1, 2, arguments, Lambda.name);
+      switch (arguments.length) {
+        case 1:
+          var value = arguments[0];
+          if (typeof value === "function") {
+            return _lambdaFunc(value);
+          } else if (value instanceof Expr || util.checkInstanceHasProperty(value, "_isFaunaExpr")) {
+            return value;
+          } else {
+            throw new errors.InvalidValue("Lambda function takes either a Function or an Expr.");
+          }
+        case 2:
+          var var_name = arguments[0];
+          var expr = arguments[1];
+          return _lambdaExpr(var_name, expr);
+      }
+    }
+    function _lambdaFunc(func) {
+      var vars = annotate(func);
+      switch (vars.length) {
+        case 0:
+          throw new errors.InvalidValue("Provided Function must take at least 1 argument.");
+        case 1:
+          return _lambdaExpr(vars[0], func(Var(vars[0])));
+        default:
+          return _lambdaExpr(vars, func.apply(null, vars.map(function(name) {
+            return Var(name);
+          })));
+      }
+    }
+    function _lambdaExpr(var_name, expr) {
+      return new Expr({ lambda: wrap(var_name), expr: wrap(expr) });
+    }
+    function Call(ref) {
+      arity.min(1, arguments, Call.name);
+      var args = argsToArray(arguments);
+      args.shift();
+      return new Expr({ call: wrap(ref), arguments: wrap(varargs(args)) });
+    }
+    function Query(lambda) {
+      arity.exact(1, arguments, Query.name);
+      return new Expr({ query: wrap(lambda) });
+    }
+    function Map2(collection, lambda_expr) {
+      arity.exact(2, arguments, Map2.name);
+      return new Expr({ map: wrap(lambda_expr), collection: wrap(collection) });
+    }
+    function Foreach(collection, lambda_expr) {
+      arity.exact(2, arguments, Foreach.name);
+      return new Expr({ foreach: wrap(lambda_expr), collection: wrap(collection) });
+    }
+    function Filter(collection, lambda_expr) {
+      arity.exact(2, arguments, Filter.name);
+      return new Expr({ filter: wrap(lambda_expr), collection: wrap(collection) });
+    }
+    function Take(number, collection) {
+      arity.exact(2, arguments, Take.name);
+      return new Expr({ take: wrap(number), collection: wrap(collection) });
+    }
+    function Drop(number, collection) {
+      arity.exact(2, arguments, Drop.name);
+      return new Expr({ drop: wrap(number), collection: wrap(collection) });
+    }
+    function Prepend(elements, collection) {
+      arity.exact(2, arguments, Prepend.name);
+      return new Expr({ prepend: wrap(elements), collection: wrap(collection) });
+    }
+    function Append(elements, collection) {
+      arity.exact(2, arguments, Append.name);
+      return new Expr({ append: wrap(elements), collection: wrap(collection) });
+    }
+    function IsEmpty(collection) {
+      arity.exact(1, arguments, IsEmpty.name);
+      return new Expr({ is_empty: wrap(collection) });
+    }
+    function IsNonEmpty(collection) {
+      arity.exact(1, arguments, IsNonEmpty.name);
+      return new Expr({ is_nonempty: wrap(collection) });
+    }
+    function IsNumber(expr) {
+      arity.exact(1, arguments, IsNumber.name);
+      return new Expr({ is_number: wrap(expr) });
+    }
+    function IsDouble(expr) {
+      arity.exact(1, arguments, IsDouble.name);
+      return new Expr({ is_double: wrap(expr) });
+    }
+    function IsInteger(expr) {
+      arity.exact(1, arguments, IsInteger.name);
+      return new Expr({ is_integer: wrap(expr) });
+    }
+    function IsBoolean(expr) {
+      arity.exact(1, arguments, IsBoolean.name);
+      return new Expr({ is_boolean: wrap(expr) });
+    }
+    function IsNull(expr) {
+      arity.exact(1, arguments, IsNull.name);
+      return new Expr({ is_null: wrap(expr) });
+    }
+    function IsBytes(expr) {
+      arity.exact(1, arguments, IsBytes.name);
+      return new Expr({ is_bytes: wrap(expr) });
+    }
+    function IsTimestamp(expr) {
+      arity.exact(1, arguments, IsTimestamp.name);
+      return new Expr({ is_timestamp: wrap(expr) });
+    }
+    function IsDate(expr) {
+      arity.exact(1, arguments, IsDate.name);
+      return new Expr({ is_date: wrap(expr) });
+    }
+    function IsString(expr) {
+      arity.exact(1, arguments, IsString.name);
+      return new Expr({ is_string: wrap(expr) });
+    }
+    function IsArray(expr) {
+      arity.exact(1, arguments, IsArray.name);
+      return new Expr({ is_array: wrap(expr) });
+    }
+    function IsObject(expr) {
+      arity.exact(1, arguments, IsObject.name);
+      return new Expr({ is_object: wrap(expr) });
+    }
+    function IsRef(expr) {
+      arity.exact(1, arguments, IsRef.name);
+      return new Expr({ is_ref: wrap(expr) });
+    }
+    function IsSet(expr) {
+      arity.exact(1, arguments, IsSet.name);
+      return new Expr({ is_set: wrap(expr) });
+    }
+    function IsDoc(expr) {
+      arity.exact(1, arguments, IsDoc.name);
+      return new Expr({ is_doc: wrap(expr) });
+    }
+    function IsLambda(expr) {
+      arity.exact(1, arguments, IsLambda.name);
+      return new Expr({ is_lambda: wrap(expr) });
+    }
+    function IsCollection(expr) {
+      arity.exact(1, arguments, IsCollection.name);
+      return new Expr({ is_collection: wrap(expr) });
+    }
+    function IsDatabase(expr) {
+      arity.exact(1, arguments, IsDatabase.name);
+      return new Expr({ is_database: wrap(expr) });
+    }
+    function IsIndex(expr) {
+      arity.exact(1, arguments, IsIndex.name);
+      return new Expr({ is_index: wrap(expr) });
+    }
+    function IsFunction(expr) {
+      arity.exact(1, arguments, IsFunction.name);
+      return new Expr({ is_function: wrap(expr) });
+    }
+    function IsKey(expr) {
+      arity.exact(1, arguments, IsKey.name);
+      return new Expr({ is_key: wrap(expr) });
+    }
+    function IsToken(expr) {
+      arity.exact(1, arguments, IsToken.name);
+      return new Expr({ is_token: wrap(expr) });
+    }
+    function IsCredentials(expr) {
+      arity.exact(1, arguments, IsCredentials.name);
+      return new Expr({ is_credentials: wrap(expr) });
+    }
+    function IsRole(expr) {
+      arity.exact(1, arguments, IsRole.name);
+      return new Expr({ is_role: wrap(expr) });
+    }
+    function Get(ref, ts) {
+      arity.between(1, 2, arguments, Get.name);
+      ts = util.defaults(ts, null);
+      return new Expr(params({ get: wrap(ref) }, { ts: wrap(ts) }));
+    }
+    function KeyFromSecret(secret) {
+      arity.exact(1, arguments, KeyFromSecret.name);
+      return new Expr({ key_from_secret: wrap(secret) });
+    }
+    function Reduce(lambda, initial, collection) {
+      arity.exact(3, arguments, Reduce.name);
+      return new Expr({
+        reduce: wrap(lambda),
+        initial: wrap(initial),
+        collection: wrap(collection)
+      });
+    }
+    function Paginate(set, opts) {
+      arity.between(1, 2, arguments, Paginate.name);
+      opts = util.defaults(opts, {});
+      return new Expr(objectAssign({ paginate: wrap(set) }, wrapValues(opts)));
+    }
+    function Exists(ref, ts) {
+      arity.between(1, 2, arguments, Exists.name);
+      ts = util.defaults(ts, null);
+      return new Expr(params({ exists: wrap(ref) }, { ts: wrap(ts) }));
+    }
+    function Create(collection_ref, params2) {
+      arity.between(1, 2, arguments, Create.name);
+      return new Expr({ create: wrap(collection_ref), params: wrap(params2) });
+    }
+    function Update(ref, params2) {
+      arity.exact(2, arguments, Update.name);
+      return new Expr({ update: wrap(ref), params: wrap(params2) });
+    }
+    function Replace(ref, params2) {
+      arity.exact(2, arguments, Replace.name);
+      return new Expr({ replace: wrap(ref), params: wrap(params2) });
+    }
+    function Delete(ref) {
+      arity.exact(1, arguments, Delete.name);
+      return new Expr({ delete: wrap(ref) });
+    }
+    function Insert(ref, ts, action, params2) {
+      arity.exact(4, arguments, Insert.name);
+      return new Expr({
+        insert: wrap(ref),
+        ts: wrap(ts),
+        action: wrap(action),
+        params: wrap(params2)
+      });
+    }
+    function Remove(ref, ts, action) {
+      arity.exact(3, arguments, Remove.name);
+      return new Expr({ remove: wrap(ref), ts: wrap(ts), action: wrap(action) });
+    }
+    function CreateClass(params2) {
+      arity.exact(1, arguments, CreateClass.name);
+      return new Expr({ create_class: wrap(params2) });
+    }
+    function CreateCollection(params2) {
+      arity.exact(1, arguments, CreateCollection.name);
+      return new Expr({ create_collection: wrap(params2) });
+    }
+    function CreateDatabase(params2) {
+      arity.exact(1, arguments, CreateDatabase.name);
+      return new Expr({ create_database: wrap(params2) });
+    }
+    function CreateIndex(params2) {
+      arity.exact(1, arguments, CreateIndex.name);
+      return new Expr({ create_index: wrap(params2) });
+    }
+    function CreateKey(params2) {
+      arity.exact(1, arguments, CreateKey.name);
+      return new Expr({ create_key: wrap(params2) });
+    }
+    function CreateFunction(params2) {
+      arity.exact(1, arguments, CreateFunction.name);
+      return new Expr({ create_function: wrap(params2) });
+    }
+    function CreateRole(params2) {
+      arity.exact(1, arguments, CreateRole.name);
+      return new Expr({ create_role: wrap(params2) });
+    }
+    function CreateAccessProvider(params2) {
+      arity.exact(1, arguments, CreateAccessProvider.name);
+      return new Expr({ create_access_provider: wrap(params2) });
+    }
+    function Singleton(ref) {
+      arity.exact(1, arguments, Singleton.name);
+      return new Expr({ singleton: wrap(ref) });
+    }
+    function Events(ref_set) {
+      arity.exact(1, arguments, Events.name);
+      return new Expr({ events: wrap(ref_set) });
+    }
+    function Match(index) {
+      arity.min(1, arguments, Match.name);
+      var args = argsToArray(arguments);
+      args.shift();
+      return new Expr({ match: wrap(index), terms: wrap(varargs(args)) });
+    }
+    function Union() {
+      arity.min(1, arguments, Union.name);
+      return new Expr({ union: wrap(varargs(arguments)) });
+    }
+    function Merge(merge, _with, lambda) {
+      arity.between(2, 3, arguments, Merge.name);
+      return new Expr(params({ merge: wrap(merge), with: wrap(_with) }, { lambda: wrap(lambda) }));
+    }
+    function Intersection() {
+      arity.min(1, arguments, Intersection.name);
+      return new Expr({ intersection: wrap(varargs(arguments)) });
+    }
+    function Difference() {
+      arity.min(1, arguments, Difference.name);
+      return new Expr({ difference: wrap(varargs(arguments)) });
+    }
+    function Distinct(set) {
+      arity.exact(1, arguments, Distinct.name);
+      return new Expr({ distinct: wrap(set) });
+    }
+    function Join(source, target) {
+      arity.exact(2, arguments, Join.name);
+      return new Expr({ join: wrap(source), with: wrap(target) });
+    }
+    function Range(set, from, to) {
+      arity.exact(3, arguments, Range.name);
+      return new Expr({ range: wrap(set), from: wrap(from), to: wrap(to) });
+    }
+    function Login(ref, params2) {
+      arity.exact(2, arguments, Login.name);
+      return new Expr({ login: wrap(ref), params: wrap(params2) });
+    }
+    function Logout(delete_tokens) {
+      arity.exact(1, arguments, Logout.name);
+      return new Expr({ logout: wrap(delete_tokens) });
+    }
+    function Identify(ref, password) {
+      arity.exact(2, arguments, Identify.name);
+      return new Expr({ identify: wrap(ref), password: wrap(password) });
+    }
+    function Identity() {
+      arity.exact(0, arguments, Identity.name);
+      return new Expr({ identity: null });
+    }
+    function CurrentIdentity() {
+      arity.exact(0, arguments, CurrentIdentity.name);
+      return new Expr({ current_identity: null });
+    }
+    function HasIdentity() {
+      arity.exact(0, arguments, HasIdentity.name);
+      return new Expr({ has_identity: null });
+    }
+    function HasCurrentIdentity() {
+      arity.exact(0, arguments, HasCurrentIdentity.name);
+      return new Expr({ has_current_identity: null });
+    }
+    function CurrentToken() {
+      arity.exact(0, arguments, CurrentToken.name);
+      return new Expr({ current_token: null });
+    }
+    function HasCurrentToken() {
+      arity.exact(0, arguments, HasCurrentToken.name);
+      return new Expr({ has_current_token: null });
+    }
+    function Concat(strings, separator) {
+      arity.min(1, arguments, Concat.name);
+      separator = util.defaults(separator, null);
+      return new Expr(params({ concat: wrap(strings) }, { separator: wrap(separator) }));
+    }
+    function Casefold(string, normalizer) {
+      arity.min(1, arguments, Casefold.name);
+      return new Expr(params({ casefold: wrap(string) }, { normalizer: wrap(normalizer) }));
+    }
+    function ContainsStr(value, search) {
+      arity.exact(2, arguments, ContainsStr.name);
+      return new Expr({ containsstr: wrap(value), search: wrap(search) });
+    }
+    function ContainsStrRegex(value, pattern) {
+      arity.exact(2, arguments, ContainsStrRegex.name);
+      return new Expr({ containsstrregex: wrap(value), pattern: wrap(pattern) });
+    }
+    function StartsWith(value, search) {
+      arity.exact(2, arguments, StartsWith.name);
+      return new Expr({ startswith: wrap(value), search: wrap(search) });
+    }
+    function EndsWith(value, search) {
+      arity.exact(2, arguments, EndsWith.name);
+      return new Expr({ endswith: wrap(value), search: wrap(search) });
+    }
+    function RegexEscape(value) {
+      arity.exact(1, arguments, RegexEscape.name);
+      return new Expr({ regexescape: wrap(value) });
+    }
+    function FindStr(value, find, start) {
+      arity.between(2, 3, arguments, FindStr.name);
+      start = util.defaults(start, null);
+      return new Expr(params({ findstr: wrap(value), find: wrap(find) }, { start: wrap(start) }));
+    }
+    function FindStrRegex(value, pattern, start, numResults) {
+      arity.between(2, 4, arguments, FindStrRegex.name);
+      start = util.defaults(start, null);
+      return new Expr(params({ findstrregex: wrap(value), pattern: wrap(pattern) }, { start: wrap(start), num_results: wrap(numResults) }));
+    }
+    function Length(value) {
+      arity.exact(1, arguments, Length.name);
+      return new Expr({ length: wrap(value) });
+    }
+    function LowerCase(value) {
+      arity.exact(1, arguments, LowerCase.name);
+      return new Expr({ lowercase: wrap(value) });
+    }
+    function LTrim(value) {
+      arity.exact(1, arguments, LTrim.name);
+      return new Expr({ ltrim: wrap(value) });
+    }
+    function NGram(terms, min, max) {
+      arity.between(1, 3, arguments, NGram.name);
+      min = util.defaults(min, null);
+      max = util.defaults(max, null);
+      return new Expr(params({ ngram: wrap(terms) }, { min: wrap(min), max: wrap(max) }));
+    }
+    function Repeat(value, number) {
+      arity.between(1, 2, arguments, Repeat.name);
+      number = util.defaults(number, null);
+      return new Expr(params({ repeat: wrap(value) }, { number: wrap(number) }));
+    }
+    function ReplaceStr(value, find, replace) {
+      arity.exact(3, arguments, ReplaceStr.name);
+      return new Expr({
+        replacestr: wrap(value),
+        find: wrap(find),
+        replace: wrap(replace)
+      });
+    }
+    function ReplaceStrRegex(value, pattern, replace, first) {
+      arity.between(3, 4, arguments, ReplaceStrRegex.name);
+      first = util.defaults(first, null);
+      return new Expr(params({
+        replacestrregex: wrap(value),
+        pattern: wrap(pattern),
+        replace: wrap(replace)
+      }, { first: wrap(first) }));
+    }
+    function RTrim(value) {
+      arity.exact(1, arguments, RTrim.name);
+      return new Expr({ rtrim: wrap(value) });
+    }
+    function Space(num) {
+      arity.exact(1, arguments, Space.name);
+      return new Expr({ space: wrap(num) });
+    }
+    function SubString(value, start, length) {
+      arity.between(1, 3, arguments, SubString.name);
+      start = util.defaults(start, null);
+      length = util.defaults(length, null);
+      return new Expr(params({ substring: wrap(value) }, { start: wrap(start), length: wrap(length) }));
+    }
+    function TitleCase(value) {
+      arity.exact(1, arguments, TitleCase.name);
+      return new Expr({ titlecase: wrap(value) });
+    }
+    function Trim(value) {
+      arity.exact(1, arguments, Trim.name);
+      return new Expr({ trim: wrap(value) });
+    }
+    function UpperCase(value) {
+      arity.exact(1, arguments, UpperCase.name);
+      return new Expr({ uppercase: wrap(value) });
+    }
+    function Format(string) {
+      arity.min(1, arguments, Format.name);
+      var args = argsToArray(arguments);
+      args.shift();
+      return new Expr({ format: wrap(string), values: wrap(varargs(args)) });
+    }
+    function Time(string) {
+      arity.exact(1, arguments, Time.name);
+      return new Expr({ time: wrap(string) });
+    }
+    function Epoch(number, unit) {
+      arity.exact(2, arguments, Epoch.name);
+      return new Expr({ epoch: wrap(number), unit: wrap(unit) });
+    }
+    function TimeAdd(base, offset, unit) {
+      arity.exact(3, arguments, TimeAdd.name);
+      return new Expr({
+        time_add: wrap(base),
+        offset: wrap(offset),
+        unit: wrap(unit)
+      });
+    }
+    function TimeSubtract(base, offset, unit) {
+      arity.exact(3, arguments, TimeSubtract.name);
+      return new Expr({
+        time_subtract: wrap(base),
+        offset: wrap(offset),
+        unit: wrap(unit)
+      });
+    }
+    function TimeDiff(start, finish, unit) {
+      arity.exact(3, arguments, TimeDiff.name);
+      return new Expr({
+        time_diff: wrap(start),
+        other: wrap(finish),
+        unit: wrap(unit)
+      });
+    }
+    function Date2(string) {
+      arity.exact(1, arguments, Date2.name);
+      return new Expr({ date: wrap(string) });
+    }
+    function Now() {
+      arity.exact(0, arguments, Now.name);
+      return new Expr({ now: wrap(null) });
+    }
+    function NextId() {
+      arity.exact(0, arguments, NextId.name);
+      return new Expr({ next_id: null });
+    }
+    function NewId() {
+      arity.exact(0, arguments, NewId.name);
+      return new Expr({ new_id: null });
+    }
+    function Database(name, scope) {
+      arity.between(1, 2, arguments, Database.name);
+      switch (arguments.length) {
+        case 1:
+          return new Expr({ database: wrap(name) });
+        case 2:
+          return new Expr({ database: wrap(name), scope: wrap(scope) });
+      }
+    }
+    function Index(name, scope) {
+      arity.between(1, 2, arguments, Index.name);
+      switch (arguments.length) {
+        case 1:
+          return new Expr({ index: wrap(name) });
+        case 2:
+          return new Expr({ index: wrap(name), scope: wrap(scope) });
+      }
+    }
+    function Class(name, scope) {
+      arity.between(1, 2, arguments, Class.name);
+      switch (arguments.length) {
+        case 1:
+          return new Expr({ class: wrap(name) });
+        case 2:
+          return new Expr({ class: wrap(name), scope: wrap(scope) });
+      }
+    }
+    function Collection(name, scope) {
+      arity.between(1, 2, arguments, Collection.name);
+      switch (arguments.length) {
+        case 1:
+          return new Expr({ collection: wrap(name) });
+        case 2:
+          return new Expr({ collection: wrap(name), scope: wrap(scope) });
+      }
+    }
+    function FunctionFn(name, scope) {
+      arity.between(1, 2, arguments, FunctionFn.name);
+      switch (arguments.length) {
+        case 1:
+          return new Expr({ function: wrap(name) });
+        case 2:
+          return new Expr({ function: wrap(name), scope: wrap(scope) });
+      }
+    }
+    function Role(name, scope) {
+      arity.between(1, 2, arguments, Role.name);
+      scope = util.defaults(scope, null);
+      return new Expr(params({ role: wrap(name) }, { scope: wrap(scope) }));
+    }
+    function AccessProviders(scope) {
+      arity.max(1, arguments, AccessProviders.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ access_providers: wrap(scope) });
+    }
+    function Classes(scope) {
+      arity.max(1, arguments, Classes.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ classes: wrap(scope) });
+    }
+    function Collections(scope) {
+      arity.max(1, arguments, Collections.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ collections: wrap(scope) });
+    }
+    function Databases(scope) {
+      arity.max(1, arguments, Databases.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ databases: wrap(scope) });
+    }
+    function Indexes(scope) {
+      arity.max(1, arguments, Indexes.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ indexes: wrap(scope) });
+    }
+    function Functions(scope) {
+      arity.max(1, arguments, Functions.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ functions: wrap(scope) });
+    }
+    function Roles(scope) {
+      arity.max(1, arguments, Roles.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ roles: wrap(scope) });
+    }
+    function Keys(scope) {
+      arity.max(1, arguments, Keys.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ keys: wrap(scope) });
+    }
+    function Tokens(scope) {
+      arity.max(1, arguments, Tokens.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ tokens: wrap(scope) });
+    }
+    function Credentials(scope) {
+      arity.max(1, arguments, Credentials.name);
+      scope = util.defaults(scope, null);
+      return new Expr({ credentials: wrap(scope) });
+    }
+    function Equals() {
+      arity.min(1, arguments, Equals.name);
+      return new Expr({ equals: wrap(varargs(arguments)) });
+    }
+    function Contains(path, _in) {
+      arity.exact(2, arguments, Contains.name);
+      return new Expr({ contains: wrap(path), in: wrap(_in) });
+    }
+    function ContainsValue(value, _in) {
+      arity.exact(2, arguments, ContainsValue.name);
+      return new Expr({ contains_value: wrap(value), in: wrap(_in) });
+    }
+    function ContainsField(field, obj) {
+      arity.exact(2, arguments, ContainsField.name);
+      return new Expr({ contains_field: wrap(field), in: wrap(obj) });
+    }
+    function ContainsPath(path, _in) {
+      arity.exact(2, arguments, ContainsPath.name);
+      return new Expr({ contains_path: wrap(path), in: wrap(_in) });
+    }
+    function Select(path, from, _default) {
+      arity.between(2, 3, arguments, Select.name);
+      var exprObj = { select: wrap(path), from: wrap(from) };
+      if (_default !== void 0) {
+        exprObj.default = wrap(_default);
+      }
+      return new Expr(exprObj);
+    }
+    function SelectAll(path, from) {
+      arity.exact(2, arguments, SelectAll.name);
+      return new Expr({ select_all: wrap(path), from: wrap(from) });
+    }
+    function Abs(expr) {
+      arity.exact(1, arguments, Abs.name);
+      return new Expr({ abs: wrap(expr) });
+    }
+    function Add() {
+      arity.min(1, arguments, Add.name);
+      return new Expr({ add: wrap(varargs(arguments)) });
+    }
+    function BitAnd() {
+      arity.min(1, arguments, BitAnd.name);
+      return new Expr({ bitand: wrap(varargs(arguments)) });
+    }
+    function BitNot(expr) {
+      arity.exact(1, arguments, BitNot.name);
+      return new Expr({ bitnot: wrap(expr) });
+    }
+    function BitOr() {
+      arity.min(1, arguments, BitOr.name);
+      return new Expr({ bitor: wrap(varargs(arguments)) });
+    }
+    function BitXor() {
+      arity.min(1, arguments, BitXor.name);
+      return new Expr({ bitxor: wrap(varargs(arguments)) });
+    }
+    function Ceil(expr) {
+      arity.exact(1, arguments, Ceil.name);
+      return new Expr({ ceil: wrap(expr) });
+    }
+    function Divide() {
+      arity.min(1, arguments, Divide.name);
+      return new Expr({ divide: wrap(varargs(arguments)) });
+    }
+    function Floor(expr) {
+      arity.exact(1, arguments, Floor.name);
+      return new Expr({ floor: wrap(expr) });
+    }
+    function Max() {
+      arity.min(1, arguments, Max.name);
+      return new Expr({ max: wrap(varargs(arguments)) });
+    }
+    function Min() {
+      arity.min(1, arguments, Min.name);
+      return new Expr({ min: wrap(varargs(arguments)) });
+    }
+    function Modulo() {
+      arity.min(1, arguments, Modulo.name);
+      return new Expr({ modulo: wrap(varargs(arguments)) });
+    }
+    function Multiply() {
+      arity.min(1, arguments, Multiply.name);
+      return new Expr({ multiply: wrap(varargs(arguments)) });
+    }
+    function Round(value, precision) {
+      arity.min(1, arguments, Round.name);
+      precision = util.defaults(precision, null);
+      return new Expr(params({ round: wrap(value) }, { precision: wrap(precision) }));
+    }
+    function Subtract() {
+      arity.min(1, arguments, Subtract.name);
+      return new Expr({ subtract: wrap(varargs(arguments)) });
+    }
+    function Sign(expr) {
+      arity.exact(1, arguments, Sign.name);
+      return new Expr({ sign: wrap(expr) });
+    }
+    function Sqrt(expr) {
+      arity.exact(1, arguments, Sqrt.name);
+      return new Expr({ sqrt: wrap(expr) });
+    }
+    function Trunc(value, precision) {
+      arity.min(1, arguments, Trunc.name);
+      precision = util.defaults(precision, null);
+      return new Expr(params({ trunc: wrap(value) }, { precision: wrap(precision) }));
+    }
+    function Count(collection) {
+      arity.exact(1, arguments, Count.name);
+      return new Expr({ count: wrap(collection) });
+    }
+    function Sum(collection) {
+      arity.exact(1, arguments, Sum.name);
+      return new Expr({ sum: wrap(collection) });
+    }
+    function Mean(collection) {
+      arity.exact(1, arguments, Mean.name);
+      return new Expr({ mean: wrap(collection) });
+    }
+    function Any(collection) {
+      arity.exact(1, arguments, Any.name);
+      return new Expr({ any: wrap(collection) });
+    }
+    function All(collection) {
+      arity.exact(1, arguments, All.name);
+      return new Expr({ all: wrap(collection) });
+    }
+    function Acos(expr) {
+      arity.exact(1, arguments, Acos.name);
+      return new Expr({ acos: wrap(expr) });
+    }
+    function Asin(expr) {
+      arity.exact(1, arguments, Asin.name);
+      return new Expr({ asin: wrap(expr) });
+    }
+    function Atan(expr) {
+      arity.exact(1, arguments, Atan.name);
+      return new Expr({ atan: wrap(expr) });
+    }
+    function Cos(expr) {
+      arity.exact(1, arguments, Cos.name);
+      return new Expr({ cos: wrap(expr) });
+    }
+    function Cosh(expr) {
+      arity.exact(1, arguments, Cosh.name);
+      return new Expr({ cosh: wrap(expr) });
+    }
+    function Degrees(expr) {
+      arity.exact(1, arguments, Degrees.name);
+      return new Expr({ degrees: wrap(expr) });
+    }
+    function Exp(expr) {
+      arity.exact(1, arguments, Exp.name);
+      return new Expr({ exp: wrap(expr) });
+    }
+    function Hypot(value, side) {
+      arity.min(1, arguments, Hypot.name);
+      side = util.defaults(side, null);
+      return new Expr(params({ hypot: wrap(value) }, { b: wrap(side) }));
+    }
+    function Ln(expr) {
+      arity.exact(1, arguments, Ln.name);
+      return new Expr({ ln: wrap(expr) });
+    }
+    function Log(expr) {
+      arity.exact(1, arguments, Log.name);
+      return new Expr({ log: wrap(expr) });
+    }
+    function Pow(value, exponent) {
+      arity.min(1, arguments, Pow.name);
+      exponent = util.defaults(exponent, null);
+      return new Expr(params({ pow: wrap(value) }, { exp: wrap(exponent) }));
+    }
+    function Radians(expr) {
+      arity.exact(1, arguments, Radians.name);
+      return new Expr({ radians: wrap(expr) });
+    }
+    function Sin(expr) {
+      arity.exact(1, arguments, Sin.name);
+      return new Expr({ sin: wrap(expr) });
+    }
+    function Sinh(expr) {
+      arity.exact(1, arguments, Sinh.name);
+      return new Expr({ sinh: wrap(expr) });
+    }
+    function Tan(expr) {
+      arity.exact(1, arguments, Tan.name);
+      return new Expr({ tan: wrap(expr) });
+    }
+    function Tanh(expr) {
+      arity.exact(1, arguments, Tanh.name);
+      return new Expr({ tanh: wrap(expr) });
+    }
+    function LT() {
+      arity.min(1, arguments, LT.name);
+      return new Expr({ lt: wrap(varargs(arguments)) });
+    }
+    function LTE() {
+      arity.min(1, arguments, LTE.name);
+      return new Expr({ lte: wrap(varargs(arguments)) });
+    }
+    function GT() {
+      arity.min(1, arguments, GT.name);
+      return new Expr({ gt: wrap(varargs(arguments)) });
+    }
+    function GTE() {
+      arity.min(1, arguments, GTE.name);
+      return new Expr({ gte: wrap(varargs(arguments)) });
+    }
+    function And() {
+      arity.min(1, arguments, And.name);
+      return new Expr({ and: wrap(varargs(arguments)) });
+    }
+    function Or() {
+      arity.min(1, arguments, Or.name);
+      return new Expr({ or: wrap(varargs(arguments)) });
+    }
+    function Not(boolean) {
+      arity.exact(1, arguments, Not.name);
+      return new Expr({ not: wrap(boolean) });
+    }
+    function ToString(expr) {
+      arity.exact(1, arguments, ToString.name);
+      return new Expr({ to_string: wrap(expr) });
+    }
+    function ToNumber(expr) {
+      arity.exact(1, arguments, ToNumber.name);
+      return new Expr({ to_number: wrap(expr) });
+    }
+    function ToObject(expr) {
+      arity.exact(1, arguments, ToObject.name);
+      return new Expr({ to_object: wrap(expr) });
+    }
+    function ToArray(expr) {
+      arity.exact(1, arguments, ToArray.name);
+      return new Expr({ to_array: wrap(expr) });
+    }
+    function ToDouble(expr) {
+      arity.exact(1, arguments, ToDouble.name);
+      return new Expr({ to_double: wrap(expr) });
+    }
+    function ToInteger(expr) {
+      arity.exact(1, arguments, ToInteger.name);
+      return new Expr({ to_integer: wrap(expr) });
+    }
+    function ToTime(expr) {
+      arity.exact(1, arguments, ToTime.name);
+      return new Expr({ to_time: wrap(expr) });
+    }
+    function ToSeconds(expr) {
+      arity.exact(1, arguments, ToSeconds.name);
+      return new Expr({ to_seconds: wrap(expr) });
+    }
+    function ToMillis(expr) {
+      arity.exact(1, arguments, ToMillis.name);
+      return new Expr({ to_millis: wrap(expr) });
+    }
+    function ToMicros(expr) {
+      arity.exact(1, arguments, ToMicros.name);
+      return new Expr({ to_micros: wrap(expr) });
+    }
+    function DayOfWeek(expr) {
+      arity.exact(1, arguments, DayOfWeek.name);
+      return new Expr({ day_of_week: wrap(expr) });
+    }
+    function DayOfYear(expr) {
+      arity.exact(1, arguments, DayOfYear.name);
+      return new Expr({ day_of_year: wrap(expr) });
+    }
+    function DayOfMonth(expr) {
+      arity.exact(1, arguments, DayOfMonth.name);
+      return new Expr({ day_of_month: wrap(expr) });
+    }
+    function Hour(expr) {
+      arity.exact(1, arguments, Hour.name);
+      return new Expr({ hour: wrap(expr) });
+    }
+    function Minute(expr) {
+      arity.exact(1, arguments, Minute.name);
+      return new Expr({ minute: wrap(expr) });
+    }
+    function Second(expr) {
+      arity.exact(1, arguments, Second.name);
+      return new Expr({ second: wrap(expr) });
+    }
+    function Month(expr) {
+      arity.exact(1, arguments, Month.name);
+      return new Expr({ month: wrap(expr) });
+    }
+    function Year(expr) {
+      arity.exact(1, arguments, Year.name);
+      return new Expr({ year: wrap(expr) });
+    }
+    function ToDate(expr) {
+      arity.exact(1, arguments, ToDate.name);
+      return new Expr({ to_date: wrap(expr) });
+    }
+    function MoveDatabase(from, to) {
+      arity.exact(2, arguments, MoveDatabase.name);
+      return new Expr({ move_database: wrap(from), to: wrap(to) });
+    }
+    function Documents(collection) {
+      arity.exact(1, arguments, Documents.name);
+      return new Expr({ documents: wrap(collection) });
+    }
+    function Reverse(expr) {
+      arity.exact(1, arguments, Reverse.name);
+      return new Expr({ reverse: wrap(expr) });
+    }
+    function AccessProvider(name) {
+      arity.exact(1, arguments, AccessProvider.name);
+      return new Expr({ access_provider: wrap(name) });
+    }
+    function arity(min, max, args, callerFunc) {
+      if (min !== null && args.length < min || max !== null && args.length > max) {
+        throw new errors.InvalidArity(min, max, args.length, callerFunc);
+      }
+    }
+    arity.exact = function(n, args, callerFunc) {
+      arity(n, n, args, callerFunc);
+    };
+    arity.max = function(n, args, callerFunc) {
+      arity(null, n, args, callerFunc);
+    };
+    arity.min = function(n, args, callerFunc) {
+      arity(n, null, args, callerFunc);
+    };
+    arity.between = function(min, max, args, callerFunc) {
+      arity(min, max, args, callerFunc);
+    };
+    function params(mainParams, optionalParams) {
+      for (var key in optionalParams) {
+        var val = optionalParams[key];
+        if (val !== null && val !== void 0) {
+          mainParams[key] = val;
+        }
+      }
+      return mainParams;
+    }
+    function varargs(values2) {
+      var valuesAsArr = Array.isArray(values2) ? values2 : Array.prototype.slice.call(values2);
+      return values2.length === 1 ? values2[0] : valuesAsArr;
+    }
+    function argsToArray(args) {
+      var rv = [];
+      rv.push.apply(rv, args);
+      return rv;
+    }
+    function wrap(obj) {
+      arity.exact(1, arguments, wrap.name);
+      if (obj === null) {
+        return null;
+      } else if (obj instanceof Expr || util.checkInstanceHasProperty(obj, "_isFaunaExpr")) {
+        return obj;
+      } else if (typeof obj === "symbol") {
+        return obj.toString().replace(/Symbol\((.*)\)/, function(str, symbol) {
+          return symbol;
+        });
+      } else if (typeof obj === "function") {
+        return Lambda(obj);
+      } else if (Array.isArray(obj)) {
+        return new Expr(obj.map(function(elem) {
+          return wrap(elem);
+        }));
+      } else if (obj instanceof Uint8Array || obj instanceof ArrayBuffer) {
+        return new values.Bytes(obj);
+      } else if (typeof obj === "object") {
+        return new Expr({ object: wrapValues(obj) });
+      } else {
+        return obj;
+      }
+    }
+    function wrapValues(obj) {
+      if (obj !== null) {
+        var rv = {};
+        Object.keys(obj).forEach(function(key) {
+          rv[key] = wrap(obj[key]);
+        });
+        return rv;
+      } else {
+        return null;
+      }
+    }
+    module.exports = {
+      Ref,
+      Bytes,
+      Abort,
+      At,
+      Let,
+      Var,
+      If,
+      Do,
+      Object: objectFunction,
+      Lambda,
+      Call,
+      Query,
+      Map: Map2,
+      Foreach,
+      Filter,
+      Take,
+      Drop,
+      Prepend,
+      Append,
+      IsEmpty,
+      IsNonEmpty,
+      IsNumber,
+      IsDouble,
+      IsInteger,
+      IsBoolean,
+      IsNull,
+      IsBytes,
+      IsTimestamp,
+      IsDate,
+      IsString,
+      IsArray,
+      IsObject,
+      IsRef,
+      IsSet,
+      IsDoc,
+      IsLambda,
+      IsCollection,
+      IsDatabase,
+      IsIndex,
+      IsFunction,
+      IsKey,
+      IsToken,
+      IsCredentials,
+      IsRole,
+      Get,
+      KeyFromSecret,
+      Reduce,
+      Paginate,
+      Exists,
+      Create,
+      Update,
+      Replace,
+      Delete,
+      Insert,
+      Remove,
+      CreateClass: deprecate(CreateClass, "CreateClass() is deprecated, use CreateCollection() instead"),
+      CreateCollection,
+      CreateDatabase,
+      CreateIndex,
+      CreateKey,
+      CreateFunction,
+      CreateRole,
+      CreateAccessProvider,
+      Singleton,
+      Events,
+      Match,
+      Union,
+      Merge,
+      Intersection,
+      Difference,
+      Distinct,
+      Join,
+      Range,
+      Login,
+      Logout,
+      Identify,
+      Identity: deprecate(Identity, "Identity() is deprecated, use CurrentIdentity() instead"),
+      CurrentIdentity,
+      HasIdentity: deprecate(HasIdentity, "HasIdentity() is deprecated, use HasCurrentIdentity() instead"),
+      HasCurrentIdentity,
+      CurrentToken,
+      HasCurrentToken,
+      Concat,
+      Casefold,
+      ContainsStr,
+      ContainsStrRegex,
+      StartsWith,
+      EndsWith,
+      FindStr,
+      FindStrRegex,
+      Length,
+      LowerCase,
+      LTrim,
+      NGram,
+      Repeat,
+      ReplaceStr,
+      ReplaceStrRegex,
+      RegexEscape,
+      RTrim,
+      Space,
+      SubString,
+      TitleCase,
+      Trim,
+      UpperCase,
+      Format,
+      Time,
+      TimeAdd,
+      TimeSubtract,
+      TimeDiff,
+      Epoch,
+      Date: Date2,
+      Now,
+      NextId: deprecate(NextId, "NextId() is deprecated, use NewId() instead"),
+      NewId,
+      Database,
+      Index,
+      Class: deprecate(Class, "Class() is deprecated, use Collection() instead"),
+      Collection,
+      Function: FunctionFn,
+      Role,
+      AccessProviders,
+      Classes: deprecate(Classes, "Classes() is deprecated, use Collections() instead"),
+      Collections,
+      Databases,
+      Indexes,
+      Functions,
+      Roles,
+      Keys,
+      Tokens,
+      Credentials,
+      Equals,
+      Contains: deprecate(Contains, "Contains() is deprecated, use ContainsPath() instead"),
+      ContainsPath,
+      ContainsField,
+      ContainsValue,
+      Select,
+      SelectAll: deprecate(SelectAll, "SelectAll() is deprecated. Avoid use."),
+      Abs,
+      Add,
+      BitAnd,
+      BitNot,
+      BitOr,
+      BitXor,
+      Ceil,
+      Divide,
+      Floor,
+      Max,
+      Min,
+      Modulo,
+      Multiply,
+      Round,
+      Subtract,
+      Sign,
+      Sqrt,
+      Trunc,
+      Count,
+      Sum,
+      Mean,
+      Any,
+      All,
+      Acos,
+      Asin,
+      Atan,
+      Cos,
+      Cosh,
+      Degrees,
+      Exp,
+      Hypot,
+      Ln,
+      Log,
+      Pow,
+      Radians,
+      Sin,
+      Sinh,
+      Tan,
+      Tanh,
+      LT,
+      LTE,
+      GT,
+      GTE,
+      And,
+      Or,
+      Not,
+      ToString,
+      ToNumber,
+      ToObject,
+      ToArray,
+      ToDouble,
+      ToInteger,
+      ToTime,
+      ToSeconds,
+      ToMicros,
+      ToMillis,
+      DayOfMonth,
+      DayOfWeek,
+      DayOfYear,
+      Second,
+      Minute,
+      Hour,
+      Month,
+      Year,
+      ToDate,
+      MoveDatabase,
+      Documents,
+      Reverse,
+      AccessProvider,
+      wrap
+    };
+  }
+});
+
+// node_modules/faunadb/src/_json.js
+var require_json = __commonJS({
+  "node_modules/faunadb/src/_json.js"(exports, module) {
+    "use strict";
+    var values = require_values();
+    function toJSON(object, pretty) {
+      pretty = typeof pretty !== "undefined" ? pretty : false;
+      if (pretty) {
+        return JSON.stringify(object, null, "  ");
+      } else {
+        return JSON.stringify(object);
+      }
+    }
+    function parseJSON(json) {
+      return JSON.parse(json, json_parse);
+    }
+    function parseJSONStreaming(content) {
+      var values2 = [];
+      try {
+        values2.push(parseJSON(content));
+        content = "";
+      } catch (err) {
+        while (true) {
+          var pos = content.indexOf("\n") + 1;
+          if (pos <= 0) {
+            break;
+          }
+          var slice = content.slice(0, pos).trim();
+          if (slice.length > 0) {
+            values2.push(parseJSON(slice));
+          }
+          content = content.slice(pos);
+        }
+      }
+      return {
+        values: values2,
+        buffer: content
+      };
+    }
+    function json_parse(_, val) {
+      if (typeof val !== "object" || val === null) {
+        return val;
+      } else if ("@ref" in val) {
+        var ref = val["@ref"];
+        if (!("collection" in ref) && !("database" in ref)) {
+          return values.Native.fromName(ref["id"]);
+        }
+        var col = json_parse("collection", ref["collection"]);
+        var db = json_parse("database", ref["database"]);
+        return new values.Ref(ref["id"], col, db);
+      } else if ("@obj" in val) {
+        return val["@obj"];
+      } else if ("@set" in val) {
+        return new values.SetRef(val["@set"]);
+      } else if ("@ts" in val) {
+        return new values.FaunaTime(val["@ts"]);
+      } else if ("@date" in val) {
+        return new values.FaunaDate(val["@date"]);
+      } else if ("@bytes" in val) {
+        return new values.Bytes(val["@bytes"]);
+      } else if ("@query" in val) {
+        return new values.Query(val["@query"]);
+      } else {
+        return val;
+      }
+    }
+    module.exports = {
+      toJSON,
+      parseJSON,
+      parseJSONStreaming
+    };
+  }
+});
+
+// node_modules/faunadb/src/PageHelper.js
+var require_PageHelper = __commonJS({
+  "node_modules/faunadb/src/PageHelper.js"(exports, module) {
+    "use strict";
+    var query = require_query();
+    var objectAssign = require_object_assign();
+    function PageHelper(client, set, params, options) {
+      if (params === void 0) {
+        params = {};
+      }
+      if (options === void 0) {
+        options = {};
+      }
+      this.reverse = false;
+      this.params = {};
+      this.before = void 0;
+      this.after = void 0;
+      objectAssign(this.params, params);
+      var cursorParams = this.params.cursor || this.params;
+      if ("before" in cursorParams) {
+        this.before = cursorParams.before;
+        delete cursorParams.before;
+      } else if ("after" in cursorParams) {
+        this.after = cursorParams.after;
+        delete cursorParams.after;
+      }
+      this.options = {};
+      objectAssign(this.options, options);
+      this.client = client;
+      this.set = set;
+      this._faunaFunctions = [];
+    }
+    PageHelper.prototype.map = function(lambda) {
+      var rv = this._clone();
+      rv._faunaFunctions.push(function(q4) {
+        return query.Map(q4, lambda);
+      });
+      return rv;
+    };
+    PageHelper.prototype.filter = function(lambda) {
+      var rv = this._clone();
+      rv._faunaFunctions.push(function(q4) {
+        return query.Filter(q4, lambda);
+      });
+      return rv;
+    };
+    PageHelper.prototype.each = function(lambda) {
+      return this._retrieveNextPage(this.after, false).then(this._consumePages(lambda, false));
+    };
+    PageHelper.prototype.eachReverse = function(lambda) {
+      return this._retrieveNextPage(this.before, true).then(this._consumePages(lambda, true));
+    };
+    PageHelper.prototype.previousPage = function() {
+      var self2 = this;
+      return this._retrieveNextPage(this.before, true).then(this._adjustCursors.bind(self2));
+    };
+    PageHelper.prototype.nextPage = function() {
+      var self2 = this;
+      return this._retrieveNextPage(this.after, false).then(this._adjustCursors.bind(self2));
+    };
+    PageHelper.prototype._adjustCursors = function(page) {
+      if (page.after !== void 0) {
+        this.after = page.after;
+      }
+      if (page.before !== void 0) {
+        this.before = page.before;
+      }
+      return page.data;
+    };
+    PageHelper.prototype._consumePages = function(lambda, reverse) {
+      var self2 = this;
+      return function(page) {
+        var data = [];
+        page.data.forEach(function(item) {
+          if (item.document) {
+            item.instance = item.document;
+          }
+          if (item.value && item.value.document) {
+            item.value.instance = item.value.document;
+          }
+          data.push(item);
+        });
+        lambda(data);
+        var nextCursor;
+        if (reverse) {
+          nextCursor = page.before;
+        } else {
+          nextCursor = page.after;
+        }
+        if (nextCursor !== void 0) {
+          return self2._retrieveNextPage(nextCursor, reverse).then(self2._consumePages(lambda, reverse));
+        } else {
+          return Promise.resolve();
+        }
+      };
+    };
+    PageHelper.prototype._retrieveNextPage = function(cursor, reverse) {
+      var opts = {};
+      objectAssign(opts, this.params);
+      var cursorOpts = opts.cursor || opts;
+      if (cursor !== void 0) {
+        if (reverse) {
+          cursorOpts.before = cursor;
+        } else {
+          cursorOpts.after = cursor;
+        }
+      } else {
+        if (reverse) {
+          cursorOpts.before = null;
+        }
+      }
+      var q4 = query.Paginate(this.set, opts);
+      if (this._faunaFunctions.length > 0) {
+        this._faunaFunctions.forEach(function(lambda) {
+          q4 = lambda(q4);
+        });
+      }
+      return this.client.query(q4, this.options);
+    };
+    PageHelper.prototype._clone = function() {
+      return Object.create(PageHelper.prototype, {
+        client: { value: this.client },
+        set: { value: this.set },
+        _faunaFunctions: { value: this._faunaFunctions },
+        before: { value: this.before },
+        after: { value: this.after },
+        params: { value: this.params }
+      });
+    };
+    module.exports = PageHelper;
+  }
+});
+
+// node_modules/faunadb/src/RequestResult.js
+var require_RequestResult = __commonJS({
+  "node_modules/faunadb/src/RequestResult.js"(exports, module) {
+    "use strict";
+    function RequestResult(method, path, query, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
+      this.method = method;
+      this.path = path;
+      this.query = query;
+      this.requestRaw = requestRaw;
+      this.requestContent = requestContent;
+      this.responseRaw = responseRaw;
+      this.responseContent = responseContent;
+      this.statusCode = statusCode;
+      this.responseHeaders = responseHeaders;
+      this.startTime = startTime;
+      this.endTime = endTime;
+    }
+    Object.defineProperty(RequestResult.prototype, "timeTaken", {
+      get: function() {
+        return this.endTime - this.startTime;
+      }
+    });
+    module.exports = RequestResult;
+  }
+});
+
+// node_modules/faunadb/src/_http/errors.js
+var require_errors2 = __commonJS({
+  "node_modules/faunadb/src/_http/errors.js"(exports, module) {
+    "use strict";
+    var util = require_util();
+    function TimeoutError(message) {
+      Error.call(this);
+      this.message = message || "Request aborted due to timeout";
+      this.isTimeoutError = true;
+    }
+    util.inherits(TimeoutError, Error);
+    function AbortError(message) {
+      Error.call(this);
+      this.message = message || "Request aborted";
+      this.isAbortError = true;
+    }
+    util.inherits(AbortError, Error);
+    module.exports = {
+      TimeoutError,
+      AbortError
+    };
+  }
+});
+
+// (disabled):http2
+var require_http2 = __commonJS({
+  "(disabled):http2"() {
+  }
+});
+
+// node_modules/faunadb/src/_http/http2Adapter.js
+var require_http2Adapter = __commonJS({
+  "node_modules/faunadb/src/_http/http2Adapter.js"(exports, module) {
+    "use strict";
+    var http2 = require_http2();
+    var errors = require_errors2();
+    var faunaErrors = require_errors();
+    var util = require_util();
+    var STREAM_PREFIX = "stream::";
+    function Http2Adapter(options) {
+      this.type = "http2";
+      this._sessionMap = {};
+      this._http2SessionIdleTime = options.http2SessionIdleTime;
+      this._closed = false;
+    }
+    Http2Adapter.prototype._resolveSessionFor = function(origin, isStreaming) {
+      var sessionKey = isStreaming ? STREAM_PREFIX + origin : origin;
+      if (this._sessionMap[sessionKey]) {
+        return this._sessionMap[sessionKey];
+      }
+      var self2 = this;
+      var timerId = null;
+      var ongoingRequests = 0;
+      var cleanup = function() {
+        self2._cleanupSessionFor(origin, isStreaming);
+      };
+      var clearInactivityTimeout = function() {
+        if (timerId) {
+          clearTimeout(timerId);
+          timerId = null;
+        }
+      };
+      var setInactivityTimeout = function() {
+        clearInactivityTimeout();
+        if (self2._http2SessionIdleTime === Infinity) {
+          return;
+        }
+        var onTimeout = function() {
+          timerId = null;
+          if (ongoingRequests === 0) {
+            cleanup();
+          }
+        };
+        timerId = setTimeout(onTimeout, self2._http2SessionIdleTime);
+      };
+      var close = function(force) {
+        clearInactivityTimeout();
+        var shouldDestroy = force || isStreaming;
+        if (shouldDestroy) {
+          session.destroy();
+          return Promise.resolve();
+        }
+        return new Promise(function(resolve) {
+          session.close(resolve);
+        });
+      };
+      var onRequestStart = function() {
+        ++ongoingRequests;
+        clearInactivityTimeout();
+      };
+      var onRequestEnd = function() {
+        --ongoingRequests;
+        var noOngoingRequests = ongoingRequests === 0;
+        var isSessionClosed = self2._closed || session.closed || session.destroyed;
+        if (noOngoingRequests && !isSessionClosed) {
+          setInactivityTimeout();
+        }
+      };
+      var session = http2.connect(origin).once("error", cleanup).once("goaway", cleanup);
+      var sessionInterface = {
+        session,
+        close,
+        onRequestStart,
+        onRequestEnd
+      };
+      this._sessionMap[sessionKey] = sessionInterface;
+      return sessionInterface;
+    };
+    Http2Adapter.prototype._cleanupSessionFor = function(origin, isStreaming) {
+      var sessionKey = isStreaming ? STREAM_PREFIX + origin : origin;
+      if (this._sessionMap[sessionKey]) {
+        this._sessionMap[sessionKey].session.close();
+        delete this._sessionMap[sessionKey];
+      }
+    };
+    Http2Adapter.prototype.execute = function(options) {
+      if (this._closed) {
+        return Promise.reject(new faunaErrors.ClientClosed("The Client has already been closed", "No subsequent requests can be issued after the .close method is called. Consider creating a new Client instance"));
+      }
+      var self2 = this;
+      var isStreaming = options.streamConsumer != null;
+      return new Promise(function(resolvePromise, rejectPromise) {
+        var isPromiseSettled = false;
+        var isCanceled = false;
+        var resolve = function(value) {
+          isPromiseSettled = true;
+          resolvePromise(value);
+        };
+        var rejectOrOnError = function(error) {
+          var remapped = remapHttp2Error({ error, isClosed: self2._closed });
+          if (isPromiseSettled && isStreaming) {
+            return options.streamConsumer.onError(remapped);
+          }
+          isPromiseSettled = true;
+          rejectPromise(remapped);
+        };
+        var onSettled = function() {
+          sessionInterface.onRequestEnd();
+          if (options.signal) {
+            options.signal.removeEventListener("abort", onAbort);
+          }
+        };
+        var onError = function(error) {
+          onSettled();
+          rejectOrOnError(error);
+        };
+        var onAbort = function() {
+          isCanceled = true;
+          onSettled();
+          request.close(http2.constants.NGHTTP2_CANCEL);
+          rejectOrOnError(new errors.AbortError());
+        };
+        var onTimeout = function() {
+          isCanceled = true;
+          onSettled();
+          request.close(http2.constants.NGHTTP2_CANCEL);
+          rejectOrOnError(new errors.TimeoutError());
+        };
+        var onResponse = function(responseHeaders) {
+          var status = responseHeaders[http2.constants.HTTP2_HEADER_STATUS];
+          var isOkStatus = status >= 200 && status < 400;
+          var processStream = isOkStatus && isStreaming;
+          var responseBody = "";
+          var onData = function(chunk) {
+            if (processStream) {
+              return options.streamConsumer.onData(chunk);
+            }
+            responseBody += chunk;
+          };
+          var onEnd = function() {
+            if (!isCanceled) {
+              onSettled();
+            }
+            if (!processStream) {
+              return resolve({
+                body: responseBody,
+                headers: responseHeaders,
+                status
+              });
+            }
+            if (!isCanceled && !self2._closed) {
+              options.streamConsumer.onError(new TypeError("network error"));
+            }
+          };
+          if (processStream) {
+            resolve({
+              body: "[stream]",
+              headers: responseHeaders,
+              status
+            });
+          }
+          request.on("data", onData).on("end", onEnd);
+        };
+        try {
+          var pathname = (options.path[0] === "/" ? options.path : "/" + options.path) + util.querystringify(options.query, "?");
+          var requestHeaders = Object.assign({}, options.headers, {
+            [http2.constants.HTTP2_HEADER_PATH]: pathname,
+            [http2.constants.HTTP2_HEADER_METHOD]: options.method
+          });
+          var sessionInterface = self2._resolveSessionFor(options.origin, isStreaming);
+          var request = sessionInterface.session.request(requestHeaders).setEncoding("utf8").on("error", onError).on("response", onResponse);
+          sessionInterface.onRequestStart();
+          if (!options.signal && options.timeout) {
+            request.setTimeout(options.timeout, onTimeout);
+          }
+          if (options.signal) {
+            options.signal.addEventListener("abort", onAbort);
+          }
+          if (options.body != null) {
+            request.write(options.body);
+          }
+          request.end();
+        } catch (error) {
+          self2._cleanupSessionFor(options.origin, isStreaming);
+          rejectOrOnError(error);
+        }
+      });
+    };
+    Http2Adapter.prototype.close = function(opts) {
+      opts = opts || {};
+      this._closed = true;
+      var noop = function() {
+      };
+      return Promise.all(Object.values(this._sessionMap).map(function(sessionInterface) {
+        return sessionInterface.close(opts.force);
+      })).then(noop);
+    };
+    function remapHttp2Error({ error, isClosed }) {
+      var shouldRemap = isClosed && (error.code === "ERR_HTTP2_GOAWAY_SESSION" || error.code === "ERR_HTTP2_STREAM_CANCEL");
+      if (shouldRemap) {
+        return new faunaErrors.ClientClosed("The request is aborted due to the Client#close call");
+      }
+      return error;
+    }
+    module.exports = Http2Adapter;
+  }
+});
+
+// node_modules/event-target-shim/dist/event-target-shim.js
+var require_event_target_shim = __commonJS({
+  "node_modules/event-target-shim/dist/event-target-shim.js"(exports, module) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var privateData = new WeakMap();
+    var wrappers = new WeakMap();
+    function pd(event) {
+      const retv = privateData.get(event);
+      console.assert(retv != null, "'this' is expected an Event object, but got", event);
+      return retv;
+    }
+    function setCancelFlag(data) {
+      if (data.passiveListener != null) {
+        if (typeof console !== "undefined" && typeof console.error === "function") {
+          console.error("Unable to preventDefault inside passive event listener invocation.", data.passiveListener);
+        }
+        return;
+      }
+      if (!data.event.cancelable) {
+        return;
+      }
+      data.canceled = true;
+      if (typeof data.event.preventDefault === "function") {
+        data.event.preventDefault();
+      }
+    }
+    function Event2(eventTarget, event) {
+      privateData.set(this, {
+        eventTarget,
+        event,
+        eventPhase: 2,
+        currentTarget: eventTarget,
+        canceled: false,
+        stopped: false,
+        immediateStopped: false,
+        passiveListener: null,
+        timeStamp: event.timeStamp || Date.now()
+      });
+      Object.defineProperty(this, "isTrusted", { value: false, enumerable: true });
+      const keys = Object.keys(event);
+      for (let i = 0; i < keys.length; ++i) {
+        const key = keys[i];
+        if (!(key in this)) {
+          Object.defineProperty(this, key, defineRedirectDescriptor(key));
+        }
+      }
+    }
+    Event2.prototype = {
+      get type() {
+        return pd(this).event.type;
+      },
+      get target() {
+        return pd(this).eventTarget;
+      },
+      get currentTarget() {
+        return pd(this).currentTarget;
+      },
+      composedPath() {
+        const currentTarget = pd(this).currentTarget;
+        if (currentTarget == null) {
+          return [];
+        }
+        return [currentTarget];
+      },
+      get NONE() {
+        return 0;
+      },
+      get CAPTURING_PHASE() {
+        return 1;
+      },
+      get AT_TARGET() {
+        return 2;
+      },
+      get BUBBLING_PHASE() {
+        return 3;
+      },
+      get eventPhase() {
+        return pd(this).eventPhase;
+      },
+      stopPropagation() {
+        const data = pd(this);
+        data.stopped = true;
+        if (typeof data.event.stopPropagation === "function") {
+          data.event.stopPropagation();
+        }
+      },
+      stopImmediatePropagation() {
+        const data = pd(this);
+        data.stopped = true;
+        data.immediateStopped = true;
+        if (typeof data.event.stopImmediatePropagation === "function") {
+          data.event.stopImmediatePropagation();
+        }
+      },
+      get bubbles() {
+        return Boolean(pd(this).event.bubbles);
+      },
+      get cancelable() {
+        return Boolean(pd(this).event.cancelable);
+      },
+      preventDefault() {
+        setCancelFlag(pd(this));
+      },
+      get defaultPrevented() {
+        return pd(this).canceled;
+      },
+      get composed() {
+        return Boolean(pd(this).event.composed);
+      },
+      get timeStamp() {
+        return pd(this).timeStamp;
+      },
+      get srcElement() {
+        return pd(this).eventTarget;
+      },
+      get cancelBubble() {
+        return pd(this).stopped;
+      },
+      set cancelBubble(value) {
+        if (!value) {
+          return;
+        }
+        const data = pd(this);
+        data.stopped = true;
+        if (typeof data.event.cancelBubble === "boolean") {
+          data.event.cancelBubble = true;
+        }
+      },
+      get returnValue() {
+        return !pd(this).canceled;
+      },
+      set returnValue(value) {
+        if (!value) {
+          setCancelFlag(pd(this));
+        }
+      },
+      initEvent() {
+      }
+    };
+    Object.defineProperty(Event2.prototype, "constructor", {
+      value: Event2,
+      configurable: true,
+      writable: true
+    });
+    if (typeof window !== "undefined" && typeof window.Event !== "undefined") {
+      Object.setPrototypeOf(Event2.prototype, window.Event.prototype);
+      wrappers.set(window.Event.prototype, Event2);
+    }
+    function defineRedirectDescriptor(key) {
+      return {
+        get() {
+          return pd(this).event[key];
+        },
+        set(value) {
+          pd(this).event[key] = value;
+        },
+        configurable: true,
+        enumerable: true
+      };
+    }
+    function defineCallDescriptor(key) {
+      return {
+        value() {
+          const event = pd(this).event;
+          return event[key].apply(event, arguments);
+        },
+        configurable: true,
+        enumerable: true
+      };
+    }
+    function defineWrapper(BaseEvent, proto) {
+      const keys = Object.keys(proto);
+      if (keys.length === 0) {
+        return BaseEvent;
+      }
+      function CustomEvent(eventTarget, event) {
+        BaseEvent.call(this, eventTarget, event);
+      }
+      CustomEvent.prototype = Object.create(BaseEvent.prototype, {
+        constructor: { value: CustomEvent, configurable: true, writable: true }
+      });
+      for (let i = 0; i < keys.length; ++i) {
+        const key = keys[i];
+        if (!(key in BaseEvent.prototype)) {
+          const descriptor = Object.getOwnPropertyDescriptor(proto, key);
+          const isFunc = typeof descriptor.value === "function";
+          Object.defineProperty(CustomEvent.prototype, key, isFunc ? defineCallDescriptor(key) : defineRedirectDescriptor(key));
+        }
+      }
+      return CustomEvent;
+    }
+    function getWrapper(proto) {
+      if (proto == null || proto === Object.prototype) {
+        return Event2;
+      }
+      let wrapper = wrappers.get(proto);
+      if (wrapper == null) {
+        wrapper = defineWrapper(getWrapper(Object.getPrototypeOf(proto)), proto);
+        wrappers.set(proto, wrapper);
+      }
+      return wrapper;
+    }
+    function wrapEvent(eventTarget, event) {
+      const Wrapper = getWrapper(Object.getPrototypeOf(event));
+      return new Wrapper(eventTarget, event);
+    }
+    function isStopped(event) {
+      return pd(event).immediateStopped;
+    }
+    function setEventPhase(event, eventPhase) {
+      pd(event).eventPhase = eventPhase;
+    }
+    function setCurrentTarget(event, currentTarget) {
+      pd(event).currentTarget = currentTarget;
+    }
+    function setPassiveListener(event, passiveListener) {
+      pd(event).passiveListener = passiveListener;
+    }
+    var listenersMap = new WeakMap();
+    var CAPTURE = 1;
+    var BUBBLE = 2;
+    var ATTRIBUTE = 3;
+    function isObject(x) {
+      return x !== null && typeof x === "object";
+    }
+    function getListeners(eventTarget) {
+      const listeners = listenersMap.get(eventTarget);
+      if (listeners == null) {
+        throw new TypeError("'this' is expected an EventTarget object, but got another value.");
+      }
+      return listeners;
+    }
+    function defineEventAttributeDescriptor(eventName) {
+      return {
+        get() {
+          const listeners = getListeners(this);
+          let node = listeners.get(eventName);
+          while (node != null) {
+            if (node.listenerType === ATTRIBUTE) {
+              return node.listener;
+            }
+            node = node.next;
+          }
+          return null;
+        },
+        set(listener) {
+          if (typeof listener !== "function" && !isObject(listener)) {
+            listener = null;
+          }
+          const listeners = getListeners(this);
+          let prev = null;
+          let node = listeners.get(eventName);
+          while (node != null) {
+            if (node.listenerType === ATTRIBUTE) {
+              if (prev !== null) {
+                prev.next = node.next;
+              } else if (node.next !== null) {
+                listeners.set(eventName, node.next);
+              } else {
+                listeners.delete(eventName);
+              }
+            } else {
+              prev = node;
+            }
+            node = node.next;
+          }
+          if (listener !== null) {
+            const newNode = {
+              listener,
+              listenerType: ATTRIBUTE,
+              passive: false,
+              once: false,
+              next: null
+            };
+            if (prev === null) {
+              listeners.set(eventName, newNode);
+            } else {
+              prev.next = newNode;
+            }
+          }
+        },
+        configurable: true,
+        enumerable: true
+      };
+    }
+    function defineEventAttribute(eventTargetPrototype, eventName) {
+      Object.defineProperty(eventTargetPrototype, `on${eventName}`, defineEventAttributeDescriptor(eventName));
+    }
+    function defineCustomEventTarget(eventNames) {
+      function CustomEventTarget() {
+        EventTarget.call(this);
+      }
+      CustomEventTarget.prototype = Object.create(EventTarget.prototype, {
+        constructor: {
+          value: CustomEventTarget,
+          configurable: true,
+          writable: true
+        }
+      });
+      for (let i = 0; i < eventNames.length; ++i) {
+        defineEventAttribute(CustomEventTarget.prototype, eventNames[i]);
+      }
+      return CustomEventTarget;
+    }
+    function EventTarget() {
+      if (this instanceof EventTarget) {
+        listenersMap.set(this, /* @__PURE__ */ new Map());
+        return;
+      }
+      if (arguments.length === 1 && Array.isArray(arguments[0])) {
+        return defineCustomEventTarget(arguments[0]);
+      }
+      if (arguments.length > 0) {
+        const types = new Array(arguments.length);
+        for (let i = 0; i < arguments.length; ++i) {
+          types[i] = arguments[i];
+        }
+        return defineCustomEventTarget(types);
+      }
+      throw new TypeError("Cannot call a class as a function");
+    }
+    EventTarget.prototype = {
+      addEventListener(eventName, listener, options) {
+        if (listener == null) {
+          return;
+        }
+        if (typeof listener !== "function" && !isObject(listener)) {
+          throw new TypeError("'listener' should be a function or an object.");
+        }
+        const listeners = getListeners(this);
+        const optionsIsObj = isObject(options);
+        const capture = optionsIsObj ? Boolean(options.capture) : Boolean(options);
+        const listenerType = capture ? CAPTURE : BUBBLE;
+        const newNode = {
+          listener,
+          listenerType,
+          passive: optionsIsObj && Boolean(options.passive),
+          once: optionsIsObj && Boolean(options.once),
+          next: null
+        };
+        let node = listeners.get(eventName);
+        if (node === void 0) {
+          listeners.set(eventName, newNode);
+          return;
+        }
+        let prev = null;
+        while (node != null) {
+          if (node.listener === listener && node.listenerType === listenerType) {
+            return;
+          }
+          prev = node;
+          node = node.next;
+        }
+        prev.next = newNode;
+      },
+      removeEventListener(eventName, listener, options) {
+        if (listener == null) {
+          return;
+        }
+        const listeners = getListeners(this);
+        const capture = isObject(options) ? Boolean(options.capture) : Boolean(options);
+        const listenerType = capture ? CAPTURE : BUBBLE;
+        let prev = null;
+        let node = listeners.get(eventName);
+        while (node != null) {
+          if (node.listener === listener && node.listenerType === listenerType) {
+            if (prev !== null) {
+              prev.next = node.next;
+            } else if (node.next !== null) {
+              listeners.set(eventName, node.next);
+            } else {
+              listeners.delete(eventName);
+            }
+            return;
+          }
+          prev = node;
+          node = node.next;
+        }
+      },
+      dispatchEvent(event) {
+        if (event == null || typeof event.type !== "string") {
+          throw new TypeError('"event.type" should be a string.');
+        }
+        const listeners = getListeners(this);
+        const eventName = event.type;
+        let node = listeners.get(eventName);
+        if (node == null) {
+          return true;
+        }
+        const wrappedEvent = wrapEvent(this, event);
+        let prev = null;
+        while (node != null) {
+          if (node.once) {
+            if (prev !== null) {
+              prev.next = node.next;
+            } else if (node.next !== null) {
+              listeners.set(eventName, node.next);
+            } else {
+              listeners.delete(eventName);
+            }
+          } else {
+            prev = node;
+          }
+          setPassiveListener(wrappedEvent, node.passive ? node.listener : null);
+          if (typeof node.listener === "function") {
+            try {
+              node.listener.call(this, wrappedEvent);
+            } catch (err) {
+              if (typeof console !== "undefined" && typeof console.error === "function") {
+                console.error(err);
+              }
+            }
+          } else if (node.listenerType !== ATTRIBUTE && typeof node.listener.handleEvent === "function") {
+            node.listener.handleEvent(wrappedEvent);
+          }
+          if (isStopped(wrappedEvent)) {
+            break;
+          }
+          node = node.next;
+        }
+        setPassiveListener(wrappedEvent, null);
+        setEventPhase(wrappedEvent, 0);
+        setCurrentTarget(wrappedEvent, null);
+        return !wrappedEvent.defaultPrevented;
+      }
+    };
+    Object.defineProperty(EventTarget.prototype, "constructor", {
+      value: EventTarget,
+      configurable: true,
+      writable: true
+    });
+    if (typeof window !== "undefined" && typeof window.EventTarget !== "undefined") {
+      Object.setPrototypeOf(EventTarget.prototype, window.EventTarget.prototype);
+    }
+    exports.defineEventAttribute = defineEventAttribute;
+    exports.EventTarget = EventTarget;
+    exports.default = EventTarget;
+    module.exports = EventTarget;
+    module.exports.EventTarget = module.exports["default"] = EventTarget;
+    module.exports.defineEventAttribute = defineEventAttribute;
+  }
+});
+
+// node_modules/abort-controller/dist/abort-controller.js
+var require_abort_controller = __commonJS({
+  "node_modules/abort-controller/dist/abort-controller.js"(exports, module) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var eventTargetShim = require_event_target_shim();
+    var AbortSignal = class extends eventTargetShim.EventTarget {
+      constructor() {
+        super();
+        throw new TypeError("AbortSignal cannot be constructed directly");
+      }
+      get aborted() {
+        const aborted = abortedFlags.get(this);
+        if (typeof aborted !== "boolean") {
+          throw new TypeError(`Expected 'this' to be an 'AbortSignal' object, but got ${this === null ? "null" : typeof this}`);
+        }
+        return aborted;
+      }
+    };
+    eventTargetShim.defineEventAttribute(AbortSignal.prototype, "abort");
+    function createAbortSignal() {
+      const signal = Object.create(AbortSignal.prototype);
+      eventTargetShim.EventTarget.call(signal);
+      abortedFlags.set(signal, false);
+      return signal;
+    }
+    function abortSignal(signal) {
+      if (abortedFlags.get(signal) !== false) {
+        return;
+      }
+      abortedFlags.set(signal, true);
+      signal.dispatchEvent({ type: "abort" });
+    }
+    var abortedFlags = new WeakMap();
+    Object.defineProperties(AbortSignal.prototype, {
+      aborted: { enumerable: true }
+    });
+    if (typeof Symbol === "function" && typeof Symbol.toStringTag === "symbol") {
+      Object.defineProperty(AbortSignal.prototype, Symbol.toStringTag, {
+        configurable: true,
+        value: "AbortSignal"
+      });
+    }
+    var AbortController2 = class {
+      constructor() {
+        signals.set(this, createAbortSignal());
+      }
+      get signal() {
+        return getSignal(this);
+      }
+      abort() {
+        abortSignal(getSignal(this));
+      }
+    };
+    var signals = new WeakMap();
+    function getSignal(controller) {
+      const signal = signals.get(controller);
+      if (signal == null) {
+        throw new TypeError(`Expected 'this' to be an 'AbortController' object, but got ${controller === null ? "null" : typeof controller}`);
+      }
+      return signal;
+    }
+    Object.defineProperties(AbortController2.prototype, {
+      signal: { enumerable: true },
+      abort: { enumerable: true }
+    });
+    if (typeof Symbol === "function" && typeof Symbol.toStringTag === "symbol") {
+      Object.defineProperty(AbortController2.prototype, Symbol.toStringTag, {
+        configurable: true,
+        value: "AbortController"
+      });
+    }
+    exports.AbortController = AbortController2;
+    exports.AbortSignal = AbortSignal;
+    exports.default = AbortController2;
+    module.exports = AbortController2;
+    module.exports.AbortController = module.exports["default"] = AbortController2;
+    module.exports.AbortSignal = AbortSignal;
+  }
+});
+
+// node_modules/abort-controller/polyfill.js
+var require_polyfill = __commonJS({
+  "node_modules/abort-controller/polyfill.js"() {
+    "use strict";
+    var ac = require_abort_controller();
+    var g = typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : void 0;
+    if (g) {
+      if (typeof g.AbortController === "undefined") {
+        g.AbortController = ac.AbortController;
+      }
+      if (typeof g.AbortSignal === "undefined") {
+        g.AbortSignal = ac.AbortSignal;
+      }
+    }
+  }
+});
+
+// (disabled):https
+var require_https = __commonJS({
+  "(disabled):https"() {
+  }
+});
+
+// (disabled):http
+var require_http = __commonJS({
+  "(disabled):http"() {
+  }
+});
+
+// node_modules/faunadb/src/_http/fetchAdapter.js
+var require_fetchAdapter = __commonJS({
+  "node_modules/faunadb/src/_http/fetchAdapter.js"(exports, module) {
+    "use strict";
+    require_polyfill();
+    var util = require_util();
+    var faunaErrors = require_errors();
+    var errors = require_errors2();
+    function FetchAdapter(options) {
+      options = options || {};
+      this.type = "fetch";
+      this._closed = false;
+      this._fetch = util.resolveFetch(options.fetch);
+      this._pendingRequests = /* @__PURE__ */ new Map();
+      if (util.isNodeEnv() && options.keepAlive) {
+        this._keepAliveEnabledAgent = new (options.isHttps ? require_https() : require_http()).Agent({ keepAlive: true });
+      }
+    }
+    FetchAdapter.prototype.execute = function(options) {
+      if (this._closed) {
+        return Promise.reject(new faunaErrors.ClientClosed("The Client has already been closed", "No subsequent requests can be issued after the .close method is called. Consider creating a new Client instance"));
+      }
+      var self2 = this;
+      var timerId = null;
+      var isStreaming = options.streamConsumer != null;
+      var useTimeout = !options.signal && !!options.timeout;
+      var ctrl = new AbortController();
+      var pendingRequest = {
+        isStreaming,
+        isAbortedByClose: false,
+        onComplete: null
+      };
+      self2._pendingRequests.set(ctrl, pendingRequest);
+      var onComplete = function() {
+        self2._pendingRequests.delete(ctrl);
+        if (options.signal) {
+          options.signal.removeEventListener("abort", onAbort);
+        }
+        if (pendingRequest.onComplete) {
+          pendingRequest.onComplete();
+        }
+      };
+      var onSettle = function() {
+        if (timerId) {
+          clearTimeout(timerId);
+        }
+      };
+      var onResponse = function(response) {
+        onSettle();
+        var headers = responseHeadersAsObject(response.headers);
+        var processStream = isStreaming && response.ok;
+        if (!processStream) {
+          onComplete();
+          return response.text().then(function(content) {
+            return {
+              body: content,
+              headers,
+              status: response.status
+            };
+          });
+        }
+        attachStreamConsumer(response, options.streamConsumer, onComplete);
+        return {
+          body: "[stream]",
+          headers,
+          status: response.status
+        };
+      };
+      var onError = function(error) {
+        onSettle();
+        onComplete();
+        return Promise.reject(remapIfAbortError(error, function() {
+          if (!isStreaming && pendingRequest.isAbortedByClose) {
+            return new faunaErrors.ClientClosed("The request is aborted due to the Client#close call with the force=true option");
+          }
+          return useTimeout ? new errors.TimeoutError() : new errors.AbortError();
+        }));
+      };
+      var onAbort = function() {
+        ctrl.abort();
+      };
+      if (useTimeout) {
+        timerId = setTimeout(function() {
+          timerId = null;
+          ctrl.abort();
+        }, options.timeout);
+      }
+      if (options.signal) {
+        options.signal.addEventListener("abort", onAbort);
+      }
+      return this._fetch(util.formatUrl(options.origin, options.path, options.query), {
+        method: options.method,
+        headers: options.headers,
+        body: options.body,
+        agent: this._keepAliveEnabledAgent,
+        signal: ctrl.signal
+      }).then(onResponse).catch(onError);
+    };
+    FetchAdapter.prototype.close = function(opts) {
+      opts = opts || {};
+      this._closed = true;
+      var promises = [];
+      var abortOrWait = function(pendingRequest, ctrl) {
+        var shouldAbort = pendingRequest.isStreaming || opts.force;
+        if (shouldAbort) {
+          pendingRequest.isAbortedByClose = true;
+          return ctrl.abort();
+        }
+        promises.push(new Promise(function(resolve) {
+          pendingRequest.onComplete = resolve;
+        }));
+      };
+      this._pendingRequests.forEach(abortOrWait);
+      var noop = function() {
+      };
+      return Promise.all(promises).then(noop);
+    };
+    function attachStreamConsumer(response, consumer, onComplete) {
+      var onError = function(error) {
+        onComplete();
+        consumer.onError(remapIfAbortError(error));
+      };
+      if (util.isNodeEnv()) {
+        response.body.on("error", onError).on("data", consumer.onData).on("end", function() {
+          onComplete();
+          consumer.onError(new TypeError("network error"));
+        });
+        return;
+      }
+      try {
+        let pump = function() {
+          return reader.read().then(function(msg) {
+            if (!msg.done) {
+              var chunk = decoder.decode(msg.value, { stream: true });
+              consumer.onData(chunk);
+              return pump();
+            }
+            onComplete();
+            consumer.onError(new TypeError("network error"));
+          });
+        };
+        var reader = response.body.getReader();
+        var decoder = new TextDecoder("utf-8");
+        pump().catch(onError);
+      } catch (err) {
+        throw new faunaErrors.StreamsNotSupported("Please, consider providing a Fetch API-compatible function with streamable response bodies. " + err);
+      }
+    }
+    function remapIfAbortError(error, errorFactory) {
+      var isAbortError = error && error.name === "AbortError";
+      if (!isAbortError) {
+        return error;
+      }
+      if (errorFactory) {
+        return errorFactory();
+      }
+      return new errors.AbortError();
+    }
+    function responseHeadersAsObject(headers) {
+      var result = {};
+      for (var header of headers.entries()) {
+        var key = header[0];
+        var value = header[1];
+        result[key] = value;
+      }
+      return result;
+    }
+    module.exports = FetchAdapter;
+  }
+});
+
+// (disabled):os
+var require_os = __commonJS({
+  "(disabled):os"() {
+  }
+});
+
+// node_modules/faunadb/src/_http/index.js
+var require_http3 = __commonJS({
+  "node_modules/faunadb/src/_http/index.js"(exports, module) {
+    "use strict";
+    var packageJson = require_package();
+    var { getBrowserOsDetails } = require_util();
+    var util = require_util();
+    var errors = require_errors2();
+    function HttpClient(options) {
+      var isHttps = options.scheme === "https";
+      if (!options.port) {
+        options.port = isHttps ? 443 : 80;
+      }
+      var useHttp2Adapter = !options.fetch && util.isNodeEnv() && isHttp2Supported();
+      this._adapter = useHttp2Adapter ? new (require_http2Adapter())({
+        http2SessionIdleTime: options.http2SessionIdleTime
+      }) : new (require_fetchAdapter())({
+        isHttps,
+        fetch: options.fetch,
+        keepAlive: options.keepAlive
+      });
+      this._baseUrl = options.scheme + "://" + options.domain + ":" + options.port;
+      this._secret = options.secret;
+      this._headers = Object.assign({}, options.headers, getDefaultHeaders());
+      this._queryTimeout = options.queryTimeout;
+      this._lastSeen = null;
+      this._timeout = Math.floor(options.timeout * 1e3);
+    }
+    HttpClient.prototype.getLastTxnTime = function() {
+      return this._lastSeen;
+    };
+    HttpClient.prototype.syncLastTxnTime = function(time) {
+      if (this._lastSeen == null || this._lastSeen < time) {
+        this._lastSeen = time;
+      }
+    };
+    HttpClient.prototype.close = function(opts) {
+      return this._adapter.close(opts);
+    };
+    HttpClient.prototype.execute = function(options) {
+      options = options || {};
+      var invalidStreamConsumer = options.streamConsumer && (typeof options.streamConsumer.onData !== "function" || typeof options.streamConsumer.onError !== "function");
+      if (invalidStreamConsumer) {
+        return Promise.reject(new TypeError('Invalid "streamConsumer" provided'));
+      }
+      var secret = options.secret || this._secret;
+      var queryTimeout = options.queryTimeout || this._queryTimeout;
+      var headers = this._headers;
+      headers["Authorization"] = secret && secretHeader(secret);
+      headers["X-Last-Seen-Txn"] = this._lastSeen;
+      headers["X-Query-Timeout"] = queryTimeout;
+      return this._adapter.execute({
+        origin: this._baseUrl,
+        path: options.path || "/",
+        query: options.query,
+        method: options.method || "GET",
+        headers: util.removeNullAndUndefinedValues(headers),
+        body: options.body,
+        signal: options.signal,
+        timeout: this._timeout,
+        streamConsumer: options.streamConsumer
+      });
+    };
+    function secretHeader(secret) {
+      return "Bearer " + secret;
+    }
+    function getDefaultHeaders() {
+      var driverEnv = {
+        driver: ["javascript", packageJson.version].join("-")
+      };
+      var isServiceWorker;
+      try {
+        isServiceWorker = global instanceof ServiceWorkerGlobalScope;
+      } catch (error) {
+        isServiceWorker = false;
+      }
+      try {
+        if (util.isNodeEnv()) {
+          driverEnv.runtime = ["nodejs", process.version].join("-");
+          driverEnv.env = util.getNodeRuntimeEnv();
+          var os = require_os();
+          driverEnv.os = [os.platform(), os.release()].join("-");
+        } else if (isServiceWorker) {
+          driverEnv.runtime = "Service Worker";
+        } else {
+          driverEnv.runtime = util.getBrowserDetails();
+          driverEnv.env = "browser";
+          driverEnv.os = getBrowserOsDetails();
+        }
+      } catch (_) {
+      }
+      var headers = {
+        "X-FaunaDB-API-Version": packageJson.apiVersion
+      };
+      if (util.isNodeEnv()) {
+        headers["X-Driver-Env"] = Object.keys(driverEnv).map((key) => [key, driverEnv[key].toLowerCase()].join("=")).join("; ");
+      }
+      return headers;
+    }
+    function isHttp2Supported() {
+      try {
+        require_http2();
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+    module.exports = {
+      HttpClient,
+      TimeoutError: errors.TimeoutError,
+      AbortError: errors.AbortError
+    };
+  }
+});
+
+// node_modules/faunadb/src/stream.js
+var require_stream = __commonJS({
+  "node_modules/faunadb/src/stream.js"(exports, module) {
+    "use strict";
+    require_polyfill();
+    var RequestResult = require_RequestResult();
+    var errors = require_errors();
+    var json = require_json();
+    var http = require_http3();
+    var q4 = require_query();
+    var util = require_util();
+    var DefaultEvents = ["start", "error", "version", "history_rewrite"];
+    var DocumentStreamEvents = DefaultEvents.concat(["snapshot"]);
+    function StreamClient(client, expression, options, onEvent) {
+      options = util.applyDefaults(options, {
+        fields: null
+      });
+      this._client = client;
+      this._onEvent = onEvent;
+      this._query = q4.wrap(expression);
+      this._urlParams = options.fields ? { fields: options.fields.join(",") } : null;
+      this._abort = new AbortController();
+      this._state = "idle";
+    }
+    StreamClient.prototype.snapshot = function() {
+      var self2 = this;
+      self2._client.query(q4.Get(self2._query)).then(function(doc) {
+        self2._onEvent({
+          type: "snapshot",
+          event: doc
+        });
+      }).catch(function(error) {
+        self2._onEvent({
+          type: "error",
+          event: error
+        });
+      });
+    };
+    StreamClient.prototype.subscribe = function() {
+      var self2 = this;
+      if (self2._state === "idle") {
+        self2._state = "open";
+      } else {
+        throw new Error("Subscription#start should not be called several times, consider instantiating a new stream instead.");
+      }
+      var body = JSON.stringify(self2._query);
+      var startTime = Date.now();
+      var buffer = "";
+      function onResponse(response) {
+        var endTime = Date.now();
+        var parsed;
+        try {
+          parsed = json.parseJSON(response.body);
+        } catch (_) {
+          parsed = response.body;
+        }
+        var result = new RequestResult("POST", "stream", self2._urlParams, body, self2._query, response.body, parsed, response.status, response.headers, startTime, endTime);
+        self2._client._handleRequestResult(response, result);
+      }
+      function onData(data) {
+        var result = json.parseJSONStreaming(buffer + data);
+        buffer = result.buffer;
+        result.values.forEach(function(event) {
+          if (event.txn !== void 0) {
+            self2._client.syncLastTxnTime(event.txn);
+          }
+          if (event.event === "error") {
+            onError(new errors.StreamErrorEvent(event));
+          } else {
+            self2._onEvent(event);
+          }
+        });
+      }
+      function onError(error) {
+        if (error instanceof http.AbortError) {
+          return;
+        }
+        self2._onEvent({
+          type: "error",
+          event: error
+        });
+      }
+      self2._client._http.execute({
+        method: "POST",
+        path: "stream",
+        body,
+        query: self2._urlParams,
+        signal: this._abort.signal,
+        streamConsumer: {
+          onError,
+          onData
+        }
+      }).then(onResponse).catch(onError);
+    };
+    StreamClient.prototype.close = function() {
+      if (this._state !== "closed") {
+        this._state = "closed";
+        this._abort.abort();
+      }
+    };
+    function EventDispatcher(allowedEvents) {
+      this._allowedEvents = allowedEvents;
+      this._listeners = {};
+    }
+    EventDispatcher.prototype.on = function(type, callback) {
+      if (this._allowedEvents.indexOf(type) === -1) {
+        throw new Error("Unknown event type: " + type);
+      }
+      if (this._listeners[type] === void 0) {
+        this._listeners[type] = [];
+      }
+      this._listeners[type].push(callback);
+    };
+    EventDispatcher.prototype.dispatch = function(event) {
+      var listeners = this._listeners[event.type];
+      if (!listeners) {
+        return;
+      }
+      for (var i = 0; i < listeners.length; i++) {
+        listeners[i].call(null, event.event, event);
+      }
+    };
+    function Subscription(client, dispatcher) {
+      this._client = client;
+      this._dispatcher = dispatcher;
+    }
+    Subscription.prototype.on = function(type, callback) {
+      this._dispatcher.on(type, callback);
+      return this;
+    };
+    Subscription.prototype.start = function() {
+      this._client.subscribe();
+      return this;
+    };
+    Subscription.prototype.close = function() {
+      this._client.close();
+    };
+    function StreamAPI(client) {
+      var api = function(expression, options) {
+        var dispatcher = new EventDispatcher(DefaultEvents);
+        var streamClient = new StreamClient(client, expression, options, function(event) {
+          dispatcher.dispatch(event);
+        });
+        return new Subscription(streamClient, dispatcher);
+      };
+      api.document = function(expression, options) {
+        var buffer = [];
+        var buffering = true;
+        var dispatcher = new EventDispatcher(DocumentStreamEvents);
+        var streamClient = new StreamClient(client, expression, options, onEvent);
+        function onEvent(event) {
+          switch (event.type) {
+            case "start":
+              dispatcher.dispatch(event);
+              streamClient.snapshot();
+              break;
+            case "snapshot":
+              resume(event);
+              break;
+            case "error":
+              dispatcher.dispatch(event);
+              break;
+            default:
+              if (buffering) {
+                buffer.push(event);
+              } else {
+                dispatcher.dispatch(event);
+              }
+          }
+        }
+        function resume(snapshotEvent) {
+          dispatcher.dispatch(snapshotEvent);
+          for (var i = 0; i < buffer.length; i++) {
+            var bufferedEvent = buffer[i];
+            if (bufferedEvent.txn > snapshotEvent.event.ts) {
+              dispatcher.dispatch(bufferedEvent);
+            }
+          }
+          buffering = false;
+          buffer = null;
+        }
+        return new Subscription(streamClient, dispatcher);
+      };
+      return api;
+    }
+    module.exports = {
+      StreamAPI
+    };
+  }
+});
+
+// node_modules/faunadb/src/Client.js
+var require_Client = __commonJS({
+  "node_modules/faunadb/src/Client.js"(exports, module) {
+    "use strict";
+    var packageJson = require_package();
+    var PageHelper = require_PageHelper();
+    var RequestResult = require_RequestResult();
+    var errors = require_errors();
+    var http = require_http3();
+    var json = require_json();
+    var query = require_query();
+    var stream = require_stream();
+    var util = require_util();
+    var values = require_values();
+    var notifyAboutNewVersion = util.notifyAboutNewVersion();
+    function Client(options) {
+      var http2SessionIdleTime = getHttp2SessionIdleTime();
+      options = util.applyDefaults(options, {
+        domain: "db.fauna.com",
+        scheme: "https",
+        port: null,
+        secret: null,
+        timeout: 60,
+        observer: null,
+        keepAlive: true,
+        headers: {},
+        fetch: void 0,
+        queryTimeout: null,
+        http2SessionIdleTime: http2SessionIdleTime.value,
+        checkNewVersion: true
+      });
+      notifyAboutNewVersion(options.checkNewVersion);
+      if (http2SessionIdleTime.shouldOverride) {
+        options.http2SessionIdleTime = http2SessionIdleTime.value;
+      }
+      this._observer = options.observer;
+      this._http = new http.HttpClient(options);
+      this.stream = stream.StreamAPI(this);
+    }
+    Client.apiVersion = packageJson.apiVersion;
+    Client.prototype.query = function(expression, options) {
+      return this._execute("POST", "", query.wrap(expression), null, options);
+    };
+    Client.prototype.paginate = function(expression, params, options) {
+      params = util.defaults(params, {});
+      options = util.defaults(options, {});
+      return new PageHelper(this, expression, params, options);
+    };
+    Client.prototype.ping = function(scope, timeout) {
+      return this._execute("GET", "ping", null, { scope, timeout });
+    };
+    Client.prototype.getLastTxnTime = function() {
+      return this._http.getLastTxnTime();
+    };
+    Client.prototype.syncLastTxnTime = function(time) {
+      this._http.syncLastTxnTime(time);
+    };
+    Client.prototype.close = function(opts) {
+      return this._http.close(opts);
+    };
+    Client.prototype._execute = function(method, path, data, query2, options) {
+      query2 = util.defaults(query2, null);
+      if (path instanceof values.Ref || util.checkInstanceHasProperty(path, "_isFaunaRef")) {
+        path = path.value;
+      }
+      if (query2 !== null) {
+        query2 = util.removeUndefinedValues(query2);
+      }
+      var startTime = Date.now();
+      var self2 = this;
+      var body = ["GET", "HEAD"].indexOf(method) >= 0 ? void 0 : JSON.stringify(data);
+      return this._http.execute(Object.assign({}, options, {
+        path,
+        query: query2,
+        method,
+        body
+      })).then(function(response) {
+        var endTime = Date.now();
+        var responseObject = json.parseJSON(response.body);
+        var result = new RequestResult(method, path, query2, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
+        self2._handleRequestResult(response, result, options);
+        return responseObject["resource"];
+      });
+    };
+    Client.prototype._handleRequestResult = function(response, result, options) {
+      var txnTimeHeaderKey = "x-txn-time";
+      if (response.headers[txnTimeHeaderKey] != null) {
+        this.syncLastTxnTime(parseInt(response.headers[txnTimeHeaderKey], 10));
+      }
+      var observers = [this._observer, options && options.observer];
+      observers.forEach((observer) => {
+        if (typeof observer == "function") {
+          observer(result, this);
+        }
+      });
+      errors.FaunaHTTPError.raiseForStatusCode(result);
+    };
+    function getHttp2SessionIdleTime() {
+      var fromEnv = util.getEnvVariable("FAUNADB_HTTP2_SESSION_IDLE_TIME");
+      var parsed = fromEnv === "Infinity" ? Infinity : parseInt(fromEnv, 10);
+      var useEnvVar = !isNaN(parsed);
+      return {
+        shouldOverride: useEnvVar,
+        value: useEnvVar ? parsed : 500
+      };
+    }
+    module.exports = Client;
+    module.exports.resetNotifyAboutNewVersion = function() {
+      notifyAboutNewVersion = util.notifyAboutNewVersion();
+    };
+  }
+});
+
+// node_modules/faunadb/src/clientLogger.js
+var require_clientLogger = __commonJS({
+  "node_modules/faunadb/src/clientLogger.js"(exports, module) {
+    "use strict";
+    var json = require_json();
+    function logger(loggerFunction) {
+      return function(requestResult, client) {
+        return loggerFunction(showRequestResult(requestResult), client);
+      };
+    }
+    function showRequestResult(requestResult) {
+      var query = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
+      var out = "";
+      function log(str) {
+        out = out + str;
+      }
+      log("Fauna " + method + " /" + path + _queryString(query) + "\n");
+      if (requestContent != null) {
+        log("  Request JSON: " + _showJSON(requestContent) + "\n");
+      }
+      log("  Response headers: " + _showJSON(responseHeaders) + "\n");
+      log("  Response JSON: " + _showJSON(responseContent) + "\n");
+      log("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
+      return out;
+    }
+    function _indent(str) {
+      var indentStr = "  ";
+      return str.split("\n").join("\n" + indentStr);
+    }
+    function _showJSON(object) {
+      return _indent(json.toJSON(object, true));
+    }
+    function _queryString(query) {
+      if (query == null) {
+        return "";
+      }
+      var keys = Object.keys(query);
+      if (keys.length === 0) {
+        return "";
+      }
+      var pairs = keys.map(function(key) {
+        return key + "=" + query[key];
+      });
+      return "?" + pairs.join("&");
+    }
+    module.exports = {
+      logger,
+      showRequestResult
+    };
+  }
+});
+
+// node_modules/faunadb/index.js
+var require_faunadb = __commonJS({
+  "node_modules/faunadb/index.js"(exports, module) {
+    var query = require_query();
+    var util = require_util();
+    var parseJSON = require_json().parseJSON;
+    module.exports = util.mergeObjects({
+      Client: require_Client(),
+      Expr: require_Expr(),
+      PageHelper: require_PageHelper(),
+      RequestResult: require_RequestResult(),
+      clientLogger: require_clientLogger(),
+      errors: require_errors(),
+      values: require_values(),
+      query,
+      parseJSON
+    }, query);
+  }
+});
+
+// app/fun/sort.ts
+var sortOps = {
+  number: (a, b) => a - b,
+  "-number": (a, b) => -(a - b),
+  gl: (a, b) => a >= 0 ? a - b : b - a,
+  "abs(number)": (a, b) => Math.abs(a) - Math.abs(b),
+  "-abs(number)": (a, b) => -(Math.abs(a) - Math.abs(b)),
+  string: (a, b) => a.localeCompare(b),
+  date: (a, b) => a.valueOf() - b.valueOf(),
+  noop: () => 0
+};
+Array.prototype.sortBy = function(sortBy) {
+  return sort(this, sortBy);
+};
+function sort(items, sortBy) {
+  const keys = Object.keys(sortBy);
+  return [...items].sort((a, b) => {
+    let result = 0;
+    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
+    return result;
+  });
+}
+
+// app/globals.ts
+var import_faunadb = __toModule(require_faunadb());
+var TAXRATE = 0.06;
+var BATCH_SIZE = 10;
+var isDebug = location.href.includes("localhost");
+var isOffline = () => getGlobalState("work_offline")?.value === true;
+var accessKeys = {
+  FAUNADB_SERVER_SECRET: "",
+  FAUNADB_ADMIN_SECRET: "",
+  FAUNADB_DOMAIN: "db.us.fauna.com"
+};
+if (globalThis.process?.env) {
+  accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
+  accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
+} else if (localStorage) {
+  accessKeys.FAUNADB_SERVER_SECRET = localStorage.getItem("FAUNADB_SERVER_SECRET");
+  accessKeys.FAUNADB_ADMIN_SECRET = localStorage.getItem("FAUNADB_ADMIN_SECRET");
+  if (!accessKeys.FAUNADB_SERVER_SECRET) {
+    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
+    accessKeys.FAUNADB_SERVER_SECRET = secret;
+    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+  }
+  if (!accessKeys.FAUNADB_SERVER_SECRET)
+    console.error("set FAUNADB_SERVER_SECRET in local storage");
+  if (!accessKeys.FAUNADB_ADMIN_SECRET)
+    console.error("set FAUNADB_ADMIN_SECRET in local storage");
+}
+function isNetlifyBuildContext() {
+  return 0 <= location.href.indexOf("netlify");
+}
+var domain = accessKeys.FAUNADB_DOMAIN;
+var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
+var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
+var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
+var CURRENT_USER = localStorage.getItem("user");
+function createClient() {
+  return new import_faunadb.default.Client({
+    secret: FAUNADB_SERVER_SECRET,
+    domain
+  });
+}
+var globalState;
+function forceGlobalState() {
+  return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
+}
+function setGlobalState(key, value) {
+  const state = forceGlobalState();
+  const type = typeof value;
+  state[key] = { type, value };
+  localStorage.setItem("__GLOBAL_STATE__", JSON.stringify(state));
+}
+function getGlobalState(key) {
+  const state = forceGlobalState();
+  return state[key];
+}
+
+// app/services/validateAccessToken.ts
+var import_faunadb2 = __toModule(require_faunadb());
+async function validate() {
+  const client = createClient();
+  await client.ping();
+}
+
+// app/router.ts
+var routes = {
+  home: () => "/index.html",
+  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
+  createInvoice: () => `/app/invoice/invoice.html`,
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
+  allInvoices: () => `/app/invoice/invoices.html`,
+  allLedgers: () => `/app/gl/index.html?print=all`,
+  printLedger: (id) => `/app/gl/index.html?print=${id}`,
+  createLedger: () => "/app/gl/index.html",
+  dashboard: () => "/app/index.html",
+  admin: () => "/app/admin/index.html"
+};
+
+// app/identify.ts
+async function identify() {
+  if (!localStorage.getItem("user")) {
+    location.href = routes.identity({
+      target: location.href,
+      context: CONTEXT
+    });
+    return false;
+  }
+  try {
+    await validate();
+  } catch (ex) {
+    localStorage.setItem("FAUNADB_SERVER_SECRET", "");
+    routes.home();
+    return false;
+  }
+  return true;
+}
+
+// app/fun/on.ts
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  console.log("trigger", eventName);
+  domNode.dispatchEvent(new Event(eventName));
+}
+
+// app/fun/hookupTriggers.ts
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    const eventName = eventItem.dataset["event"];
+    if (!eventName)
+      throw "item must define a data-event";
+    const isInput = isInputElement(eventItem);
+    const inputType = getInputType(eventItem);
+    const isButton = isButtonElement(eventItem, isInput);
+    const isCheckbox = isCheckboxInput(eventItem);
+    if (isButton)
+      on(eventItem, "click", () => {
+        trigger(domNode, eventName);
+      });
+    else if (isCheckbox)
+      on(eventItem, "click", () => {
+        const checked = eventItem.checked;
+        trigger(domNode, eventName + (checked ? ":yes" : ":no"));
+      });
+    else if (isInput)
+      on(eventItem, "change", () => {
+        trigger(domNode, eventName);
+      });
+    else
+      throw `data-event not supported for this item: ${eventItem.outerHTML}`;
+  });
+  domNode.querySelectorAll("[data-bind]").forEach((eventItem) => {
+    const bindTo = eventItem.dataset["bind"];
+    if (!bindTo)
+      throw "item must define a data-bind";
+    const valueInfo = getGlobalState(bindTo);
+    if (isCheckboxInput(eventItem)) {
+      eventItem.checked = valueInfo?.value === true;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, eventItem.checked);
+      });
+    } else {
+      throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
+    }
+  });
+}
+function isCheckboxInput(eventItem) {
+  return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
+}
+function isButtonElement(eventItem, isInput) {
+  return eventItem.tagName === "BUTTON" || isInput && getInputType(eventItem) === "button";
+}
+function getInputType(eventItem) {
+  return isInputElement(eventItem) && eventItem.type;
+}
+function isInputElement(eventItem) {
+  return eventItem.tagName === "INPUT";
+}
+
+// app/services/admin.ts
+var import_faunadb5 = __toModule(require_faunadb());
+
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
+// app/fun/ticksInSeconds.ts
+function ticksInSeconds(ticks) {
+  return ticks / 1e3;
+}
+
+// app/services/ServiceCache.ts
+var MAX_AGE = isDebug ? 365 * 24 * 3600 : (7 - 0.2) * 24 * 3600;
+var ServiceCache = class {
+  constructor(options) {
+    this.options = options;
+    options.maxAge = options.maxAge || MAX_AGE;
+    this.table = options.table;
+    const raw = localStorage.getItem(`table_${this.table}`);
+    if (!raw) {
+      this.data = [];
+      this.lastWrite = 0;
+    } else {
+      const info = JSON.parse(raw);
+      this.lastWrite = info.lastWrite;
+      this.data = info.data;
+    }
+  }
+  clear() {
+    this.lastWrite = 0;
+    this.save();
+  }
+  renew() {
+    this.lastWrite = Date.now();
+    this.save();
+  }
+  save() {
+    localStorage.setItem(`table_${this.table}`, JSON.stringify({
+      lastWrite: this.lastWrite,
+      data: this.data
+    }));
+  }
+  deleteLineItem(id) {
+    const index = this.data.findIndex((i) => i.id === id);
+    this.data.splice(index, 1);
+    this.save();
+  }
+  updateLineItem(lineItem) {
+    const index = this.data.findIndex((i) => i.id === lineItem.id);
+    if (-1 < index) {
+      this.data.splice(index, 1);
+    }
+    this.data.push(lineItem);
+    this.save();
+  }
+  expired() {
+    const age = ticksInSeconds(Date.now() - this.lastWrite);
+    return this.options.maxAge < age;
+  }
+  getById(id) {
+    return this.data.find((item) => item.id === id);
+  }
+  get() {
+    return this.data;
+  }
+  set(data) {
+    this.lastWrite = Date.now();
+    this.data = data;
+    this.save();
+  }
+};
+
+// app/services/StorageModel.ts
+var import_faunadb4 = __toModule(require_faunadb());
+
+// app/ux/Toaster.ts
+var DEFAULT_DELAY = 5e3;
+var Toaster = class {
+  toast(options) {
+    let target = document.querySelector("#toaster");
+    if (!target) {
+      target = document.createElement("div");
+      target.id = "toaster";
+      target.classList.add("toaster", "border", "rounded", "fixed", "bottom", "right");
+      document.body.appendChild(target);
+    }
+    const message = document.createElement("div");
+    message.classList.add(options.mode || "error", "padding", "margin");
+    message.innerHTML = options.message;
+    message.addEventListener("click", () => message.remove());
+    setTimeout(() => message.remove(), DEFAULT_DELAY);
+    target.insertBefore(message, null);
+  }
+};
+var toaster = new Toaster();
+function toast(message, options) {
+  if (!options)
+    options = { mode: "info" };
+  toaster.toast({
+    message,
+    ...options
+  });
+}
+function reportError(message) {
+  toast(message + "", {
+    mode: "error"
+  });
+}
+
+// app/services/getDatabaseTime.ts
+var import_faunadb3 = __toModule(require_faunadb());
+async function getDatabaseTime() {
+  const client = createClient();
+  const response = await client.query(import_faunadb3.query.Now());
+  return new Date(response.value).valueOf();
+}
+
+// app/services/StorageModel.ts
+var statusFlags = {
+  DELETED: "___DELETED___",
+  UPDATED: "___UPDATED___"
+};
+function isMarked(item) {
+  return Object.values(statusFlags).some((key) => !!item[key]);
+}
+function clearMarkings(item) {
+  Object.values(statusFlags).forEach((key) => item[key] && delete item[key]);
+}
+function clearTemporaryId(item) {
+  delete item.id;
+}
+function IsTemporaryId(itemId) {
+  return "9" < itemId[0];
+}
+function markForUpsert(item) {
+  item[statusFlags.UPDATED] = Date.now();
+}
+function isMarkedForUpsert(item) {
+  return !!item[statusFlags.UPDATED];
+}
+function markForDelete(item) {
+  item[statusFlags.DELETED] = Date.now();
+}
+function isMarkedForDelete(item) {
+  return !!item[statusFlags.DELETED];
+}
+var StorageModel = class {
+  constructor(options) {
+    this.options = options;
+    this.tableName = options.tableName;
+    this.cache = new ServiceCache({
+      table: options.tableName,
+      maxAge: options.maxAge
+    });
+  }
+  isOffline() {
+    return this.options.offline || isOffline();
+  }
+  async loadLatestData(args) {
+    const lowerBound = args.update_date;
+    let upperBound = Number.MAX_SAFE_INTEGER;
+    const client = createClient();
+    const result = [];
+    while (true) {
+      const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.GT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), lowerBound), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), { size: BATCH_SIZE }), import_faunadb4.query.Lambda("item", import_faunadb4.query.Get(import_faunadb4.query.Select([1], import_faunadb4.query.Var("item"))))));
+      response.data.forEach((item) => {
+        if (isMarked(item.data)) {
+          reportError("Data contains client-side marking");
+          clearMarkings(item.data);
+        }
+        result.push({
+          ...item.data,
+          id: item.ref.value.id
+        });
+      });
+      if (response.data.length < BATCH_SIZE)
+        break;
+      upperBound = response.data[BATCH_SIZE - 1].data["update_date"];
+    }
+    return result;
+  }
+  async forceUpdatestampIndex() {
+    const client = createClient();
+    const query = import_faunadb4.query.CreateIndex({
+      name: `${this.tableName}_updates`,
+      source: import_faunadb4.query.Collection(this.tableName),
+      values: [
+        {
+          field: [
+            "data",
+            "update_date"
+          ],
+          reverse: true
+        },
+        {
+          field: ["ref"]
+        }
+      ]
+    });
+    try {
+      return await client.query(query);
+    } catch (ex) {
+      reportError(ex);
+    }
+  }
+  async synchronize() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.isOffline())
+      throw "cannot synchronize in offline mode";
+    if (!getGlobalState(`forceUpdatestampIndex_${this.tableName}`)) {
+      await this.forceUpdatestampIndex();
+      setGlobalState(`forceUpdatestampIndex_${this.tableName}`, Date.now());
+    }
+    const timeOfLastSynchronization = getGlobalState(`timeOfLastSynchronization_${this.tableName}`)?.value || 0;
+    const timeOfCurrentSynchronization = await getDatabaseTime();
+    const dataToImport = await this.loadLatestData({
+      update_date: timeOfLastSynchronization
+    });
+    dataToImport.forEach((item) => {
+      if (!item.id)
+        throw `item must have an id`;
+      const currentItem = this.cache.getById(item.id);
+      if (currentItem && isMarkedForUpsert(currentItem)) {
+        toast(`item changed remotely and locally: ${item.id}`);
+      }
+      if (isMarkedForDelete(item)) {
+        this.cache.deleteLineItem(item.id);
+      } else {
+        this.cache.updateLineItem(item);
+      }
+    });
+    const dataToExport = this.cache.get().filter(isMarkedForDelete);
+    dataToExport.forEach(async (item) => {
+      if (!item.id)
+        throw "all items must have an id";
+      if (IsTemporaryId(item.id)) {
+        this.cache.deleteLineItem(item.id);
+      } else {
+        await this.removeItem(item.id);
+      }
+    });
+    this.cache.get().filter(isMarkedForUpsert).forEach(async (item) => {
+      clearMarkings(item);
+      try {
+        await this.upsertItem(item);
+      } catch (ex) {
+        markForUpsert(item);
+        reportError(ex);
+      }
+    });
+    const result = await this.forceFetchAllItems();
+    result.forEach((item) => this.cache.updateLineItem(item));
+    setGlobalState(`timeOfLastSynchronization_${this.tableName}`, timeOfCurrentSynchronization);
+    this.cache.renew();
+  }
+  async removeItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.isOffline()) {
+      const item = this.cache.getById(id);
+      if (!item)
+        throw "cannot remove an item that is not already there";
+      markForDelete(item);
+      if (IsTemporaryId(id)) {
+        this.cache.deleteLineItem(id);
+      } else {
+        this.cache.updateLineItem(item);
+      }
+      return;
+    }
+    const client = createClient();
+    await client.query(import_faunadb4.query.Update(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), id), {
+      data: {
+        user: CURRENT_USER,
+        update_date: Date.now(),
+        delete_date: Date.now()
+      }
+    }));
+    this.cache.deleteLineItem(id);
+  }
+  async getItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.isOffline() || !this.cache.expired()) {
+      const result2 = this.cache.getById(id);
+      if (!!result2) {
+        if (isMarkedForDelete(result2))
+          throw "item marked for deletion";
+        return result2;
+      }
+    }
+    if (this.isOffline())
+      throw `unable to load item: ${this.tableName} ${id}`;
+    const client = createClient();
+    const result = await client.query(import_faunadb4.query.Get(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), id)));
+    this.cache.updateLineItem(result.data);
+    return result.data;
+  }
+  async upsertItem(data) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    const client = createClient();
+    if (this.isOffline()) {
+      data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
+      markForUpsert(data);
+      this.cache.updateLineItem(data);
+      return;
+    }
+    if (!data.id || isMarkedForUpsert(data) && IsTemporaryId(data.id)) {
+      clearMarkings(data);
+      clearTemporaryId(data);
+      const result = await client.query(import_faunadb4.query.Create(import_faunadb4.query.Collection(this.tableName), {
+        data: {
+          ...data,
+          user: CURRENT_USER,
+          create_date: Date.now(),
+          update_date: Date.now()
+        }
+      }));
+      data.id = result.ref.id;
+      this.cache.updateLineItem(data);
+    } else {
+      await client.query(import_faunadb4.query.Update(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), data.id), {
+        data: {
+          ...data,
+          user: CURRENT_USER,
+          update_date: Date.now()
+        }
+      }));
+    }
+    this.cache.updateLineItem(data);
+  }
+  async getItems() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.cache.expired() && !this.isOffline())
+      await this.synchronize();
+    return this.cache.get().filter((item) => !isMarkedForDelete(item));
+  }
+  async forceFetchAllItems() {
+    const client = createClient();
+    const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Documents(import_faunadb4.query.Collection(this.tableName)), { size: BATCH_SIZE }), import_faunadb4.query.Lambda("ref", import_faunadb4.query.Get(import_faunadb4.query.Var("ref")))));
+    const items = response.data;
+    items.forEach((item) => {
+      item.data.id = item.ref.value.id;
+      clearMarkings(item.data);
+    });
+    const result = items.map((i) => i.data);
+    return result;
+  }
+};
+
+// app/services/gl.ts
+var LEDGER_TABLE = "general_ledger";
+var ledgerModel = new StorageModel({
+  tableName: LEDGER_TABLE,
+  offline: false
+});
+async function upsertItem(data) {
+  return ledgerModel.upsertItem(data);
+}
+async function getItems() {
+  const items = await ledgerModel.getItems();
+  return items.filter((ledger) => ledger.items && ledger.items[0] && ledger.items[0].account);
+}
+
+// app/services/invoices.ts
+var INVOICE_TABLE = "invoices";
+var invoiceModel = new StorageModel({
+  tableName: INVOICE_TABLE,
+  offline: false
+});
+async function getItems2() {
+  const invoices = await invoiceModel.getItems();
+  invoices.forEach((invoice) => {
+    invoice.mops = invoice.mops || [];
+    if (invoice["paid"] && invoice["mop"]) {
+      invoice.mops.push({
+        mop: invoice["mop"],
+        paid: invoice["paid"]
+      });
+      delete invoice["paid"];
+      delete invoice["mop"];
+    }
+  });
+  const response = invoices.filter((invoice) => invoice.items).map((invoice) => {
+    invoice.date = invoice.date || invoice.create_date;
+    invoice.labor = (invoice.labor || 0) - 0;
+    invoice.additional = (invoice.additional || 0) - 0;
+    invoice.items.forEach((item) => {
+      item.item = (item.item || "").toLocaleUpperCase();
+      item.quantity = (item.quantity || 0) - 0;
+      item.price = (item.price || 0) - 0;
+      item.total = (item.total || 0) - 0;
+    });
+    return invoice;
+  }).sortBy({ date: "date" }).reverse();
+  return response;
+}
+
+// app/fun/split.ts
+function split(items, test) {
+  const result = [[], []];
+  items.forEach((i) => result[test(i) ? 0 : 1].push(i));
+  return result;
+}
+
+// app/services/admin.ts
+async function importInvoicesToGeneralLedger() {
+  const invoices = await getItems2();
+  const ledgers = await getItems();
+  const [
+    invoicesToImport,
+    invoicesToUpdate
+  ] = split(invoices, (i) => !ledgers.find((l) => l.description === `INVOICE ${i.id}`));
+  invoicesToUpdate.forEach(async (invoice) => {
+    const ledger = ledgers.find((l) => l.description === `INVOICE ${invoice.id}`);
+    if (!ledger)
+      throw `ledger must exist for invoice: ${invoice.id}`;
+    const newLedger = {
+      ...createLedger(invoice),
+      id: ledger.id
+    };
+    if (JSON.stringify([
+      newLedger.date,
+      newLedger.items
+    ]) !== JSON.stringify([
+      ledger.date,
+      ledger.items
+    ])) {
+      await upsertItem({
+        ...newLedger,
+        id: ledger.id
+      });
+    }
+  });
+  while (invoicesToImport.length) {
+    const invoice = invoicesToImport.shift();
+    const ledger = createLedger(invoice);
+    await upsertItem(ledger);
+  }
+}
+function createLedger(invoice) {
+  const inventory = sum(invoice.items.map((i) => i.total));
+  const tax = inventory * TAXRATE;
+  const labor = invoice.labor;
+  const rent = invoice.additional > 0 ? invoice.additional : 0;
+  const discount = invoice.additional < 0 ? invoice.additional : 0;
+  const ledger = {
+    date: invoice.date,
+    description: `INVOICE ${invoice.id}`,
+    items: [
+      {
+        account: "AR",
+        amount: inventory,
+        comment: "INVENTORY"
+      },
+      {
+        account: "INVENTORY",
+        amount: -inventory,
+        comment: "INVENTORY"
+      },
+      {
+        account: "AR",
+        amount: tax,
+        comment: "TAX"
+      },
+      {
+        account: "TAX",
+        amount: -tax,
+        comment: "TAX"
+      },
+      {
+        account: "AR",
+        amount: rent,
+        comment: "RENT"
+      },
+      {
+        account: "RENT",
+        amount: -rent,
+        comment: "RENT"
+      },
+      {
+        account: "AR",
+        amount: labor,
+        comment: "LABOR"
+      },
+      {
+        account: "LABOR",
+        amount: -labor,
+        comment: "LABOR"
+      },
+      {
+        account: "AR",
+        amount: discount,
+        comment: "DISCOUNT"
+      },
+      {
+        account: "LABOR",
+        amount: -discount,
+        comment: "DISCOUNT"
+      }
+    ]
+  };
+  ledger.items = ledger.items.filter((i) => i.amount != 0);
+  return ledger;
+}
+
+// app/services/accounts.ts
+var ACCOUNT_TABLE = "accounts";
+var accountModel = new StorageModel({
+  tableName: ACCOUNT_TABLE,
+  maxAge: Number.MAX_SAFE_INTEGER,
+  offline: true
+});
+
+// app/fun/setMode.ts
+var modes = {
+  light_mode: "light",
+  dark_mode: "dark",
+  holiday_mode: "holiday"
+};
+function setMode(mode) {
+  if (!mode)
+    mode = localStorage.getItem("mode") || modes.light_mode;
+  localStorage.setItem("mode", mode);
+  document.body.classList.remove(...Object.values(modes));
+  document.body.classList.add(mode);
+}
+
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var inventoryModel = new StorageModel({
+  tableName: INVENTORY_TABLE,
+  maxAge: Number.MAX_SAFE_INTEGER,
+  offline: true
+});
+
+// app/admin.ts
+var starterAccounts = [
+  "AP",
+  "AR",
+  "CASH",
+  "INVENTORY",
+  "LABOR",
+  "OPEX",
+  "Phone",
+  "Rental",
+  "SALE TAX",
+  "SALES",
+  "STORAGE",
+  "TOOLS",
+  "Utilities"
+];
+async function init() {
+  await identify();
+  const domNode = document.body;
+  hookupTriggers(domNode);
+  Object.keys(modes).forEach((mode) => on(domNode, mode, () => {
+    setMode(modes[mode]);
+    toast(`theme changed to ${mode}`);
+  }));
+  on(domNode, "synchronize-invoice-data", async () => {
+    try {
+      await invoiceModel.synchronize();
+      toast("invoice sync completed");
+    } catch (ex) {
+      reportError(ex);
+    }
+  });
+  on(domNode, "synchronize-ledger-data", async () => {
+    try {
+      await ledgerModel.synchronize();
+      toast("ledger sync completed");
+    } catch (ex) {
+      reportError(ex);
+    }
+  });
+  on(domNode, "set-api-key", () => {
+    prompt2("Enter API Key", (secret) => {
+      if (!secret)
+        return;
+      localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+    });
+  });
+  on(domNode, "ping-local-storage", () => {
+    let cache = new ServiceCache({
+      table: "invoices"
+    });
+    cache.renew();
+    cache = new ServiceCache({
+      table: "general_ledger"
+    });
+    cache.renew();
+  });
+  on(domNode, "invoice-to-inventory", async () => {
+    await importInvoicesToGeneralLedger();
+    const invoices = await invoiceModel.getItems();
+    invoices.forEach((invoice) => {
+      invoice.items.forEach(async (item) => {
+        await inventoryModel.upsertItem({
+          id: item.item,
+          code: item.item,
+          price: item.price
+        });
+      });
+    });
+    toast("inventory updated with invoice line items");
+  });
+  on(domNode, "invoice-to-gl", async () => {
+    if (!confirm("import invoices into general ledger?"))
+      return;
+    await importInvoicesToGeneralLedger();
+  });
+  on(domNode, "gl-to-list-of-accounts", async () => {
+    starterAccounts.forEach(async (account) => await accountModel.upsertItem({
+      id: account,
+      code: account
+    }));
+    const ledgers = await getItems();
+    ledgers.forEach(async (l) => l.items.forEach(async (item) => await accountModel.upsertItem({
+      id: item.account,
+      code: item.account
+    })));
+    toast("accounts generated");
+  });
+  setMode();
+}
+function prompt2(label, cb) {
+  const input = document.createElement("input");
+  input.placeholder = label;
+  document.body.appendChild(input);
+  input.onchange = () => {
+    cb(input.value.trim());
+    input.remove();
+  };
+}
+export {
+  init
+};
 /*
 object-assign
 (c) Sindre Sorhus
