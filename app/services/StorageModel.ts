@@ -14,50 +14,82 @@ import {
 } from "../ux/Toaster.js";
 import { getDatabaseTime } from "./getDatabaseTime.js";
 
-const statusFlags = {
+const syncStatusFlags = {
   DELETED: "___DELETED___",
   UPDATED: "___UPDATED___",
 };
 
-function isMarked(item: any) {
+function isMarkedForSync(item: any) {
   return Object.values(
-    statusFlags
+    syncStatusFlags
   ).some((key) => !!item[key]);
 }
 
-function clearMarkings(item: any) {
-  Object.values(statusFlags).forEach(
+function clearSyncMarkings(item: any) {
+  Object.values(
+    syncStatusFlags
+  ).forEach(
     (key) =>
       item[key] && delete item[key]
   );
 }
 
-function clearTemporaryId(item: {
+function clearOfflineId(item: {
   id?: string;
 }) {
   delete item.id;
 }
 
-function IsTemporaryId(itemId: string) {
+function isOfflineId(itemId: string) {
   return "9" < itemId[0];
 }
 
 function markForUpsert(item: any) {
-  item[statusFlags.UPDATED] =
+  item[syncStatusFlags.UPDATED] =
     Date.now();
 }
 
 function isMarkedForUpsert(item: any) {
-  return !!item[statusFlags.UPDATED];
+  return !!item[
+    syncStatusFlags.UPDATED
+  ];
 }
 
 function markForDelete(item: any) {
-  item[statusFlags.DELETED] =
+  item[syncStatusFlags.DELETED] =
     Date.now();
 }
 
 function isMarkedForDelete(item: any) {
-  return !!item[statusFlags.DELETED];
+  return !!item[
+    syncStatusFlags.DELETED
+  ];
+}
+
+async function forceUpdatestampIndex(
+  tableName: string
+) {
+  const client = createClient();
+
+  const query = q.CreateIndex({
+    name: `${tableName}_updates`,
+    source: q.Collection(tableName),
+    values: [
+      {
+        field: ["data", "update_date"],
+        reverse: true,
+      },
+      {
+        field: ["ref"],
+      },
+    ],
+  });
+
+  try {
+    return await client.query(query);
+  } catch (ex) {
+    reportError(ex);
+  }
 }
 
 export class StorageModel<
@@ -149,11 +181,13 @@ export class StorageModel<
           }>;
         };
       response.data.forEach((item) => {
-        if (isMarked(item.data)) {
+        if (
+          isMarkedForSync(item.data)
+        ) {
           reportError(
             "Data contains client-side marking"
           );
-          clearMarkings(item.data);
+          clearSyncMarkings(item.data);
         }
         result.push({
           ...item.data,
@@ -172,35 +206,6 @@ export class StorageModel<
     return result;
   }
 
-  async forceUpdatestampIndex() {
-    const client = createClient();
-
-    const query = q.CreateIndex({
-      name: `${this.tableName}_updates`,
-      source: q.Collection(
-        this.tableName
-      ),
-      values: [
-        {
-          field: [
-            "data",
-            "update_date",
-          ],
-          reverse: true,
-        },
-        {
-          field: ["ref"],
-        },
-      ],
-    });
-
-    try {
-      return await client.query(query);
-    } catch (ex) {
-      reportError(ex);
-    }
-  }
-
   async synchronize() {
     if (!CURRENT_USER)
       throw "user must be signed in";
@@ -214,7 +219,9 @@ export class StorageModel<
         `forceUpdatestampIndex_${this.tableName}`
       )
     ) {
-      await this.forceUpdatestampIndex();
+      await forceUpdatestampIndex(
+        this.tableName
+      );
       setGlobalState(
         `forceUpdatestampIndex_${this.tableName}`,
         Date.now()
@@ -265,7 +272,7 @@ export class StorageModel<
       async (item) => {
         if (!item.id)
           throw "all items must have an id";
-        if (IsTemporaryId(item.id)) {
+        if (isOfflineId(item.id)) {
           this.cache.deleteLineItem(
             item.id
           );
@@ -281,7 +288,7 @@ export class StorageModel<
       .get()
       .filter(isMarkedForUpsert)
       .forEach(async (item) => {
-        clearMarkings(item);
+        clearSyncMarkings(item);
         try {
           await this.upsertItem(item);
         } catch (ex) {
@@ -321,7 +328,7 @@ export class StorageModel<
       if (!item)
         throw "cannot remove an item that is not already there";
       markForDelete(item);
-      if (IsTemporaryId(id)) {
+      if (isOfflineId(id)) {
         this.cache.deleteLineItem(id);
       } else {
         this.cache.updateLineItem(item);
@@ -405,10 +412,10 @@ export class StorageModel<
     if (
       !data.id ||
       (isMarkedForUpsert(data) &&
-        IsTemporaryId(data.id))
+        isOfflineId(data.id))
     ) {
-      clearMarkings(data);
-      clearTemporaryId(data);
+      clearSyncMarkings(data);
+      clearOfflineId(data);
       const result =
         (await client.query(
           q.Create(
@@ -500,7 +507,7 @@ export class StorageModel<
     // copy ref into invoice id
     items.forEach((item) => {
       item.data.id = item.ref.value.id;
-      clearMarkings(item.data);
+      clearSyncMarkings(item.data);
     });
 
     const result = items.map(
