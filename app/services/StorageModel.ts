@@ -279,6 +279,12 @@ export class StorageModel<
       this.cache.expired()
     ) {
       await this.synchronize();
+    } else {
+      if (!!this.cache.getById(id)) {
+        this.cache.renew();
+      } else {
+        await this.synchronize();
+      }
     }
 
     const result =
@@ -373,8 +379,11 @@ export class StorageModel<
     if (
       this.cache.expired() &&
       !this.isOffline()
-    )
+    ) {
       await this.synchronize();
+    } else {
+      this.cache.renew();
+    }
 
     return this.cache
       .get()

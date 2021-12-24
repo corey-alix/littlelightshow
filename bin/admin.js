@@ -4922,14 +4922,9 @@ var ServiceCache = class {
   lastWriteTime() {
     return this.lastWrite;
   }
-  clear() {
-    this.lastWrite = 0;
-    this.save();
-  }
   renew() {
     this.lastWrite = Date.now();
     this.save();
-    return this.lastWrite;
   }
   save() {
     localStorage.setItem(`table_${this.table}`, JSON.stringify({
@@ -5119,6 +5114,12 @@ var StorageModel = class {
       throw "user must be signed in";
     if (!this.isOffline() && this.cache.expired()) {
       await this.synchronize();
+    } else {
+      if (!!this.cache.getById(id)) {
+        this.cache.renew();
+      } else {
+        await this.synchronize();
+      }
     }
     const result = this.cache.getById(id);
     if (!result)
@@ -5167,8 +5168,11 @@ var StorageModel = class {
   async getItems() {
     if (!CURRENT_USER)
       throw "user must be signed in";
-    if (this.cache.expired() && !this.isOffline())
+    if (this.cache.expired() && !this.isOffline()) {
       await this.synchronize();
+    } else {
+      this.cache.renew();
+    }
     return this.cache.get().filter((item) => !item.delete_date);
   }
   async forceFetchAllItems() {
