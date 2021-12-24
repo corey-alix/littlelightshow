@@ -21,6 +21,11 @@ body.dark .toaster {
   color: black;
 }
 
+body.holiday .toaster {
+  background-color: black;
+  color: white;
+}
+
 .toaster .error {
   color: red;
   font-weight: bolder;
