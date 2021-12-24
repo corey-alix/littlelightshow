@@ -4990,7 +4990,7 @@ var StorageModel = class {
       return;
     }
     const client = createClient();
-    await client.query(import_faunadb3.query.Update(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), id), {
+    await client.query(import_faunadb3.query.Replace(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), id), {
       data: {
         user: CURRENT_USER,
         update_date: Date.now(),
@@ -5041,7 +5041,7 @@ var StorageModel = class {
       data.id = result.ref.value.id;
       this.cache.updateLineItem(data);
     } else {
-      await client.query(import_faunadb3.query.Update(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), data.id), {
+      await client.query(import_faunadb3.query.Replace(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), data.id), {
         data: {
           user: CURRENT_USER,
           update_date: Date.now(),

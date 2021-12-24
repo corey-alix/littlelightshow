@@ -243,7 +243,7 @@ export class StorageModel<
     // online
     const client = createClient();
     await client.query(
-      q.Update(
+      q.Replace(
         q.Ref(
           q.Collection(this.tableName),
           id
@@ -334,7 +334,7 @@ export class StorageModel<
       this.cache.updateLineItem(data);
     } else {
       await client.query(
-        q.Update(
+        q.Replace(
           q.Ref(
             q.Collection(
               this.tableName
