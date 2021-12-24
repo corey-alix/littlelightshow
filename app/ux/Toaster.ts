@@ -16,8 +16,8 @@ class Toaster {
       target.classList.add(
         "toaster",
         "border",
-        "rounded",
-        "fixed",
+        "rounded-top",
+        "absolute",
         "bottom",
         "right"
       );

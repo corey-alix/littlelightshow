@@ -1,9 +1,13 @@
 import { isDebug } from "../globals";
 import { ticksInSeconds } from "../fun/ticksInSeconds";
 
+// in seconds
+const SECONDS_PER_MINUTE = 60;
+const SECONDS_PER_HOUR = 60 * 60;
+
 const MAX_AGE = isDebug
-  ? 365 * 24 * 3600
-  : (7 - 0.2) * 24 * 3600;
+  ? 4 * SECONDS_PER_HOUR
+  : 5 * SECONDS_PER_MINUTE;
 
 export class ServiceCache<
   T extends { id?: string }

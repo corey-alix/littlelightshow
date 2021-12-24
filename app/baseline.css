@@ -31,6 +31,10 @@ body.holiday .toaster {
   font-weight: bolder;
 }
 
+.absolute {
+  position: absolute;
+}
+
 .fixed {
   position: fixed;
 }
@@ -161,6 +165,11 @@ body.dark .border {
 
 body.light .border {
   border: 1px solid black;
+}
+
+.rounded-top {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
 }
 
 .rounded {

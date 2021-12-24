@@ -4894,7 +4894,9 @@ function ticksInSeconds(ticks) {
 }
 
 // app/services/ServiceCache.ts
-var MAX_AGE = isDebug ? 365 * 24 * 3600 : (7 - 0.2) * 24 * 3600;
+var SECONDS_PER_MINUTE = 60;
+var SECONDS_PER_HOUR = 60 * 60;
+var MAX_AGE = isDebug ? 4 * SECONDS_PER_HOUR : 5 * SECONDS_PER_MINUTE;
 var ServiceCache = class {
   constructor(options) {
     this.options = options;
@@ -4966,7 +4968,7 @@ var Toaster = class {
     if (!target) {
       target = document.createElement("div");
       target.id = "toaster";
-      target.classList.add("toaster", "border", "rounded", "fixed", "bottom", "right");
+      target.classList.add("toaster", "border", "rounded-top", "absolute", "bottom", "right");
       document.body.appendChild(target);
     }
     const message = document.createElement("div");
@@ -5139,20 +5141,15 @@ var StorageModel = class {
   async getItem(id) {
     if (!CURRENT_USER)
       throw "user must be signed in";
-    if (this.isOffline() || !this.cache.expired()) {
-      const result2 = this.cache.getById(id);
-      if (!!result2) {
-        if (isMarkedForDelete(result2))
-          throw "item marked for deletion";
-        return result2;
-      }
+    if (!this.isOffline() && this.cache.expired()) {
+      await this.synchronize();
     }
-    if (this.isOffline())
+    const result = this.cache.getById(id);
+    if (!result)
       throw `unable to load item: ${this.tableName} ${id}`;
-    const client = createClient();
-    const result = await client.query(import_faunadb4.query.Get(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), id)));
-    this.cache.updateLineItem(result.data);
-    return result.data;
+    if (isMarkedForDelete(result))
+      throw "item marked for deletion";
+    return result;
   }
   async upsertItem(data) {
     if (!CURRENT_USER)

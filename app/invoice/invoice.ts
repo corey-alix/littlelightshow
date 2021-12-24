@@ -139,11 +139,11 @@ function hookupEvents(
   });
 
   on(formDom, "submit", async () => {
-    if (await tryToSaveInvoice(formDom))
-      trigger(
-        formDom,
-        "list-all-invoices"
-      );
+    if (
+      await tryToSaveInvoice(formDom)
+    ) {
+      toast("Invoice saved");
+    }
   });
 }
 

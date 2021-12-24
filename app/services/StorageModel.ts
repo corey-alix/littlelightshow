@@ -321,35 +321,21 @@ export class StorageModel<
       throw "user must be signed in";
 
     if (
-      this.isOffline() ||
-      !this.cache.expired()
+      !this.isOffline() &&
+      this.cache.expired()
     ) {
-      const result =
-        this.cache.getById(id);
-
-      if (!!result) {
-        if (isMarkedForDelete(result))
-          throw "item marked for deletion";
-        return result;
-      }
+      await this.synchronize();
     }
 
-    if (this.isOffline())
+    const result =
+      this.cache.getById(id);
+
+    if (!result)
       throw `unable to load item: ${this.tableName} ${id}`;
 
-    const client = createClient();
-    const result = (await client.query(
-      q.Get(
-        q.Ref(
-          q.Collection(this.tableName),
-          id
-        )
-      )
-    )) as { data: T };
-    this.cache.updateLineItem(
-      result.data
-    );
-    return result.data;
+    if (isMarkedForDelete(result))
+      throw "item marked for deletion";
+    return result;
   }
 
   async upsertItem(data: T) {

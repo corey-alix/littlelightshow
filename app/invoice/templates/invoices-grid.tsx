@@ -71,19 +71,6 @@ export function create(
       target
     );
 
-  moveChildren(
-    <div>
-      <button
-        type="button"
-        class="button col-1-2"
-        data-event="create-invoice"
-      >
-        Create Invoice
-      </button>
-    </div>,
-    target
-  );
-
   hookupTriggers(target);
 
   return target;
