@@ -171,7 +171,6 @@ export class StorageModel<
         );
       }
       if (!!item.delete_date) {
-        debugger;
         this.cache.deleteLineItem(
           item.id
         );
@@ -211,16 +210,6 @@ export class StorageModel<
         await this.upsertItem(item);
       });
 
-    // actually this only fetches the 25 most recently changed.
-    // TODO: deleted items should be marked "deleted" instead of actually deleted
-    const result =
-      await this.forceFetchAllItems();
-
-    // items delete by other users will remain in the cache...
-    result.forEach((item) =>
-      this.cache.updateLineItem(item)
-    );
-
     // preserve the timestamp for a future sync run
     // notice the next sync will pull in the data we just pushed
     setFutureSyncTime(
@@ -236,17 +225,18 @@ export class StorageModel<
     if (!CURRENT_USER)
       throw "user must be signed in";
 
+    if (isOfflineId(id)) {
+      this.cache.deleteLineItem(id);
+      return;
+    }
+
     if (this.isOffline()) {
       const item =
         this.cache.getById(id);
       if (!item)
         throw "cannot remove an item that is not already there";
-      if (isOfflineId(id)) {
-        this.cache.deleteLineItem(id);
-      } else {
-        item.delete_date = Date.now();
-        this.cache.updateLineItem(item);
-      }
+      item.delete_date = Date.now();
+      this.cache.updateLineItem(item);
       return;
     }
 
@@ -315,7 +305,6 @@ export class StorageModel<
       return;
     }
 
-    debugger;
     if (isOfflineId(data.id)) {
       this.cache.deleteLineItem(
         data.id!
@@ -328,10 +317,10 @@ export class StorageModel<
             ),
             {
               data: {
-                ...data,
                 user: CURRENT_USER,
                 create_date: Date.now(),
                 update_date: Date.now(),
+                ...data,
               },
             }
           )
@@ -354,9 +343,9 @@ export class StorageModel<
           ),
           {
             data: {
-              ...data,
               user: CURRENT_USER,
               update_date: Date.now(),
+              ...data,
             },
           }
         )
@@ -390,45 +379,6 @@ export class StorageModel<
       .filter(
         (item) => !item.delete_date
       );
-  }
-
-  private async forceFetchAllItems() {
-    const client = createClient();
-    const response =
-      (await client.query(
-        q.Map(
-          q.Paginate(
-            q.Documents(
-              q.Collection(
-                this.tableName
-              )
-            ),
-            { size: BATCH_SIZE }
-          ),
-          q.Lambda(
-            "ref",
-            q.Get(q.Var("ref"))
-          )
-        )
-      )) as {
-        data: Array<{
-          data: T &
-            SynchronizationAttributes;
-          ref: any;
-        }>;
-      };
-
-    const items = response.data;
-
-    // copy ref into invoice id
-    items.forEach((item) => {
-      item.data.id = item.ref.value.id;
-    });
-
-    const result = items.map(
-      (i) => i.data
-    );
-    return result;
   }
 }
 

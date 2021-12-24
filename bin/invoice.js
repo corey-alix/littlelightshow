@@ -4731,7 +4731,7 @@ function trigger(domNode, eventName) {
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.06;
-var BATCH_SIZE = 10;
+var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
 var isDebug = location.href.includes("localhost");
 var isOffline = () => getGlobalState("work_offline")?.value === true;
 var primaryContact = {
@@ -4954,7 +4954,6 @@ var StorageModel = class {
         toast(`item changed remotely and locally: ${item.id}`);
       }
       if (!!item.delete_date) {
-        debugger;
         this.cache.deleteLineItem(item.id);
       } else {
         this.cache.updateLineItem(item);
@@ -4972,24 +4971,22 @@ var StorageModel = class {
     this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime).forEach(async (item) => {
       await this.upsertItem(item);
     });
-    const result = await this.forceFetchAllItems();
-    result.forEach((item) => this.cache.updateLineItem(item));
     setFutureSyncTime(this.tableName, currentSyncTime);
     this.cache.renew();
   }
   async removeItem(id) {
     if (!CURRENT_USER)
       throw "user must be signed in";
+    if (isOfflineId(id)) {
+      this.cache.deleteLineItem(id);
+      return;
+    }
     if (this.isOffline()) {
       const item = this.cache.getById(id);
       if (!item)
         throw "cannot remove an item that is not already there";
-      if (isOfflineId(id)) {
-        this.cache.deleteLineItem(id);
-      } else {
-        item.delete_date = Date.now();
-        this.cache.updateLineItem(item);
-      }
+      item.delete_date = Date.now();
+      this.cache.updateLineItem(item);
       return;
     }
     const client = createClient();
@@ -5031,15 +5028,14 @@ var StorageModel = class {
       this.cache.updateLineItem(data);
       return;
     }
-    debugger;
     if (isOfflineId(data.id)) {
       this.cache.deleteLineItem(data.id);
       const result = await client.query(import_faunadb3.query.Create(import_faunadb3.query.Collection(this.tableName), {
         data: {
-          ...data,
           user: CURRENT_USER,
           create_date: Date.now(),
-          update_date: Date.now()
+          update_date: Date.now(),
+          ...data
         }
       }));
       data.id = result.ref.value.id;
@@ -5047,9 +5043,9 @@ var StorageModel = class {
     } else {
       await client.query(import_faunadb3.query.Update(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), data.id), {
         data: {
-          ...data,
           user: CURRENT_USER,
-          update_date: Date.now()
+          update_date: Date.now(),
+          ...data
         }
       }));
     }
@@ -5067,16 +5063,6 @@ var StorageModel = class {
       this.cache.renew();
     }
     return this.cache.get().filter((item) => !item.delete_date);
-  }
-  async forceFetchAllItems() {
-    const client = createClient();
-    const response = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Documents(import_faunadb3.query.Collection(this.tableName)), { size: BATCH_SIZE }), import_faunadb3.query.Lambda("ref", import_faunadb3.query.Get(import_faunadb3.query.Var("ref")))));
-    const items = response.data;
-    items.forEach((item) => {
-      item.data.id = item.ref.value.id;
-    });
-    const result = items.map((i) => i.data);
-    return result;
   }
 };
 function isOfflineId(itemId) {

@@ -1,6 +1,8 @@
 import faunadb from "faunadb";
 export const TAXRATE = 0.06;
-export const BATCH_SIZE = 10;
+export const BATCH_SIZE =
+  getGlobalState("BATCH_SIZE")?.value ||
+  10;
 
 export const isDebug =
   location.href.includes("localhost");

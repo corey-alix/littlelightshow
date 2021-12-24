@@ -4698,6 +4698,7 @@ var require_faunadb = __commonJS({
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
+var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
 var isDebug = location.href.includes("localhost");
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
@@ -4733,6 +4734,14 @@ function createClient() {
     secret: FAUNADB_SERVER_SECRET,
     domain
   });
+}
+var globalState;
+function forceGlobalState() {
+  return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
+}
+function getGlobalState(key) {
+  const state = forceGlobalState();
+  return state[key];
 }
 
 // test/test.ts
