@@ -66,32 +66,6 @@ function isMarkedForDelete(item: any) {
   ];
 }
 
-async function forceUpdatestampIndex(
-  tableName: string
-) {
-  const client = createClient();
-
-  const query = q.CreateIndex({
-    name: `${tableName}_updates`,
-    source: q.Collection(tableName),
-    values: [
-      {
-        field: ["data", "update_date"],
-        reverse: true,
-      },
-      {
-        field: ["ref"],
-      },
-    ],
-  });
-
-  try {
-    return await client.query(query);
-  } catch (ex) {
-    reportError(ex);
-  }
-}
-
 export class StorageModel<
   T extends { id?: string }
 > {
@@ -213,20 +187,6 @@ export class StorageModel<
     if (this.isOffline())
       throw "cannot synchronize in offline mode";
 
-    // get data by timestamp (descending order)
-    if (
-      !getGlobalState(
-        `forceUpdatestampIndex_${this.tableName}`
-      )
-    ) {
-      await forceUpdatestampIndex(
-        this.tableName
-      );
-      setGlobalState(
-        `forceUpdatestampIndex_${this.tableName}`,
-        Date.now()
-      );
-    }
     const timeOfLastSynchronization =
       getGlobalState(
         `timeOfLastSynchronization_${this.tableName}`

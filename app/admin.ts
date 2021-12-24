@@ -3,14 +3,17 @@ import "./fun/sort.js";
 import { identify } from "./identify.js";
 import { hookupTriggers } from "./fun/hookupTriggers.js";
 
-import { importInvoicesToGeneralLedger } from "./services/admin.js";
+import {
+  forceUpdatestampIndex,
+  forceUpdatestampTable,
+  importInvoicesToGeneralLedger,
+} from "./services/admin.js";
 import {
   getItems as loadAllLedgers,
   ledgerModel,
 } from "./services/gl.js";
 import { accountModel } from "./services/accounts.js";
 import { on } from "./fun/on.js";
-import { ServiceCache } from "./services/ServiceCache.js";
 import {
   modes,
   setMode,
@@ -21,6 +24,7 @@ import {
   toast,
 } from "./ux/Toaster.js";
 import { inventoryModel } from "./services/inventory.js";
+import { getDatabaseTime } from "./services/getDatabaseTime.js";
 const starterAccounts = [
   "AP",
   "AR",
@@ -37,6 +41,13 @@ const starterAccounts = [
   "Utilities",
 ];
 
+interface FaunaException {
+  name: string;
+  message: string;
+  description: string;
+  requestResult: any;
+}
+
 export async function init() {
   await identify();
   const domNode = document.body;
@@ -48,6 +59,63 @@ export async function init() {
       setMode(modes[mode]);
       toast(`theme changed to ${mode}`);
     })
+  );
+
+  const tableNames = [
+    "general_ledger",
+    "invoices",
+  ];
+
+  on(
+    domNode,
+    "database-rebuild-collection",
+    () => {
+      tableNames.forEach(
+        async (tableName) => {
+          try {
+            await forceUpdatestampTable(
+              tableName
+            );
+            toast(
+              `Table created: ${tableName}`
+            );
+          } catch (ex) {
+            reportError(
+              `Failed to create table: ${tableName}: ${
+                (ex as FaunaException)
+                  .description
+              }`
+            );
+          }
+        }
+      );
+    }
+  );
+
+  on(
+    domNode,
+    "database-rebuild-index",
+    async () => {
+      tableNames.forEach(
+        async (tableName) => {
+          try {
+            await forceUpdatestampIndex(
+              tableName
+            );
+            toast(
+              `Index Rebuilt: ${tableName}`
+            );
+          } catch (ex) {
+            reportError(
+              `Failed to create index: ${tableName}: ${
+                (ex as FaunaException)
+                  .description
+              }`
+            );
+          }
+        }
+      );
+    }
   );
 
   on(
@@ -93,15 +161,19 @@ export async function init() {
   on(
     domNode,
     "ping-local-storage",
-    () => {
-      let cache = new ServiceCache({
-        table: "invoices",
-      });
-      cache.renew();
-      cache = new ServiceCache({
-        table: "general_ledger",
-      });
-      cache.renew();
+    async () => {
+      const ticks = {
+        start: Date.now(),
+        end: -1,
+      };
+      const time =
+        await getDatabaseTime();
+      ticks.end = Date.now();
+      toast(
+        `Roundtrip time: ${
+          ticks.end - ticks.start
+        }ms`
+      );
     }
   );
 
@@ -189,15 +261,4 @@ function prompt(
     cb(input.value.trim());
     input.remove();
   };
-}
-
-function addAccount(
-  accounts: any,
-  item: string
-) {
-  if (!accounts[item]) {
-    accounts[item] = {
-      code: item,
-    };
-  }
 }

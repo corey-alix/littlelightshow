@@ -16,6 +16,7 @@ export class ServiceCache<
   renew() {
     this.lastWrite = Date.now();
     this.save();
+    return this.lastWrite;
   }
 
   private data: Array<T>;

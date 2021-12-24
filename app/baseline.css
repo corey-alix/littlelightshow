@@ -23,6 +23,7 @@ body.dark .toaster {
 
 .toaster .error {
   color: red;
+  font-weight: bolder;
 }
 
 .fixed {

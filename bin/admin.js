@@ -4917,6 +4917,7 @@ var ServiceCache = class {
   renew() {
     this.lastWrite = Date.now();
     this.save();
+    return this.lastWrite;
   }
   save() {
     localStorage.setItem(`table_${this.table}`, JSON.stringify({
@@ -5000,33 +5001,33 @@ async function getDatabaseTime() {
 }
 
 // app/services/StorageModel.ts
-var statusFlags = {
+var syncStatusFlags = {
   DELETED: "___DELETED___",
   UPDATED: "___UPDATED___"
 };
-function isMarked(item) {
-  return Object.values(statusFlags).some((key) => !!item[key]);
+function isMarkedForSync(item) {
+  return Object.values(syncStatusFlags).some((key) => !!item[key]);
 }
-function clearMarkings(item) {
-  Object.values(statusFlags).forEach((key) => item[key] && delete item[key]);
+function clearSyncMarkings(item) {
+  Object.values(syncStatusFlags).forEach((key) => item[key] && delete item[key]);
 }
-function clearTemporaryId(item) {
+function clearOfflineId(item) {
   delete item.id;
 }
-function IsTemporaryId(itemId) {
+function isOfflineId(itemId) {
   return "9" < itemId[0];
 }
 function markForUpsert(item) {
-  item[statusFlags.UPDATED] = Date.now();
+  item[syncStatusFlags.UPDATED] = Date.now();
 }
 function isMarkedForUpsert(item) {
-  return !!item[statusFlags.UPDATED];
+  return !!item[syncStatusFlags.UPDATED];
 }
 function markForDelete(item) {
-  item[statusFlags.DELETED] = Date.now();
+  item[syncStatusFlags.DELETED] = Date.now();
 }
 function isMarkedForDelete(item) {
-  return !!item[statusFlags.DELETED];
+  return !!item[syncStatusFlags.DELETED];
 }
 var StorageModel = class {
   constructor(options) {
@@ -5048,9 +5049,9 @@ var StorageModel = class {
     while (true) {
       const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.GT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), lowerBound), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), { size: BATCH_SIZE }), import_faunadb4.query.Lambda("item", import_faunadb4.query.Get(import_faunadb4.query.Select([1], import_faunadb4.query.Var("item"))))));
       response.data.forEach((item) => {
-        if (isMarked(item.data)) {
+        if (isMarkedForSync(item.data)) {
           reportError("Data contains client-side marking");
-          clearMarkings(item.data);
+          clearSyncMarkings(item.data);
         }
         result.push({
           ...item.data,
@@ -5063,39 +5064,11 @@ var StorageModel = class {
     }
     return result;
   }
-  async forceUpdatestampIndex() {
-    const client = createClient();
-    const query = import_faunadb4.query.CreateIndex({
-      name: `${this.tableName}_updates`,
-      source: import_faunadb4.query.Collection(this.tableName),
-      values: [
-        {
-          field: [
-            "data",
-            "update_date"
-          ],
-          reverse: true
-        },
-        {
-          field: ["ref"]
-        }
-      ]
-    });
-    try {
-      return await client.query(query);
-    } catch (ex) {
-      reportError(ex);
-    }
-  }
   async synchronize() {
     if (!CURRENT_USER)
       throw "user must be signed in";
     if (this.isOffline())
       throw "cannot synchronize in offline mode";
-    if (!getGlobalState(`forceUpdatestampIndex_${this.tableName}`)) {
-      await this.forceUpdatestampIndex();
-      setGlobalState(`forceUpdatestampIndex_${this.tableName}`, Date.now());
-    }
     const timeOfLastSynchronization = getGlobalState(`timeOfLastSynchronization_${this.tableName}`)?.value || 0;
     const timeOfCurrentSynchronization = await getDatabaseTime();
     const dataToImport = await this.loadLatestData({
@@ -5118,14 +5091,14 @@ var StorageModel = class {
     dataToExport.forEach(async (item) => {
       if (!item.id)
         throw "all items must have an id";
-      if (IsTemporaryId(item.id)) {
+      if (isOfflineId(item.id)) {
         this.cache.deleteLineItem(item.id);
       } else {
         await this.removeItem(item.id);
       }
     });
     this.cache.get().filter(isMarkedForUpsert).forEach(async (item) => {
-      clearMarkings(item);
+      clearSyncMarkings(item);
       try {
         await this.upsertItem(item);
       } catch (ex) {
@@ -5146,7 +5119,7 @@ var StorageModel = class {
       if (!item)
         throw "cannot remove an item that is not already there";
       markForDelete(item);
-      if (IsTemporaryId(id)) {
+      if (isOfflineId(id)) {
         this.cache.deleteLineItem(id);
       } else {
         this.cache.updateLineItem(item);
@@ -5191,9 +5164,9 @@ var StorageModel = class {
       this.cache.updateLineItem(data);
       return;
     }
-    if (!data.id || isMarkedForUpsert(data) && IsTemporaryId(data.id)) {
-      clearMarkings(data);
-      clearTemporaryId(data);
+    if (!data.id || isMarkedForUpsert(data) && isOfflineId(data.id)) {
+      clearSyncMarkings(data);
+      clearOfflineId(data);
       const result = await client.query(import_faunadb4.query.Create(import_faunadb4.query.Collection(this.tableName), {
         data: {
           ...data,
@@ -5228,7 +5201,7 @@ var StorageModel = class {
     const items = response.data;
     items.forEach((item) => {
       item.data.id = item.ref.value.id;
-      clearMarkings(item.data);
+      clearSyncMarkings(item.data);
     });
     const result = items.map((i) => i.data);
     return result;
@@ -5291,6 +5264,29 @@ function split(items, test) {
 }
 
 // app/services/admin.ts
+async function forceUpdatestampTable(tableName) {
+  const client = createClient();
+  return await client.query(import_faunadb5.query.CreateCollection({
+    name: tableName
+  }));
+}
+async function forceUpdatestampIndex(tableName) {
+  const client = createClient();
+  const query = import_faunadb5.query.CreateIndex({
+    name: `${tableName}_updates`,
+    source: import_faunadb5.query.Collection(tableName),
+    values: [
+      {
+        field: ["data", "update_date"],
+        reverse: true
+      },
+      {
+        field: ["ref"]
+      }
+    ]
+  });
+  return await client.query(query);
+}
 async function importInvoicesToGeneralLedger() {
   const invoices = await getItems2();
   const ledgers = await getItems();
@@ -5445,6 +5441,30 @@ async function init() {
     setMode(modes[mode]);
     toast(`theme changed to ${mode}`);
   }));
+  const tableNames = [
+    "general_ledger",
+    "invoices"
+  ];
+  on(domNode, "database-rebuild-collection", () => {
+    tableNames.forEach(async (tableName) => {
+      try {
+        await forceUpdatestampTable(tableName);
+        toast(`Table created: ${tableName}`);
+      } catch (ex) {
+        reportError(`Failed to create table: ${tableName}: ${ex.description}`);
+      }
+    });
+  });
+  on(domNode, "database-rebuild-index", async () => {
+    tableNames.forEach(async (tableName) => {
+      try {
+        await forceUpdatestampIndex(tableName);
+        toast(`Index Rebuilt: ${tableName}`);
+      } catch (ex) {
+        reportError(`Failed to create index: ${tableName}: ${ex.description}`);
+      }
+    });
+  });
   on(domNode, "synchronize-invoice-data", async () => {
     try {
       await invoiceModel.synchronize();
@@ -5468,15 +5488,14 @@ async function init() {
       localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
     });
   });
-  on(domNode, "ping-local-storage", () => {
-    let cache = new ServiceCache({
-      table: "invoices"
-    });
-    cache.renew();
-    cache = new ServiceCache({
-      table: "general_ledger"
-    });
-    cache.renew();
+  on(domNode, "ping-local-storage", async () => {
+    const ticks = {
+      start: Date.now(),
+      end: -1
+    };
+    const time = await getDatabaseTime();
+    ticks.end = Date.now();
+    toast(`Roundtrip time: ${ticks.end - ticks.start}ms`);
   });
   on(domNode, "invoice-to-inventory", async () => {
     await importInvoicesToGeneralLedger();
