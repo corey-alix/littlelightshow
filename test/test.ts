@@ -22,40 +22,43 @@ async function loadLatestData(args: {
 }) {
   const client = createClient();
   let response = await client.query(
-    q.Filter(
-      q.Map(
-        q.Paginate(
+    q.Map(
+      q.Paginate(
+        q.Filter(
           q.Match(
             q.Index(
               `${args.tableName}_updates`
             )
           ),
-          { size: 10 }
-        ),
-        q.Lambda(
-          "item",
-          q.Get(
-            q.Select([1], q.Var("item"))
+          q.Lambda(
+            "item",
+            q.And(
+              q.ContainsField(
+                "update_date",
+                q.Select(
+                  ["data"],
+                  q.Var("item")
+                )
+              ),
+              q.GT(
+                q.Select(
+                  [
+                    "data",
+                    "update_date",
+                  ],
+                  q.Var("item")
+                ),
+                args.update_date
+              )
+            )
           )
-        )
+        ),
+        { size: 10 }
       ),
       q.Lambda(
         "item",
-        q.And(
-          q.ContainsField(
-            "update_date",
-            q.Select(
-              ["data"],
-              q.Var("item")
-            )
-          ),
-          q.GT(
-            q.Select(
-              ["data", "update_date"],
-              q.Var("item")
-            ),
-            args.update_date
-          )
+        q.Get(
+          q.Select([1], q.Var("item"))
         )
       )
     )
@@ -128,14 +131,14 @@ async function run() {
 
   if (false) {
     const response =
-      await removeItemsWithoutUpdateInfo(
+      await updateItemsWithoutUpdateInfo(
         {
           tableName,
         }
       );
 
     localStorage.setItem(
-      "test1.setUpdateDateOnAllItems",
+      "test1.updateItemsWithoutCreateInfo",
       JSON.stringify(response)
     );
     return;
@@ -176,7 +179,9 @@ async function run() {
       "test1.loadLatestData",
       JSON.stringify(response)
     );
+    return;
   }
+
   if (
     false &&
     !localStorage.getItem(
@@ -197,7 +202,7 @@ async function run() {
     );
   }
 }
-async function removeItemsWithoutUpdateInfo(args: {
+async function updateItemsWithoutUpdateInfo(args: {
   tableName: string;
 }) {
   const client = createClient();
@@ -206,18 +211,29 @@ async function removeItemsWithoutUpdateInfo(args: {
     q.Paginate(
       q.Documents(
         q.Collection(args.tableName)
-      )
+      ),
+      { size: 100 }
     ),
     q.Lambda("x", q.Get(q.Var("x")))
   );
+
   const filterItems = q.Filter(
     getItems,
     q.Lambda(
       "x",
-      q.Not(
+      q.And(
         q.ContainsField(
-          "update_date",
+          "create_date",
           q.Select(["data"], q.Var("x"))
+        ),
+        q.Not(
+          q.ContainsField(
+            "update_date",
+            q.Select(
+              ["data"],
+              q.Var("x")
+            )
+          )
         )
       )
     )
@@ -233,8 +249,26 @@ async function removeItemsWithoutUpdateInfo(args: {
     )
   );
 
+  const updateItems = q.Map(
+    filterItems,
+    q.Lambda(
+      "x",
+      q.Update(
+        q.Select(["ref"], q.Var("x")),
+        {
+          data: {
+            update_date: q.Select(
+              ["data", "create_date"],
+              q.Var("x")
+            ),
+          },
+        }
+      )
+    )
+  );
+
   const itemsWithNoUpdateInfo =
-    await client.query(deleteItems);
+    await client.query(updateItems);
 
   return itemsWithNoUpdateInfo;
 }
