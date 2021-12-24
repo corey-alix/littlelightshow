@@ -4,13 +4,26 @@ import {
   BATCH_SIZE,
   createClient,
   CURRENT_USER,
+  getGlobalState,
   isOffline as globalIsOffline,
+  setGlobalState,
 } from "../globals.js";
+import {
+  reportError,
+  toast,
+} from "../ux/Toaster.js";
+import { getDatabaseTime } from "./getDatabaseTime.js";
 
 const statusFlags = {
   DELETED: "___DELETED___",
   UPDATED: "___UPDATED___",
 };
+
+function isMarked(item: any) {
+  return Object.values(
+    statusFlags
+  ).some((key) => !!item[key]);
+}
 
 function clearMarkings(item: any) {
   Object.values(statusFlags).forEach(
@@ -74,6 +87,120 @@ export class StorageModel<
     );
   }
 
+  async loadLatestData(args: {
+    update_date: number;
+  }) {
+    const lowerBound = args.update_date;
+    let upperBound =
+      Number.MAX_SAFE_INTEGER;
+
+    const client = createClient();
+    const result = [] as Array<T>;
+    while (true) {
+      const response =
+        (await client.query(
+          q.Map(
+            q.Paginate(
+              q.Filter(
+                q.Match(
+                  q.Index(
+                    `${this.tableName}_updates`
+                  )
+                ),
+                q.Lambda(
+                  "item",
+                  q.And(
+                    q.GT(
+                      q.Select(
+                        [0],
+                        q.Var("item")
+                      ),
+                      lowerBound
+                    ),
+                    q.LT(
+                      q.Select(
+                        [0],
+                        q.Var("item")
+                      ),
+                      upperBound
+                    )
+                  )
+                )
+              ),
+
+              { size: BATCH_SIZE }
+            ),
+            q.Lambda(
+              "item",
+              q.Get(
+                q.Select(
+                  [1],
+                  q.Var("item")
+                )
+              )
+            )
+          )
+        )) as {
+          data: Array<{
+            ref: {
+              value: { id: string };
+            };
+            data: T;
+          }>;
+        };
+      response.data.forEach((item) => {
+        if (isMarked(item.data)) {
+          reportError(
+            "Data contains client-side marking"
+          );
+          clearMarkings(item.data);
+        }
+        result.push({
+          ...item.data,
+          id: item.ref.value.id,
+        });
+      });
+      if (
+        response.data.length <
+        BATCH_SIZE
+      )
+        break;
+      upperBound =
+        response.data[BATCH_SIZE - 1]
+          .data["update_date"];
+    }
+    return result;
+  }
+
+  async forceUpdatestampIndex() {
+    const client = createClient();
+
+    const query = q.CreateIndex({
+      name: `${this.tableName}_updates`,
+      source: q.Collection(
+        this.tableName
+      ),
+      values: [
+        {
+          field: [
+            "data",
+            "update_date",
+          ],
+          reverse: true,
+        },
+        {
+          field: ["ref"],
+        },
+      ],
+    });
+
+    try {
+      return await client.query(query);
+    } catch (ex) {
+      reportError(ex);
+    }
+  }
+
   async synchronize() {
     if (!CURRENT_USER)
       throw "user must be signed in";
@@ -81,10 +208,61 @@ export class StorageModel<
     if (this.isOffline())
       throw "cannot synchronize in offline mode";
 
-    this.cache
+    // get data by timestamp (descending order)
+    if (
+      !getGlobalState(
+        `forceUpdatestampIndex_${this.tableName}`
+      )
+    ) {
+      await this.forceUpdatestampIndex();
+      setGlobalState(
+        `forceUpdatestampIndex_${this.tableName}`,
+        Date.now()
+      );
+    }
+    const timeOfLastSynchronization =
+      getGlobalState(
+        `timeOfLastSynchronization_${this.tableName}`
+      )?.value || 0;
+
+    const timeOfCurrentSynchronization =
+      await getDatabaseTime();
+
+    const dataToImport =
+      await this.loadLatestData({
+        update_date:
+          timeOfLastSynchronization,
+      });
+
+    // check for merge conflicts
+    dataToImport.forEach((item) => {
+      if (!item.id)
+        throw `item must have an id`;
+      const currentItem =
+        this.cache.getById(item.id);
+      if (
+        currentItem &&
+        isMarkedForUpsert(currentItem)
+      ) {
+        toast(
+          `item changed remotely and locally: ${item.id}`
+        );
+      }
+      if (isMarkedForDelete(item)) {
+        this.cache.deleteLineItem(
+          item.id
+        );
+      } else {
+        this.cache.updateLineItem(item);
+      }
+    });
+
+    const dataToExport = this.cache
       .get()
-      .filter(isMarkedForDelete)
-      .forEach(async (item) => {
+      .filter(isMarkedForDelete);
+
+    dataToExport.forEach(
+      async (item) => {
         if (!item.id)
           throw "all items must have an id";
         if (IsTemporaryId(item.id)) {
@@ -96,13 +274,20 @@ export class StorageModel<
             item.id
           );
         }
-      });
+      }
+    );
 
     this.cache
       .get()
       .filter(isMarkedForUpsert)
       .forEach(async (item) => {
-        await this.upsertItem(item);
+        clearMarkings(item);
+        try {
+          await this.upsertItem(item);
+        } catch (ex) {
+          markForUpsert(item);
+          reportError(ex);
+        }
       });
 
     // actually this only fetches the 25 most recently changed.
@@ -113,6 +298,13 @@ export class StorageModel<
     // items delete by other users will remain in the cache...
     result.forEach((item) =>
       this.cache.updateLineItem(item)
+    );
+
+    // preserve the timestamp for a future sync run
+    // notice the next sync will pull in the data we just pushed
+    setGlobalState(
+      `timeOfLastSynchronization_${this.tableName}`,
+      timeOfCurrentSynchronization
     );
 
     return result;
