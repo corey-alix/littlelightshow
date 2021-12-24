@@ -1,17 +1,20 @@
-import { isDebug } from "../globals";
+import {
+  getGlobalState,
+  isDebug,
+} from "../globals";
 import { ticksInSeconds } from "../fun/ticksInSeconds";
 
-// in seconds
-const SECONDS_PER_MINUTE = 60;
-const SECONDS_PER_HOUR = 60 * 60;
-
-const MAX_AGE = isDebug
-  ? 4 * SECONDS_PER_HOUR
-  : 5 * SECONDS_PER_MINUTE;
+const MAX_AGE =
+  getGlobalState("CACHE_MAX_AGE")
+    ?.value || 0;
 
 export class ServiceCache<
   T extends { id?: string }
 > {
+  lastWriteTime() {
+    return this.lastWrite;
+  }
+
   clear() {
     this.lastWrite = 0;
     this.save();

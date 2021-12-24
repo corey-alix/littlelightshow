@@ -14,60 +14,15 @@ import {
 } from "../ux/Toaster.js";
 import { getDatabaseTime } from "./getDatabaseTime.js";
 
-const syncStatusFlags = {
-  DELETED: "___DELETED___",
-  UPDATED: "___UPDATED___",
-};
-
-function isMarkedForSync(item: any) {
-  return Object.values(
-    syncStatusFlags
-  ).some((key) => !!item[key]);
-}
-
-function clearSyncMarkings(item: any) {
-  Object.values(
-    syncStatusFlags
-  ).forEach(
-    (key) =>
-      item[key] && delete item[key]
-  );
-}
-
-function clearOfflineId(item: {
+interface SynchronizationAttributes {
   id?: string;
-}) {
-  delete item.id;
-}
-
-function isOfflineId(itemId: string) {
-  return "9" < itemId[0];
-}
-
-function markForUpsert(item: any) {
-  item[syncStatusFlags.UPDATED] =
-    Date.now();
-}
-
-function isMarkedForUpsert(item: any) {
-  return !!item[
-    syncStatusFlags.UPDATED
-  ];
-}
-
-function markForDelete(item: any) {
-  item[syncStatusFlags.DELETED] =
-    Date.now();
-}
-
-function isMarkedForDelete(item: any) {
-  return !!item[
-    syncStatusFlags.DELETED
-  ];
+  create_date: number;
+  update_date: number;
+  delete_date?: number;
 }
 
 export class StorageModel<
-  T extends { id?: string }
+  T extends Partial<SynchronizationAttributes>
 > {
   private tableName: string;
   private cache: ServiceCache<T>;
@@ -80,7 +35,9 @@ export class StorageModel<
     }
   ) {
     this.tableName = options.tableName;
-    this.cache = new ServiceCache<T>({
+    this.cache = new ServiceCache<
+      T & SynchronizationAttributes
+    >({
       table: options.tableName,
       maxAge: options.maxAge,
     });
@@ -94,14 +51,16 @@ export class StorageModel<
   }
 
   async loadLatestData(args: {
-    update_date: number;
+    after_date: number;
+    before_date: number;
   }) {
-    const lowerBound = args.update_date;
-    let upperBound =
-      Number.MAX_SAFE_INTEGER;
+    let upperBound = args.before_date;
+    const lowerBound = args.after_date;
 
     const client = createClient();
-    const result = [] as Array<T>;
+    const result = [] as Array<
+      T & SynchronizationAttributes
+    >;
     while (true) {
       const response =
         (await client.query(
@@ -151,17 +110,15 @@ export class StorageModel<
             ref: {
               value: { id: string };
             };
-            data: T;
+            data: T &
+              SynchronizationAttributes;
           }>;
         };
       response.data.forEach((item) => {
-        if (
-          isMarkedForSync(item.data)
-        ) {
+        if (!!item.data.delete_date) {
           reportError(
             "Data contains client-side marking"
           );
-          clearSyncMarkings(item.data);
         }
         result.push({
           ...item.data,
@@ -175,7 +132,7 @@ export class StorageModel<
         break;
       upperBound =
         response.data[BATCH_SIZE - 1]
-          .data["update_date"];
+          .data.update_date;
     }
     return result;
   }
@@ -187,18 +144,16 @@ export class StorageModel<
     if (this.isOffline())
       throw "cannot synchronize in offline mode";
 
-    const timeOfLastSynchronization =
-      getGlobalState(
-        `timeOfLastSynchronization_${this.tableName}`
-      )?.value || 0;
+    const priorSyncTime =
+      getPriorSyncTime(this.tableName);
 
-    const timeOfCurrentSynchronization =
+    const currentSyncTime =
       await getDatabaseTime();
 
     const dataToImport =
       await this.loadLatestData({
-        update_date:
-          timeOfLastSynchronization,
+        after_date: priorSyncTime,
+        before_date: currentSyncTime,
       });
 
     // check for merge conflicts
@@ -209,13 +164,14 @@ export class StorageModel<
         this.cache.getById(item.id);
       if (
         currentItem &&
-        isMarkedForUpsert(currentItem)
+        this.isUpdated(currentItem)
       ) {
         toast(
           `item changed remotely and locally: ${item.id}`
         );
       }
-      if (isMarkedForDelete(item)) {
+      if (!!item.delete_date) {
+        debugger;
         this.cache.deleteLineItem(
           item.id
         );
@@ -224,12 +180,12 @@ export class StorageModel<
       }
     });
 
-    const dataToExport = this.cache
+    this.cache
       .get()
-      .filter(isMarkedForDelete);
-
-    dataToExport.forEach(
-      async (item) => {
+      .filter(
+        (item) => !!item.delete_date
+      )
+      .forEach(async (item) => {
         if (!item.id)
           throw "all items must have an id";
         if (isOfflineId(item.id)) {
@@ -241,20 +197,18 @@ export class StorageModel<
             item.id
           );
         }
-      }
-    );
+      });
 
     this.cache
       .get()
-      .filter(isMarkedForUpsert)
+      .filter(
+        (item) =>
+          item.update_date &&
+          item.update_date >
+            priorSyncTime
+      )
       .forEach(async (item) => {
-        clearSyncMarkings(item);
-        try {
-          await this.upsertItem(item);
-        } catch (ex) {
-          markForUpsert(item);
-          reportError(ex);
-        }
+        await this.upsertItem(item);
       });
 
     // actually this only fetches the 25 most recently changed.
@@ -269,9 +223,9 @@ export class StorageModel<
 
     // preserve the timestamp for a future sync run
     // notice the next sync will pull in the data we just pushed
-    setGlobalState(
-      `timeOfLastSynchronization_${this.tableName}`,
-      timeOfCurrentSynchronization
+    setFutureSyncTime(
+      this.tableName,
+      currentSyncTime
     );
 
     // reset the cache expiration stamp
@@ -287,10 +241,10 @@ export class StorageModel<
         this.cache.getById(id);
       if (!item)
         throw "cannot remove an item that is not already there";
-      markForDelete(item);
       if (isOfflineId(id)) {
         this.cache.deleteLineItem(id);
       } else {
+        item.delete_date = Date.now();
         this.cache.updateLineItem(item);
       }
       return;
@@ -333,7 +287,7 @@ export class StorageModel<
     if (!result)
       throw `unable to load item: ${this.tableName} ${id}`;
 
-    if (isMarkedForDelete(result))
+    if (!!result.delete_date)
       throw "item marked for deletion";
     return result;
   }
@@ -350,18 +304,16 @@ export class StorageModel<
         `${
           this.tableName
         }:${Date.now().toFixed()}`;
-      markForUpsert(data);
+      data.update_date = Date.now();
       this.cache.updateLineItem(data);
       return;
     }
 
-    if (
-      !data.id ||
-      (isMarkedForUpsert(data) &&
-        isOfflineId(data.id))
-    ) {
-      clearSyncMarkings(data);
-      clearOfflineId(data);
+    debugger;
+    if (isOfflineId(data.id)) {
+      this.cache.deleteLineItem(
+        data.id!
+      );
       const result =
         (await client.query(
           q.Create(
@@ -379,9 +331,11 @@ export class StorageModel<
           )
         )) as {
           data: T[];
-          ref: { id: string };
+          ref: {
+            value: { id: string };
+          };
         };
-      data.id = result.ref.id;
+      data.id = result.ref.value.id;
       this.cache.updateLineItem(data);
     } else {
       await client.query(
@@ -405,6 +359,13 @@ export class StorageModel<
     this.cache.updateLineItem(data);
   }
 
+  private isUpdated(data: T) {
+    return (
+      (data.update_date || 0) >
+      this.cache.lastWriteTime()
+    );
+  }
+
   async getItems() {
     if (!CURRENT_USER)
       throw "user must be signed in";
@@ -418,8 +379,7 @@ export class StorageModel<
     return this.cache
       .get()
       .filter(
-        (item) =>
-          !isMarkedForDelete(item)
+        (item) => !item.delete_date
       );
   }
 
@@ -443,7 +403,8 @@ export class StorageModel<
         )
       )) as {
         data: Array<{
-          data: T;
+          data: T &
+            SynchronizationAttributes;
           ref: any;
         }>;
       };
@@ -453,7 +414,6 @@ export class StorageModel<
     // copy ref into invoice id
     items.forEach((item) => {
       item.data.id = item.ref.value.id;
-      clearSyncMarkings(item.data);
     });
 
     const result = items.map(
@@ -461,4 +421,30 @@ export class StorageModel<
     );
     return result;
   }
+}
+
+function isOfflineId(itemId?: string) {
+  return !!itemId && "9" < itemId[0];
+}
+
+function getPriorSyncTime(
+  tableName: string
+) {
+  return (
+    getGlobalState(
+      `timeOfLastSynchronization_${tableName}`
+    )?.value || 0
+  );
+}
+
+function setFutureSyncTime(
+  tableName: string,
+  syncTime: number
+) {
+  // preserve the timestamp for a future sync run
+  // notice the next sync will pull in the data we just pushed
+  setGlobalState(
+    `timeOfLastSynchronization_${tableName}`,
+    syncTime
+  );
 }

@@ -4796,9 +4796,7 @@ function ticksInSeconds(ticks) {
 }
 
 // app/services/ServiceCache.ts
-var SECONDS_PER_MINUTE = 60;
-var SECONDS_PER_HOUR = 60 * 60;
-var MAX_AGE = isDebug ? 4 * SECONDS_PER_HOUR : 5 * SECONDS_PER_MINUTE;
+var MAX_AGE = getGlobalState("CACHE_MAX_AGE")?.value || 0;
 var ServiceCache = class {
   constructor(options) {
     this.options = options;
@@ -4813,6 +4811,9 @@ var ServiceCache = class {
       this.lastWrite = info.lastWrite;
       this.data = info.data;
     }
+  }
+  lastWriteTime() {
+    return this.lastWrite;
   }
   clear() {
     this.lastWrite = 0;
@@ -4905,34 +4906,6 @@ async function getDatabaseTime() {
 }
 
 // app/services/StorageModel.ts
-var syncStatusFlags = {
-  DELETED: "___DELETED___",
-  UPDATED: "___UPDATED___"
-};
-function isMarkedForSync(item) {
-  return Object.values(syncStatusFlags).some((key) => !!item[key]);
-}
-function clearSyncMarkings(item) {
-  Object.values(syncStatusFlags).forEach((key) => item[key] && delete item[key]);
-}
-function clearOfflineId(item) {
-  delete item.id;
-}
-function isOfflineId(itemId) {
-  return "9" < itemId[0];
-}
-function markForUpsert(item) {
-  item[syncStatusFlags.UPDATED] = Date.now();
-}
-function isMarkedForUpsert(item) {
-  return !!item[syncStatusFlags.UPDATED];
-}
-function markForDelete(item) {
-  item[syncStatusFlags.DELETED] = Date.now();
-}
-function isMarkedForDelete(item) {
-  return !!item[syncStatusFlags.DELETED];
-}
 var StorageModel = class {
   constructor(options) {
     this.options = options;
@@ -4946,16 +4919,15 @@ var StorageModel = class {
     return this.options.offline || isOffline();
   }
   async loadLatestData(args) {
-    const lowerBound = args.update_date;
-    let upperBound = Number.MAX_SAFE_INTEGER;
+    let upperBound = args.before_date;
+    const lowerBound = args.after_date;
     const client = createClient();
     const result = [];
     while (true) {
       const response = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Filter(import_faunadb3.query.Match(import_faunadb3.query.Index(`${this.tableName}_updates`)), import_faunadb3.query.Lambda("item", import_faunadb3.query.And(import_faunadb3.query.GT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), lowerBound), import_faunadb3.query.LT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), upperBound)))), { size: BATCH_SIZE }), import_faunadb3.query.Lambda("item", import_faunadb3.query.Get(import_faunadb3.query.Select([1], import_faunadb3.query.Var("item"))))));
       response.data.forEach((item) => {
-        if (isMarkedForSync(item.data)) {
+        if (!!item.data.delete_date) {
           reportError("Data contains client-side marking");
-          clearSyncMarkings(item.data);
         }
         result.push({
           ...item.data,
@@ -4964,7 +4936,7 @@ var StorageModel = class {
       });
       if (response.data.length < BATCH_SIZE)
         break;
-      upperBound = response.data[BATCH_SIZE - 1].data["update_date"];
+      upperBound = response.data[BATCH_SIZE - 1].data.update_date;
     }
     return result;
   }
@@ -4973,26 +4945,27 @@ var StorageModel = class {
       throw "user must be signed in";
     if (this.isOffline())
       throw "cannot synchronize in offline mode";
-    const timeOfLastSynchronization = getGlobalState(`timeOfLastSynchronization_${this.tableName}`)?.value || 0;
-    const timeOfCurrentSynchronization = await getDatabaseTime();
+    const priorSyncTime = getPriorSyncTime(this.tableName);
+    const currentSyncTime = await getDatabaseTime();
     const dataToImport = await this.loadLatestData({
-      update_date: timeOfLastSynchronization
+      after_date: priorSyncTime,
+      before_date: currentSyncTime
     });
     dataToImport.forEach((item) => {
       if (!item.id)
         throw `item must have an id`;
       const currentItem = this.cache.getById(item.id);
-      if (currentItem && isMarkedForUpsert(currentItem)) {
+      if (currentItem && this.isUpdated(currentItem)) {
         toast(`item changed remotely and locally: ${item.id}`);
       }
-      if (isMarkedForDelete(item)) {
+      if (!!item.delete_date) {
+        debugger;
         this.cache.deleteLineItem(item.id);
       } else {
         this.cache.updateLineItem(item);
       }
     });
-    const dataToExport = this.cache.get().filter(isMarkedForDelete);
-    dataToExport.forEach(async (item) => {
+    this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
       if (!item.id)
         throw "all items must have an id";
       if (isOfflineId(item.id)) {
@@ -5001,18 +4974,12 @@ var StorageModel = class {
         await this.removeItem(item.id);
       }
     });
-    this.cache.get().filter(isMarkedForUpsert).forEach(async (item) => {
-      clearSyncMarkings(item);
-      try {
-        await this.upsertItem(item);
-      } catch (ex) {
-        markForUpsert(item);
-        reportError(ex);
-      }
+    this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime).forEach(async (item) => {
+      await this.upsertItem(item);
     });
     const result = await this.forceFetchAllItems();
     result.forEach((item) => this.cache.updateLineItem(item));
-    setGlobalState(`timeOfLastSynchronization_${this.tableName}`, timeOfCurrentSynchronization);
+    setFutureSyncTime(this.tableName, currentSyncTime);
     this.cache.renew();
   }
   async removeItem(id) {
@@ -5022,10 +4989,10 @@ var StorageModel = class {
       const item = this.cache.getById(id);
       if (!item)
         throw "cannot remove an item that is not already there";
-      markForDelete(item);
       if (isOfflineId(id)) {
         this.cache.deleteLineItem(id);
       } else {
+        item.delete_date = Date.now();
         this.cache.updateLineItem(item);
       }
       return;
@@ -5049,7 +5016,7 @@ var StorageModel = class {
     const result = this.cache.getById(id);
     if (!result)
       throw `unable to load item: ${this.tableName} ${id}`;
-    if (isMarkedForDelete(result))
+    if (!!result.delete_date)
       throw "item marked for deletion";
     return result;
   }
@@ -5059,13 +5026,13 @@ var StorageModel = class {
     const client = createClient();
     if (this.isOffline()) {
       data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
-      markForUpsert(data);
+      data.update_date = Date.now();
       this.cache.updateLineItem(data);
       return;
     }
-    if (!data.id || isMarkedForUpsert(data) && isOfflineId(data.id)) {
-      clearSyncMarkings(data);
-      clearOfflineId(data);
+    debugger;
+    if (isOfflineId(data.id)) {
+      this.cache.deleteLineItem(data.id);
       const result = await client.query(import_faunadb3.query.Create(import_faunadb3.query.Collection(this.tableName), {
         data: {
           ...data,
@@ -5074,7 +5041,7 @@ var StorageModel = class {
           update_date: Date.now()
         }
       }));
-      data.id = result.ref.id;
+      data.id = result.ref.value.id;
       this.cache.updateLineItem(data);
     } else {
       await client.query(import_faunadb3.query.Update(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), data.id), {
@@ -5087,12 +5054,15 @@ var StorageModel = class {
     }
     this.cache.updateLineItem(data);
   }
+  isUpdated(data) {
+    return (data.update_date || 0) > this.cache.lastWriteTime();
+  }
   async getItems() {
     if (!CURRENT_USER)
       throw "user must be signed in";
     if (this.cache.expired() && !this.isOffline())
       await this.synchronize();
-    return this.cache.get().filter((item) => !isMarkedForDelete(item));
+    return this.cache.get().filter((item) => !item.delete_date);
   }
   async forceFetchAllItems() {
     const client = createClient();
@@ -5100,12 +5070,20 @@ var StorageModel = class {
     const items = response.data;
     items.forEach((item) => {
       item.data.id = item.ref.value.id;
-      clearSyncMarkings(item.data);
     });
     const result = items.map((i) => i.data);
     return result;
   }
 };
+function isOfflineId(itemId) {
+  return !!itemId && "9" < itemId[0];
+}
+function getPriorSyncTime(tableName) {
+  return getGlobalState(`timeOfLastSynchronization_${tableName}`)?.value || 0;
+}
+function setFutureSyncTime(tableName, syncTime) {
+  setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
+}
 
 // app/services/inventory.ts
 var INVENTORY_TABLE = "inventory";
@@ -5338,6 +5316,12 @@ function hookupTriggers(domNode) {
       on(eventItem, "change", () => {
         setGlobalState(bindTo, eventItem.checked);
       });
+    } else if (isNumericInputElement(eventItem)) {
+      const item = eventItem;
+      item.valueAsNumber = valueInfo?.value || 0;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.valueAsNumber);
+      });
     } else {
       throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
     }
@@ -5354,6 +5338,9 @@ function getInputType(eventItem) {
 }
 function isInputElement(eventItem) {
   return eventItem.tagName === "INPUT";
+}
+function isNumericInputElement(item) {
+  return isInputElement(item) && getInputType(item) === "number";
 }
 
 // app/fun/behavior/input.ts

@@ -80,6 +80,19 @@ export function hookupTriggers(
             ).checked
           );
         });
+      } else if (
+        isNumericInputElement(eventItem)
+      ) {
+        const item =
+          eventItem as HTMLInputElement;
+        item.valueAsNumber =
+          valueInfo?.value || 0;
+        on(eventItem, "change", () => {
+          setGlobalState(
+            bindTo,
+            item.valueAsNumber
+          );
+        });
       } else {
         throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
       }
@@ -120,4 +133,13 @@ function isInputElement(
   eventItem: Element
 ) {
   return eventItem.tagName === "INPUT";
+}
+
+function isNumericInputElement(
+  item: Element
+) {
+  return (
+    isInputElement(item) &&
+    getInputType(item) === "number"
+  );
 }
