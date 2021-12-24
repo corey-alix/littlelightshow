@@ -21,16 +21,6 @@ import {
   toast,
 } from "./ux/Toaster.js";
 import { inventoryModel } from "./services/inventory.js";
-
-// not sure what to start with
-type AccountHierarchy = Record<
-  string,
-  {
-    code?: string;
-    accounts?: AccountHierarchy;
-  }
->;
-
 const starterAccounts = [
   "AP",
   "AR",
@@ -66,7 +56,7 @@ export async function init() {
     async () => {
       try {
         await invoiceModel.synchronize();
-        toast("sync completed");
+        toast("invoice sync completed");
       } catch (ex) {
         reportError(ex);
       }
@@ -79,7 +69,8 @@ export async function init() {
     async () => {
       try {
         await ledgerModel.synchronize();
-        toast("sync completed");
+
+        toast("ledger sync completed");
       } catch (ex) {
         reportError(ex);
       }
