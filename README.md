@@ -20,7 +20,7 @@ littlelightshow
   - deleted records must be _marked_ deleted but preserved until all clients sync
 
 - TODO: Works when the network is unavailable (Network tab is "offline")
-- TODO: do not replace, but merge remote batch with local storage
+- TODO: Build artifacts on Netlify (compressed with .js.map file)
 
 ## Portfolio
 
