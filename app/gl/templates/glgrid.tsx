@@ -234,6 +234,9 @@ function hookupHandlers(
     const model = asModel(domNode);
     await saveLedger(model);
     toast(`saved ${model.id}`);
+    location.href = routes.editLedger(
+      model.id
+    );
   });
 
   on(domNode, "add-row", () => {

@@ -14,6 +14,8 @@ export const routes = {
     `/app/gl/index.html?print=${id}`,
   createLedger: () =>
     "/app/gl/index.html",
+  editLedger: (id: string) =>
+    `/app/gl/index.html?id=${id}`,
   dashboard: () => "/app/index.html",
   admin: () => "/app/admin/index.html",
 };
