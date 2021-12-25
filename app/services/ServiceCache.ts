@@ -64,7 +64,8 @@ export class ServiceCache<
     const index = this.data.findIndex(
       (i) => i.id === id
     );
-    this.data.splice(index, 1);
+    if (-1 < index)
+      this.data.splice(index, 1);
     this.save();
   }
 
@@ -94,12 +95,5 @@ export class ServiceCache<
 
   get() {
     return this.data;
-  }
-
-  // reset the cache
-  set(data: T[]) {
-    this.lastWrite = Date.now();
-    this.data = data;
-    this.save();
   }
 }

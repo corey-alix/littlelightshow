@@ -54,6 +54,10 @@ export class StorageModel<
     after_date: number;
     before_date: number;
   }) {
+    let batchSize = Math.max(
+      1000,
+      BATCH_SIZE
+    );
     let upperBound = args.before_date;
     const lowerBound = args.after_date;
 
@@ -93,7 +97,7 @@ export class StorageModel<
                 )
               ),
 
-              { size: BATCH_SIZE }
+              { size: batchSize }
             ),
             q.Lambda(
               "item",
@@ -115,23 +119,21 @@ export class StorageModel<
           }>;
         };
       response.data.forEach((item) => {
-        if (!!item.data.delete_date) {
-          reportError(
-            "Data contains client-side marking"
-          );
-        }
         result.push({
           ...item.data,
           id: item.ref.value.id,
         });
       });
       if (
-        response.data.length <
-        BATCH_SIZE
+        response.data.length < batchSize
       )
         break;
+
+      console.warn(
+        "if update_date is duplicated records can get skipped"
+      );
       upperBound =
-        response.data[BATCH_SIZE - 1]
+        response.data[batchSize - 1]
           .data.update_date;
     }
     return result;
@@ -149,6 +151,17 @@ export class StorageModel<
 
     const currentSyncTime =
       await getDatabaseTime();
+
+    // must capture before importing
+    // to prevent exporting what was imported
+    const dataToExport = this.cache
+      .get()
+      .filter(
+        (item) =>
+          item.update_date &&
+          item.update_date >
+            priorSyncTime
+      );
 
     const dataToImport =
       await this.loadLatestData({
@@ -179,6 +192,7 @@ export class StorageModel<
       }
     });
 
+    // apply local deletes
     this.cache
       .get()
       .filter(
@@ -198,17 +212,12 @@ export class StorageModel<
         }
       });
 
-    this.cache
-      .get()
-      .filter(
-        (item) =>
-          item.update_date &&
-          item.update_date >
-            priorSyncTime
-      )
-      .forEach(async (item) => {
+    // apply local updates
+    dataToExport.forEach(
+      async (item) => {
         await this.upsertItem(item);
-      });
+      }
+    );
 
     // preserve the timestamp for a future sync run
     // notice the next sync will pull in the data we just pushed
@@ -250,9 +259,14 @@ export class StorageModel<
         ),
         {
           data: {
+            id: id,
             user: CURRENT_USER,
-            update_date: Date.now(),
-            delete_date: Date.now(),
+            update_date: q.ToMillis(
+              q.Now()
+            ),
+            delete_date: q.ToMillis(
+              q.Now()
+            ),
           },
         }
       )
@@ -294,21 +308,30 @@ export class StorageModel<
 
     const client = createClient();
 
+    // copy into local cached temporarily
+    data.id =
+      data.id ||
+      `${
+        this.tableName
+      }:${Date.now().toFixed()}`;
+    data.update_date = Date.now();
+    this.cache.updateLineItem(data);
+
+    // if offline then that is all we can do
     if (this.isOffline()) {
-      data.id =
-        data.id ||
-        `${
-          this.tableName
-        }:${Date.now().toFixed()}`;
-      data.update_date = Date.now();
-      this.cache.updateLineItem(data);
       return;
     }
 
-    if (isOfflineId(data.id)) {
-      this.cache.deleteLineItem(
-        data.id!
-      );
+    // remember the offlineId so the proper cache item can be updated
+    const offlineId =
+      data.id && isOfflineId(data.id)
+        ? data.id
+        : "";
+
+    // clear the offline id so it is not sent to the server
+    if (offlineId) data.id = "";
+
+    if (!data.id) {
       const result =
         (await client.query(
           q.Create(
@@ -317,10 +340,14 @@ export class StorageModel<
             ),
             {
               data: {
-                user: CURRENT_USER,
-                create_date: Date.now(),
-                update_date: Date.now(),
                 ...data,
+                user: CURRENT_USER,
+                create_date: q.ToMillis(
+                  q.Now()
+                ),
+                update_date: q.ToMillis(
+                  q.Now()
+                ),
               },
             }
           )
@@ -330,27 +357,37 @@ export class StorageModel<
             value: { id: string };
           };
         };
-      data.id = result.ref.value.id;
-      this.cache.updateLineItem(data);
-    } else {
-      await client.query(
-        q.Replace(
-          q.Ref(
-            q.Collection(
-              this.tableName
-            ),
-            data.id
-          ),
-          {
-            data: {
-              user: CURRENT_USER,
-              update_date: Date.now(),
-              ...data,
-            },
-          }
-        )
-      );
+
+      // replace the temporary item with the real one
+      {
+        offlineId &&
+          this.cache.deleteLineItem(
+            offlineId
+          );
+        data.id = result.ref.value.id;
+        this.cache.updateLineItem(data);
+      }
+      return;
     }
+
+    // update an existing server-side collection
+    await client.query(
+      q.Replace(
+        q.Ref(
+          q.Collection(this.tableName),
+          data.id
+        ),
+        {
+          data: {
+            ...data,
+            user: CURRENT_USER,
+            update_date: q.ToMillis(
+              q.Now()
+            ),
+          },
+        }
+      )
+    );
     this.cache.updateLineItem(data);
   }
 

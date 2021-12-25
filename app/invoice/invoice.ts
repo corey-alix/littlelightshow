@@ -183,7 +183,6 @@ async function tryToSaveInvoice(
       });
     });
   const requestModel = asModel(formDom);
-  console.log({ requestModel });
   await saveInvoice(requestModel);
   set(formDom, { id: requestModel.id });
   return true;

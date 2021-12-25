@@ -4878,7 +4878,8 @@ var ServiceCache = class {
   }
   deleteLineItem(id) {
     const index = this.data.findIndex((i) => i.id === id);
-    this.data.splice(index, 1);
+    if (-1 < index)
+      this.data.splice(index, 1);
     this.save();
   }
   updateLineItem(lineItem) {
@@ -4899,11 +4900,6 @@ var ServiceCache = class {
   get() {
     return this.data;
   }
-  set(data) {
-    this.lastWrite = Date.now();
-    this.data = data;
-    this.save();
-  }
 };
 
 // app/services/StorageModel.ts
@@ -4917,7 +4913,7 @@ var Toaster = class {
     if (!target) {
       target = document.createElement("div");
       target.id = "toaster";
-      target.classList.add("toaster", "border", "rounded-top", "absolute", "bottom", "right");
+      target.classList.add("toaster", "border", "rounded-top", "fixed", "bottom", "right");
       document.body.appendChild(target);
     }
     const message = document.createElement("div");
@@ -4965,24 +4961,23 @@ var StorageModel = class {
     return this.options.offline || isOffline();
   }
   async loadLatestData(args) {
+    let batchSize = Math.max(1e3, BATCH_SIZE);
     let upperBound = args.before_date;
     const lowerBound = args.after_date;
     const client = createClient();
     const result = [];
     while (true) {
-      const response = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Filter(import_faunadb3.query.Match(import_faunadb3.query.Index(`${this.tableName}_updates`)), import_faunadb3.query.Lambda("item", import_faunadb3.query.And(import_faunadb3.query.GT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), lowerBound), import_faunadb3.query.LT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), upperBound)))), { size: BATCH_SIZE }), import_faunadb3.query.Lambda("item", import_faunadb3.query.Get(import_faunadb3.query.Select([1], import_faunadb3.query.Var("item"))))));
+      const response = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Filter(import_faunadb3.query.Match(import_faunadb3.query.Index(`${this.tableName}_updates`)), import_faunadb3.query.Lambda("item", import_faunadb3.query.And(import_faunadb3.query.GT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), lowerBound), import_faunadb3.query.LT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), upperBound)))), { size: batchSize }), import_faunadb3.query.Lambda("item", import_faunadb3.query.Get(import_faunadb3.query.Select([1], import_faunadb3.query.Var("item"))))));
       response.data.forEach((item) => {
-        if (!!item.data.delete_date) {
-          reportError("Data contains client-side marking");
-        }
         result.push({
           ...item.data,
           id: item.ref.value.id
         });
       });
-      if (response.data.length < BATCH_SIZE)
+      if (response.data.length < batchSize)
         break;
-      upperBound = response.data[BATCH_SIZE - 1].data.update_date;
+      console.warn("if update_date is duplicated records can get skipped");
+      upperBound = response.data[batchSize - 1].data.update_date;
     }
     return result;
   }
@@ -4993,6 +4988,7 @@ var StorageModel = class {
       throw "cannot synchronize in offline mode";
     const priorSyncTime = getPriorSyncTime(this.tableName);
     const currentSyncTime = await getDatabaseTime();
+    const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
     const dataToImport = await this.loadLatestData({
       after_date: priorSyncTime,
       before_date: currentSyncTime
@@ -5019,7 +5015,7 @@ var StorageModel = class {
         await this.removeItem(item.id);
       }
     });
-    this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime).forEach(async (item) => {
+    dataToExport.forEach(async (item) => {
       await this.upsertItem(item);
     });
     setFutureSyncTime(this.tableName, currentSyncTime);
@@ -5043,9 +5039,10 @@ var StorageModel = class {
     const client = createClient();
     await client.query(import_faunadb3.query.Replace(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), id), {
       data: {
+        id,
         user: CURRENT_USER,
-        update_date: Date.now(),
-        delete_date: Date.now()
+        update_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now()),
+        delete_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now())
       }
     }));
     this.cache.deleteLineItem(id);
@@ -5073,33 +5070,38 @@ var StorageModel = class {
     if (!CURRENT_USER)
       throw "user must be signed in";
     const client = createClient();
+    data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
+    data.update_date = Date.now();
+    this.cache.updateLineItem(data);
     if (this.isOffline()) {
-      data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
-      data.update_date = Date.now();
-      this.cache.updateLineItem(data);
       return;
     }
-    if (isOfflineId(data.id)) {
-      this.cache.deleteLineItem(data.id);
+    const offlineId = data.id && isOfflineId(data.id) ? data.id : "";
+    if (offlineId)
+      data.id = "";
+    if (!data.id) {
       const result = await client.query(import_faunadb3.query.Create(import_faunadb3.query.Collection(this.tableName), {
         data: {
+          ...data,
           user: CURRENT_USER,
-          create_date: Date.now(),
-          update_date: Date.now(),
-          ...data
+          create_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now()),
+          update_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now())
         }
       }));
-      data.id = result.ref.value.id;
-      this.cache.updateLineItem(data);
-    } else {
-      await client.query(import_faunadb3.query.Replace(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), data.id), {
-        data: {
-          user: CURRENT_USER,
-          update_date: Date.now(),
-          ...data
-        }
-      }));
+      {
+        offlineId && this.cache.deleteLineItem(offlineId);
+        data.id = result.ref.value.id;
+        this.cache.updateLineItem(data);
+      }
+      return;
     }
+    await client.query(import_faunadb3.query.Replace(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), data.id), {
+      data: {
+        ...data,
+        user: CURRENT_USER,
+        update_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now())
+      }
+    }));
     this.cache.updateLineItem(data);
   }
   isUpdated(data) {
@@ -5260,6 +5262,7 @@ var routes = {
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
   createLedger: () => "/app/gl/index.html",
+  editLedger: (id) => `/app/gl/index.html?id=${id}`,
   dashboard: () => "/app/index.html",
   admin: () => "/app/admin/index.html"
 };
@@ -5537,6 +5540,7 @@ function hookupHandlers(domNode) {
     const model = asModel(domNode);
     await upsertItem(model);
     toast(`saved ${model.id}`);
+    location.href = routes.editLedger(model.id);
   });
   on(domNode, "add-row", () => {
     const row = createRow();

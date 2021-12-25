@@ -56,22 +56,11 @@ export async function getItems() {
   const invoices =
     await invoiceModel.getItems();
 
-  invoices.forEach((invoice) => {
-    invoice.mops = invoice.mops || [];
-    if (
-      invoice["paid"] &&
-      invoice["mop"]
-    ) {
-      invoice.mops.push({
-        mop: invoice["mop"],
-        paid: invoice["paid"],
-      });
-      delete invoice["paid"];
-      delete invoice["mop"];
-    }
-  });
+  let normalizedInvoices = invoices.map(
+    normalizeInvoice
+  );
 
-  const response = invoices
+  const response = normalizedInvoices
     .filter((invoice) => invoice.items)
     .map((invoice) => {
       invoice.date =
@@ -98,4 +87,28 @@ export async function getItems() {
     .reverse();
 
   return response;
+}
+
+function normalizeInvoice(
+  invoice: Invoice
+) {
+  let raw = invoice as any;
+  if (raw.data) {
+    raw.data.id = invoice.id;
+    raw.data.mops = invoice.mops || [];
+    invoice = raw = raw.data;
+  }
+  invoice.mops = invoice.mops || [];
+  invoice.items = invoice.items || [];
+
+  if (raw["paid"] && raw["mop"]) {
+    invoice.mops.push({
+      mop: raw["mop"],
+      paid: raw["paid"],
+    });
+    delete raw["paid"];
+    delete raw["mop"];
+  }
+
+  return raw as Invoice;
 }
