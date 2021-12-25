@@ -120,6 +120,26 @@ export async function init() {
 
   on(
     domNode,
+    "clean-invoice-data",
+    async () => {
+      debugger;
+      const invoices =
+        await invoiceModel.getItems();
+      const toDelete =
+        [] as Array<string>;
+      invoices.forEach((invoice) => {
+        if (!invoice.clientname) {
+          toDelete.push(invoice.id!);
+        }
+      });
+      toDelete.forEach((id) =>
+        invoiceModel.removeItem(id)
+      );
+    }
+  );
+
+  on(
+    domNode,
     "synchronize-invoice-data",
     async () => {
       try {
@@ -181,9 +201,9 @@ export async function init() {
     domNode,
     "invoice-to-inventory",
     async () => {
-      await importInvoicesToGeneralLedger();
       const invoices =
         await invoiceModel.getItems();
+
       invoices.forEach((invoice) => {
         invoice.items.forEach(
           async (item) => {
