@@ -50,17 +50,17 @@ export class StorageModel<
     );
   }
 
+  // return items [after_date, before_date)
   async loadLatestData(args: {
     after_date: number;
     before_date: number;
   }) {
-    let batchSize = Math.max(
-      1000,
-      BATCH_SIZE
-    );
-    let upperBound = args.before_date;
+    const size = BATCH_SIZE;
+
+    const upperBound = args.before_date;
     const lowerBound = args.after_date;
 
+    let after = null;
     const client = createClient();
     const result = [] as Array<
       T & SynchronizationAttributes
@@ -79,12 +79,12 @@ export class StorageModel<
                 q.Lambda(
                   "item",
                   q.And(
-                    q.GT(
+                    q.LTE(
+                      lowerBound,
                       q.Select(
                         [0],
                         q.Var("item")
-                      ),
-                      lowerBound
+                      )
                     ),
                     q.LT(
                       q.Select(
@@ -96,8 +96,12 @@ export class StorageModel<
                   )
                 )
               ),
-
-              { size: batchSize }
+              after
+                ? {
+                    size,
+                    after,
+                  }
+                : { size }
             ),
             q.Lambda(
               "item",
@@ -110,6 +114,7 @@ export class StorageModel<
             )
           )
         )) as {
+          after: any;
           data: Array<{
             ref: {
               value: { id: string };
@@ -124,17 +129,10 @@ export class StorageModel<
           id: item.ref.value.id,
         });
       });
-      if (
-        response.data.length < batchSize
-      )
+      if (response.data.length < size)
         break;
 
-      console.warn(
-        "if update_date is duplicated records can get skipped"
-      );
-      upperBound =
-        response.data[batchSize - 1]
-          .data.update_date;
+      after = response.after;
     }
     return result;
   }
