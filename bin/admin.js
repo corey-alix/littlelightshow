@@ -4721,7 +4721,7 @@ function sort(items, sortBy) {
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.06;
+var TAXRATE = getGlobalState("TAX_RATE")?.value || 0.06;
 var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
 var isDebug = location.href.includes("localhost");
 var isOffline = () => getGlobalState("work_offline")?.value === true;

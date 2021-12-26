@@ -4698,6 +4698,7 @@ var require_faunadb = __commonJS({
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
+var TAXRATE = getGlobalState("TAX_RATE")?.value || 0.06;
 var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
 var isDebug = location.href.includes("localhost");
 var accessKeys = {

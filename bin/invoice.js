@@ -4730,7 +4730,7 @@ function trigger(domNode, eventName) {
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.06;
+var TAXRATE = getGlobalState("TAX_RATE")?.value || 0.06;
 var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
 var isDebug = location.href.includes("localhost");
 var isOffline = () => getGlobalState("work_offline")?.value === true;
@@ -5683,7 +5683,8 @@ function compute(form) {
   const balance_due = form.querySelector("#balance_due");
   const totals = Array.from(form.querySelectorAll("input[name=total]")).map((input) => parseFloat(input.value || "0"));
   const total = totals.reduce((a, b) => a + b, 0);
-  const grandTotal = labor.valueAsNumber + additional.valueAsNumber + total * (1 + TAXRATE);
+  const tax = parseFloat(asCurrency(total * TAXRATE));
+  const grandTotal = labor.valueAsNumber + additional.valueAsNumber + tax + total;
   total_due.value = grandTotal.toFixed(2);
   const total_payments = sum(Array.from(form.querySelectorAll("input[name=amount_paid]")).map(asNumber));
   balance_due.value = (grandTotal - total_payments).toFixed(2);

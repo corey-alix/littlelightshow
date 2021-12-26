@@ -502,10 +502,16 @@ function compute(
     (a, b) => a + b,
     0
   );
+
+  const tax = parseFloat(
+    asCurrency(total * TAXRATE)
+  );
+
   const grandTotal =
     labor.valueAsNumber +
     additional.valueAsNumber +
-    total * (1.0 + TAXRATE);
+    tax +
+    total;
   total_due.value =
     grandTotal.toFixed(2);
 

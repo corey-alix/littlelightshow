@@ -1,5 +1,7 @@
 import faunadb from "faunadb";
-export const TAXRATE = 0.06;
+export const TAXRATE =
+  getGlobalState("TAX_RATE")?.value ||
+  0.06;
 export const BATCH_SIZE =
   getGlobalState("BATCH_SIZE")?.value ||
   10;
