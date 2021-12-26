@@ -37,7 +37,7 @@ export async function forceUpdatestampIndex(
     values: [
       {
         field: ["data", "update_date"],
-        reverse: true,
+        reverse: false,
       },
       {
         field: ["ref"],

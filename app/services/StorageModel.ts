@@ -66,6 +66,7 @@ export class StorageModel<
       T & SynchronizationAttributes
     >;
     while (true) {
+      debugger;
       const response =
         (await client.query(
           q.Map(
@@ -123,12 +124,48 @@ export class StorageModel<
               SynchronizationAttributes;
           }>;
         };
-      response.data.forEach((item) => {
-        result.push({
+      const dataToImport =
+        response.data.map((item) => ({
           ...item.data,
           id: item.ref.value.id,
-        });
+        }));
+
+      result.push(...dataToImport);
+
+      // capture progress
+      // check for merge conflicts
+      dataToImport.forEach((item) => {
+        if (!item.id)
+          throw `item must have an id`;
+        const currentItem =
+          this.cache.getById(item.id);
+        if (
+          currentItem &&
+          this.isUpdated(currentItem)
+        ) {
+          toast(
+            `item changed remotely and locally: ${item.id}`
+          );
+        }
+        if (!!item.delete_date) {
+          this.cache.deleteLineItem(
+            item.id
+          );
+        } else {
+          this.cache.updateLineItem(
+            item
+          );
+        }
       });
+
+      // capture progress
+      this.cache.renew();
+      setFutureSyncTime(
+        this.tableName,
+        result[result.length - 1]
+          .update_date
+      );
+
       if (response.data.length < size)
         break;
 
@@ -161,33 +198,9 @@ export class StorageModel<
             priorSyncTime
       );
 
-    const dataToImport =
-      await this.loadLatestData({
-        after_date: priorSyncTime,
-        before_date: currentSyncTime,
-      });
-
-    // check for merge conflicts
-    dataToImport.forEach((item) => {
-      if (!item.id)
-        throw `item must have an id`;
-      const currentItem =
-        this.cache.getById(item.id);
-      if (
-        currentItem &&
-        this.isUpdated(currentItem)
-      ) {
-        toast(
-          `item changed remotely and locally: ${item.id}`
-        );
-      }
-      if (!!item.delete_date) {
-        this.cache.deleteLineItem(
-          item.id
-        );
-      } else {
-        this.cache.updateLineItem(item);
-      }
+    await this.loadLatestData({
+      after_date: priorSyncTime,
+      before_date: currentSyncTime,
     });
 
     // apply local deletes
