@@ -4,14 +4,21 @@ littlelightshow
 
 ## Change Log
 
-- 2021-12-25: create "desktop" layout for gl
+- 2021-12-25: create "desktop" layout for GL and AR (invoice)
 - 2021-12-22: use storage API for sale items and account codes (always offline)
 - 2021-12-22: error reporting via toaster
 - 2021-12-22: create storage API (persist local, sync remotely)
 
-## Offline Support
-
 ## v1.0.2
+
+- adds offline to reduce data usage
+
+## TODOs
+
+- Invoice summary report should show dates if space permits
+  The issue will be that date should be optional yet not in the last column
+
+## Offline Support
 
 ### Offline storage and data sync
 
