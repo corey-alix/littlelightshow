@@ -16,14 +16,10 @@
     <h1>General Ledger</h1>
     <div class="gl"></div>
     <script type="module">
-      import {
-        identify,
-        init,
-      } from "../../bin/gl.js";
-      if (await identify())
-        init(
-          document.querySelector(".gl")
-        );
+      import { init } from "../../bin/gl.js";
+      init(
+        document.querySelector(".gl")
+      );
     </script>
   </body>
 </html>

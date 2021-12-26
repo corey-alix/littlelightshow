@@ -18,7 +18,7 @@ import {
   on,
   trigger,
 } from "../../fun/on.js";
-import { printDetail } from "./printDetail";
+import { create as printDetail } from "./printDetail";
 import { create as printSummary } from "./printSummary";
 import { isZero } from "../../fun/isZero";
 import { forceDatalist } from "../../services/accounts.js";
@@ -269,17 +269,17 @@ function createRow(): HTMLElement {
       />
       <input
         name="credit"
-        class="currency col-5-2"
+        class="currency col-5-last"
         type="number"
         placeholder="credit"
       />
       <input
         name="comment"
-        class="text col-1-6"
+        class="text col-1-last"
         type="text"
         placeholder="comment"
       />
-      <div class="vspacer-1 col-1-6"></div>
+      <div class="vspacer-1 col-1-last"></div>
     </form>
   );
 }
@@ -297,7 +297,7 @@ export function create(
       />
       <div class="date col-1">Date</div>
       <input
-        class="col-2-5"
+        class="col-2-last"
         name="date"
         required
         type="date"
@@ -312,20 +312,20 @@ export function create(
       </label>
       <textarea
         name="description"
-        class="col-2-5 comments"
+        class="col-2-last comments"
         placeholder="Describe the context for these entries"
       ></textarea>
-      <div class="vspacer col-1-6"></div>
+      <div class="vspacer col-1-last"></div>
       <div class="text col-1-2">
         Account
       </div>
       <div class="currency col-3-2">
         Debit (+)
       </div>
-      <div class="currency col-5-2">
+      <div class="currency col-5-last">
         Credit (-)
       </div>
-      <div class="line col-1-6"></div>
+      <div class="line col-1-last"></div>
       <div
         id="end-of-line-items"
         class="hidden"
@@ -338,7 +338,7 @@ export function create(
         Add Row
       </button>
       <button
-        class="button col-4-2"
+        class="button col-last-2"
         type="button"
         data-event="submit"
       >
@@ -351,14 +351,14 @@ export function create(
       >
         Delete
       </button>
-      <div class="vspacer col-1-6"></div>
+      <div class="vspacer col-1-last"></div>
       <div class="currency col-2-2">
         Total Debit
       </div>
       <input
         readonly
         type="number"
-        class="currency col-4-3"
+        class="currency col-4-last"
         name="total_debit"
         value="0.00"
       />
@@ -368,7 +368,7 @@ export function create(
       <input
         type="number"
         readonly
-        class="currency col-4-3"
+        class="currency col-4-last"
         name="total_credit"
         value="0.00"
       />
@@ -378,12 +378,12 @@ export function create(
       <input
         readonly
         type="number"
-        class="currency col-4-3"
+        class="currency col-4-last"
         name="total_error"
         value="0.00"
       />
-      <div class="col-1-6 vspacer-1"></div>
-      <div class="col-1-6 flex">
+      <div class="col-1-last vspacer-1"></div>
+      <div class="col-1-last flex">
         <button
           class="button col-1 if-desktop"
           type="button"
@@ -406,16 +406,16 @@ export function create(
           Show All
         </button>
       </div>
-      <div class="vspacer-2 col-1-6 if-desktop"></div>
-      <div class="section-title col-1-6">
+      <div class="vspacer-2 col-1-last if-desktop"></div>
+      <div class="section-title col-1-last">
         Summary
       </div>
-      <div class="vspacer-2 col-1-6"></div>
+      <div class="vspacer-2 col-1-last"></div>
       <div
         id="summary-area"
-        class="col-1-6"
+        class="col-1-last"
       ></div>
-      <div class="vspacer-2 col-1-6"></div>
+      <div class="vspacer-2 col-1-last"></div>
     </form>
   );
   if (ledgerModel) {

@@ -4910,23 +4910,40 @@ var StorageModel = class {
     return this.options.offline || isOffline();
   }
   async loadLatestData(args) {
-    let batchSize = Math.max(1e3, BATCH_SIZE);
-    let upperBound = args.before_date;
+    const size = BATCH_SIZE;
+    const upperBound = args.before_date;
     const lowerBound = args.after_date;
+    let after = null;
     const client = createClient();
     const result = [];
     while (true) {
-      const response = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Filter(import_faunadb3.query.Match(import_faunadb3.query.Index(`${this.tableName}_updates`)), import_faunadb3.query.Lambda("item", import_faunadb3.query.And(import_faunadb3.query.GT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), lowerBound), import_faunadb3.query.LT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), upperBound)))), { size: batchSize }), import_faunadb3.query.Lambda("item", import_faunadb3.query.Get(import_faunadb3.query.Select([1], import_faunadb3.query.Var("item"))))));
-      response.data.forEach((item) => {
-        result.push({
-          ...item.data,
-          id: item.ref.value.id
-        });
+      const response = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Filter(import_faunadb3.query.Match(import_faunadb3.query.Index(`${this.tableName}_updates`)), import_faunadb3.query.Lambda("item", import_faunadb3.query.And(import_faunadb3.query.LTE(lowerBound, import_faunadb3.query.Select([0], import_faunadb3.query.Var("item"))), import_faunadb3.query.LT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), upperBound)))), after ? {
+        size,
+        after
+      } : { size }), import_faunadb3.query.Lambda("item", import_faunadb3.query.Get(import_faunadb3.query.Select([1], import_faunadb3.query.Var("item"))))));
+      const dataToImport = response.data.map((item) => ({
+        ...item.data,
+        id: item.ref.value.id
+      }));
+      result.push(...dataToImport);
+      dataToImport.forEach((item) => {
+        if (!item.id)
+          throw `item must have an id`;
+        const currentItem = this.cache.getById(item.id);
+        if (currentItem && this.isUpdated(currentItem)) {
+          toast(`item changed remotely and locally: ${item.id}`);
+        }
+        if (!!item.delete_date) {
+          this.cache.deleteLineItem(item.id);
+        } else {
+          this.cache.updateLineItem(item);
+        }
       });
-      if (response.data.length < batchSize)
+      this.cache.renew();
+      dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
+      if (dataToImport.length < size)
         break;
-      console.warn("if update_date is duplicated records can get skipped");
-      upperBound = response.data[batchSize - 1].data.update_date;
+      after = response.after;
     }
     return result;
   }
@@ -4938,22 +4955,9 @@ var StorageModel = class {
     const priorSyncTime = getPriorSyncTime(this.tableName);
     const currentSyncTime = await getDatabaseTime();
     const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
-    const dataToImport = await this.loadLatestData({
+    await this.loadLatestData({
       after_date: priorSyncTime,
       before_date: currentSyncTime
-    });
-    dataToImport.forEach((item) => {
-      if (!item.id)
-        throw `item must have an id`;
-      const currentItem = this.cache.getById(item.id);
-      if (currentItem && this.isUpdated(currentItem)) {
-        toast(`item changed remotely and locally: ${item.id}`);
-      }
-      if (!!item.delete_date) {
-        this.cache.deleteLineItem(item.id);
-      } else {
-        this.cache.updateLineItem(item);
-      }
     });
     this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
       if (!item.id)
@@ -5433,7 +5437,7 @@ async function create(invoice) {
     class: "grid-6",
     id: "invoice-form"
   }, /* @__PURE__ */ dom("h1", {
-    class: "col-1-6 centered"
+    class: "col-1-last centered"
   }, `Invoice Form for ${primaryContact.companyName}`), /* @__PURE__ */ dom("input", {
     class: "form-label hidden",
     readonly: true,
@@ -5441,11 +5445,11 @@ async function create(invoice) {
     name: "id",
     value: invoice.id
   }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
+    class: "section-title col-1-last"
   }, "Client"), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-3"
   }, "Client Name"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3"
+    class: "form-label col-4-last"
   }, "Date"), /* @__PURE__ */ dom("input", {
     class: "col-1-3",
     type: "text",
@@ -5454,7 +5458,7 @@ async function create(invoice) {
     required: true,
     value: invoice.clientname
   }), /* @__PURE__ */ dom("input", {
-    class: "col-4-3",
+    class: "col-4-last",
     type: "date",
     placeholder: "Date",
     name: "date",
@@ -5463,7 +5467,7 @@ async function create(invoice) {
   }), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-3"
   }, "Telephone"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3"
+    class: "form-label col-4-last"
   }, "Email"), /* @__PURE__ */ dom("input", {
     type: "tel",
     class: "col-1-3",
@@ -5472,48 +5476,48 @@ async function create(invoice) {
     value: invoice.telephone
   }), /* @__PURE__ */ dom("input", {
     type: "email",
-    class: "col-4-3",
+    class: "col-4-last",
     placeholder: "email",
     name: "email",
     value: invoice.email
   }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
+    class: "form-label col-1-last"
   }, "Bill To", /* @__PURE__ */ dom("textarea", {
     class: "address",
     placeholder: "billto",
     name: "billto"
   }, invoice.billto)), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
+    class: "form-label col-1-last"
   }, "Comments", /* @__PURE__ */ dom("textarea", {
     class: "comments",
     placeholder: "comments",
     name: "comments"
   }, invoice.comments)), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
+    class: "vspacer col-1-last"
   }), /* @__PURE__ */ dom("section", {
-    class: "line-items grid-6 col-1-6"
+    class: "line-items grid-6 col-1-last"
   }, /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
+    class: "section-title col-1-last"
   }, "Items")), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
+    class: "vspacer col-1-last"
   }), /* @__PURE__ */ dom("button", {
     class: "button col-1-3",
     "data-event": "add-another-item",
     type: "button"
   }, "Add item"), /* @__PURE__ */ dom("button", {
-    class: "button col-4-3",
+    class: "button col-4-last",
     "data-event": "remove-last-item",
     type: "button"
   }, "Remove Last Item"), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
+    class: "vspacer col-1-last"
   }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
+    class: "section-title col-1-last"
   }, "Summary"), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-2 currency"
   }, "Labor"), /* @__PURE__ */ dom("label", {
     class: "form-label col-3-2 currency"
   }, "Other"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-5-2 currency"
+    class: "form-label col-5-last currency"
   }, "Total + Tax"), /* @__PURE__ */ dom("input", {
     type: "number",
     class: "currency col-1-2",
@@ -5530,17 +5534,17 @@ async function create(invoice) {
   }), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
-    class: "currency col-5-2",
+    class: "currency col-5-last",
     id: "total_due",
     name: "total_due"
   }), /* @__PURE__ */ dom("div", {
     class: "col-1 vspacer-1"
   }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
+    class: "section-title col-1-last"
   }, "Method of Payment"), /* @__PURE__ */ dom("div", {
     class: "col-1-4"
   }, "Payment Type"), /* @__PURE__ */ dom("div", {
-    class: "col-5-2 currency"
+    class: "col-5-last currency"
   }, "Amount"), /* @__PURE__ */ dom("div", {
     id: "mop-line-item-end",
     class: "hidden"
@@ -5549,14 +5553,14 @@ async function create(invoice) {
     "data-event": "add-method-of-payment",
     type: "button"
   }, "Add Payment"), /* @__PURE__ */ dom("div", {
-    class: "form-label col-5-2 currency if-desktop"
+    class: "form-label col-5-last currency if-desktop"
   }, "Balance Due"), /* @__PURE__ */ dom("input", {
     readonly: true,
-    class: "currency col-5-2 bold if-desktop",
+    class: "currency col-5-last bold if-desktop",
     type: "number",
     id: "balance_due"
   }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-6 flex"
+    class: "vspacer-1 col-1-last flex"
   }, /* @__PURE__ */ dom("button", {
     class: "bold button",
     "data-event": "submit",
@@ -5663,7 +5667,7 @@ function renderMopLineItem(item) {
     list: forceDatalist2().id
   }), /* @__PURE__ */ dom("input", {
     type: "number",
-    class: "col-5-2 currency",
+    class: "col-5-last currency",
     name: "amount_paid",
     placeholder: "amount paid",
     value: asCurrency(item?.paid || 0)
@@ -5683,10 +5687,10 @@ function compute(form) {
 }
 function renderInvoiceItem(item) {
   const form = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
+    class: "form-label col-1-last"
   }, "Item"), /* @__PURE__ */ dom("input", {
     name: "item",
-    class: "bold col-1-6",
+    class: "bold col-1-last",
     required: true,
     type: "text",
     value: item.item,
@@ -5696,7 +5700,7 @@ function renderInvoiceItem(item) {
   }, "Quantity"), /* @__PURE__ */ dom("label", {
     class: "form-label col-3-2 currency"
   }, "Price"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-5-2 currency"
+    class: "form-label col-5-last currency"
   }, "Total"), /* @__PURE__ */ dom("input", {
     name: "quantity",
     required: true,
@@ -5712,7 +5716,7 @@ function renderInvoiceItem(item) {
   }), /* @__PURE__ */ dom("input", {
     readonly: true,
     name: "total",
-    class: "bold currency col-5-2",
+    class: "bold currency col-5-last",
     type: "number",
     value: item.total.toFixed(2)
   }));
@@ -5965,14 +5969,14 @@ async function setup() {
   setMode();
   removeCssRestrictors();
 }
-async function init() {
+async function init(target = document.body) {
   try {
     await setup();
     const queryParams = new URLSearchParams(window.location.search);
     if (queryParams.has("id")) {
-      renderInvoice2(queryParams.get("id"));
+      renderInvoice2(target, queryParams.get("id"));
     } else {
-      renderInvoice2();
+      renderInvoice2(target);
     }
   } catch (ex) {
     reportError(ex);
@@ -5995,7 +5999,7 @@ async function renderInvoices(target) {
     reportError(ex);
   }
 }
-async function renderInvoice2(invoiceId) {
+async function renderInvoice2(target, invoiceId) {
   let invoice;
   if (invoiceId) {
     invoice = await getItem(invoiceId);
@@ -6017,7 +6021,7 @@ async function renderInvoice2(invoiceId) {
     };
   }
   const formDom = await create(invoice);
-  document.body.appendChild(formDom);
+  target.appendChild(formDom);
   hookupEvents2(formDom);
   trigger(formDom, "change");
 }
@@ -6025,7 +6029,7 @@ function hookupEvents2(formDom) {
   on(formDom, "print", async () => {
     if (await tryToSaveInvoice(formDom)) {
       const requestModel = asModel(formDom);
-      print(requestModel);
+      print(formDom.parentElement || formDom, requestModel);
     }
   });
   on(formDom, "delete", async () => {
@@ -6118,12 +6122,12 @@ function asModel(formDom) {
   }
   return requestModel;
 }
-function print(invoice) {
+function print(target, invoice) {
   try {
-    document.body.classList.add("print");
+    target.classList.add("print");
     const toPrint = create2(invoice);
-    document.body.innerHTML = "";
-    document.body.appendChild(toPrint);
+    target.innerHTML = "";
+    target.appendChild(toPrint);
     window.document.title = invoice.clientname;
     window.print();
   } catch (ex) {

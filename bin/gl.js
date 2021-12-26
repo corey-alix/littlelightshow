@@ -4696,6 +4696,29 @@ var require_faunadb = __commonJS({
   }
 });
 
+// app/fun/sort.ts
+var sortOps = {
+  number: (a, b) => a - b,
+  "-number": (a, b) => -(a - b),
+  gl: (a, b) => a >= 0 ? a - b : b - a,
+  "abs(number)": (a, b) => Math.abs(a) - Math.abs(b),
+  "-abs(number)": (a, b) => -(Math.abs(a) - Math.abs(b)),
+  string: (a, b) => a.localeCompare(b),
+  date: (a, b) => a.valueOf() - b.valueOf(),
+  noop: () => 0
+};
+Array.prototype.sortBy = function(sortBy) {
+  return sort(this, sortBy);
+};
+function sort(items, sortBy) {
+  const keys = Object.keys(sortBy);
+  return [...items].sort((a, b) => {
+    let result = 0;
+    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
+    return result;
+  });
+}
+
 // app/dom.ts
 function asStyle(o) {
   if (typeof o === "string")
@@ -4961,23 +4984,40 @@ var StorageModel = class {
     return this.options.offline || isOffline();
   }
   async loadLatestData(args) {
-    let batchSize = Math.max(1e3, BATCH_SIZE);
-    let upperBound = args.before_date;
+    const size = BATCH_SIZE;
+    const upperBound = args.before_date;
     const lowerBound = args.after_date;
+    let after = null;
     const client = createClient();
     const result = [];
     while (true) {
-      const response = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Filter(import_faunadb3.query.Match(import_faunadb3.query.Index(`${this.tableName}_updates`)), import_faunadb3.query.Lambda("item", import_faunadb3.query.And(import_faunadb3.query.GT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), lowerBound), import_faunadb3.query.LT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), upperBound)))), { size: batchSize }), import_faunadb3.query.Lambda("item", import_faunadb3.query.Get(import_faunadb3.query.Select([1], import_faunadb3.query.Var("item"))))));
-      response.data.forEach((item) => {
-        result.push({
-          ...item.data,
-          id: item.ref.value.id
-        });
+      const response = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Filter(import_faunadb3.query.Match(import_faunadb3.query.Index(`${this.tableName}_updates`)), import_faunadb3.query.Lambda("item", import_faunadb3.query.And(import_faunadb3.query.LTE(lowerBound, import_faunadb3.query.Select([0], import_faunadb3.query.Var("item"))), import_faunadb3.query.LT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), upperBound)))), after ? {
+        size,
+        after
+      } : { size }), import_faunadb3.query.Lambda("item", import_faunadb3.query.Get(import_faunadb3.query.Select([1], import_faunadb3.query.Var("item"))))));
+      const dataToImport = response.data.map((item) => ({
+        ...item.data,
+        id: item.ref.value.id
+      }));
+      result.push(...dataToImport);
+      dataToImport.forEach((item) => {
+        if (!item.id)
+          throw `item must have an id`;
+        const currentItem = this.cache.getById(item.id);
+        if (currentItem && this.isUpdated(currentItem)) {
+          toast(`item changed remotely and locally: ${item.id}`);
+        }
+        if (!!item.delete_date) {
+          this.cache.deleteLineItem(item.id);
+        } else {
+          this.cache.updateLineItem(item);
+        }
       });
-      if (response.data.length < batchSize)
+      this.cache.renew();
+      dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
+      if (dataToImport.length < size)
         break;
-      console.warn("if update_date is duplicated records can get skipped");
-      upperBound = response.data[batchSize - 1].data.update_date;
+      after = response.after;
     }
     return result;
   }
@@ -4989,22 +5029,9 @@ var StorageModel = class {
     const priorSyncTime = getPriorSyncTime(this.tableName);
     const currentSyncTime = await getDatabaseTime();
     const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
-    const dataToImport = await this.loadLatestData({
+    await this.loadLatestData({
       after_date: priorSyncTime,
       before_date: currentSyncTime
-    });
-    dataToImport.forEach((item) => {
-      if (!item.id)
-        throw `item must have an id`;
-      const currentItem = this.cache.getById(item.id);
-      if (currentItem && this.isUpdated(currentItem)) {
-        toast(`item changed remotely and locally: ${item.id}`);
-      }
-      if (!!item.delete_date) {
-        this.cache.deleteLineItem(item.id);
-      } else {
-        this.cache.updateLineItem(item);
-      }
     });
     this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
       if (!item.id)
@@ -5280,7 +5307,7 @@ function noZero(value) {
 }
 
 // app/gl/templates/printDetail.tsx
-function printDetail(ledgers) {
+function create(ledgers) {
   ledgers = ledgers.sortBy({
     date: "date",
     id: "number"
@@ -5292,9 +5319,9 @@ function printDetail(ledgers) {
   }, "Account"), /* @__PURE__ */ dom("div", {
     class: "col-5 currency"
   }, "Debit"), /* @__PURE__ */ dom("div", {
-    class: "col-6 currency"
+    class: "col-6-last currency"
   }, "Credit"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
+    class: "line col-1-last"
   }));
   const totals = [0, 0];
   let priorDate = "";
@@ -5310,13 +5337,13 @@ function printDetail(ledgers) {
       totals[1] += credit || 0;
       let currentDate = asDateString(new Date(ledger.date || item["date"]));
       const lineitem = /* @__PURE__ */ dom("div", null, currentDate != priorDate && /* @__PURE__ */ dom("div", {
-        class: "col-1-6 date section-title"
+        class: "col-1-last date section-title"
       }, `${priorDate = currentDate}`), /* @__PURE__ */ dom("div", {
         class: "col-1-4 text"
       }, item.account), /* @__PURE__ */ dom("div", {
         class: "col-5 currency"
       }, debit && debit.toFixed(2)), /* @__PURE__ */ dom("div", {
-        class: "col-6 currency"
+        class: "col-6-last currency"
       }, credit && credit.toFixed(2)), /* @__PURE__ */ dom("div", {
         class: "col-1-6 text"
       }, /* @__PURE__ */ dom("a", {
@@ -5328,19 +5355,19 @@ function printDetail(ledgers) {
     });
   });
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
+    class: "line col-1-last"
   }), /* @__PURE__ */ dom("div", {
     class: "col-5 currency"
   }, totals[0].toFixed(2)), /* @__PURE__ */ dom("div", {
     class: "col-6 currency"
   }, totals[1].toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "col-6 currency"
+    class: "col-7 currency"
   }, noZero((totals[0] - totals[1]).toFixed(2)))), report);
   return report;
 }
 
 // app/gl/templates/printSummary.tsx
-function create(ledgers) {
+function create2(ledgers) {
   const totals = {};
   ledgers.forEach((l) => {
     l.items.sortBy({ account: "string" }).forEach((item) => {
@@ -5362,26 +5389,30 @@ function create(ledgers) {
       class: "currency col-5"
     }, noZero(total.debit.toFixed(2))), /* @__PURE__ */ dom("div", {
       class: "currency col-6"
-    }, noZero(total.credit.toFixed(2))));
+    }, noZero(total.credit.toFixed(2))), /* @__PURE__ */ dom("div", {
+      class: "currency col-7"
+    }, noZero((total.debit - total.credit).toFixed(2))));
   });
   const report = /* @__PURE__ */ dom("div", {
-    class: "grid-6 col-1-6"
+    class: "grid-6 col-1-last"
   }, /* @__PURE__ */ dom("div", {
     class: "col-1-4 line"
   }, "Account"), /* @__PURE__ */ dom("div", {
     class: "col-5 line currency"
-  }, "Debit"), /* @__PURE__ */ dom("div", {
+  }, "Debit (+)"), /* @__PURE__ */ dom("div", {
     class: "col-6 line currency"
-  }, "Credit"));
+  }, "Credit (-)"), /* @__PURE__ */ dom("div", {
+    class: "col-7 line currency"
+  }, "Balance"));
   reportItems.forEach((item) => moveChildren(item, report));
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "col-1-6 line"
+    class: "col-1-last line"
   }), /* @__PURE__ */ dom("div", {
-    class: "col-1-6 vspacer-1"
+    class: "col-1-last vspacer-1"
   }), /* @__PURE__ */ dom("div", {
     class: "col-1-4"
   }, "Imbalance"), /* @__PURE__ */ dom("div", {
-    class: "currency col-6 bold"
+    class: "currency col-last bold"
   }, grandTotal.toFixed(2))), report);
   return report;
 }
@@ -5490,7 +5521,7 @@ function hookupHandlers(domNode) {
     setCurrency(totalCredits, creditTotal);
     setCurrency(totalError, debitTotal - creditTotal);
     const ledger = asModel(domNode);
-    const summaryReport = create([
+    const summaryReport = create2([
       ledger
     ]);
     summaryArea.innerText = "";
@@ -5512,13 +5543,13 @@ function hookupHandlers(domNode) {
   });
   on(domNode, "print-detail", async () => {
     const ledgers = await getItems();
-    const report = printDetail(ledgers);
+    const report = create(ledgers);
     document.body.innerHTML = "";
     document.body.appendChild(report);
   });
   on(domNode, "print-summary", async () => {
     const ledgers = await getItems();
-    const report = create(ledgers);
+    const report = create2(ledgers);
     document.body.innerHTML = "";
     document.body.appendChild(report);
   });
@@ -5565,19 +5596,19 @@ function createRow() {
     placeholder: "debit"
   }), /* @__PURE__ */ dom("input", {
     name: "credit",
-    class: "currency col-5-2",
+    class: "currency col-5-last",
     type: "number",
     placeholder: "credit"
   }), /* @__PURE__ */ dom("input", {
     name: "comment",
-    class: "text col-1-6",
+    class: "text col-1-last",
     type: "text",
     placeholder: "comment"
   }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-6"
+    class: "vspacer-1 col-1-last"
   }));
 }
-function create2(ledgerModel2) {
+function create3(ledgerModel2) {
   forceDatalist();
   const ledger = /* @__PURE__ */ dom("form", {
     class: "grid-6"
@@ -5588,7 +5619,7 @@ function create2(ledgerModel2) {
   }), /* @__PURE__ */ dom("div", {
     class: "date col-1"
   }, "Date"), /* @__PURE__ */ dom("input", {
-    class: "col-2-5",
+    class: "col-2-last",
     name: "date",
     required: true,
     type: "date",
@@ -5598,18 +5629,18 @@ function create2(ledgerModel2) {
     class: "col-1"
   }, "Batch Summary"), /* @__PURE__ */ dom("textarea", {
     name: "description",
-    class: "col-2-5 comments",
+    class: "col-2-last comments",
     placeholder: "Describe the context for these entries"
   }), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
+    class: "vspacer col-1-last"
   }), /* @__PURE__ */ dom("div", {
     class: "text col-1-2"
   }, "Account"), /* @__PURE__ */ dom("div", {
     class: "currency col-3-2"
   }, "Debit (+)"), /* @__PURE__ */ dom("div", {
-    class: "currency col-5-2"
+    class: "currency col-5-last"
   }, "Credit (-)"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
+    class: "line col-1-last"
   }), /* @__PURE__ */ dom("div", {
     id: "end-of-line-items",
     class: "hidden"
@@ -5618,7 +5649,7 @@ function create2(ledgerModel2) {
     type: "button",
     "data-event": "add-row"
   }, "Add Row"), /* @__PURE__ */ dom("button", {
-    class: "button col-4-2",
+    class: "button col-last-2",
     type: "button",
     "data-event": "submit"
   }, "Save"), /* @__PURE__ */ dom("button", {
@@ -5626,13 +5657,13 @@ function create2(ledgerModel2) {
     type: "button",
     "data-event": "delete"
   }, "Delete"), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
+    class: "vspacer col-1-last"
   }), /* @__PURE__ */ dom("div", {
     class: "currency col-2-2"
   }, "Total Debit"), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
-    class: "currency col-4-3",
+    class: "currency col-4-last",
     name: "total_debit",
     value: "0.00"
   }), /* @__PURE__ */ dom("div", {
@@ -5640,7 +5671,7 @@ function create2(ledgerModel2) {
   }, "Total Credit"), /* @__PURE__ */ dom("input", {
     type: "number",
     readonly: true,
-    class: "currency col-4-3",
+    class: "currency col-4-last",
     name: "total_credit",
     value: "0.00"
   }), /* @__PURE__ */ dom("div", {
@@ -5648,13 +5679,13 @@ function create2(ledgerModel2) {
   }, "Imbalance"), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
-    class: "currency col-4-3",
+    class: "currency col-4-last",
     name: "total_error",
     value: "0.00"
   }), /* @__PURE__ */ dom("div", {
-    class: "col-1-6 vspacer-1"
+    class: "col-1-last vspacer-1"
   }), /* @__PURE__ */ dom("div", {
-    class: "col-1-6 flex"
+    class: "col-1-last flex"
   }, /* @__PURE__ */ dom("button", {
     class: "button col-1 if-desktop",
     type: "button",
@@ -5668,16 +5699,16 @@ function create2(ledgerModel2) {
     type: "button",
     "data-event": "print-all"
   }, "Show All")), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6 if-desktop"
+    class: "vspacer-2 col-1-last if-desktop"
   }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
+    class: "section-title col-1-last"
   }, "Summary"), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
+    class: "vspacer-2 col-1-last"
   }), /* @__PURE__ */ dom("div", {
     id: "summary-area",
-    class: "col-1-6"
+    class: "col-1-last"
   }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
+    class: "vspacer-2 col-1-last"
   }));
   if (ledgerModel2) {
     const lineItems = ledger.querySelector("#end-of-line-items");
@@ -5705,7 +5736,7 @@ function create2(ledgerModel2) {
 }
 
 // app/gl/templates/print.tsx
-async function create3(id) {
+async function create4(id) {
   const target = /* @__PURE__ */ dom("div", null);
   let ledgers;
   if (id) {
@@ -5723,11 +5754,11 @@ async function create3(id) {
     class: "section-title if-desktop"
   }, "Account Summary")));
   if (ledgers.length) {
-    target.appendChild(create(ledgers));
+    target.appendChild(create2(ledgers));
     target.appendChild(/* @__PURE__ */ dom("div", {
       class: "vspacer-2"
     }));
-    target.appendChild(printDetail(ledgers));
+    target.appendChild(create(ledgers));
   } else {
     moveChildren(/* @__PURE__ */ dom("div", {
       class: "grid-6"
@@ -5750,9 +5781,9 @@ function createBanner() {
   return /* @__PURE__ */ dom("div", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
-    class: "col-1-6 centered"
+    class: "col-1-last centered"
   }, `General Ledger for ${primaryContact.companyName}`), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6 if-desktop"
+    class: "line col-1-last if-desktop"
   }), /* @__PURE__ */ dom("div", {
     class: "col-1-3 if-desktop"
   }, /* @__PURE__ */ dom("address", {
@@ -5762,9 +5793,9 @@ function createBanner() {
   }, primaryContact.addressLine1), /* @__PURE__ */ dom("address", {
     class: "col-1-5"
   }, primaryContact.addressLine2)), /* @__PURE__ */ dom("div", {
-    class: "col-4-3 if-desktop"
+    class: "col-4-last if-desktop"
   }, /* @__PURE__ */ dom("div", {
-    class: "align-right col-6"
+    class: "align-right col-6-last"
   }, `Printed on ${asDateString()} @ ${asTimeString()}`)));
 }
 
@@ -5792,29 +5823,6 @@ async function identify() {
     return false;
   }
   return true;
-}
-
-// app/fun/sort.ts
-var sortOps = {
-  number: (a, b) => a - b,
-  "-number": (a, b) => -(a - b),
-  gl: (a, b) => a >= 0 ? a - b : b - a,
-  "abs(number)": (a, b) => Math.abs(a) - Math.abs(b),
-  "-abs(number)": (a, b) => -(Math.abs(a) - Math.abs(b)),
-  string: (a, b) => a.localeCompare(b),
-  date: (a, b) => a.valueOf() - b.valueOf(),
-  noop: () => 0
-};
-Array.prototype.sortBy = function(sortBy) {
-  return sort(this, sortBy);
-};
-function sort(items, sortBy) {
-  const keys = Object.keys(sortBy);
-  return [...items].sort((a, b) => {
-    let result = 0;
-    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
-    return result;
-  });
 }
 
 // app/fun/setMode.ts
@@ -5870,13 +5878,13 @@ async function init(domNode) {
       switch (printId) {
         case "all": {
           target.innerHTML = "";
-          const ledger = await create3();
+          const ledger = await create4();
           target.appendChild(ledger);
           break;
         }
         default: {
           target.innerHTML = "";
-          const ledger = await create3(printId);
+          const ledger = await create4(printId);
           target.appendChild(ledger);
         }
       }
@@ -5887,9 +5895,9 @@ async function init(domNode) {
       const ledger = await getItem(id);
       if (!ledger)
         throw `cannot find ledger: ${id}`;
-      domNode.appendChild(create2(ledger));
+      domNode.appendChild(create3(ledger));
     } else {
-      const ledger = create2();
+      const ledger = create3();
       domNode.appendChild(ledger);
     }
   } catch (ex) {
@@ -5897,7 +5905,6 @@ async function init(domNode) {
   }
 }
 export {
-  identify,
   init
 };
 /*

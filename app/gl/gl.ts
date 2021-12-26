@@ -1,8 +1,7 @@
+import "../fun/sort.js"; // includes sortBy Array extension
 import { create as createLedgerForm } from "./templates/glgrid.js";
 import { create as printLedger } from "./templates/print";
-export { identify } from "../identify.js";
 import { getItem as loadLedger } from "../services/gl.js";
-import "../fun/sort.js"; // includes sortBy Array extension
 import { identify } from "../identify.js";
 import { setMode } from "../fun/setMode.js";
 import { removeCssRestrictors } from "../fun/detect.js";

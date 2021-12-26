@@ -4,7 +4,7 @@ import {
   getItems as loadAllLedgers,
   getItem as loadLedger,
 } from "../../services/gl.js";
-import { printDetail } from "./printDetail";
+import { create as printDetail } from "./printDetail";
 import { create as printSummary } from "./printSummary";
 import { primaryContact } from "../../globals.js";
 import {

@@ -4,7 +4,7 @@ import { Ledger } from "../../services/gl.js";
 import { asDateString } from "../../fun/asDateString";
 import { noZero } from "../../fun/isZero";
 
-export function printDetail(
+export function create(
   ledgers: Ledger[]
 ) {
   ledgers = ledgers

@@ -12,9 +12,14 @@
     />
   </head>
   <body class="absolute">
+    <div class="invoice"></div>
     <script type="module">
       import { init } from "/bin/invoice.js";
-      init();
+      init(
+        document.querySelector(
+          ".invoice"
+        )
+      );
     </script>
   </body>
 </html>

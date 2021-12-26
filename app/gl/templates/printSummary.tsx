@@ -1,6 +1,6 @@
+import type { Ledger } from "../../services/gl.js";
 import { dom } from "../../dom.js";
 import { moveChildren } from "../../fun/dom.js";
-import { Ledger } from "../../services/gl.js";
 import { noZero } from "../../fun/isZero";
 
 export function create(

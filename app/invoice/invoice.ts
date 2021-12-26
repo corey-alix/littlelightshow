@@ -32,7 +32,9 @@ async function setup() {
   removeCssRestrictors();
 }
 
-export async function init() {
+export async function init(
+  target = document.body
+) {
   try {
     await setup();
     const queryParams =
@@ -41,10 +43,11 @@ export async function init() {
       );
     if (queryParams.has("id")) {
       renderInvoice(
+        target,
         queryParams.get("id")!
       );
     } else {
-      renderInvoice();
+      renderInvoice(target);
     }
   } catch (ex) {
     reportError(ex);
@@ -79,6 +82,7 @@ export async function renderInvoices(
 }
 
 async function renderInvoice(
+  target: HTMLElement,
   invoiceId?: string
 ) {
   let invoice: Invoice | null;
@@ -106,7 +110,7 @@ async function renderInvoice(
   }
   const formDom =
     await createFormTemplate(invoice);
-  document.body.appendChild(formDom);
+  target.appendChild(formDom);
 
   hookupEvents(formDom);
 
@@ -124,7 +128,11 @@ function hookupEvents(
     ) {
       const requestModel =
         asModel(formDom);
-      print(requestModel);
+      print(
+        formDom.parentElement ||
+          formDom,
+        requestModel
+      );
     }
   });
 
@@ -298,16 +306,15 @@ function asModel(
 }
 
 export function print(
+  target: HTMLElement,
   invoice: Invoice
 ) {
   try {
-    document.body.classList.add(
-      "print"
-    );
+    target.classList.add("print");
     const toPrint =
       createPrintTemplate(invoice);
-    document.body.innerHTML = "";
-    document.body.appendChild(toPrint);
+    target.innerHTML = "";
+    target.appendChild(toPrint);
     window.document.title =
       invoice.clientname;
     window.print();

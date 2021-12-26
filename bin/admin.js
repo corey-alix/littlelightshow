@@ -5018,23 +5018,40 @@ var StorageModel = class {
     return this.options.offline || isOffline();
   }
   async loadLatestData(args) {
-    let batchSize = Math.max(1e3, BATCH_SIZE);
-    let upperBound = args.before_date;
+    const size = BATCH_SIZE;
+    const upperBound = args.before_date;
     const lowerBound = args.after_date;
+    let after = null;
     const client = createClient();
     const result = [];
     while (true) {
-      const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.GT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), lowerBound), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), { size: batchSize }), import_faunadb4.query.Lambda("item", import_faunadb4.query.Get(import_faunadb4.query.Select([1], import_faunadb4.query.Var("item"))))));
-      response.data.forEach((item) => {
-        result.push({
-          ...item.data,
-          id: item.ref.value.id
-        });
+      const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.LTE(lowerBound, import_faunadb4.query.Select([0], import_faunadb4.query.Var("item"))), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), after ? {
+        size,
+        after
+      } : { size }), import_faunadb4.query.Lambda("item", import_faunadb4.query.Get(import_faunadb4.query.Select([1], import_faunadb4.query.Var("item"))))));
+      const dataToImport = response.data.map((item) => ({
+        ...item.data,
+        id: item.ref.value.id
+      }));
+      result.push(...dataToImport);
+      dataToImport.forEach((item) => {
+        if (!item.id)
+          throw `item must have an id`;
+        const currentItem = this.cache.getById(item.id);
+        if (currentItem && this.isUpdated(currentItem)) {
+          toast(`item changed remotely and locally: ${item.id}`);
+        }
+        if (!!item.delete_date) {
+          this.cache.deleteLineItem(item.id);
+        } else {
+          this.cache.updateLineItem(item);
+        }
       });
-      if (response.data.length < batchSize)
+      this.cache.renew();
+      dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
+      if (dataToImport.length < size)
         break;
-      console.warn("if update_date is duplicated records can get skipped");
-      upperBound = response.data[batchSize - 1].data.update_date;
+      after = response.after;
     }
     return result;
   }
@@ -5046,22 +5063,9 @@ var StorageModel = class {
     const priorSyncTime = getPriorSyncTime(this.tableName);
     const currentSyncTime = await getDatabaseTime();
     const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
-    const dataToImport = await this.loadLatestData({
+    await this.loadLatestData({
       after_date: priorSyncTime,
       before_date: currentSyncTime
-    });
-    dataToImport.forEach((item) => {
-      if (!item.id)
-        throw `item must have an id`;
-      const currentItem = this.cache.getById(item.id);
-      if (currentItem && this.isUpdated(currentItem)) {
-        toast(`item changed remotely and locally: ${item.id}`);
-      }
-      if (!!item.delete_date) {
-        this.cache.deleteLineItem(item.id);
-      } else {
-        this.cache.updateLineItem(item);
-      }
     });
     this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
       if (!item.id)
@@ -5264,7 +5268,7 @@ async function forceUpdatestampIndex(tableName) {
     values: [
       {
         field: ["data", "update_date"],
-        reverse: true
+        reverse: false
       },
       {
         field: ["ref"]
@@ -5452,7 +5456,6 @@ async function init() {
     });
   });
   on(domNode, "clean-invoice-data", async () => {
-    debugger;
     const invoices = await invoiceModel.getItems();
     const toDelete = [];
     invoices.forEach((invoice) => {

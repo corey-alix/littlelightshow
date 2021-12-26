@@ -43,7 +43,7 @@ export async function create(
       class="grid-6"
       id="invoice-form"
     >
-      <h1 class="col-1-6 centered">
+      <h1 class="col-1-last centered">
         {`Invoice Form for ${primaryContact.companyName}`}
       </h1>
       <input
@@ -53,13 +53,13 @@ export async function create(
         name="id"
         value={invoice.id}
       />
-      <div class="section-title col-1-6">
+      <div class="section-title col-1-last">
         Client
       </div>
       <label class="form-label col-1-3">
         Client Name
       </label>
-      <label class="form-label col-4-3">
+      <label class="form-label col-4-last">
         Date
       </label>
       <input
@@ -71,7 +71,7 @@ export async function create(
         value={invoice.clientname}
       />
       <input
-        class="col-4-3"
+        class="col-4-last"
         type="date"
         placeholder="Date"
         name="date"
@@ -85,7 +85,7 @@ export async function create(
       <label class="form-label col-1-3">
         Telephone
       </label>
-      <label class="form-label col-4-3">
+      <label class="form-label col-4-last">
         Email
       </label>
       <input
@@ -97,12 +97,12 @@ export async function create(
       />
       <input
         type="email"
-        class="col-4-3"
+        class="col-4-last"
         placeholder="email"
         name="email"
         value={invoice.email}
       />
-      <label class="form-label col-1-6">
+      <label class="form-label col-1-last">
         Bill To
         <textarea
           class="address"
@@ -112,7 +112,7 @@ export async function create(
           {invoice.billto}
         </textarea>
       </label>
-      <label class="form-label col-1-6">
+      <label class="form-label col-1-last">
         Comments
         <textarea
           class="comments"
@@ -122,13 +122,13 @@ export async function create(
           {invoice.comments}
         </textarea>
       </label>
-      <div class="vspacer col-1-6"></div>
-      <section class="line-items grid-6 col-1-6">
-        <div class="section-title col-1-6">
+      <div class="vspacer col-1-last"></div>
+      <section class="line-items grid-6 col-1-last">
+        <div class="section-title col-1-last">
           Items
         </div>
       </section>
-      <div class="vspacer col-1-6"></div>
+      <div class="vspacer col-1-last"></div>
       <button
         class="button col-1-3"
         data-event="add-another-item"
@@ -137,14 +137,14 @@ export async function create(
         Add item
       </button>
       <button
-        class="button col-4-3"
+        class="button col-4-last"
         data-event="remove-last-item"
         type="button"
       >
         Remove Last Item
       </button>
-      <div class="vspacer col-1-6"></div>
-      <div class="section-title col-1-6">
+      <div class="vspacer col-1-last"></div>
+      <div class="section-title col-1-last">
         Summary
       </div>
       <label class="form-label col-1-2 currency">
@@ -153,7 +153,7 @@ export async function create(
       <label class="form-label col-3-2 currency">
         Other
       </label>
-      <label class="form-label col-5-2 currency">
+      <label class="form-label col-5-last currency">
         Total + Tax
       </label>
       <input
@@ -176,19 +176,19 @@ export async function create(
       <input
         readonly
         type="number"
-        class="currency col-5-2"
+        class="currency col-5-last"
         id="total_due"
         name="total_due"
       />
       <div class="col-1 vspacer-1"></div>
 
-      <div class="section-title col-1-6">
+      <div class="section-title col-1-last">
         Method of Payment
       </div>
       <div class="col-1-4">
         Payment Type
       </div>
-      <div class="col-5-2 currency">
+      <div class="col-5-last currency">
         Amount
       </div>
       <div
@@ -202,16 +202,16 @@ export async function create(
       >
         Add Payment
       </button>
-      <div class="form-label col-5-2 currency if-desktop">
+      <div class="form-label col-5-last currency if-desktop">
         Balance Due
       </div>
       <input
         readonly
-        class="currency col-5-2 bold if-desktop"
+        class="currency col-5-last bold if-desktop"
         type="number"
         id="balance_due"
       />
-      <div class="vspacer-1 col-1-6 flex">
+      <div class="vspacer-1 col-1-last flex">
         <button
           class="bold button"
           data-event="submit"
@@ -461,7 +461,7 @@ function renderMopLineItem(item?: {
       />
       <input
         type="number"
-        class="col-5-2 currency"
+        class="col-5-last currency"
         name="amount_paid"
         placeholder="amount paid"
         value={asCurrency(
@@ -527,12 +527,12 @@ function renderInvoiceItem(
 ) {
   const form: HTMLDivElement = (
     <div>
-      <label class="form-label col-1-6">
+      <label class="form-label col-1-last">
         Item
       </label>
       <input
         name="item"
-        class="bold col-1-6"
+        class="bold col-1-last"
         required
         type="text"
         value={item.item}
@@ -544,7 +544,7 @@ function renderInvoiceItem(
       <label class="form-label col-3-2 currency">
         Price
       </label>
-      <label class="form-label col-5-2 currency">
+      <label class="form-label col-5-last currency">
         Total
       </label>
       <input
@@ -564,7 +564,7 @@ function renderInvoiceItem(
       <input
         readonly
         name="total"
-        class="bold currency col-5-2"
+        class="bold currency col-5-last"
         type="number"
         value={item.total.toFixed(2)}
       />
