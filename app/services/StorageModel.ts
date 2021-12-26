@@ -66,7 +66,6 @@ export class StorageModel<
       T & SynchronizationAttributes
     >;
     while (true) {
-      debugger;
       const response =
         (await client.query(
           q.Map(
@@ -160,13 +159,15 @@ export class StorageModel<
 
       // capture progress
       this.cache.renew();
-      setFutureSyncTime(
-        this.tableName,
-        result[result.length - 1]
-          .update_date
-      );
+      dataToImport.length &&
+        setFutureSyncTime(
+          this.tableName,
+          dataToImport[
+            dataToImport.length - 1
+          ].update_date
+        );
 
-      if (response.data.length < size)
+      if (dataToImport.length < size)
         break;
 
       after = response.after;

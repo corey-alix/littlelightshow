@@ -375,6 +375,7 @@ form textarea {
 .col-1-5 {
   grid-column: 1/6;
 }
+.col-1-last,
 .col-1-6 {
   grid-column: 1/7;
 }
@@ -411,6 +412,7 @@ form textarea {
 .col-4-2 {
   grid-column: 4/6;
 }
+.col-4-last,
 .col-4-3 {
   grid-column: 4/7;
 }
@@ -420,6 +422,9 @@ form textarea {
 .col-5-2 {
   grid-column: 5/7;
 }
+
+.col-6-last,
+.col-last,
 .col-6 {
   grid-column: 6;
 }
@@ -476,10 +481,35 @@ body.dark button {
   white-space: nowrap;
 }
 
-@media (max-width: 459px) {
+@media (max-width: 639px) {
+  .col-7 {
+    display: none;
+  }
 }
 
 @media (min-width: 640px) {
+  .grid-6 {
+    grid-template-columns: repeat(
+      7,
+      auto
+    );
+  }
+  .col-1-last,
+  .col-1-7 {
+    grid-column: 1/8;
+  }
+  .col-4-last,
+  .col-4-4 {
+    grid-column: 4/8;
+  }
+  .col-6-last,
+  .col-6-7 {
+    grid-column: 6/8;
+  }
+  .col-7,
+  .col-last {
+    grid-column: 7;
+  }
 }
 
 @media (min-width: 960px) {

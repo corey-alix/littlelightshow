@@ -82,10 +82,10 @@ export async function create(
 function createBanner() {
   return (
     <div class="grid-6">
-      <div class="col-1-6 centered">
+      <div class="col-1-last centered">
         {`General Ledger for ${primaryContact.companyName}`}
       </div>
-      <div class="line col-1-6 if-desktop"></div>
+      <div class="line col-1-last if-desktop"></div>
       <div class="col-1-3 if-desktop">
         <address class="col-1-5">
           {primaryContact.fullName}
@@ -97,8 +97,8 @@ function createBanner() {
           {primaryContact.addressLine2}
         </address>
       </div>
-      <div class="col-4-3 if-desktop">
-        <div class="align-right col-6">
+      <div class="col-4-last if-desktop">
+        <div class="align-right col-6-last">
           {`Printed on ${asDateString()} @ ${asTimeString()}`}
         </div>
       </div>

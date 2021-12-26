@@ -21,10 +21,10 @@ export function printDetail(
       <div class="col-5 currency">
         Debit
       </div>
-      <div class="col-6 currency">
+      <div class="col-6-last currency">
         Credit
       </div>
-      <div class="line col-1-6"></div>
+      <div class="line col-1-last"></div>
     </div>
   );
   const totals = [0, 0];
@@ -53,7 +53,7 @@ export function printDetail(
           <div>
             {currentDate !=
               priorDate && (
-              <div class="col-1-6 date section-title">{`${(priorDate =
+              <div class="col-1-last date section-title">{`${(priorDate =
                 currentDate)}`}</div>
             )}
             <div class="col-1-4 text">
@@ -63,7 +63,7 @@ export function printDetail(
               {debit &&
                 debit.toFixed(2)}
             </div>
-            <div class="col-6 currency">
+            <div class="col-6-last currency">
               {credit &&
                 credit.toFixed(2)}
             </div>
@@ -83,14 +83,14 @@ export function printDetail(
   });
   moveChildren(
     <div>
-      <div class="line col-1-6"></div>
+      <div class="line col-1-last"></div>
       <div class="col-5 currency">
         {totals[0].toFixed(2)}
       </div>
       <div class="col-6 currency">
         {totals[1].toFixed(2)}
       </div>
-      <div class="col-6 currency">
+      <div class="col-7 currency">
         {noZero(
           (
             totals[0] - totals[1]

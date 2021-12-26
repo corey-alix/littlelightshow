@@ -122,7 +122,6 @@ export async function init() {
     domNode,
     "clean-invoice-data",
     async () => {
-      debugger;
       const invoices =
         await invoiceModel.getItems();
       const toDelete =

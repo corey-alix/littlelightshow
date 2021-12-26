@@ -51,19 +51,30 @@ export function create(
               total.credit.toFixed(2)
             )}
           </div>
+          <div class="currency col-7">
+            {noZero(
+              (
+                total.debit -
+                total.credit
+              ).toFixed(2)
+            )}
+          </div>
         </div>
       );
     });
   const report = (
-    <div class="grid-6 col-1-6">
+    <div class="grid-6 col-1-last">
       <div class="col-1-4 line">
         Account
       </div>
       <div class="col-5 line currency">
-        Debit
+        Debit (+)
       </div>
       <div class="col-6 line currency">
-        Credit
+        Credit (-)
+      </div>
+      <div class="col-7 line currency">
+        Balance
       </div>
     </div>
   );
@@ -72,12 +83,12 @@ export function create(
   );
   moveChildren(
     <div>
-      <div class="col-1-6 line"></div>
-      <div class="col-1-6 vspacer-1"></div>
+      <div class="col-1-last line"></div>
+      <div class="col-1-last vspacer-1"></div>
       <div class="col-1-4">
         Imbalance
       </div>
-      <div class="currency col-6 bold">
+      <div class="currency col-last bold">
         {grandTotal.toFixed(2)}
       </div>
     </div>,

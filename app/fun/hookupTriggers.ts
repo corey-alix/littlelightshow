@@ -98,6 +98,7 @@ export function hookupTriggers(
       }
     });
 }
+
 function isCheckboxInput(
   eventItem: Element
 ) {
