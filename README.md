@@ -4,6 +4,7 @@ littlelightshow
 
 ## Change Log
 
+- 2021-12-26: Show balance due on invoices
 - 2021-12-26: hyperlink GL entries
 - 2021-12-25: create "desktop" layout for GL and AR (invoice)
 - 2021-12-22: use storage API for sale items and account codes (always offline)
@@ -17,6 +18,7 @@ littlelightshow
 
 ## TODOs
 
+- Invoice payments need to be scrapped into the GL as part of the invoice scraping process
 - Invoice summary report should show dates if space permits
   The issue will be that date should be optional yet not in the last column
 

@@ -14,6 +14,7 @@ import {
   getItems as loadAllInvoices,
 } from "./invoices.js";
 import { split } from "../fun/split";
+import { distinct } from "../fun/distinct.js";
 
 export async function forceUpdatestampTable(
   tableName: string
@@ -90,6 +91,7 @@ export async function importInvoicesToGeneralLedger() {
           ledger.items,
         ])
       ) {
+        debugger;
         await saveLedger({
           ...newLedger,
           id: ledger.id,
@@ -99,6 +101,8 @@ export async function importInvoicesToGeneralLedger() {
   );
 
   while (invoicesToImport.length) {
+    debugger;
+
     const invoice =
       invoicesToImport.shift()!;
     const ledger =
@@ -123,6 +127,22 @@ function createLedger(
     invoice.additional < 0
       ? invoice.additional
       : 0;
+
+  const totalPayments = sum(
+    invoice.mops.map((i) => i.paid)
+  );
+
+  const payments = distinct(
+    invoice.mops.map((i) => i.mop)
+  ).map((mop) => ({
+    mop,
+    total: sum(
+      invoice.mops
+        .filter((i) => i.mop === mop)
+        .map((i) => i.paid)
+    ),
+  }));
+
   const ledger: Ledger = {
     date: invoice.date,
     description: `INVOICE ${invoice.id}`,
@@ -177,8 +197,22 @@ function createLedger(
         amount: -discount,
         comment: "DISCOUNT",
       },
+      {
+        account: "AR",
+        amount: -totalPayments,
+        comment: "PAYMENT",
+      },
     ],
   };
+
+  payments.forEach((payment) => {
+    ledger.items.push({
+      account: payment.mop,
+      amount: payment.total,
+      comment: `PAYMENT`,
+    });
+  });
+
   ledger.items = ledger.items.filter(
     (i) => 0 != i.amount
   );

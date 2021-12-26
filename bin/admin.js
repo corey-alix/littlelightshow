@@ -5256,6 +5256,13 @@ function split(items, test) {
   return result;
 }
 
+// app/fun/distinct.ts
+function distinct(items) {
+  return [
+    ...new Set(items)
+  ];
+}
+
 // app/services/admin.ts
 async function forceUpdatestampTable(tableName) {
   const client = createClient();
@@ -5302,6 +5309,7 @@ async function importInvoicesToGeneralLedger() {
       ledger.date,
       ledger.items
     ])) {
+      debugger;
       await upsertItem({
         ...newLedger,
         id: ledger.id
@@ -5309,6 +5317,7 @@ async function importInvoicesToGeneralLedger() {
     }
   });
   while (invoicesToImport.length) {
+    debugger;
     const invoice = invoicesToImport.shift();
     const ledger = createLedger(invoice);
     await upsertItem(ledger);
@@ -5320,6 +5329,11 @@ function createLedger(invoice) {
   const labor = invoice.labor;
   const rent = invoice.additional > 0 ? invoice.additional : 0;
   const discount = invoice.additional < 0 ? invoice.additional : 0;
+  const totalPayments = sum(invoice.mops.map((i) => i.paid));
+  const payments = distinct(invoice.mops.map((i) => i.mop)).map((mop) => ({
+    mop,
+    total: sum(invoice.mops.filter((i) => i.mop === mop).map((i) => i.paid))
+  }));
   const ledger = {
     date: invoice.date,
     description: `INVOICE ${invoice.id}`,
@@ -5373,9 +5387,21 @@ function createLedger(invoice) {
         account: "LABOR",
         amount: -discount,
         comment: "DISCOUNT"
+      },
+      {
+        account: "AR",
+        amount: -totalPayments,
+        comment: "PAYMENT"
       }
     ]
   };
+  payments.forEach((payment) => {
+    ledger.items.push({
+      account: payment.mop,
+      amount: payment.total,
+      comment: `PAYMENT`
+    });
+  });
   ledger.items = ledger.items.filter((i) => i.amount != 0);
   return ledger;
 }

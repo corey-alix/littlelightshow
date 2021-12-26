@@ -1,3 +1,5 @@
-export function asCurrency(value: number) {
-  return value.toFixed(2);
+export function asCurrency(
+  value: number
+) {
+  return (value || 0).toFixed(2);
 }

@@ -5185,7 +5185,7 @@ async function getItems() {
 
 // app/fun/asCurrency.ts
 function asCurrency(value) {
-  return value.toFixed(2);
+  return (value || 0).toFixed(2);
 }
 
 // app/fun/asDateString.ts
