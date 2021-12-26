@@ -2,6 +2,7 @@ import type { Ledger } from "../../services/gl.js";
 import { dom } from "../../dom.js";
 import { moveChildren } from "../../fun/dom.js";
 import { noZero } from "../../fun/isZero";
+import { routes } from "../../router.js";
 
 export function create(
   ledgers: Ledger[]
@@ -39,7 +40,13 @@ export function create(
       return (
         <div>
           <div class="col-1-4">
-            {account}
+            <a
+              href={routes.gl.byAccount(
+                account
+              )}
+            >
+              {account}
+            </a>
           </div>
           <div class="currency col-5">
             {noZero(

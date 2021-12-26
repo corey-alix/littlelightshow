@@ -18,4 +18,8 @@ export const routes = {
     `/app/gl/index.html?id=${id}`,
   dashboard: () => "/app/index.html",
   admin: () => "/app/admin/index.html",
+  gl: {
+    byAccount: (id: string) =>
+      `/app/gl/index.html?account=${id}`,
+  },
 };

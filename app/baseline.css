@@ -99,12 +99,10 @@ body.holiday .toaster {
 }
 
 body.light ::placeholder {
-  color: black;
   opacity: 0.5;
 }
 
 body.dark ::placeholder {
-  color: white;
   opacity: 0.5;
 }
 
@@ -447,8 +445,9 @@ body.dark .line {
 
 body.dark input,
 body.dark textarea {
-  background: black;
-  color: silver;
+  background: rgb(32, 32, 32);
+  color: rgb(224, 224, 224);
+  border-color: black;
 }
 
 body.dark button {

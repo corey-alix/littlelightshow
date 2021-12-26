@@ -4,6 +4,7 @@ littlelightshow
 
 ## Change Log
 
+- 2021-12-26: hyperlink GL entries
 - 2021-12-25: create "desktop" layout for GL and AR (invoice)
 - 2021-12-22: use storage API for sale items and account codes (always offline)
 - 2021-12-22: error reporting via toaster
@@ -11,6 +12,7 @@ littlelightshow
 
 ## v1.0.2
 
+- adds GL hyperlinks to drill into ledgers
 - adds offline to reduce data usage
 
 ## TODOs

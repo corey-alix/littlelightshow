@@ -4802,6 +4802,14 @@ function moveChildrenBefore(items, report) {
   while (items.firstChild)
     report.before(items.firstChild);
 }
+function moveChildrenAfter(items, report) {
+  let head = report;
+  while (items.firstChild) {
+    const firstChild = items.firstChild;
+    head.after(firstChild);
+    head = firstChild;
+  }
+}
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
@@ -5291,7 +5299,10 @@ var routes = {
   createLedger: () => "/app/gl/index.html",
   editLedger: (id) => `/app/gl/index.html?id=${id}`,
   dashboard: () => "/app/index.html",
-  admin: () => "/app/admin/index.html"
+  admin: () => "/app/admin/index.html",
+  gl: {
+    byAccount: (id) => `/app/gl/index.html?account=${id}`
+  }
 };
 
 // app/fun/isZero.ts
@@ -5385,7 +5396,9 @@ function create2(ledgers) {
     grandTotal += total.debit - total.credit;
     return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
       class: "col-1-4"
-    }, account), /* @__PURE__ */ dom("div", {
+    }, /* @__PURE__ */ dom("a", {
+      href: routes.gl.byAccount(account)
+    }, account)), /* @__PURE__ */ dom("div", {
       class: "currency col-5"
     }, noZero(total.debit.toFixed(2))), /* @__PURE__ */ dom("div", {
       class: "currency col-6"
@@ -5653,7 +5666,7 @@ function create3(ledgerModel2) {
     type: "button",
     "data-event": "submit"
   }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button col-6 if-desktop",
+    class: "button col-last-2 if-desktop",
     type: "button",
     "data-event": "delete"
   }, "Delete"), /* @__PURE__ */ dom("div", {
@@ -5799,6 +5812,46 @@ function createBanner() {
   }, `Printed on ${asDateString()} @ ${asTimeString()}`)));
 }
 
+// app/fql/gl-by-account.ts
+async function execute(query) {
+  const items = await ledgerModel.getItems();
+  const lineItems = items.map((parent) => parent.items.map((child) => ({
+    parent,
+    child
+  }))).flat();
+  return lineItems.filter((item) => item.child.account === query.account);
+}
+
+// app/gl/templates/by-account.tsx
+async function create5(account) {
+  const items = await execute({
+    account
+  });
+  if (!items.length)
+    return /* @__PURE__ */ dom("div", null, "No items found");
+  const rows = items.map((item) => /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "currency col-1"
+  }, asCurrency(item.child.amount)), /* @__PURE__ */ dom("div", {
+    class: "col-2"
+  }, item.child.comment), /* @__PURE__ */ dom("div", {
+    class: "col-3-last"
+  }, /* @__PURE__ */ dom("a", {
+    href: routes.editLedger(item.parent.id)
+  }, item.parent.description || "no comment"))));
+  const result = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("h1", null, `Ledger Entries for ${account}`), /* @__PURE__ */ dom("div", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("div", {
+    class: "currency col-1"
+  }, "Amount"), /* @__PURE__ */ dom("div", {
+    class: "col-2-last"
+  }, "Comment"), /* @__PURE__ */ dom("div", {
+    class: "placeholder line-items"
+  })));
+  const placeholder = result.querySelector(".placeholder");
+  rows.forEach((item) => moveChildrenAfter(item, placeholder));
+  return result;
+}
+
 // app/services/validateAccessToken.ts
 var import_faunadb4 = __toModule(require_faunadb());
 async function validate() {
@@ -5872,12 +5925,11 @@ async function init(domNode) {
     setMode();
     removeCssRestrictors();
     const queryParams = new URLSearchParams(window.location.search);
-    const printId = queryParams.get("print");
-    if (printId) {
-      const target = document.body;
+    if (queryParams.has("print")) {
+      const printId = queryParams.get("print");
+      const target = domNode;
       switch (printId) {
         case "all": {
-          target.innerHTML = "";
           const ledger = await create4();
           target.appendChild(ledger);
           break;
@@ -5896,7 +5948,18 @@ async function init(domNode) {
       if (!ledger)
         throw `cannot find ledger: ${id}`;
       domNode.appendChild(create3(ledger));
-    } else {
+      return;
+    }
+    if (queryParams.has("account")) {
+      const account = queryParams.get("account");
+      const entries = await execute({
+        account
+      });
+      const report = await create5(account);
+      domNode.appendChild(report);
+      return;
+    }
+    {
       const ledger = create3();
       domNode.appendChild(ledger);
     }

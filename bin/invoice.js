@@ -5116,7 +5116,10 @@ var routes = {
   createLedger: () => "/app/gl/index.html",
   editLedger: (id) => `/app/gl/index.html?id=${id}`,
   dashboard: () => "/app/index.html",
-  admin: () => "/app/admin/index.html"
+  admin: () => "/app/admin/index.html",
+  gl: {
+    byAccount: (id) => `/app/gl/index.html?account=${id}`
+  }
 };
 
 // app/services/invoices.ts

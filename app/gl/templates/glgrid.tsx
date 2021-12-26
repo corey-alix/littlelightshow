@@ -345,7 +345,7 @@ export function create(
         Save
       </button>
       <button
-        class="button col-6 if-desktop"
+        class="button col-last-2 if-desktop"
         type="button"
         data-event="delete"
       >
