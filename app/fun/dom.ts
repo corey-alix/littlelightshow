@@ -9,8 +9,8 @@ export function moveChildren(
 }
 
 export function moveChildrenBefore(
-  items: HTMLElement,
-  report: HTMLElement
+  items: Element,
+  report: Element
 ) {
   while (items.firstChild)
     report.before(items.firstChild);

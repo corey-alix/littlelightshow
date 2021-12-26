@@ -23,7 +23,10 @@ import { create as printSummary } from "./printSummary";
 import { isZero } from "../../fun/isZero";
 import { forceDatalist } from "../../services/accounts.js";
 import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
-import { toast } from "../../ux/Toaster.js";
+import {
+  reportError,
+  toast,
+} from "../../ux/Toaster.js";
 
 function asModel(
   form: HTMLFormElement
@@ -212,13 +215,18 @@ function hookupHandlers(
   });
 
   on(domNode, "delete", async () => {
-    const id = (
-      domNode[
-        "id"
-      ] as any as HTMLInputElement
-    ).value;
-    await deleteLedger(id);
-    location.href = routes.allLedgers();
+    try {
+      const id = (
+        domNode[
+          "id"
+        ] as any as HTMLInputElement
+      ).value;
+      await deleteLedger(id);
+      location.href =
+        routes.allLedgers();
+    } catch (ex) {
+      reportError(ex);
+    }
   });
 
   on(domNode, "submit", async () => {

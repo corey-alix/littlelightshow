@@ -1,6 +1,8 @@
 import { dom } from "../../dom.js";
+import { asCurrency } from "../../fun/asCurrency.js";
 import { moveChildren } from "../../fun/dom.js";
 import { hookupTriggers } from "../../fun/hookupTriggers.js";
+import { noZero } from "../../fun/isZero.js";
 import { sum } from "../../fun/sum.js";
 import { TAXRATE } from "../../globals.js";
 import { Invoice } from "../../services/invoices.js";
@@ -16,26 +18,34 @@ export function create(
     invoices.map((i) => i.labor)
   );
 
+  const payments = sum(
+    invoices.map(totalPayments)
+  );
+  const balanceDue = total - payments;
+
   const target: HTMLFormElement =
     invoices.length ? (
       <form class="grid-6">
-        <label class="bold col-1-4">
+        <div class="bold col-1-4">
           Client
-        </label>
-        <label class="bold col-5 align-right">
+        </div>
+        <div class="bold col-5 align-right">
           Labor
-        </label>
-        <label class="bold col-6 align-right">
+        </div>
+        <div class="bold col-6 align-right">
           Total
-        </label>
-        <div class="line col-1-6"></div>
+        </div>
+        <div class="bold col-7-last align-right">
+          Balance Due
+        </div>
+        <div class="line col-1-last"></div>
       </form>
     ) : (
       <form class="grid-6">
-        <div class="col-1-6 centered">
+        <div class="col-1-last centered">
           No invoices defined
         </div>
-        <div class="line col-1-6"></div>
+        <div class="line col-1-last"></div>
       </form>
     );
 
@@ -48,18 +58,21 @@ export function create(
   invoices.length &&
     moveChildren(
       <div>
-        <div class="vspacer-1 col-1-6"></div>
-        <div class="line col-1-6"></div>
+        <div class="vspacer-1 col-1-last"></div>
+        <div class="line col-1-last"></div>
         <label class="bold col-1-4">
           Total
         </label>
         <label class="bold col-5 currency">
-          {labor.toFixed(2)}
+          {asCurrency(labor)}
         </label>
         <label class="bold col-6 currency">
-          {total.toFixed(2)}
+          {asCurrency(total)}
         </label>
-        <div class="vspacer-2 col-1-6"></div>
+        <label class="bold col-7-last currency">
+          {asCurrency(balanceDue)}
+        </label>
+        <div class="vspacer-2 col-1-last"></div>
         <button
           type="button"
           class="button col-1-2"
@@ -94,6 +107,8 @@ function totalInvoice(
 function renderInvoice(
   invoice: Invoice
 ): HTMLDivElement {
+  const invoiceTotal =
+    totalInvoice(invoice);
   return (
     <div>
       <a
@@ -102,14 +117,33 @@ function renderInvoice(
       >
         {invoice.clientname}
       </a>
-      <label class="col-5 align-right">
-        {invoice.labor.toFixed(2)}
+      <label class="col-5 currency">
+        {asCurrency(invoice.labor)}
       </label>
-      <label class="col-6 align-right">
-        {totalInvoice(invoice).toFixed(
-          2
+      <label class="col-6 currency">
+        {asCurrency(invoiceTotal)}
+      </label>
+      <label class="col-7 currency">
+        {noZero(
+          asCurrency(
+            invoiceTotal -
+              totalPayments(invoice)
+          )
         )}
       </label>
     </div>
   );
+}
+function totalPayments(
+  invoice: Invoice
+): number {
+  const result = sum(
+    invoice.mops.map((mop) => mop.paid)
+  );
+  console.log(
+    "totalPayments",
+    invoice.clientname,
+    result
+  );
+  return result;
 }

@@ -4802,14 +4802,6 @@ function moveChildrenBefore(items, report) {
   while (items.firstChild)
     report.before(items.firstChild);
 }
-function moveChildrenAfter(items, report) {
-  let head = report;
-  while (items.firstChild) {
-    const firstChild = items.firstChild;
-    head.after(firstChild);
-    head = firstChild;
-  }
-}
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
@@ -5570,9 +5562,13 @@ function hookupHandlers(domNode) {
     location.href = routes.createLedger();
   });
   on(domNode, "delete", async () => {
-    const id = domNode["id"].value;
-    await removeItem(id);
-    location.href = routes.allLedgers();
+    try {
+      const id = domNode["id"].value;
+      await removeItem(id);
+      location.href = routes.allLedgers();
+    } catch (ex) {
+      reportError(ex);
+    }
   });
   on(domNode, "submit", async () => {
     if (!domNode.reportValidity())
@@ -5829,26 +5825,35 @@ async function create5(account) {
   });
   if (!items.length)
     return /* @__PURE__ */ dom("div", null, "No items found");
-  const rows = items.map((item) => /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "currency col-1"
-  }, asCurrency(item.child.amount)), /* @__PURE__ */ dom("div", {
-    class: "col-2"
-  }, item.child.comment), /* @__PURE__ */ dom("div", {
-    class: "col-3-last"
-  }, /* @__PURE__ */ dom("a", {
-    href: routes.editLedger(item.parent.id)
-  }, item.parent.description || "no comment"))));
+  let runningBalance = 0;
+  const rows = items.map((item) => {
+    runningBalance += item.child.amount;
+    console.log({ runningBalance });
+    return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+      class: "currency col-1"
+    }, asCurrency(item.child.amount)), /* @__PURE__ */ dom("div", {
+      class: "col-2"
+    }, item.child.comment), /* @__PURE__ */ dom("div", {
+      class: "col-3-4"
+    }, /* @__PURE__ */ dom("a", {
+      href: routes.editLedger(item.parent.id)
+    }, item.parent.description || "no comment")), /* @__PURE__ */ dom("div", {
+      class: "currency col-7"
+    }, noZero(asCurrency(runningBalance))));
+  });
   const result = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("h1", null, `Ledger Entries for ${account}`), /* @__PURE__ */ dom("div", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
     class: "currency col-1"
   }, "Amount"), /* @__PURE__ */ dom("div", {
-    class: "col-2-last"
+    class: "col-2-5"
   }, "Comment"), /* @__PURE__ */ dom("div", {
+    class: "col-7"
+  }, "Balance"), /* @__PURE__ */ dom("div", {
     class: "placeholder line-items"
   })));
   const placeholder = result.querySelector(".placeholder");
-  rows.forEach((item) => moveChildrenAfter(item, placeholder));
+  rows.forEach((item) => moveChildrenBefore(item, placeholder));
   return result;
 }
 

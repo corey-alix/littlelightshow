@@ -42,12 +42,12 @@ export async function init(
         window.location.search
       );
     if (queryParams.has("id")) {
-      renderInvoice(
+      await renderInvoice(
         target,
         queryParams.get("id")!
       );
     } else {
-      renderInvoice(target);
+      await renderInvoice(target);
     }
   } catch (ex) {
     reportError(ex);

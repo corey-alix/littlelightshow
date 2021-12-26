@@ -232,7 +232,12 @@ export async function init() {
         )
       )
         return;
-      await importInvoicesToGeneralLedger();
+      try {
+        await importInvoicesToGeneralLedger();
+        toast("Import complete");
+      } catch (ex) {
+        reportError(ex);
+      }
     }
   );
 

@@ -5309,7 +5309,6 @@ async function importInvoicesToGeneralLedger() {
       ledger.date,
       ledger.items
     ])) {
-      debugger;
       await upsertItem({
         ...newLedger,
         id: ledger.id
@@ -5317,7 +5316,6 @@ async function importInvoicesToGeneralLedger() {
     }
   });
   while (invoicesToImport.length) {
-    debugger;
     const invoice = invoicesToImport.shift();
     const ledger = createLedger(invoice);
     await upsertItem(ledger);
@@ -5542,7 +5540,12 @@ async function init() {
   on(domNode, "invoice-to-gl", async () => {
     if (!confirm("import invoices into general ledger?"))
       return;
-    await importInvoicesToGeneralLedger();
+    try {
+      await importInvoicesToGeneralLedger();
+      toast("Import complete");
+    } catch (ex) {
+      reportError(ex);
+    }
   });
   on(domNode, "gl-to-list-of-accounts", async () => {
     starterAccounts.forEach(async (account) => await accountModel.upsertItem({

@@ -1,7 +1,8 @@
 import { dom } from "../../dom.js";
 import { execute } from "../../fql/gl-by-account.js";
 import { asCurrency } from "../../fun/asCurrency.js";
-import { moveChildrenAfter } from "../../fun/dom.js";
+import { moveChildrenBefore } from "../../fun/dom.js";
+import { noZero } from "../../fun/isZero.js";
 import { routes } from "../../router.js";
 
 export async function create(
@@ -14,26 +15,38 @@ export async function create(
   if (!items.length)
     return <div>No items found</div>;
 
-  const rows = items.map((item) => (
-    <div>
-      <div class="currency col-1">
-        {asCurrency(item.child.amount)}
-      </div>
-      <div class="col-2">
-        {item.child.comment}
-      </div>
-      <div class="col-3-last">
-        <a
-          href={routes.editLedger(
-            item.parent.id!
+  let runningBalance = 0;
+  const rows = items.map((item) => {
+    runningBalance += item.child.amount;
+    console.log({ runningBalance });
+    return (
+      <div>
+        <div class="currency col-1">
+          {asCurrency(
+            item.child.amount
           )}
-        >
-          {item.parent.description ||
-            "no comment"}
-        </a>
+        </div>
+        <div class="col-2">
+          {item.child.comment}
+        </div>
+        <div class="col-3-4">
+          <a
+            href={routes.editLedger(
+              item.parent.id!
+            )}
+          >
+            {item.parent.description ||
+              "no comment"}
+          </a>
+        </div>
+        <div class="currency col-7">
+          {noZero(
+            asCurrency(runningBalance)
+          )}
+        </div>
       </div>
-    </div>
-  ));
+    );
+  });
 
   const result = (
     <div>
@@ -42,9 +55,10 @@ export async function create(
         <div class="currency col-1">
           Amount
         </div>
-        <div class="col-2-last">
+        <div class="col-2-5">
           Comment
         </div>
+        <div class="col-7">Balance</div>
         <div class="placeholder line-items" />
       </div>
     </div>
@@ -55,7 +69,10 @@ export async function create(
       ".placeholder"
     )!;
   rows.forEach((item) =>
-    moveChildrenAfter(item, placeholder)
+    moveChildrenBefore(
+      item,
+      placeholder
+    )
   );
 
   return result;

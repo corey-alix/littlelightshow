@@ -5851,40 +5851,58 @@ function invoiceItem(item) {
   }, item.total.toFixed(2)));
 }
 
+// app/fun/isZero.ts
+function isZero(value) {
+  if (value === "0.00")
+    return true;
+  if (value === "-0.00")
+    return true;
+  return false;
+}
+function noZero(value) {
+  return isZero(value) ? "" : value;
+}
+
 // app/invoice/templates/invoices-grid.tsx
 function create3(invoices) {
   const total = sum(invoices.map(totalInvoice));
   const labor = sum(invoices.map((i) => i.labor));
+  const payments = sum(invoices.map(totalPayments));
+  const balanceDue = total - payments;
   const target = invoices.length ? /* @__PURE__ */ dom("form", {
     class: "grid-6"
-  }, /* @__PURE__ */ dom("label", {
+  }, /* @__PURE__ */ dom("div", {
     class: "bold col-1-4"
-  }, "Client"), /* @__PURE__ */ dom("label", {
+  }, "Client"), /* @__PURE__ */ dom("div", {
     class: "bold col-5 align-right"
-  }, "Labor"), /* @__PURE__ */ dom("label", {
+  }, "Labor"), /* @__PURE__ */ dom("div", {
     class: "bold col-6 align-right"
   }, "Total"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
+    class: "bold col-7-last align-right"
+  }, "Balance Due"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-last"
   })) : /* @__PURE__ */ dom("form", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
-    class: "col-1-6 centered"
+    class: "col-1-last centered"
   }, "No invoices defined"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
+    class: "line col-1-last"
   }));
   invoices.map(renderInvoice).forEach((item) => moveChildren(item, target));
   invoices.length && moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-6"
+    class: "vspacer-1 col-1-last"
   }), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
+    class: "line col-1-last"
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1-4"
   }, "Total"), /* @__PURE__ */ dom("label", {
     class: "bold col-5 currency"
-  }, labor.toFixed(2)), /* @__PURE__ */ dom("label", {
+  }, asCurrency(labor)), /* @__PURE__ */ dom("label", {
     class: "bold col-6 currency"
-  }, total.toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
+  }, asCurrency(total)), /* @__PURE__ */ dom("label", {
+    class: "bold col-7-last currency"
+  }, asCurrency(balanceDue)), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-last"
   }), /* @__PURE__ */ dom("button", {
     type: "button",
     class: "button col-1-2",
@@ -5898,14 +5916,22 @@ function totalInvoice(invoice) {
   return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
 }
 function renderInvoice(invoice) {
+  const invoiceTotal = totalInvoice(invoice);
   return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
     class: "col-1-4",
     href: `invoice?id=${invoice.id}`
   }, invoice.clientname), /* @__PURE__ */ dom("label", {
-    class: "col-5 align-right"
-  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "col-6 align-right"
-  }, totalInvoice(invoice).toFixed(2)));
+    class: "col-5 currency"
+  }, asCurrency(invoice.labor)), /* @__PURE__ */ dom("label", {
+    class: "col-6 currency"
+  }, asCurrency(invoiceTotal)), /* @__PURE__ */ dom("label", {
+    class: "col-7 currency"
+  }, noZero(asCurrency(invoiceTotal - totalPayments(invoice)))));
+}
+function totalPayments(invoice) {
+  const result = sum(invoice.mops.map((mop) => mop.paid));
+  console.log("totalPayments", invoice.clientname, result);
+  return result;
 }
 
 // app/fun/get.ts
@@ -5977,9 +6003,9 @@ async function init(target = document.body) {
     await setup();
     const queryParams = new URLSearchParams(window.location.search);
     if (queryParams.has("id")) {
-      renderInvoice2(target, queryParams.get("id"));
+      await renderInvoice2(target, queryParams.get("id"));
     } else {
-      renderInvoice2(target);
+      await renderInvoice2(target);
     }
   } catch (ex) {
     reportError(ex);

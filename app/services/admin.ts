@@ -77,10 +77,12 @@ export async function importInvoicesToGeneralLedger() {
       );
       if (!ledger)
         throw `ledger must exist for invoice: ${invoice.id}`;
+
       const newLedger = {
         ...createLedger(invoice),
         id: ledger.id,
       };
+
       if (
         JSON.stringify([
           newLedger.date,
@@ -91,7 +93,6 @@ export async function importInvoicesToGeneralLedger() {
           ledger.items,
         ])
       ) {
-        debugger;
         await saveLedger({
           ...newLedger,
           id: ledger.id,
@@ -101,8 +102,6 @@ export async function importInvoicesToGeneralLedger() {
   );
 
   while (invoicesToImport.length) {
-    debugger;
-
     const invoice =
       invoicesToImport.shift()!;
     const ledger =
@@ -217,92 +216,4 @@ function createLedger(
     (i) => 0 != i.amount
   );
   return ledger;
-}
-
-export async function copyInvoicesFromTodo() {
-  const client = createClient();
-
-  const result = (await client.query(
-    q.Map(
-      q.Paginate(
-        q.Documents(
-          q.Collection("Todos")
-        ),
-        { size: 25 }
-      ),
-      q.Lambda(
-        "ref",
-        q.Get(q.Var("ref"))
-      )
-    )
-  )) as {
-    data: Array<{ data: Invoice }>;
-  };
-
-  const invoices = result.data.map(
-    (v) => v.data
-  );
-
-  invoices.forEach(
-    async (invoice, index) => {
-      console.log(
-        "copying invoice",
-        invoice
-      );
-      const priorKey = invoice.id;
-      const id = 1001 + index;
-      const result = await client.query(
-        q.Create(
-          q.Collection("invoices"),
-          {
-            data: {
-              ...invoice,
-              priorKey,
-              id,
-            },
-          }
-        )
-      );
-    }
-  );
-}
-
-export async function copyGeneralLedgerEntriesFromTodo() {
-  const client = createClient();
-
-  const result = (await client.query(
-    q.Map(
-      q.Paginate(
-        q.Documents(
-          q.Collection("Todos")
-        )
-      ),
-      q.Lambda(
-        "ref",
-        q.Get(q.Var("ref"))
-      )
-    )
-  )) as {
-    data: Array<{ data: Ledger }>;
-  };
-
-  const records = result.data
-    .map((v) => v.data)
-    .filter(
-      (v) =>
-        v.items.length &&
-        !!v.items[0].account
-    );
-
-  records.forEach(async (record) => {
-    console.log("ledger", { record });
-    await client.query(
-      q.Create(
-        q.Collection("general_ledger"),
-        {
-          data: record,
-        }
-      )
-    );
-  });
 }
