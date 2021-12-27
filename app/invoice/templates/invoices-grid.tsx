@@ -97,8 +97,13 @@ function totalInvoice(
       (item) => item.total || 0
     )
   );
+
+  const tax = parseFloat(
+    asCurrency(total * TAXRATE)
+  );
   return (
-    total * (1 + TAXRATE) +
+    total +
+    tax +
     invoice.labor +
     invoice.additional
   );

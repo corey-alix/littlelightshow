@@ -4637,16 +4637,16 @@ var require_clientLogger = __commonJS({
     function showRequestResult(requestResult) {
       var query = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
       var out = "";
-      function log(str) {
+      function log2(str) {
         out = out + str;
       }
-      log("Fauna " + method + " /" + path + _queryString(query) + "\n");
+      log2("Fauna " + method + " /" + path + _queryString(query) + "\n");
       if (requestContent != null) {
-        log("  Request JSON: " + _showJSON(requestContent) + "\n");
+        log2("  Request JSON: " + _showJSON(requestContent) + "\n");
       }
-      log("  Response headers: " + _showJSON(responseHeaders) + "\n");
-      log("  Response JSON: " + _showJSON(responseContent) + "\n");
-      log("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
+      log2("  Response headers: " + _showJSON(responseHeaders) + "\n");
+      log2("  Response JSON: " + _showJSON(responseContent) + "\n");
+      log2("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
       return out;
     }
     function _indent(str) {
@@ -4719,20 +4719,11 @@ function sort(items, sortBy) {
   });
 }
 
-// app/fun/on.ts
-function on(domNode, eventName, cb) {
-  domNode.addEventListener(eventName, cb);
-}
-function trigger(domNode, eventName) {
-  console.log("trigger", eventName);
-  domNode.dispatchEvent(new Event(eventName));
-}
-
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = getGlobalState("TAX_RATE")?.value || 0.06;
+var TAXRATE = 0.01 * (getGlobalState("TAX_RATE")?.value || 6);
 var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
-var isDebug = location.href.includes("localhost");
+var isDebug = location.href.includes("localhost") || location.search.includes("debug");
 var isOffline = () => getGlobalState("work_offline")?.value === true;
 var primaryContact = {
   companyName: "Little Light Show",
@@ -4788,6 +4779,20 @@ function setGlobalState(key, value) {
 function getGlobalState(key) {
   const state = forceGlobalState();
   return state[key];
+}
+
+// app/fun/on.ts
+function log(...message) {
+  if (!isDebug)
+    return;
+  console.log(...message);
+}
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  log("trigger", eventName);
+  domNode.dispatchEvent(new Event(eventName));
 }
 
 // app/fun/ticksInSeconds.ts
@@ -5809,7 +5814,7 @@ function create2(invoice) {
       moveChildren(invoiceItem(item), report);
     });
     const totalItems = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-    console.log(invoice.items, totalItems);
+    const tax = parseFloat(asCurrency(totalItems * TAXRATE));
     const summary = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
       class: "line col-1-6"
     }), /* @__PURE__ */ dom("div", {
@@ -5822,7 +5827,7 @@ function create2(invoice) {
       class: "col-5"
     }, "Tax (", 100 * TAXRATE + "", "%)"), /* @__PURE__ */ dom("label", {
       class: "col-6 align-right"
-    }, (totalItems * TAXRATE).toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
+    }, tax.toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
       class: "col-5"
     }, "Labor"), invoice.labor && /* @__PURE__ */ dom("label", {
       class: "col-6 align-right"
@@ -5834,7 +5839,7 @@ function create2(invoice) {
       class: "bold col-5"
     }, "Balance Due"), /* @__PURE__ */ dom("label", {
       class: "bold col-6 align-right"
-    }, ((invoice.labor || 0) + (invoice.additional || 0) + totalItems * (1 + TAXRATE)).toFixed(2)));
+    }, ((invoice.labor || 0) + (invoice.additional || 0) + totalItems + tax).toFixed(2)));
     moveChildren(summary, report);
   }
   return report;
@@ -5914,7 +5919,8 @@ function create3(invoices) {
 }
 function totalInvoice(invoice) {
   const total = sum(invoice.items.map((item) => item.total || 0));
-  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
+  const tax = parseFloat(asCurrency(total * TAXRATE));
+  return total + tax + invoice.labor + invoice.additional;
 }
 function renderInvoice(invoice) {
   const invoiceTotal = totalInvoice(invoice);
@@ -6121,7 +6127,6 @@ function asModel(formDom) {
     mop,
     paid: parseFloat(payments[i])
   }));
-  console.log("mops", requestModel.mops);
   let currentItem = null;
   for (let [
     key,

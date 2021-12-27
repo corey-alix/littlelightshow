@@ -4637,16 +4637,16 @@ var require_clientLogger = __commonJS({
     function showRequestResult(requestResult) {
       var query = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
       var out = "";
-      function log(str) {
+      function log2(str) {
         out = out + str;
       }
-      log("Fauna " + method + " /" + path + _queryString(query) + "\n");
+      log2("Fauna " + method + " /" + path + _queryString(query) + "\n");
       if (requestContent != null) {
-        log("  Request JSON: " + _showJSON(requestContent) + "\n");
+        log2("  Request JSON: " + _showJSON(requestContent) + "\n");
       }
-      log("  Response headers: " + _showJSON(responseHeaders) + "\n");
-      log("  Response JSON: " + _showJSON(responseContent) + "\n");
-      log("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
+      log2("  Response headers: " + _showJSON(responseHeaders) + "\n");
+      log2("  Response JSON: " + _showJSON(responseContent) + "\n");
+      log2("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
       return out;
     }
     function _indent(str) {
@@ -4721,9 +4721,9 @@ function sort(items, sortBy) {
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = getGlobalState("TAX_RATE")?.value || 0.06;
+var TAXRATE = 0.01 * (getGlobalState("TAX_RATE")?.value || 6);
 var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
-var isDebug = location.href.includes("localhost");
+var isDebug = location.href.includes("localhost") || location.search.includes("debug");
 var isOffline = () => getGlobalState("work_offline")?.value === true;
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
@@ -4820,11 +4820,16 @@ async function identify() {
 }
 
 // app/fun/on.ts
+function log(...message) {
+  if (!isDebug)
+    return;
+  console.log(...message);
+}
 function on(domNode, eventName, cb) {
   domNode.addEventListener(eventName, cb);
 }
 function trigger(domNode, eventName) {
-  console.log("trigger", eventName);
+  log("trigger", eventName);
   domNode.dispatchEvent(new Event(eventName));
 }
 
@@ -5263,6 +5268,11 @@ function distinct(items) {
   ];
 }
 
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return (value || 0).toFixed(2);
+}
+
 // app/services/admin.ts
 async function forceUpdatestampTable(tableName) {
   const client = createClient();
@@ -5323,7 +5333,7 @@ async function importInvoicesToGeneralLedger() {
 }
 function createLedger(invoice) {
   const inventory = sum(invoice.items.map((i) => i.total));
-  const tax = inventory * TAXRATE;
+  const tax = parseFloat(asCurrency(inventory * TAXRATE));
   const labor = invoice.labor;
   const rent = invoice.additional > 0 ? invoice.additional : 0;
   const discount = invoice.additional < 0 ? invoice.additional : 0;
@@ -5434,6 +5444,29 @@ var inventoryModel = new StorageModel({
   offline: true
 });
 
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  });
+}
+
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
+}
+
 // app/admin.ts
 var starterAccounts = [
   "AP",
@@ -5453,6 +5486,7 @@ var starterAccounts = [
 async function init() {
   await identify();
   const domNode = document.body;
+  extendNumericInputBehaviors(domNode);
   hookupTriggers(domNode);
   Object.keys(modes).forEach((mode) => on(domNode, mode, () => {
     setMode(modes[mode]);

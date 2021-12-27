@@ -25,6 +25,7 @@ import {
 } from "./ux/Toaster.js";
 import { inventoryModel } from "./services/inventory.js";
 import { getDatabaseTime } from "./services/getDatabaseTime.js";
+import { extendNumericInputBehaviors } from "./fun/behavior/form.js";
 const starterAccounts = [
   "AP",
   "AR",
@@ -52,6 +53,7 @@ export async function init() {
   await identify();
   const domNode = document.body;
 
+  extendNumericInputBehaviors(domNode);
   hookupTriggers(domNode);
 
   Object.keys(modes).forEach((mode) =>

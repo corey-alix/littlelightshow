@@ -15,6 +15,7 @@ import {
 } from "./invoices.js";
 import { split } from "../fun/split";
 import { distinct } from "../fun/distinct.js";
+import { asCurrency } from "../fun/asCurrency.js";
 
 export async function forceUpdatestampTable(
   tableName: string
@@ -116,7 +117,9 @@ function createLedger(
   const inventory = sum(
     invoice.items.map((i) => i.total)
   );
-  const tax = inventory * TAXRATE;
+  const tax = parseFloat(
+    asCurrency(inventory * TAXRATE)
+  );
   const labor = invoice.labor;
   const rent =
     invoice.additional > 0

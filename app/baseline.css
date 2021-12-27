@@ -34,6 +34,10 @@ body.holiday {
   color: rgba(253, 244, 220, 0.9);
 }
 
+.c4 {
+  width: 4rem;
+}
+
 .toaster {
   opacity: 0.8;
 }

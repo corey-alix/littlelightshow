@@ -4637,16 +4637,16 @@ var require_clientLogger = __commonJS({
     function showRequestResult(requestResult) {
       var query = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
       var out = "";
-      function log(str) {
+      function log2(str) {
         out = out + str;
       }
-      log("Fauna " + method + " /" + path + _queryString(query) + "\n");
+      log2("Fauna " + method + " /" + path + _queryString(query) + "\n");
       if (requestContent != null) {
-        log("  Request JSON: " + _showJSON(requestContent) + "\n");
+        log2("  Request JSON: " + _showJSON(requestContent) + "\n");
       }
-      log("  Response headers: " + _showJSON(responseHeaders) + "\n");
-      log("  Response JSON: " + _showJSON(responseContent) + "\n");
-      log("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
+      log2("  Response headers: " + _showJSON(responseHeaders) + "\n");
+      log2("  Response JSON: " + _showJSON(responseContent) + "\n");
+      log2("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
       return out;
     }
     function _indent(str) {
@@ -4805,9 +4805,9 @@ function moveChildrenBefore(items, report) {
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = getGlobalState("TAX_RATE")?.value || 0.06;
+var TAXRATE = 0.01 * (getGlobalState("TAX_RATE")?.value || 6);
 var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
-var isDebug = location.href.includes("localhost");
+var isDebug = location.href.includes("localhost") || location.search.includes("debug");
 var isOffline = () => getGlobalState("work_offline")?.value === true;
 var primaryContact = {
   companyName: "Little Light Show",
@@ -5209,11 +5209,16 @@ function setCurrency(input, value) {
 }
 
 // app/fun/on.ts
+function log(...message) {
+  if (!isDebug)
+    return;
+  console.log(...message);
+}
 function on(domNode, eventName, cb) {
   domNode.addEventListener(eventName, cb);
 }
 function trigger(domNode, eventName) {
-  console.log("trigger", eventName);
+  log("trigger", eventName);
   domNode.dispatchEvent(new Event(eventName));
 }
 

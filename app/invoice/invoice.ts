@@ -260,11 +260,6 @@ function asModel(
     })
   );
 
-  console.log(
-    "mops",
-    requestModel.mops
-  );
-
   let currentItem: InvoiceItem | null =
     null;
   for (let [

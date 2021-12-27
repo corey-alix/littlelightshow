@@ -1,4 +1,5 @@
 import { dom } from "../../dom.js";
+import { asCurrency } from "../../fun/asCurrency.js";
 import { moveChildren } from "../../fun/dom.js";
 import {
   primaryContact,
@@ -92,10 +93,11 @@ export function create(
           a + ((b.total || 0) - 0),
         0
       );
-    console.log(
-      invoice.items,
-      totalItems
+
+    const tax = parseFloat(
+      asCurrency(totalItems * TAXRATE)
     );
+
     const summary = (
       <div>
         <div class="line col-1-6" />
@@ -110,9 +112,7 @@ export function create(
           Tax ({100 * TAXRATE + ""}%)
         </label>
         <label class="col-6 align-right">
-          {(
-            totalItems * TAXRATE
-          ).toFixed(2)}
+          {tax.toFixed(2)}
         </label>
         {invoice.labor && (
           <label class="col-5">
@@ -143,7 +143,8 @@ export function create(
           {(
             (invoice.labor || 0) +
             (invoice.additional || 0) +
-            totalItems * (1 + TAXRATE)
+            totalItems +
+            tax
           ).toFixed(2)}
         </label>
       </div>

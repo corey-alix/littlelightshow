@@ -1,3 +1,10 @@
+import { isDebug } from "../globals";
+
+function log(...message: Array<any>) {
+  if (!isDebug) return;
+  console.log(...message);
+}
+
 export function on(
   domNode: Element,
   eventName: string,
@@ -13,7 +20,7 @@ export function trigger(
   domNode: Element,
   eventName: string
 ) {
-  console.log("trigger", eventName);
+  log("trigger", eventName);
   domNode.dispatchEvent(
     new Event(eventName)
   );

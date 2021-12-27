@@ -83,13 +83,15 @@
         Clean Invoices
       </button>
       <label
+        class="border padding rounded"
         >Tax Rate<br />
         <input
           type="number"
-          class="currency"
+          class="c4 currency"
           placeholder="Tax Rate (in %)"
           data-bind="TAX_RATE"
-      /></label>
+        />%</label
+      >
     </div>
 
     <div
@@ -162,25 +164,28 @@
       </button>
 
       <label
+        class="border padding rounded"
         >Max Cache Age (seconds)<br />
         <input
           type="number"
-          class="quantity"
+          class="c4 quantity"
           placeholder="cache age"
           data-bind="CACHE_MAX_AGE"
       /></label>
 
       <label
+        class="border padding rounded"
         >Max record count per request<br />
         <input
           type="number"
-          class="quantity"
+          class="c4 quantity"
           placeholder="batch size"
           data-bind="BATCH_SIZE"
       /></label>
 
       <br />
       <label
+        class="border padding rounded"
         >Work Offline
         <input
           type="checkbox"
