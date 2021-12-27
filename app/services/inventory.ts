@@ -6,6 +6,7 @@ interface Inventory {
   id?: string;
   code: string;
   price: number;
+  taxrate: number;
 }
 
 export const inventoryModel =

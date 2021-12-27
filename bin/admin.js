@@ -4950,9 +4950,10 @@ var ServiceCache = class {
   updateLineItem(lineItem) {
     const index = this.data.findIndex((i) => i.id === lineItem.id);
     if (-1 < index) {
-      this.data.splice(index, 1);
+      this.data[index] = lineItem;
+    } else {
+      this.data.push(lineItem);
     }
-    this.data.push(lineItem);
     this.save();
   }
   expired() {
@@ -5211,6 +5212,11 @@ async function getItems() {
   return items.filter((ledger) => ledger.items && ledger.items[0] && ledger.items[0].account);
 }
 
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return (value || 0).toFixed(2);
+}
+
 // app/services/invoices.ts
 var INVOICE_TABLE = "invoices";
 var invoiceModel = new StorageModel({
@@ -5251,6 +5257,10 @@ function normalizeInvoice(invoice) {
     delete raw["paid"];
     delete raw["mop"];
   }
+  if (!invoice.taxrate && TAXRATE) {
+    invoice.taxrate = TAXRATE;
+    invoice.items.forEach((i) => i.tax = parseFloat(asCurrency(i.total * invoice.taxrate)));
+  }
   return raw;
 }
 
@@ -5266,11 +5276,6 @@ function distinct(items) {
   return [
     ...new Set(items)
   ];
-}
-
-// app/fun/asCurrency.ts
-function asCurrency(value) {
-  return (value || 0).toFixed(2);
 }
 
 // app/services/admin.ts
@@ -5559,13 +5564,15 @@ async function init() {
     toast(`Roundtrip time: ${ticks.end - ticks.start}ms`);
   });
   on(domNode, "invoice-to-inventory", async () => {
+    debugger;
     const invoices = await invoiceModel.getItems();
     invoices.forEach((invoice) => {
       invoice.items.forEach(async (item) => {
         await inventoryModel.upsertItem({
           id: item.item,
           code: item.item,
-          price: item.price
+          price: item.price,
+          taxrate: TAXRATE
         });
       });
     });

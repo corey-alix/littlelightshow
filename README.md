@@ -18,6 +18,7 @@ littlelightshow
 
 ## TODOs
 
+- Add taxable/taxrate to invoice items and ability to edit that data
 - Profit/Loss vs Asset/Liability -- how to organize accounts?
 - Invoice payments need to be scrapped into the GL as part of the invoice scraping process
 - Invoice summary report should show dates if space permits

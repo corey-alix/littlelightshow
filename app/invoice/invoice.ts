@@ -12,6 +12,7 @@ import {
   getItems as getAllInvoices,
   Invoice,
   InvoiceItem,
+  invoiceModel,
 } from "../services/invoices.js";
 
 import { identify } from "../identify.js";
@@ -191,9 +192,26 @@ async function tryToSaveInvoice(
         id: itemInput.value,
         code: itemInput.value,
         price: priceInput.valueAsNumber,
+        taxrate: TAXRATE,
       });
     });
   const requestModel = asModel(formDom);
+  if (requestModel.id) {
+    // confirm invoice changed
+    const priorModel =
+      await invoiceModel.getItem(
+        requestModel.id
+      );
+    if (
+      deepEqual(
+        requestModel,
+        priorModel
+      )
+    ) {
+      toast("No changes found");
+      return false;
+    }
+  }
   await saveInvoice(requestModel);
   set(formDom, { id: requestModel.id });
   return true;
@@ -321,4 +339,13 @@ export function print(
   } catch (ex) {
     reportError(ex);
   }
+}
+function deepEqual(
+  requestModel: Invoice,
+  priorModel: Invoice
+) {
+  return (
+    JSON.stringify(requestModel) ===
+    JSON.stringify(priorModel)
+  );
 }

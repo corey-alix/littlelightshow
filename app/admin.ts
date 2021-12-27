@@ -26,6 +26,7 @@ import {
 import { inventoryModel } from "./services/inventory.js";
 import { getDatabaseTime } from "./services/getDatabaseTime.js";
 import { extendNumericInputBehaviors } from "./fun/behavior/form.js";
+import { TAXRATE } from "./globals.js";
 const starterAccounts = [
   "AP",
   "AR",
@@ -202,6 +203,7 @@ export async function init() {
     domNode,
     "invoice-to-inventory",
     async () => {
+      debugger;
       const invoices =
         await invoiceModel.getItems();
 
@@ -213,6 +215,7 @@ export async function init() {
                 id: item.item,
                 code: item.item,
                 price: item.price,
+                taxrate: TAXRATE,
               }
             );
           }

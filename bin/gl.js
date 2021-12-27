@@ -4909,9 +4909,10 @@ var ServiceCache = class {
   updateLineItem(lineItem) {
     const index = this.data.findIndex((i) => i.id === lineItem.id);
     if (-1 < index) {
-      this.data.splice(index, 1);
+      this.data[index] = lineItem;
+    } else {
+      this.data.push(lineItem);
     }
-    this.data.push(lineItem);
     this.save();
   }
   expired() {

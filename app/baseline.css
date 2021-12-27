@@ -176,6 +176,11 @@ body.light .border {
   border-color: black;
 }
 
+body.holiday .border {
+  border-color: rgb(64, 255, 64);
+  border-style: dashed;
+}
+
 .rounded-top {
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;

@@ -4839,9 +4839,10 @@ var ServiceCache = class {
   updateLineItem(lineItem) {
     const index = this.data.findIndex((i) => i.id === lineItem.id);
     if (-1 < index) {
-      this.data.splice(index, 1);
+      this.data[index] = lineItem;
+    } else {
+      this.data.push(lineItem);
     }
-    this.data.push(lineItem);
     this.save();
   }
   expired() {
@@ -5127,6 +5128,11 @@ var routes = {
   }
 };
 
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return (value || 0).toFixed(2);
+}
+
 // app/services/invoices.ts
 var INVOICE_TABLE = "invoices";
 var invoiceModel = new StorageModel({
@@ -5175,6 +5181,10 @@ function normalizeInvoice(invoice) {
     });
     delete raw["paid"];
     delete raw["mop"];
+  }
+  if (!invoice.taxrate && TAXRATE) {
+    invoice.taxrate = TAXRATE;
+    invoice.items.forEach((i) => i.tax = parseFloat(asCurrency(i.total * invoice.taxrate)));
   }
   return raw;
 }
@@ -5420,11 +5430,6 @@ function forceDatalist2() {
   return dataList;
 }
 
-// app/fun/asCurrency.ts
-function asCurrency(value) {
-  return (value || 0).toFixed(2);
-}
-
 // app/fun/asNumber.ts
 function asNumber(node) {
   return node.valueAsNumber || 0;
@@ -5627,7 +5632,8 @@ function addAnotherItem(formDom) {
     quantity: 1,
     item: "",
     price: 0,
-    total: 0
+    total: 0,
+    tax: 0
   });
   setupComputeOnLineItem(formDom, itemPanel);
   const toFocus = getFirstInput(itemPanel);
@@ -5812,8 +5818,8 @@ function create2(invoice) {
     invoice.items.forEach((item) => {
       moveChildren(invoiceItem(item), report);
     });
-    const totalItems = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-    const tax = parseFloat(asCurrency(totalItems * TAXRATE));
+    const totalItems = sum(invoice.items.map((i) => i.total));
+    const totalTax = sum(invoice.items.map((i) => i.tax));
     const summary = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
       class: "line col-1-6"
     }), /* @__PURE__ */ dom("div", {
@@ -5826,7 +5832,7 @@ function create2(invoice) {
       class: "col-5"
     }, "Tax (", 100 * TAXRATE + "", "%)"), /* @__PURE__ */ dom("label", {
       class: "col-6 align-right"
-    }, tax.toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
+    }, totalTax.toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
       class: "col-5"
     }, "Labor"), invoice.labor && /* @__PURE__ */ dom("label", {
       class: "col-6 align-right"
@@ -5838,7 +5844,7 @@ function create2(invoice) {
       class: "bold col-5"
     }, "Balance Due"), /* @__PURE__ */ dom("label", {
       class: "bold col-6 align-right"
-    }, ((invoice.labor || 0) + (invoice.additional || 0) + totalItems + tax).toFixed(2)));
+    }, ((invoice.labor || 0) + (invoice.additional || 0) + totalItems + totalTax).toFixed(2)));
     moveChildren(summary, report);
   }
   return report;
@@ -5916,8 +5922,8 @@ function create3(invoices) {
   return target;
 }
 function totalInvoice(invoice) {
-  const total = sum(invoice.items.map((item) => item.total || 0));
-  const tax = parseFloat(asCurrency(total * TAXRATE));
+  const total = sum(invoice.items.map((i) => i.total));
+  const tax = sum(invoice.items.map((i) => i.tax));
   return total + tax + invoice.labor + invoice.additional;
 }
 function renderInvoice(invoice) {
@@ -6049,7 +6055,8 @@ async function renderInvoice2(target, invoiceId) {
       items: [],
       labor: 0,
       additional: 0,
-      mops: []
+      mops: [],
+      taxrate: TAXRATE
     };
   }
   const formDom = await create(invoice);
@@ -6094,10 +6101,18 @@ async function tryToSaveInvoice(formDom) {
     inventoryModel.upsertItem({
       id: itemInput.value,
       code: itemInput.value,
-      price: priceInput.valueAsNumber
+      price: priceInput.valueAsNumber,
+      taxrate: TAXRATE
     });
   });
   const requestModel = asModel(formDom);
+  if (requestModel.id) {
+    const priorModel = await invoiceModel.getItem(requestModel.id);
+    if (deepEqual(requestModel, priorModel)) {
+      toast("No changes found");
+      return false;
+    }
+  }
   await upsertItem(requestModel);
   set(formDom, { id: requestModel.id });
   return true;
@@ -6115,7 +6130,8 @@ function asModel(formDom) {
     items: [],
     labor: Number.parseFloat(data.get("labor") || "0"),
     additional: Number.parseFloat(data.get("additional") || "0"),
-    mops: []
+    mops: [],
+    taxrate: TAXRATE
   };
   const mops = data.getAll("method_of_payment");
   const payments = data.getAll("amount_paid");
@@ -6148,6 +6164,7 @@ function asModel(formDom) {
         if (!currentItem)
           throw "item expected";
         currentItem.total = parseFloat(value);
+        currentItem.tax = parseFloat(asCurrency(requestModel.taxrate * currentItem.total));
         break;
     }
   }
@@ -6164,6 +6181,9 @@ function print(target, invoice) {
   } catch (ex) {
     reportError(ex);
   }
+}
+function deepEqual(requestModel, priorModel) {
+  return JSON.stringify(requestModel) === JSON.stringify(priorModel);
 }
 export {
   init,
