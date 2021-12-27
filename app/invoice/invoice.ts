@@ -25,6 +25,8 @@ import {
   reportError,
   toast,
 } from "../ux/Toaster.js";
+import { TAXRATE } from "../globals.js";
+import { asCurrency } from "../fun/asCurrency.js";
 
 async function setup() {
   await identify();
@@ -106,6 +108,7 @@ async function renderInvoice(
       labor: 0,
       additional: 0,
       mops: [],
+      taxrate: TAXRATE,
     };
   }
   const formDom =
@@ -200,7 +203,7 @@ async function tryToSaveInvoice(
 // I did with GL but seems good to let the template handle events only
 // this is more business logic and workflow but since it is using the form
 // as the data source perhaps it belongs closer to that view...move it?
-// 260 lines here + 470 line sin the form template.
+// 260 lines here + 470 lines in the form template.
 function asModel(
   formDom: HTMLFormElement
 ) {
@@ -223,12 +226,7 @@ function asModel(
     comments: data.get(
       "comments"
     ) as string,
-    items: [] as Array<{
-      item: string;
-      price: number;
-      quantity: number;
-      total: number;
-    }>,
+    items: [] as Array<InvoiceItem>,
     labor: Number.parseFloat(
       (data.get("labor") as string) ||
         "0"
@@ -242,6 +240,7 @@ function asModel(
       mop: string;
       paid: number;
     }>,
+    taxrate: TAXRATE,
   };
 
   const mops = data.getAll(
@@ -293,6 +292,12 @@ function asModel(
           throw "item expected";
         currentItem.total = parseFloat(
           value as string
+        );
+        currentItem.tax = parseFloat(
+          asCurrency(
+            requestModel.taxrate *
+              currentItem.total
+          )
         );
         break;
     }

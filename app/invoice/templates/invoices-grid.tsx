@@ -93,14 +93,13 @@ function totalInvoice(
   invoice: Invoice
 ) {
   const total = sum(
-    invoice.items.map(
-      (item) => item.total || 0
-    )
+    invoice.items.map((i) => i.total)
   );
 
-  const tax = parseFloat(
-    asCurrency(total * TAXRATE)
+  const tax = sum(
+    invoice.items.map((i) => i.tax)
   );
+
   return (
     total +
     tax +

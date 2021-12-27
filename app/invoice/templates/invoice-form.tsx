@@ -346,6 +346,7 @@ function addAnotherItem(
     item: "",
     price: 0,
     total: 0,
+    tax: 0,
   });
   setupComputeOnLineItem(
     formDom,

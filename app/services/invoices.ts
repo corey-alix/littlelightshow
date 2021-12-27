@@ -1,3 +1,5 @@
+import { asCurrency } from "../fun/asCurrency";
+import { TAXRATE } from "../globals";
 import { StorageModel } from "./StorageModel";
 
 const INVOICE_TABLE = "invoices";
@@ -7,6 +9,7 @@ export interface InvoiceItem {
   quantity: number;
   price: number;
   total: number;
+  tax: number;
 }
 
 export interface Invoice {
@@ -26,6 +29,7 @@ export interface Invoice {
     mop: string;
     paid: number;
   }>;
+  taxrate: number;
 }
 
 export const invoiceModel =
@@ -110,5 +114,16 @@ function normalizeInvoice(
     delete raw["mop"];
   }
 
+  if (!invoice.taxrate && TAXRATE) {
+    invoice.taxrate = TAXRATE;
+    invoice.items.forEach(
+      (i) =>
+        (i.tax = parseFloat(
+          asCurrency(
+            i.total * invoice.taxrate
+          )
+        ))
+    );
+  }
   return raw as Invoice;
 }
