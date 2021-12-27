@@ -18,7 +18,6 @@ export async function create(
   let runningBalance = 0;
   const rows = items.map((item) => {
     runningBalance += item.child.amount;
-    console.log({ runningBalance });
     return (
       <div>
         <div class="currency col-1">

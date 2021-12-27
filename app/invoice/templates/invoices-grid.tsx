@@ -142,13 +142,7 @@ function renderInvoice(
 function totalPayments(
   invoice: Invoice
 ): number {
-  const result = sum(
-    invoice.mops.map((mop) => mop.paid)
+  return sum(
+    invoice.mops.map((i) => i.paid)
   );
-  console.log(
-    "totalPayments",
-    invoice.clientname,
-    result
-  );
-  return result;
 }

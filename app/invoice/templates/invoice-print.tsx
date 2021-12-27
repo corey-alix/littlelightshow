@@ -158,7 +158,6 @@ export function create(
 function invoiceItem(
   item: InvoiceItem
 ): HTMLDivElement {
-  console.log("invoiceItem", { item });
   return (
     <div>
       <label class="tall col-1-3">

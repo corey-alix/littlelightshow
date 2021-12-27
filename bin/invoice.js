@@ -5740,7 +5740,6 @@ function setupComputeOnLineItem(event, form) {
     const qty = getValueAsNumber(quantityInput);
     const price = getValueAsNumber(priceInput);
     const value = qty * price;
-    console.log({ qty, price, value });
     totalInput.value = value.toFixed(2);
     trigger(event, "change");
   };
@@ -5845,7 +5844,6 @@ function create2(invoice) {
   return report;
 }
 function invoiceItem(item) {
-  console.log("invoiceItem", { item });
   return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
     class: "tall col-1-3"
   }, item.item), /* @__PURE__ */ dom("label", {
@@ -5936,9 +5934,7 @@ function renderInvoice(invoice) {
   }, noZero(asCurrency(invoiceTotal - totalPayments(invoice)))));
 }
 function totalPayments(invoice) {
-  const result = sum(invoice.mops.map((mop) => mop.paid));
-  console.log("totalPayments", invoice.clientname, result);
-  return result;
+  return sum(invoice.mops.map((i) => i.paid));
 }
 
 // app/fun/get.ts

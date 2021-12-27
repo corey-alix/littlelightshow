@@ -604,7 +604,6 @@ function setupComputeOnLineItem(
     const price =
       getValueAsNumber(priceInput);
     const value = qty * price;
-    console.log({ qty, price, value });
     totalInput.value = value.toFixed(2);
     trigger(event, "change");
   };

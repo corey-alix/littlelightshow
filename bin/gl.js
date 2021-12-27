@@ -5834,7 +5834,6 @@ async function create5(account) {
   let runningBalance = 0;
   const rows = items.map((item) => {
     runningBalance += item.child.amount;
-    console.log({ runningBalance });
     return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
       class: "currency col-1"
     }, asCurrency(item.child.amount)), /* @__PURE__ */ dom("div", {
