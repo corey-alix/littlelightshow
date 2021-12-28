@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../app/fun/setMode.ts", "../app/index.ts"],
-  "sourcesContent": ["export const modes = {\n  light_mode: \"light\",\n  dark_mode: \"dark\",\n  holiday_mode: \"holiday\",\n};\n\nexport function setMode(mode?: string) {\n  if (!mode)\n    mode =\n      localStorage.getItem(\"mode\") ||\n      modes.light_mode;\n\n  localStorage.setItem(\"mode\", mode);\n\n  document.body.classList.remove(\n    ...Object.values(modes)\n  );\n\n  document.body.classList.add(mode);\n}\n", "import { setMode } from \"./fun/setMode\";\n\nexport function init() {\n  setMode();\n}\n"],
-  "mappings": ";AAAO,IAAM,QAAQ;AAAA,EACnB,YAAY;AAAA,EACZ,WAAW;AAAA,EACX,cAAc;AAAA;AAGT,iBAAiB,MAAe;AACrC,MAAI,CAAC;AACH,WACE,aAAa,QAAQ,WACrB,MAAM;AAEV,eAAa,QAAQ,QAAQ;AAE7B,WAAS,KAAK,UAAU,OACtB,GAAG,OAAO,OAAO;AAGnB,WAAS,KAAK,UAAU,IAAI;AAAA;;;AChBvB,gBAAgB;AACrB;AAAA;",
-  "names": []
-}
