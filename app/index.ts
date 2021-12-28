@@ -3,10 +3,12 @@ import {
   getGlobalState,
   setGlobalState,
 } from "./globals";
+import { identify } from "./identify";
 
-export function init() {
+export async function init() {
   setMode();
   setInitialState();
+  await identify();
 }
 
 function setInitialState() {

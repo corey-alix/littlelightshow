@@ -1,6 +1,6 @@
 import "./fun/sort.js";
+import { init as systemInit } from "./index.js";
 
-import { identify } from "./identify.js";
 import { hookupTriggers } from "./fun/hookupTriggers.js";
 
 import {
@@ -51,7 +51,7 @@ interface FaunaException {
 }
 
 export async function init() {
-  await identify();
+  await systemInit();
   const domNode = document.body;
 
   extendNumericInputBehaviors(domNode);
@@ -275,7 +275,6 @@ export async function init() {
       toast("accounts generated");
     }
   );
-  setMode();
 }
 
 function prompt(
