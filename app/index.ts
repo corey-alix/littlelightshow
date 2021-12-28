@@ -11,10 +11,23 @@ export async function init() {
   await identify();
 }
 
+const defaults = {
+  TAX_RATE: 6,
+  CACHE_MAX_AGE: 600,
+  BATCH_SIZE: 64,
+};
+
 function setInitialState() {
-  const taxRate =
-    getGlobalState("TAX_RATE")?.value ||
-    null;
-  if (null == taxRate)
-    setGlobalState("TAX_RATE", 6.0);
+  Object.keys(defaults).forEach(
+    (key) => {
+      const value =
+        getGlobalState(key)?.value ||
+        null;
+      if (null == value)
+        setGlobalState(
+          key,
+          defaults[key]
+        );
+    }
+  );
 }
