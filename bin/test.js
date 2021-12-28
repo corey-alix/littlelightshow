@@ -4698,9 +4698,15 @@ var require_faunadb = __commonJS({
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.01 * (getGlobalState("TAX_RATE")?.value || 6);
-var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
+var TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
+var BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
 var isDebug = location.href.includes("localhost") || location.search.includes("debug");
+var primaryContact = getGlobalState("primaryContact") || {
+  companyName: "Little Light Show",
+  fullName: "Nathan Alix",
+  addressLine1: "4 Andrea Lane",
+  addressLine2: "Greenville, SC 29615"
+};
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4742,7 +4748,14 @@ function forceGlobalState() {
 }
 function getGlobalState(key) {
   const state = forceGlobalState();
-  return state[key];
+  const [head, ...tail] = key.split(".");
+  if (!tail.length)
+    return state[head];
+  let value = state[head];
+  if (!!value && typeof value !== "object")
+    throw `key does not define an object: ${head}`;
+  tail.every((k) => typeof value === "object" && (value = value[k]) && true);
+  return value;
 }
 
 // test/test.ts

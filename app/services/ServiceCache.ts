@@ -5,8 +5,9 @@ import {
 import { ticksInSeconds } from "../fun/ticksInSeconds";
 
 const MAX_AGE =
-  getGlobalState("CACHE_MAX_AGE")
-    ?.value || 0;
+  getGlobalState<number>(
+    "CACHE_MAX_AGE"
+  ) || 0;
 
 export class ServiceCache<
   T extends { id?: string }

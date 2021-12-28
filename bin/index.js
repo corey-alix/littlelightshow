@@ -4712,9 +4712,15 @@ function setMode(mode) {
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.01 * (getGlobalState("TAX_RATE")?.value || 6);
-var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
+var TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
+var BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
 var isDebug = location.href.includes("localhost") || location.search.includes("debug");
+var primaryContact = getGlobalState("primaryContact") || {
+  companyName: "Little Light Show",
+  fullName: "Nathan Alix",
+  addressLine1: "4 Andrea Lane",
+  addressLine2: "Greenville, SC 29615"
+};
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4756,13 +4762,26 @@ function forceGlobalState() {
 }
 function setGlobalState(key, value) {
   const state = forceGlobalState();
-  const type = typeof value;
-  state[key] = { type, value };
+  const [head, ...tail] = key.split(".");
+  if (!tail.length) {
+    state[key] = value;
+  } else {
+    let o = state[head] = state[head] || {};
+    tail.forEach((k) => o[k] = o[k] || {});
+    o[tail[tail.length - 1]] = value;
+  }
   localStorage.setItem("__GLOBAL_STATE__", JSON.stringify(state));
 }
 function getGlobalState(key) {
   const state = forceGlobalState();
-  return state[key];
+  const [head, ...tail] = key.split(".");
+  if (!tail.length)
+    return state[head];
+  let value = state[head];
+  if (!!value && typeof value !== "object")
+    throw `key does not define an object: ${head}`;
+  tail.every((k) => typeof value === "object" && (value = value[k]) && true);
+  return value;
 }
 
 // app/services/validateAccessToken.ts
@@ -4845,13 +4864,21 @@ async function identify() {
 // app/index.ts
 async function init() {
   setMode();
-  setInitialState();
+  setInitialState({
+    TAX_RATE: 6,
+    CACHE_MAX_AGE: 600,
+    BATCH_SIZE: 64,
+    work_offline: true
+  });
+  setInitialState({ primaryContact });
   await identify();
 }
-function setInitialState() {
-  const taxRate = getGlobalState("TAX_RATE")?.value || null;
-  if (taxRate == null)
-    setGlobalState("TAX_RATE", 6);
+function setInitialState(data) {
+  Object.keys(data).forEach((key) => {
+    const value = getGlobalState(key) || null;
+    if (value == null)
+      setGlobalState(key, data[key]);
+  });
 }
 export {
   init

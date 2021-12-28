@@ -4735,10 +4735,16 @@ function setMode(mode) {
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.01 * (getGlobalState("TAX_RATE")?.value || 6);
-var BATCH_SIZE = getGlobalState("BATCH_SIZE")?.value || 10;
+var TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
+var BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
 var isDebug = location.href.includes("localhost") || location.search.includes("debug");
-var isOffline = () => getGlobalState("work_offline")?.value === true;
+var isOffline = () => getGlobalState("work_offline") === true;
+var primaryContact = getGlobalState("primaryContact") || {
+  companyName: "Little Light Show",
+  fullName: "Nathan Alix",
+  addressLine1: "4 Andrea Lane",
+  addressLine2: "Greenville, SC 29615"
+};
 var accessKeys = {
   FAUNADB_SERVER_SECRET: "",
   FAUNADB_ADMIN_SECRET: "",
@@ -4780,13 +4786,26 @@ function forceGlobalState() {
 }
 function setGlobalState(key, value) {
   const state = forceGlobalState();
-  const type = typeof value;
-  state[key] = { type, value };
+  const [head, ...tail] = key.split(".");
+  if (!tail.length) {
+    state[key] = value;
+  } else {
+    let o = state[head] = state[head] || {};
+    tail.forEach((k) => o[k] = o[k] || {});
+    o[tail[tail.length - 1]] = value;
+  }
   localStorage.setItem("__GLOBAL_STATE__", JSON.stringify(state));
 }
 function getGlobalState(key) {
   const state = forceGlobalState();
-  return state[key];
+  const [head, ...tail] = key.split(".");
+  if (!tail.length)
+    return state[head];
+  let value = state[head];
+  if (!!value && typeof value !== "object")
+    throw `key does not define an object: ${head}`;
+  tail.every((k) => typeof value === "object" && (value = value[k]) && true);
+  return value;
 }
 
 // app/services/validateAccessToken.ts
@@ -4869,13 +4888,21 @@ async function identify() {
 // app/index.ts
 async function init() {
   setMode();
-  setInitialState();
+  setInitialState({
+    TAX_RATE: 6,
+    CACHE_MAX_AGE: 600,
+    BATCH_SIZE: 64,
+    work_offline: true
+  });
+  setInitialState({ primaryContact });
   await identify();
 }
-function setInitialState() {
-  const taxRate = getGlobalState("TAX_RATE")?.value || null;
-  if (taxRate == null)
-    setGlobalState("TAX_RATE", 6);
+function setInitialState(data) {
+  Object.keys(data).forEach((key) => {
+    const value = getGlobalState(key) || null;
+    if (value == null)
+      setGlobalState(key, data[key]);
+  });
 }
 
 // app/fun/on.ts
@@ -4924,15 +4951,21 @@ function hookupTriggers(domNode) {
       throw "item must define a data-bind";
     const valueInfo = getGlobalState(bindTo);
     if (isCheckboxInput(eventItem)) {
-      eventItem.checked = valueInfo?.value === true;
+      eventItem.checked = valueInfo === true;
       on(eventItem, "change", () => {
         setGlobalState(bindTo, eventItem.checked);
       });
     } else if (isNumericInputElement(eventItem)) {
       const item = eventItem;
-      item.valueAsNumber = valueInfo?.value || 0;
+      item.valueAsNumber = valueInfo || 0;
       on(eventItem, "change", () => {
         setGlobalState(bindTo, item.valueAsNumber);
+      });
+    } else if (isInputElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
       });
     } else {
       throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
@@ -4971,7 +5004,7 @@ function ticksInSeconds(ticks) {
 }
 
 // app/services/ServiceCache.ts
-var MAX_AGE = getGlobalState("CACHE_MAX_AGE")?.value || 0;
+var MAX_AGE = getGlobalState("CACHE_MAX_AGE") || 0;
 var ServiceCache = class {
   constructor(options) {
     this.options = options;
@@ -5217,7 +5250,7 @@ function isOfflineId(itemId) {
   return !!itemId && "9" < itemId[0];
 }
 function getPriorSyncTime(tableName) {
-  return getGlobalState(`timeOfLastSynchronization_${tableName}`)?.value || 0;
+  return getGlobalState(`timeOfLastSynchronization_${tableName}`) || 0;
 }
 function setFutureSyncTime(tableName, syncTime) {
   setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);

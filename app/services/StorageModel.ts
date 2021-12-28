@@ -439,9 +439,9 @@ function getPriorSyncTime(
   tableName: string
 ) {
   return (
-    getGlobalState(
+    getGlobalState<number>(
       `timeOfLastSynchronization_${tableName}`
-    )?.value || 0
+    ) || 0
   );
 }
 

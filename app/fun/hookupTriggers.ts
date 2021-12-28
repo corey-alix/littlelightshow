@@ -65,13 +65,12 @@ export function hookupTriggers(
         throw "item must define a data-bind";
 
       const valueInfo =
-        getGlobalState(bindTo);
+        getGlobalState<any>(bindTo);
 
       if (isCheckboxInput(eventItem)) {
         (
           eventItem as HTMLInputElement
-        ).checked =
-          true === valueInfo?.value;
+        ).checked = true === valueInfo;
         on(eventItem, "change", () => {
           setGlobalState(
             bindTo,
@@ -86,11 +85,23 @@ export function hookupTriggers(
         const item =
           eventItem as HTMLInputElement;
         item.valueAsNumber =
-          valueInfo?.value || 0;
+          valueInfo || 0;
         on(eventItem, "change", () => {
           setGlobalState(
             bindTo,
             item.valueAsNumber
+          );
+        });
+      } else if (
+        isInputElement(eventItem)
+      ) {
+        const item =
+          eventItem as HTMLInputElement;
+        item.value = valueInfo || "";
+        on(eventItem, "change", () => {
+          setGlobalState(
+            bindTo,
+            item.value
           );
         });
       } else {
