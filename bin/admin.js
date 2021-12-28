@@ -594,9 +594,9 @@ var require_browser_ponyfill = __commonJS({
           exports2.DOMException.prototype = Object.create(Error.prototype);
           exports2.DOMException.prototype.constructor = exports2.DOMException;
         }
-        function fetch(input, init2) {
+        function fetch(input, init3) {
           return new Promise(function(resolve, reject) {
-            var request = new Request(input, init2);
+            var request = new Request(input, init3);
             if (request.signal && request.signal.aborted) {
               return reject(new exports2.DOMException("Aborted", "AbortError"));
             }
@@ -4719,6 +4719,20 @@ function sort(items, sortBy) {
   });
 }
 
+// app/fun/setMode.ts
+var modes = {
+  light_mode: "light",
+  dark_mode: "dark",
+  holiday_mode: "holiday"
+};
+function setMode(mode) {
+  if (!mode)
+    mode = localStorage.getItem("mode") || modes.light_mode;
+  localStorage.setItem("mode", mode);
+  document.body.classList.remove(...Object.values(modes));
+  document.body.classList.add(mode);
+}
+
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 var TAXRATE = 0.01 * (getGlobalState("TAX_RATE")?.value || 6);
@@ -4850,6 +4864,18 @@ async function identify() {
     return false;
   }
   return true;
+}
+
+// app/index.ts
+async function init() {
+  setMode();
+  setInitialState();
+  await identify();
+}
+function setInitialState() {
+  const taxRate = getGlobalState("TAX_RATE")?.value || null;
+  if (taxRate == null)
+    setGlobalState("TAX_RATE", 6);
 }
 
 // app/fun/on.ts
@@ -5426,20 +5452,6 @@ var accountModel = new StorageModel({
   offline: true
 });
 
-// app/fun/setMode.ts
-var modes = {
-  light_mode: "light",
-  dark_mode: "dark",
-  holiday_mode: "holiday"
-};
-function setMode(mode) {
-  if (!mode)
-    mode = localStorage.getItem("mode") || modes.light_mode;
-  localStorage.setItem("mode", mode);
-  document.body.classList.remove(...Object.values(modes));
-  document.body.classList.add(mode);
-}
-
 // app/services/inventory.ts
 var INVENTORY_TABLE = "inventory";
 var inventoryModel = new StorageModel({
@@ -5487,8 +5499,8 @@ var starterAccounts = [
   "TOOLS",
   "Utilities"
 ];
-async function init() {
-  await identify();
+async function init2() {
+  await init();
   const domNode = document.body;
   extendNumericInputBehaviors(domNode);
   hookupTriggers(domNode);
@@ -5599,7 +5611,6 @@ async function init() {
     })));
     toast("accounts generated");
   });
-  setMode();
 }
 function prompt2(label, cb) {
   const input = document.createElement("input");
@@ -5611,7 +5622,7 @@ function prompt2(label, cb) {
   };
 }
 export {
-  init
+  init2 as init
 };
 /*
 object-assign
