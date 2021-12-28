@@ -24,7 +24,7 @@
   "bugs": {
     "url": "https://github.com/corey-alix/littlelightshow/issues"
   },
-  "homepage": "https://github.com/corey-alix/littlelightshow#readme",
+  "homepage": "/",
   "proxy": {
     "/.netlify/functions": {
       "target": "http://localhost:9000",
