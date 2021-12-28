@@ -10,10 +10,7 @@ import {
   on,
   trigger,
 } from "../../fun/on.js";
-import {
-  primaryContact,
-  TAXRATE,
-} from "../../globals.js";
+import { globals } from "../../globals.js";
 import {
   forceDatalist as forceInventoryDataList,
   inventoryModel,
@@ -29,6 +26,9 @@ import { asCurrency } from "../../fun/asCurrency.js";
 import { getValueAsNumber } from "../../fun/behavior/input.js";
 import { asNumber } from "../../fun/asNumber.js";
 import { sum } from "../../fun/sum.js";
+
+const { primaryContact, TAXRATE } =
+  globals;
 
 const itemsToRemove =
   [] as Array<HTMLElement>;

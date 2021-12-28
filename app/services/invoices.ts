@@ -1,5 +1,6 @@
 import { asCurrency } from "../fun/asCurrency";
-import { TAXRATE } from "../globals";
+import { globals } from "../globals.js";
+const { TAXRATE } = globals;
 import { StorageModel } from "./StorageModel";
 
 const INVOICE_TABLE = "invoices";

@@ -4,7 +4,7 @@ import { moveChildren } from "../../fun/dom.js";
 import { hookupTriggers } from "../../fun/hookupTriggers.js";
 import { noZero } from "../../fun/isZero.js";
 import { sum } from "../../fun/sum.js";
-import { TAXRATE } from "../../globals.js";
+
 import { Invoice } from "../../services/invoices.js";
 
 export function create(

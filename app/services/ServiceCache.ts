@@ -1,7 +1,5 @@
-import {
-  getGlobalState,
-  isDebug,
-} from "../globals";
+import { isDebug } from "../globals";
+import { getGlobalState } from "../fun/globalState";
 import { ticksInSeconds } from "../fun/ticksInSeconds";
 
 const MAX_AGE =

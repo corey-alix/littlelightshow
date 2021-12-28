@@ -2,8 +2,9 @@ import { query as q } from "faunadb";
 import { sum } from "../fun/sum.js";
 import {
   createClient,
-  TAXRATE,
+  globals,
 } from "../globals.js";
+const { TAXRATE } = globals;
 import {
   Ledger,
   upsertItem as saveLedger,

@@ -26,7 +26,9 @@ import {
 import { inventoryModel } from "./services/inventory.js";
 import { getDatabaseTime } from "./services/getDatabaseTime.js";
 import { extendNumericInputBehaviors } from "./fun/behavior/form.js";
-import { TAXRATE } from "./globals.js";
+import { globals } from "./globals.js";
+const { TAXRATE } = globals;
+
 const starterAccounts = [
   "AP",
   "AR",

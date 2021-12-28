@@ -1,7 +1,7 @@
 import {
   getGlobalState,
   setGlobalState,
-} from "../globals.js";
+} from "./globalState";
 import { on, trigger } from "./on.js";
 
 export function hookupTriggers(

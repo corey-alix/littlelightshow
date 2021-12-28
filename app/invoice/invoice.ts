@@ -26,7 +26,9 @@ import {
   reportError,
   toast,
 } from "../ux/Toaster.js";
-import { TAXRATE } from "../globals.js";
+import { globals } from "../globals.js";
+const { TAXRATE } = globals;
+
 import { asCurrency } from "../fun/asCurrency.js";
 
 async function setup() {

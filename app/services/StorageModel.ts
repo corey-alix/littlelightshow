@@ -1,18 +1,19 @@
 import { ServiceCache } from "./ServiceCache.js";
 import { query as q } from "faunadb";
 import {
-  BATCH_SIZE,
+  globals,
   createClient,
-  CURRENT_USER,
-  getGlobalState,
   isOffline as globalIsOffline,
-  setGlobalState,
 } from "../globals.js";
 import {
-  reportError,
-  toast,
-} from "../ux/Toaster.js";
+  getGlobalState,
+  setGlobalState,
+} from "../fun/globalState";
+import { toast } from "../ux/Toaster.js";
 import { getDatabaseTime } from "./getDatabaseTime.js";
+
+const { BATCH_SIZE, CURRENT_USER } =
+  globals;
 
 interface SynchronizationAttributes {
   id?: string;

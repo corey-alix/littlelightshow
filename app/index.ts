@@ -1,9 +1,10 @@
 import { setMode } from "./fun/setMode";
+import { globals } from "./globals";
+const { primaryContact } = globals;
 import {
   getGlobalState,
-  primaryContact,
   setGlobalState,
-} from "./globals";
+} from "./fun/globalState";
 import { identify } from "./identify";
 
 export async function init() {
