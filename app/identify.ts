@@ -1,6 +1,7 @@
 import { CONTEXT } from "./globals.js";
 import { validate } from "./services/validateAccessToken.js";
 import { routes } from "./router.js";
+import { reportError } from "./ux/Toaster.js";
 
 export async function identify() {
   if (!localStorage.getItem("user")) {
@@ -14,11 +15,7 @@ export async function identify() {
   try {
     await validate();
   } catch (ex) {
-    localStorage.setItem(
-      "FAUNADB_SERVER_SECRET",
-      ""
-    );
-    routes.home();
+    reportError(ex);
     return false;
   }
 
