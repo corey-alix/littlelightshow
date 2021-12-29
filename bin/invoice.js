@@ -19,6 +19,19 @@ var __reExport = (target, module, desc) => {
 var __toModule = (module) => {
   return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
 };
+var __accessCheck = (obj, member, msg) => {
+  if (!member.has(obj))
+    throw TypeError("Cannot " + msg);
+};
+var __privateGet = (obj, member, getter) => {
+  __accessCheck(obj, member, "read from private field");
+  return getter ? getter.call(obj) : member.get(obj);
+};
+var __privateAdd = (obj, member, value) => {
+  if (member.has(obj))
+    throw TypeError("Cannot add the same private member more than once");
+  member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+};
 
 // node_modules/fn-annotate/index.js
 var require_fn_annotate = __commonJS({
@@ -4721,51 +4734,8 @@ function sort(items, sortBy) {
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
-var BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
-var isDebug = location.href.includes("localhost") || location.search.includes("debug");
-var isOffline = () => getGlobalState("work_offline") === true;
-var primaryContact = getGlobalState("primaryContact") || {
-  companyName: "Little Light Show",
-  fullName: "Nathan Alix",
-  addressLine1: "4 Andrea Lane",
-  addressLine2: "Greenville, SC 29615"
-};
-var accessKeys = {
-  FAUNADB_SERVER_SECRET: "",
-  FAUNADB_ADMIN_SECRET: "",
-  FAUNADB_DOMAIN: "db.us.fauna.com"
-};
-if (globalThis.process?.env) {
-  accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
-  accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
-} else if (localStorage) {
-  accessKeys.FAUNADB_SERVER_SECRET = localStorage.getItem("FAUNADB_SERVER_SECRET");
-  accessKeys.FAUNADB_ADMIN_SECRET = localStorage.getItem("FAUNADB_ADMIN_SECRET");
-  if (!accessKeys.FAUNADB_SERVER_SECRET) {
-    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
-    accessKeys.FAUNADB_SERVER_SECRET = secret;
-    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
-  }
-  if (!accessKeys.FAUNADB_SERVER_SECRET)
-    console.error("set FAUNADB_SERVER_SECRET in local storage");
-  if (!accessKeys.FAUNADB_ADMIN_SECRET)
-    console.error("set FAUNADB_ADMIN_SECRET in local storage");
-}
-function isNetlifyBuildContext() {
-  return 0 <= location.href.indexOf("netlify");
-}
-var domain = accessKeys.FAUNADB_DOMAIN;
-var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
-var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
-var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
-var CURRENT_USER = localStorage.getItem("user");
-function createClient() {
-  return new import_faunadb.default.Client({
-    secret: FAUNADB_SERVER_SECRET,
-    domain
-  });
-}
+
+// app/fun/globalState.ts
 var globalState;
 function forceGlobalState() {
   return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
@@ -4793,6 +4763,46 @@ function getGlobalState(key) {
   tail.every((k) => typeof value === "object" && (value = value[k]) && true);
   return value;
 }
+
+// app/globals.ts
+var _accessKeys;
+var GlobalModel = class {
+  constructor() {
+    __privateAdd(this, _accessKeys, {
+      FAUNADB_SERVER_SECRET: localStorage.getItem("FAUNADB_SERVER_SECRET"),
+      FAUNADB_DOMAIN: "db.us.fauna.com"
+    });
+    this.CURRENT_USER = localStorage.getItem("user");
+    this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
+    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
+    this.primaryContact = Object.seal(getGlobalState("primaryContact") || {
+      companyName: "Little Light Show",
+      fullName: "Nathan Alix",
+      addressLine1: "4 Andrea Lane",
+      addressLine2: "Greenville, SC 29615"
+    });
+    if (!__privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET) {
+      const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
+      __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET = secret;
+      localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+    }
+  }
+  createClient() {
+    return new import_faunadb.default.Client({
+      secret: __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET,
+      domain: __privateGet(this, _accessKeys).FAUNADB_DOMAIN
+    });
+  }
+};
+_accessKeys = new WeakMap();
+var globals = new GlobalModel();
+var createClient = () => globals.createClient();
+var isDebug = location.href.includes("localhost") || location.search.includes("debug");
+var isOffline = () => getGlobalState("work_offline") === true;
+function isNetlifyBuildContext() {
+  return 0 <= location.href.indexOf("netlify");
+}
+var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
 
 // app/fun/on.ts
 function log(...message) {
@@ -4916,6 +4926,7 @@ async function getDatabaseTime() {
 }
 
 // app/services/StorageModel.ts
+var { BATCH_SIZE, CURRENT_USER } = globals;
 var StorageModel = class {
   constructor(options) {
     this.options = options;
@@ -5147,6 +5158,7 @@ function asCurrency(value) {
 }
 
 // app/services/invoices.ts
+var { TAXRATE } = globals;
 var INVOICE_TABLE = "invoices";
 var invoiceModel = new StorageModel({
   tableName: INVOICE_TABLE,
@@ -5461,6 +5473,7 @@ function sum(values) {
 }
 
 // app/invoice/templates/invoice-form.tsx
+var { primaryContact, TAXRATE: TAXRATE2 } = globals;
 var itemsToRemove = [];
 async function create(invoice) {
   await forceDatalist();
@@ -5712,7 +5725,7 @@ function compute(form) {
   const balance_due = form.querySelector("#balance_due");
   const totals = Array.from(form.querySelectorAll("input[name=total]")).map((input) => parseFloat(input.value || "0"));
   const total = totals.reduce((a, b) => a + b, 0);
-  const tax = parseFloat(asCurrency(total * TAXRATE));
+  const tax = parseFloat(asCurrency(total * TAXRATE2));
   const grandTotal = labor.valueAsNumber + additional.valueAsNumber + tax + total;
   total_due.value = grandTotal.toFixed(2);
   const total_payments = sum(Array.from(form.querySelectorAll("input[name=amount_paid]")).map(asNumber));
@@ -5786,6 +5799,7 @@ async function getInventoryItemByCode(code) {
 }
 
 // app/invoice/templates/invoice-print.tsx
+var { primaryContact: primaryContact2, TAXRATE: TAXRATE3 } = globals;
 function create2(invoice) {
   const report = /* @__PURE__ */ dom("div", {
     class: "print page grid-6"
@@ -5799,15 +5813,15 @@ function create2(invoice) {
     class: "col-1-6 vspacer"
   }), /* @__PURE__ */ dom("label", {
     class: "col-1-2"
-  }, primaryContact.fullName), /* @__PURE__ */ dom("label", {
+  }, primaryContact2.fullName), /* @__PURE__ */ dom("label", {
     class: "col-5-2 align-right"
   }, invoice.id), /* @__PURE__ */ dom("label", {
     class: "col-1-2"
-  }, primaryContact.addressLine1), /* @__PURE__ */ dom("label", {
+  }, primaryContact2.addressLine1), /* @__PURE__ */ dom("label", {
     class: "col-5-2 align-right"
   }, new Date().toDateString()), /* @__PURE__ */ dom("label", {
     class: "col-1-2"
-  }, primaryContact.addressLine2), /* @__PURE__ */ dom("div", {
+  }, primaryContact2.addressLine2), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1"
@@ -5848,7 +5862,7 @@ function create2(invoice) {
       class: "col-6 align-right"
     }, totalItems.toFixed(2)), /* @__PURE__ */ dom("label", {
       class: "col-5"
-    }, "Tax (", 100 * TAXRATE + "", "%)"), /* @__PURE__ */ dom("label", {
+    }, "Tax (", 100 * TAXRATE3 + "", "%)"), /* @__PURE__ */ dom("label", {
       class: "col-6 align-right"
     }, totalTax.toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
       class: "col-5"
@@ -6020,6 +6034,7 @@ function setMode(mode) {
 }
 
 // app/invoice/invoice.ts
+var { TAXRATE: TAXRATE4 } = globals;
 async function setup() {
   await identify();
   setMode();
@@ -6074,7 +6089,7 @@ async function renderInvoice2(target, invoiceId) {
       labor: 0,
       additional: 0,
       mops: [],
-      taxrate: TAXRATE
+      taxrate: TAXRATE4
     };
   }
   const formDom = await create(invoice);
@@ -6120,7 +6135,7 @@ async function tryToSaveInvoice(formDom) {
       id: itemInput.value,
       code: itemInput.value,
       price: priceInput.valueAsNumber,
-      taxrate: TAXRATE
+      taxrate: TAXRATE4
     });
   });
   const requestModel = asModel(formDom);
@@ -6149,7 +6164,7 @@ function asModel(formDom) {
     labor: Number.parseFloat(data.get("labor") || "0"),
     additional: Number.parseFloat(data.get("additional") || "0"),
     mops: [],
-    taxrate: TAXRATE
+    taxrate: TAXRATE4
   };
   const mops = data.getAll("method_of_payment");
   const payments = data.getAll("amount_paid");

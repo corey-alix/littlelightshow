@@ -6,7 +6,7 @@ import {
 } from "../../services/gl.js";
 import { create as printDetail } from "./printDetail";
 import { create as printSummary } from "./printSummary";
-import { primaryContact } from "../../globals.js";
+import { globals } from "../../globals.js";
 import {
   asDateString,
   asTimeString,
@@ -80,6 +80,7 @@ export async function create(
 }
 
 function createBanner() {
+  const { primaryContact } = globals;
   return (
     <div class="grid-6">
       <div class="col-1-last centered">

@@ -2,14 +2,14 @@ import { dom } from "../../dom.js";
 import { asCurrency } from "../../fun/asCurrency.js";
 import { moveChildren } from "../../fun/dom.js";
 import { sum } from "../../fun/sum.js";
-import {
-  primaryContact,
-  TAXRATE,
-} from "../../globals.js";
+import { globals } from "../../globals.js";
 import {
   Invoice,
   InvoiceItem,
 } from "../../services/invoices.js";
+
+const { primaryContact, TAXRATE } =
+  globals;
 
 export function create(
   invoice: Invoice

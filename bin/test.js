@@ -19,6 +19,19 @@ var __reExport = (target, module, desc) => {
 var __toModule = (module) => {
   return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
 };
+var __accessCheck = (obj, member, msg) => {
+  if (!member.has(obj))
+    throw TypeError("Cannot " + msg);
+};
+var __privateGet = (obj, member, getter) => {
+  __accessCheck(obj, member, "read from private field");
+  return getter ? getter.call(obj) : member.get(obj);
+};
+var __privateAdd = (obj, member, value) => {
+  if (member.has(obj))
+    throw TypeError("Cannot add the same private member more than once");
+  member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+};
 
 // node_modules/fn-annotate/index.js
 var require_fn_annotate = __commonJS({
@@ -4698,50 +4711,8 @@ var require_faunadb = __commonJS({
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
-var BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
-var isDebug = location.href.includes("localhost") || location.search.includes("debug");
-var primaryContact = getGlobalState("primaryContact") || {
-  companyName: "Little Light Show",
-  fullName: "Nathan Alix",
-  addressLine1: "4 Andrea Lane",
-  addressLine2: "Greenville, SC 29615"
-};
-var accessKeys = {
-  FAUNADB_SERVER_SECRET: "",
-  FAUNADB_ADMIN_SECRET: "",
-  FAUNADB_DOMAIN: "db.us.fauna.com"
-};
-if (globalThis.process?.env) {
-  accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
-  accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
-} else if (localStorage) {
-  accessKeys.FAUNADB_SERVER_SECRET = localStorage.getItem("FAUNADB_SERVER_SECRET");
-  accessKeys.FAUNADB_ADMIN_SECRET = localStorage.getItem("FAUNADB_ADMIN_SECRET");
-  if (!accessKeys.FAUNADB_SERVER_SECRET) {
-    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
-    accessKeys.FAUNADB_SERVER_SECRET = secret;
-    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
-  }
-  if (!accessKeys.FAUNADB_SERVER_SECRET)
-    console.error("set FAUNADB_SERVER_SECRET in local storage");
-  if (!accessKeys.FAUNADB_ADMIN_SECRET)
-    console.error("set FAUNADB_ADMIN_SECRET in local storage");
-}
-function isNetlifyBuildContext() {
-  return 0 <= location.href.indexOf("netlify");
-}
-var domain = accessKeys.FAUNADB_DOMAIN;
-var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
-var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
-var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
-var CURRENT_USER = localStorage.getItem("user");
-function createClient() {
-  return new import_faunadb.default.Client({
-    secret: FAUNADB_SERVER_SECRET,
-    domain
-  });
-}
+
+// app/fun/globalState.ts
 var globalState;
 function forceGlobalState() {
   return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
@@ -4757,6 +4728,45 @@ function getGlobalState(key) {
   tail.every((k) => typeof value === "object" && (value = value[k]) && true);
   return value;
 }
+
+// app/globals.ts
+var _accessKeys;
+var GlobalModel = class {
+  constructor() {
+    __privateAdd(this, _accessKeys, {
+      FAUNADB_SERVER_SECRET: localStorage.getItem("FAUNADB_SERVER_SECRET"),
+      FAUNADB_DOMAIN: "db.us.fauna.com"
+    });
+    this.CURRENT_USER = localStorage.getItem("user");
+    this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
+    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
+    this.primaryContact = Object.seal(getGlobalState("primaryContact") || {
+      companyName: "Little Light Show",
+      fullName: "Nathan Alix",
+      addressLine1: "4 Andrea Lane",
+      addressLine2: "Greenville, SC 29615"
+    });
+    if (!__privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET) {
+      const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
+      __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET = secret;
+      localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+    }
+  }
+  createClient() {
+    return new import_faunadb.default.Client({
+      secret: __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET,
+      domain: __privateGet(this, _accessKeys).FAUNADB_DOMAIN
+    });
+  }
+};
+_accessKeys = new WeakMap();
+var globals = new GlobalModel();
+var createClient = () => globals.createClient();
+var isDebug = location.href.includes("localhost") || location.search.includes("debug");
+function isNetlifyBuildContext() {
+  return 0 <= location.href.indexOf("netlify");
+}
+var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
 
 // test/test.ts
 var import_faunadb2 = __toModule(require_faunadb());

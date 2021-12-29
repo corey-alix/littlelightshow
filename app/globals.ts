@@ -2,6 +2,14 @@ import faunadb from "faunadb";
 import { getGlobalState } from "./fun/globalState";
 
 class GlobalModel {
+  #accessKeys = {
+    FAUNADB_SERVER_SECRET:
+      localStorage.getItem(
+        "FAUNADB_SERVER_SECRET"
+      ) as string,
+    FAUNADB_DOMAIN: "db.us.fauna.com",
+  };
+
   public readonly CURRENT_USER =
     localStorage.getItem("user");
 
@@ -32,10 +40,41 @@ class GlobalModel {
           "Greenville, SC 29615",
       }
     );
+
+  constructor() {
+    if (
+      !this.#accessKeys
+        .FAUNADB_SERVER_SECRET
+    ) {
+      const secret =
+        prompt(
+          "Provide the FAUNADB_SERVER_SECRET"
+        ) || "";
+      this.#accessKeys.FAUNADB_SERVER_SECRET =
+        secret;
+      localStorage.setItem(
+        "FAUNADB_SERVER_SECRET",
+        secret
+      );
+    }
+  }
+
+  createClient() {
+    return new faunadb.Client({
+      secret:
+        this.#accessKeys
+          .FAUNADB_SERVER_SECRET,
+      domain:
+        this.#accessKeys.FAUNADB_DOMAIN,
+    });
+  }
 }
 
 export const globals =
   new GlobalModel();
+
+export const createClient = () =>
+  globals.createClient();
 
 export const isDebug =
   location.href.includes("localhost") ||
@@ -47,34 +86,6 @@ export const isOffline = () =>
     "work_offline"
   );
 
-const accessKeys = {
-  FAUNADB_SERVER_SECRET: "",
-  FAUNADB_ADMIN_SECRET: "",
-  FAUNADB_DOMAIN: "db.us.fauna.com",
-};
-
-accessKeys.FAUNADB_SERVER_SECRET =
-  localStorage.getItem(
-    "FAUNADB_SERVER_SECRET"
-  ) as string;
-accessKeys.FAUNADB_ADMIN_SECRET =
-  localStorage.getItem(
-    "FAUNADB_ADMIN_SECRET"
-  ) as string;
-
-if (!accessKeys.FAUNADB_SERVER_SECRET) {
-  const secret =
-    prompt(
-      "Provide the FAUNADB_SERVER_SECRET"
-    ) || "";
-  accessKeys.FAUNADB_SERVER_SECRET =
-    secret;
-  localStorage.setItem(
-    "FAUNADB_SERVER_SECRET",
-    secret
-  );
-}
-
 function isNetlifyBuildContext() {
   return (
     0 <=
@@ -82,20 +93,7 @@ function isNetlifyBuildContext() {
   );
 }
 
-export const domain =
-  accessKeys.FAUNADB_DOMAIN;
-export const FAUNADB_SERVER_SECRET =
-  accessKeys.FAUNADB_SERVER_SECRET;
-export const FAUNADB_ADMIN_SECRET =
-  accessKeys.FAUNADB_ADMIN_SECRET;
 export const CONTEXT =
   isNetlifyBuildContext()
     ? "NETLIFY"
     : "dev";
-
-export function createClient() {
-  return new faunadb.Client({
-    secret: FAUNADB_SERVER_SECRET,
-    domain,
-  });
-}
