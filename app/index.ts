@@ -6,9 +6,12 @@ import {
   setGlobalState,
 } from "./fun/globalState";
 import { identify } from "./identify";
+import { extendNumericInputBehaviors } from "./fun/behavior/form";
+import { hookupTriggers } from "./fun/hookupTriggers";
+import { injectLabels } from "./ux/injectLabels";
 
 export async function init() {
-  setMode();
+  const domNode = document.body;
   setInitialState({
     TAX_RATE: 6,
     CACHE_MAX_AGE: 600,
@@ -16,7 +19,12 @@ export async function init() {
     work_offline: true,
   });
   setInitialState({ primaryContact });
+
   await identify();
+  injectLabels(domNode);
+  extendNumericInputBehaviors(domNode);
+  hookupTriggers(domNode);
+  setMode();
 }
 
 function setInitialState(

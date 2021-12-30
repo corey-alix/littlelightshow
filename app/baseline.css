@@ -57,6 +57,10 @@ body.holiday .toaster {
   color: white;
 }
 
+input.auto-label {
+  display: block;
+}
+
 .toaster .error {
   color: red;
   font-weight: bolder;
@@ -107,6 +111,10 @@ body.light ::placeholder {
 }
 
 body.dark ::placeholder {
+  opacity: 0.5;
+}
+
+body.holiday ::placeholder {
   opacity: 0.5;
 }
 

@@ -25,7 +25,6 @@ import {
 } from "./ux/Toaster.js";
 import { inventoryModel } from "./services/inventory.js";
 import { getDatabaseTime } from "./services/getDatabaseTime.js";
-import { extendNumericInputBehaviors } from "./fun/behavior/form.js";
 import { globals } from "./globals.js";
 const { TAXRATE } = globals;
 
@@ -55,9 +54,6 @@ interface FaunaException {
 export async function init() {
   await systemInit();
   const domNode = document.body;
-
-  extendNumericInputBehaviors(domNode);
-  hookupTriggers(domNode);
 
   Object.keys(modes).forEach((mode) =>
     on(domNode, mode, () => {

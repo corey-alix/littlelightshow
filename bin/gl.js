@@ -4922,12 +4922,13 @@ var GlobalModel = class {
     this.CURRENT_USER = localStorage.getItem("user");
     this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
     this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
-    this.primaryContact = Object.seal(getGlobalState("primaryContact") || {
+    this.primaryContact = getGlobalState("primaryContact") || {
       companyName: "Little Light Show",
       fullName: "Nathan Alix",
       addressLine1: "4 Andrea Lane",
-      addressLine2: "Greenville, SC 29615"
-    });
+      addressLine2: "Greenville, SC 29615",
+      telephone: ""
+    };
     if (!__privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET) {
       const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
       __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET = secret;

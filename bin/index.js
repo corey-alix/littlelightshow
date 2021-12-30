@@ -904,24 +904,24 @@ var require_util = __commonJS({
       var detectedEnv = runtimeEnvs.find((env) => env.check());
       return detectedEnv ? detectedEnv.name : "unknown";
     }
-    function defaults(obj, def) {
+    function defaults2(obj, def) {
       if (obj === void 0) {
         return def;
       } else {
         return obj;
       }
     }
-    function applyDefaults(provided, defaults2) {
+    function applyDefaults(provided, defaults3) {
       var out = {};
       for (var providedKey in provided) {
-        if (!(providedKey in defaults2)) {
+        if (!(providedKey in defaults3)) {
           throw new Error("No such option " + providedKey);
         }
         out[providedKey] = provided[providedKey];
       }
-      for (var defaultsKey in defaults2) {
+      for (var defaultsKey in defaults3) {
         if (!(defaultsKey in out)) {
-          out[defaultsKey] = defaults2[defaultsKey];
+          out[defaultsKey] = defaults3[defaultsKey];
         }
       }
       return out;
@@ -1032,7 +1032,7 @@ Changelog: https://github.com/${packageJson.repository}/blob/main/CHANGELOG.md`,
       inherits,
       isNodeEnv,
       getEnvVariable,
-      defaults,
+      defaults: defaults2,
       applyDefaults,
       removeNullAndUndefinedValues,
       removeUndefinedValues,
@@ -3514,7 +3514,7 @@ var require_event_target_shim = __commonJS({
         data.event.preventDefault();
       }
     }
-    function Event(eventTarget, event) {
+    function Event2(eventTarget, event) {
       privateData.set(this, {
         eventTarget,
         event,
@@ -3535,7 +3535,7 @@ var require_event_target_shim = __commonJS({
         }
       }
     }
-    Event.prototype = {
+    Event2.prototype = {
       get type() {
         return pd(this).event.type;
       },
@@ -3627,14 +3627,14 @@ var require_event_target_shim = __commonJS({
       initEvent() {
       }
     };
-    Object.defineProperty(Event.prototype, "constructor", {
-      value: Event,
+    Object.defineProperty(Event2.prototype, "constructor", {
+      value: Event2,
       configurable: true,
       writable: true
     });
     if (typeof window !== "undefined" && typeof window.Event !== "undefined") {
-      Object.setPrototypeOf(Event.prototype, window.Event.prototype);
-      wrappers.set(window.Event.prototype, Event);
+      Object.setPrototypeOf(Event2.prototype, window.Event.prototype);
+      wrappers.set(window.Event.prototype, Event2);
     }
     function defineRedirectDescriptor(key) {
       return {
@@ -3681,7 +3681,7 @@ var require_event_target_shim = __commonJS({
     }
     function getWrapper(proto) {
       if (proto == null || proto === Object.prototype) {
-        return Event;
+        return Event2;
       }
       let wrapper = wrappers.get(proto);
       if (wrapper == null) {
@@ -4650,16 +4650,16 @@ var require_clientLogger = __commonJS({
     function showRequestResult(requestResult) {
       var query = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
       var out = "";
-      function log(str) {
+      function log2(str) {
         out = out + str;
       }
-      log("Fauna " + method + " /" + path + _queryString(query) + "\n");
+      log2("Fauna " + method + " /" + path + _queryString(query) + "\n");
       if (requestContent != null) {
-        log("  Request JSON: " + _showJSON(requestContent) + "\n");
+        log2("  Request JSON: " + _showJSON(requestContent) + "\n");
       }
-      log("  Response headers: " + _showJSON(responseHeaders) + "\n");
-      log("  Response JSON: " + _showJSON(responseContent) + "\n");
-      log("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
+      log2("  Response headers: " + _showJSON(responseHeaders) + "\n");
+      log2("  Response JSON: " + _showJSON(responseContent) + "\n");
+      log2("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
       return out;
     }
     function _indent(str) {
@@ -4766,12 +4766,13 @@ var GlobalModel = class {
     this.CURRENT_USER = localStorage.getItem("user");
     this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
     this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
-    this.primaryContact = Object.seal(getGlobalState("primaryContact") || {
+    this.primaryContact = getGlobalState("primaryContact") || {
       companyName: "Little Light Show",
       fullName: "Nathan Alix",
       addressLine1: "4 Andrea Lane",
-      addressLine2: "Greenville, SC 29615"
-    });
+      addressLine2: "Greenville, SC 29615",
+      telephone: ""
+    };
     if (!__privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET) {
       const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
       __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET = secret;
@@ -4871,10 +4872,202 @@ async function identify() {
   return true;
 }
 
+// app/fun/on.ts
+function log(...message) {
+  if (!isDebug)
+    return;
+  console.log(...message);
+}
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  log("trigger", eventName);
+  domNode.dispatchEvent(new Event(eventName));
+}
+
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  });
+}
+
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
+}
+
+// app/fun/hookupTriggers.ts
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    const eventName = eventItem.dataset["event"];
+    if (!eventName)
+      throw "item must define a data-event";
+    const isInput = isInputElement(eventItem);
+    const inputType = getInputType(eventItem);
+    const isButton = isButtonElement(eventItem, isInput);
+    const isCheckbox = isCheckboxInput(eventItem);
+    if (isButton)
+      on(eventItem, "click", () => {
+        trigger(domNode, eventName);
+      });
+    else if (isCheckbox)
+      on(eventItem, "click", () => {
+        const checked = eventItem.checked;
+        trigger(domNode, eventName + (checked ? ":yes" : ":no"));
+      });
+    else if (isInput)
+      on(eventItem, "change", () => {
+        trigger(domNode, eventName);
+      });
+    else
+      throw `data-event not supported for this item: ${eventItem.outerHTML}`;
+  });
+  domNode.querySelectorAll("[data-bind]").forEach((eventItem) => {
+    const bindTo = eventItem.dataset["bind"];
+    if (!bindTo)
+      throw "item must define a data-bind";
+    const valueInfo = getGlobalState(bindTo);
+    if (isCheckboxInput(eventItem)) {
+      eventItem.checked = valueInfo === true;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, eventItem.checked);
+      });
+    } else if (isNumericInputElement(eventItem)) {
+      const item = eventItem;
+      item.valueAsNumber = valueInfo || 0;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.valueAsNumber);
+      });
+    } else if (isInputElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
+    } else {
+      throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
+    }
+  });
+}
+function isCheckboxInput(eventItem) {
+  return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
+}
+function isButtonElement(eventItem, isInput) {
+  return eventItem.tagName === "BUTTON" || isInput && getInputType(eventItem) === "button";
+}
+function getInputType(eventItem) {
+  return isInputElement(eventItem) && eventItem.type;
+}
+function isInputElement(eventItem) {
+  return eventItem.tagName === "INPUT";
+}
+function isNumericInputElement(item) {
+  return isInputElement(item) && getInputType(item) === "number";
+}
+
+// app/dom.ts
+function asStyle(o) {
+  if (typeof o === "string")
+    return o;
+  return Object.keys(o).map((k) => `${k}:${o[k]}`).join(";");
+}
+function defaults(a, ...b) {
+  b.filter((b2) => !!b2).forEach((b2) => {
+    Object.keys(b2).filter((k) => a[k] === void 0).forEach((k) => a[k] = b2[k]);
+  });
+  return a;
+}
+var rules = {
+  style: asStyle
+};
+var default_args = {
+  button: {
+    type: "button"
+  }
+};
+function dom(tag, args, ...children) {
+  if (typeof tag === "string") {
+    let element = document.createElement(tag);
+    if (default_args[tag]) {
+      args = defaults(args ?? {}, default_args[tag]);
+    }
+    if (args) {
+      Object.keys(args).forEach((key) => {
+        let value = rules[key] ? rules[key](args[key]) : args[key];
+        if (typeof value === "string") {
+          element.setAttribute(key, value);
+        } else if (value instanceof Function) {
+          element.addEventListener(key, value);
+        } else {
+          element.setAttribute(key, value + "");
+        }
+      });
+    }
+    let addChildren = (children2) => {
+      children2 && children2.forEach((c) => {
+        if (typeof c === "string") {
+          element.appendChild(document.createTextNode(c));
+        } else if (c instanceof HTMLElement) {
+          element.appendChild(c);
+        } else if (c instanceof Array) {
+          addChildren(c);
+        } else {
+          console.log("addChildren cannot add to dom node", c);
+        }
+      });
+    };
+    children && addChildren(children);
+    return element;
+  }
+  {
+    let element = tag(args);
+    let addChildren = (children2) => {
+      children2 && children2.forEach((c) => {
+        if (typeof c === "string" || c instanceof HTMLElement) {
+          element.setContent(c);
+        } else if (c instanceof Array) {
+          addChildren(c);
+        } else if (typeof c === "object") {
+          element.addChild(c);
+        } else {
+          console.log("addChildren cannot add to widget", c);
+        }
+      });
+    };
+    children && addChildren(children);
+    return element;
+  }
+}
+
+// app/ux/injectLabels.ts
+function injectLabels(domNode) {
+  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
+  inputsToWrap.forEach((input) => {
+    const label = dom("label");
+    label.className = "border padding rounded wrap " + input.className;
+    label.innerText = input.placeholder;
+    input.parentElement.insertBefore(label, input);
+    label.appendChild(input);
+  });
+}
+
 // app/index.ts
 var { primaryContact } = globals;
 async function init() {
-  setMode();
+  const domNode = document.body;
   setInitialState({
     TAX_RATE: 6,
     CACHE_MAX_AGE: 600,
@@ -4883,6 +5076,10 @@ async function init() {
   });
   setInitialState({ primaryContact });
   await identify();
+  injectLabels(domNode);
+  extendNumericInputBehaviors(domNode);
+  hookupTriggers(domNode);
+  setMode();
 }
 function setInitialState(data) {
   Object.keys(data).forEach((key) => {

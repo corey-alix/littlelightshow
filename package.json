@@ -5,14 +5,15 @@
   "description": "littlelightshow",
   "main": "index.js",
   "scripts": {
-    "debug": "netlify dev --inspect",
+    "debug": "netlify dev",
     "build:admin": "  esbuild --watch --sourcemap --format=esm --bundle app/admin.ts           --outfile=bin/admin.js",
     "build:index": "  esbuild --watch --sourcemap --format=esm --bundle app/index.ts           --outfile=bin/index.js",
     "build:test": "   esbuild --watch --sourcemap --format=esm --bundle test/test.ts           --outfile=bin/test.js",
     "build:invoice": "esbuild --watch --sourcemap --format=esm --bundle app/invoice/invoice.ts --outfile=bin/invoice.js",
     "build:gl": "     esbuild --watch --sourcemap --format=esm --bundle app/gl/gl.ts           --outfile=bin/gl.js",
     "build": "npm-run-all -p build:index build:gl build:invoice build:admin build:test",
-    "deploy": "git checkout v1.0.2 && git merge v1.0.3 && git push && git checkout v1.0.3"
+    "deploy": "git checkout v1.0.2 && git merge v1.0.3 && git push && git checkout v1.0.3",
+    "dev": "npm-run-all -p debug build"
   },
   "repository": {
     "type": "git",
@@ -38,13 +39,13 @@
     "netlify": "^10.1.0"
   },
   "devDependencies": {
-    "netlify-cli": "^8.4.2",
-    "nodemon": "^2.0.15",
-    "typescript": "^4.5.2",
     "@netlify/functions": "^0.10.0",
     "@types/node": "^14.18.0",
     "esbuild": "^0.14.3",
+    "netlify-cli": "^8.4.2",
     "netlify-lambda": "^2.0.15",
-    "npm-run-all": "^4.1.5"
+    "nodemon": "^2.0.15",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^4.5.2"
   }
 }

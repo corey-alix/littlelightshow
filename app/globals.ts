@@ -25,21 +25,20 @@ class GlobalModel {
     ) || 10;
 
   public readonly primaryContact =
-    Object.seal(
-      getGlobalState<{
-        companyName: string;
-        fullName: string;
-        addressLine1: string;
-        addressLine2: string;
-      }>("primaryContact") || {
-        companyName:
-          "Little Light Show",
-        fullName: "Nathan Alix",
-        addressLine1: "4 Andrea Lane",
-        addressLine2:
-          "Greenville, SC 29615",
-      }
-    );
+    getGlobalState<{
+      companyName: string;
+      fullName: string;
+      addressLine1: string;
+      addressLine2: string;
+      telephone: string;
+    }>("primaryContact") || {
+      companyName: "Little Light Show",
+      fullName: "Nathan Alix",
+      addressLine1: "4 Andrea Lane",
+      addressLine2:
+        "Greenville, SC 29615",
+      telephone: "",
+    };
 
   constructor() {
     if (
