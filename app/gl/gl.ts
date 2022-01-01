@@ -58,9 +58,6 @@ export async function init(
     if (queryParams.has("account")) {
       const account =
         queryParams.get("account")!;
-      const entries = await execute({
-        account,
-      });
       const report = await printAccount(
         account
       );

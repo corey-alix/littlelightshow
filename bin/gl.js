@@ -5860,7 +5860,7 @@ async function create5(account) {
   if (!items.length)
     return /* @__PURE__ */ dom("div", null, "No items found");
   let runningBalance = 0;
-  const rows = items.map((item) => {
+  const rows = items.sort((a, b) => a.parent.date - b.parent.date || a.parent.id.localeCompare(b.parent.id)).map((item) => {
     runningBalance += item.child.amount;
     return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
       class: "currency col-1"
@@ -5868,11 +5868,13 @@ async function create5(account) {
       class: "col-2"
     }, item.child.comment), /* @__PURE__ */ dom("div", {
       class: "col-3-4"
+    }, asDateString(new Date(item.parent.date))), /* @__PURE__ */ dom("div", {
+      class: "currency col-7"
+    }, noZero(asCurrency(runningBalance))), /* @__PURE__ */ dom("div", {
+      class: "col-2-5"
     }, /* @__PURE__ */ dom("a", {
       href: routes.editLedger(item.parent.id)
-    }, item.parent.description || "no comment")), /* @__PURE__ */ dom("div", {
-      class: "currency col-7"
-    }, noZero(asCurrency(runningBalance))));
+    }, item.parent.description || "")));
   });
   const result = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("h1", null, `Ledger Entries for ${account}`), /* @__PURE__ */ dom("div", {
     class: "grid-6"
@@ -5989,9 +5991,6 @@ async function init(domNode) {
     }
     if (queryParams.has("account")) {
       const account = queryParams.get("account");
-      const entries = await execute({
-        account
-      });
       const report = await create5(account);
       domNode.appendChild(report);
       return;
