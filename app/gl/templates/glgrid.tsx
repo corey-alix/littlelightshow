@@ -54,10 +54,9 @@ function asModel(
     ) as string) || "";
 
   let currentItem: LedgerItem;
-  for (let [
-    key,
-    value,
-  ] of data.entries()) {
+  for (let [key, value] of (
+    data as any
+  ).entries()) {
     switch (key) {
       case "account":
         currentItem = {} as any;

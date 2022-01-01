@@ -13,7 +13,8 @@
     "build:gl": "     esbuild --watch --sourcemap --format=esm --bundle app/gl/gl.ts           --outfile=bin/gl.js",
     "build": "npm-run-all -p build:index build:gl build:invoice build:admin build:test",
     "deploy": "git checkout v1.0.2 && git merge v1.0.3 && git push && git checkout v1.0.3",
-    "dev": "npm-run-all -p debug build"
+    "dev": "npm-run-all -p debug build",
+    "lint": "tsc"
   },
   "repository": {
     "type": "git",

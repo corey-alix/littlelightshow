@@ -281,10 +281,9 @@ function asModel(
 
   let currentItem: InvoiceItem | null =
     null;
-  for (let [
-    key,
-    value,
-  ] of data.entries()) {
+  for (let [key, value] of (
+    data as any
+  ).entries()) {
     switch (key) {
       case "item":
         currentItem = <InvoiceItem>{};
