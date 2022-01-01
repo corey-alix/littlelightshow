@@ -5517,10 +5517,7 @@ function asModel(form) {
   result.date = new Date(batchDate).valueOf();
   result.description = data.get("description") || "";
   let currentItem;
-  for (let [
-    key,
-    value
-  ] of data.entries()) {
+  for (let [key, value] of data.entries()) {
     switch (key) {
       case "account":
         currentItem = {};

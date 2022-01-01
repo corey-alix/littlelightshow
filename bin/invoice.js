@@ -6174,10 +6174,7 @@ function asModel(formDom) {
     paid: parseFloat(payments[i])
   }));
   let currentItem = null;
-  for (let [
-    key,
-    value
-  ] of data.entries()) {
+  for (let [key, value] of data.entries()) {
     switch (key) {
       case "item":
         currentItem = {};

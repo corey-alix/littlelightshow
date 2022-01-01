@@ -5107,10 +5107,14 @@ async function init() {
 }
 function setInitialState(data) {
   Object.keys(data).forEach((key) => {
-    const value = getGlobalState(key) || null;
-    if (value == null)
+    const value = getGlobalState(key);
+    if (isUndefined(value)) {
       setGlobalState(key, data[key]);
+    }
   });
+}
+function isUndefined(value) {
+  return typeof value === "undefined";
 }
 
 // app/services/admin.ts
