@@ -31,9 +31,13 @@ function setInitialState(
   data: Record<string, any>
 ) {
   Object.keys(data).forEach((key) => {
-    const value =
-      getGlobalState(key) || null;
-    if (null == value)
+    const value = getGlobalState(key);
+    if (isUndefined(value)) {
       setGlobalState(key, data[key]);
+    }
   });
+}
+
+function isUndefined(value: any) {
+  return typeof value === "undefined";
 }
