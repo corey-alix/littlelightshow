@@ -4833,8 +4833,9 @@ var routes = {
   createInvoice: () => `/app/invoice/invoice.html`,
   invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
   allInvoices: () => `/app/invoice/invoices.html`,
+  createInventory: () => `/app/inventory/index.html`,
   inventory: (id) => `/app/inventory/index.html?id=${id}`,
-  allInventoryItems: () => `/app/inventory/index.html`,
+  allInventoryItems: () => `/app/inventory/index.html?id=all`,
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
   createLedger: () => "/app/gl/index.html",
@@ -5547,6 +5548,7 @@ function create2(inventoryItem) {
   }, "Description"), /* @__PURE__ */ dom("input", {
     class: "col-1-a text trim",
     name: "description",
+    placeholder: "Long description",
     type: "text",
     value: inventoryItem.description || inventoryItem.code
   }), /* @__PURE__ */ dom("div", {
@@ -5559,28 +5561,35 @@ function create2(inventoryItem) {
     class: "col-1-c trim text",
     name: "code",
     type: "text",
+    placeholder: "Short code",
     value: inventoryItem.code
   }), /* @__PURE__ */ dom("input", {
     class: "col-b quantity",
     name: "quantity",
     type: "number",
+    placeholder: "Quantity",
     value: inventoryItem.quantity
   }), /* @__PURE__ */ dom("input", {
     class: "col-a currency",
     name: "price",
     type: "number",
-    value: inventoryItem.price
+    placeholder: "Retail",
+    value: noZero(asCurrency(inventoryItem.price))
   }), /* @__PURE__ */ dom("div", {
     class: "col-a line taxrate"
   }, "Tax Rate"), /* @__PURE__ */ dom("input", {
     class: "col-a taxrate",
     name: "taxrate",
     type: "number",
+    placeholder: "taxrate",
     value: inventoryItem.taxrate
   }), /* @__PURE__ */ dom("button", {
     class: "bold button col-1",
     "data-event": "submit"
   }, "Save"), /* @__PURE__ */ dom("button", {
+    class: "button col-b",
+    "data-event": "clear"
+  }, "Clear"), /* @__PURE__ */ dom("button", {
     class: "button col-a",
     "data-event": "delete"
   }, "Delete"));
@@ -5593,6 +5602,13 @@ async function init2(target = document.body) {
   const queryParams = new URLSearchParams(window.location.search);
   if (queryParams.has("id")) {
     const id = queryParams.get("id");
+    if (id === "all") {
+      const report = create(inventoryItems.sortBy({
+        code: "string"
+      }));
+      target.appendChild(report);
+      return;
+    }
     const inventoryItem = {
       ...await inventoryModel.getItem(id)
     };
@@ -5606,16 +5622,7 @@ async function init2(target = document.body) {
       const priorCode = inventoryItem.code;
       inventoryItem.code = getValue(formDom, "code", inventoryItem.code);
       await renameInvoiceItems(priorCode, inventoryItem.code);
-      inventoryItem.description = getValue(formDom, "description", inventoryItem.description);
-      inventoryItem.quantity = getValue(formDom, "quantity", inventoryItem.quantity);
-      inventoryItem.price = getValue(formDom, "price", inventoryItem.price);
-      inventoryItem.taxrate = getValue(formDom, "taxrate", inventoryItem.taxrate);
-      try {
-        await inventoryModel.upsertItem(inventoryItem);
-      } catch (ex) {
-        reportError(ex);
-      }
-      toast("Changes saved");
+      await saveChanges(inventoryItem, formDom);
     });
     on(formDom, "delete", async () => {
       try {
@@ -5625,15 +5632,57 @@ async function init2(target = document.body) {
       }
       toast("Item Deleted");
     });
+    on(formDom, "clear", async () => {
+      location.href = routes.createInventory();
+    });
     hookupTriggers(formDom);
     extendNumericInputBehaviors(formDom);
     extendTextInputBehaviors(formDom);
-  } else {
-    const report = create(inventoryItems.sortBy({
-      code: "string"
-    }));
-    target.appendChild(report);
+    return;
   }
+  {
+    const inventoryItem = {
+      code: "",
+      price: 0,
+      quantity: 1,
+      taxrate: 100 * globals.TAXRATE,
+      description: ""
+    };
+    const formDom = create2(inventoryItem);
+    target.appendChild(formDom);
+    hookupTriggers(formDom);
+    extendNumericInputBehaviors(formDom);
+    extendTextInputBehaviors(formDom);
+    on(formDom, "submit", async () => {
+      await saveChanges(inventoryItem, formDom);
+      location.href = routes.inventory(inventoryItem.id);
+    });
+    on(formDom, "clear", async () => {
+      location.href = routes.createInventory();
+    });
+    on(formDom, "delete", () => {
+      location.href = routes.createInventory();
+    });
+    return;
+  }
+}
+async function saveChanges(inventoryItem, formDom) {
+  const names = [
+    "description",
+    "code",
+    "price",
+    "quantity",
+    "taxrate"
+  ];
+  names.forEach((name) => {
+    inventoryItem[name] = getValue(formDom, name, inventoryItem[name]);
+  });
+  try {
+    await inventoryModel.upsertItem(inventoryItem);
+  } catch (ex) {
+    reportError(ex);
+  }
+  toast("Changes saved");
 }
 function getValue(form, name, defaultValue) {
   const value = form[name]?.value;

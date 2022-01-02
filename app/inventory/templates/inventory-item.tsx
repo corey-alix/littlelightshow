@@ -1,5 +1,9 @@
 import { dom } from "../../dom.js";
-import { asQuantity } from "../../fun/asCurrency.js";
+import {
+  asCurrency,
+  asQuantity,
+} from "../../fun/asCurrency.js";
+import { noZero } from "../../fun/isZero.js";
 import { Inventory } from "../../services/inventory.js";
 
 export function create(
@@ -15,6 +19,7 @@ export function create(
       <input
         class="col-1-a text trim"
         name="description"
+        placeholder="Long description"
         type="text"
         value={
           inventoryItem.description ||
@@ -34,19 +39,26 @@ export function create(
         class="col-1-c trim text"
         name="code"
         type="text"
+        placeholder="Short code"
         value={inventoryItem.code}
       />
       <input
         class="col-b quantity"
         name="quantity"
         type="number"
+        placeholder="Quantity"
         value={inventoryItem.quantity}
       />
       <input
         class="col-a currency"
         name="price"
         type="number"
-        value={inventoryItem.price}
+        placeholder="Retail"
+        value={noZero(
+          asCurrency(
+            inventoryItem.price
+          )
+        )}
       />
       <div class="col-a line taxrate">
         Tax Rate
@@ -55,6 +67,7 @@ export function create(
         class="col-a taxrate"
         name="taxrate"
         type="number"
+        placeholder="taxrate"
         value={inventoryItem.taxrate}
       />
       <button
@@ -62,6 +75,12 @@ export function create(
         data-event="submit"
       >
         Save
+      </button>
+      <button
+        class="button col-b"
+        data-event="clear"
+      >
+        Clear
       </button>
       <button
         class="button col-a"

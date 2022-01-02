@@ -1,5 +1,8 @@
 import { init as systemInit } from "../index.js";
-import { inventoryModel } from "../services/inventory.js";
+import {
+  Inventory,
+  inventoryModel,
+} from "../services/inventory.js";
 import { create as showInventoryItems } from "./templates/inventory.js";
 import { create as showInventoryItem } from "./templates/inventory-item.js";
 import { on } from "../fun/on.js";
@@ -14,6 +17,8 @@ import {
 } from "../fun/behavior/form.js";
 import { invoiceModel } from "../services/invoices.js";
 import { isNull } from "../isUndefined.js";
+import { routes } from "../router.js";
+import { globals } from "../globals.js";
 
 export async function init(
   target = document.body
@@ -29,6 +34,17 @@ export async function init(
 
   if (queryParams.has("id")) {
     const id = queryParams.get("id")!;
+
+    if (id === "all") {
+      const report = showInventoryItems(
+        inventoryItems.sortBy({
+          code: "string",
+        })
+      );
+      target.appendChild(report);
+      return;
+    }
+
     const inventoryItem = {
       ...(await inventoryModel.getItem(
         id
@@ -58,39 +74,10 @@ export async function init(
         inventoryItem.code
       );
 
-      inventoryItem.description =
-        getValue(
-          formDom,
-          "description",
-          inventoryItem.description
-        );
-
-      inventoryItem.quantity = getValue(
-        formDom,
-        "quantity",
-        inventoryItem.quantity
+      await saveChanges(
+        inventoryItem,
+        formDom
       );
-
-      inventoryItem.price = getValue(
-        formDom,
-        "price",
-        inventoryItem.price
-      );
-
-      inventoryItem.taxrate = getValue(
-        formDom,
-        "taxrate",
-        inventoryItem.taxrate
-      );
-
-      try {
-        await inventoryModel.upsertItem(
-          inventoryItem
-        );
-      } catch (ex) {
-        reportError(ex);
-      }
-      toast("Changes saved");
     });
 
     on(formDom, "delete", async () => {
@@ -104,19 +91,96 @@ export async function init(
       toast("Item Deleted");
     });
 
+    on(formDom, "clear", async () => {
+      location.href =
+        routes.createInventory();
+    });
+
     hookupTriggers(formDom);
     extendNumericInputBehaviors(
       formDom
     );
     extendTextInputBehaviors(formDom);
-  } else {
-    const report = showInventoryItems(
-      inventoryItems.sortBy({
-        code: "string",
-      })
-    );
-    target.appendChild(report);
+    return;
   }
+  {
+    const inventoryItem: Inventory = {
+      code: "",
+      price: 0,
+      quantity: 1,
+      taxrate: 100 * globals.TAXRATE,
+      description: "",
+    };
+    const formDom = showInventoryItem(
+      inventoryItem
+    );
+    target.appendChild(formDom);
+    hookupTriggers(formDom);
+    extendNumericInputBehaviors(
+      formDom
+    );
+    extendTextInputBehaviors(formDom);
+
+    on(formDom, "submit", async () => {
+      await saveChanges(
+        inventoryItem,
+        formDom
+      );
+      location.href = routes.inventory(
+        inventoryItem.id!
+      );
+    });
+
+    on(formDom, "clear", async () => {
+      location.href =
+        routes.createInventory();
+    });
+
+    on(formDom, "delete", () => {
+      location.href =
+        routes.createInventory();
+    });
+
+    return;
+  }
+}
+
+async function saveChanges(
+  inventoryItem: {
+    id?: string | undefined;
+    code: string;
+    description?: string | undefined;
+    quantity: number;
+    price: number;
+    taxrate: number;
+  },
+  formDom: HTMLFormElement
+) {
+  const names: Array<keyof Inventory> =
+    [
+      "description",
+      "code",
+      "price",
+      "quantity",
+      "taxrate",
+    ];
+  names.forEach((name) => {
+    (<any>inventoryItem)[name] =
+      getValue(
+        formDom,
+        name,
+        inventoryItem[name]
+      );
+  });
+
+  try {
+    await inventoryModel.upsertItem(
+      inventoryItem
+    );
+  } catch (ex) {
+    reportError(ex);
+  }
+  toast("Changes saved");
 }
 
 function getValue<T>(
