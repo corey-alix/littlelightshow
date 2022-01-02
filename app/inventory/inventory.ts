@@ -13,6 +13,7 @@ import {
   extendTextInputBehaviors,
 } from "../fun/behavior/form.js";
 import { invoiceModel } from "../services/invoices.js";
+import { isNull } from "../isUndefined.js";
 
 export async function init(
   target = document.body
@@ -69,6 +70,11 @@ export async function init(
         "price",
         inventoryItem.price
       );
+      inventoryItem.taxrate = getValue(
+        formDom,
+        "taxrate",
+        inventoryItem.taxrate
+      );
       try {
         await inventoryModel.upsertItem(
           inventoryItem
@@ -112,14 +118,14 @@ function getValue<T>(
 ): T {
   const value = (
     form[name] as HTMLInputElement
-  ).value;
+  )?.value;
 
-  if (value) {
+  if (!isNull(value)) {
     if (
       typeof defaultValue === "number"
     )
       return <T>(
-        (<any>parseFloat(value))
+        (<any>parseFloat(value || "0"))
       );
     return <T>(<any>value);
   }

@@ -20,6 +20,7 @@ import {
   reportError,
   toast,
 } from "./ux/Toaster";
+import { isUndefined } from "./isUndefined";
 
 const VERSION = "1.0.4";
 
@@ -55,10 +56,6 @@ function setInitialState(
       setGlobalState(key, data[key]);
     }
   });
-}
-
-function isUndefined(value: any) {
-  return typeof value === "undefined";
 }
 
 async function upgradeFromCurrentVersion() {
