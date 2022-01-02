@@ -5464,11 +5464,11 @@ function create2(ledgers) {
   }), /* @__PURE__ */ dom("div", {
     class: "col-1-3"
   }, "Totals"), /* @__PURE__ */ dom("div", {
-    class: "currency col-c"
+    class: "currency col-5"
   }, grandTotal.debit.toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "currency col-b"
+    class: "currency col-6"
   }, grandTotal.credit.toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "currency col-a bold"
+    class: "currency col-7 bold"
   }, (grandTotal.debit - grandTotal.credit).toFixed(2))), report);
   return report;
 }

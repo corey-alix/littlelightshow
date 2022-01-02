@@ -95,13 +95,13 @@ export function create(
     <div>
       <div class="col-1-last line"></div>
       <div class="col-1-3">Totals</div>
-      <div class="currency col-c">
+      <div class="currency col-5">
         {grandTotal.debit.toFixed(2)}
       </div>
-      <div class="currency col-b">
+      <div class="currency col-6">
         {grandTotal.credit.toFixed(2)}
       </div>
-      <div class="currency col-a bold">
+      <div class="currency col-7 bold">
         {(
           grandTotal.debit -
           grandTotal.credit
