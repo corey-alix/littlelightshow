@@ -413,6 +413,9 @@ form textarea {
 .col-c {
   grid-column: -4;
 }
+.col-c-2 {
+  grid-column: -4/-2;
+}
 .col-1-a {
   grid-column: 1/-1;
 }

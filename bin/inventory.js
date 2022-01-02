@@ -5110,6 +5110,13 @@ function injectLabels(domNode) {
 // app/services/admin.ts
 var import_faunadb5 = __toModule(require_faunadb());
 
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
 // app/fun/ticksInSeconds.ts
 function ticksInSeconds(ticks) {
   return ticks / 1e3;
@@ -5482,6 +5489,24 @@ function noZero(value) {
 
 // app/inventory/templates/inventory.tsx
 function create(inventoryItems) {
+  const inventoryItem = inventoryItems.map((item) => {
+    return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+      class: "col-1-3"
+    }, /* @__PURE__ */ dom("a", {
+      href: routes.inventory(item.id)
+    }, item.code)), /* @__PURE__ */ dom("div", {
+      class: "col-4 quantity"
+    }, asQuantity(item.quantity)), /* @__PURE__ */ dom("div", {
+      class: "col-5 currency"
+    }, asCurrency(item.price)), /* @__PURE__ */ dom("div", {
+      class: "col-6 currency"
+    }, noZero(asCurrency(item.price * item.quantity))), /* @__PURE__ */ dom("div", {
+      class: "col-7 taxrate"
+    }, asTaxRate(item.taxrate)), /* @__PURE__ */ dom("div", {
+      class: "col-1-last text smaller"
+    }, item.description || ""));
+  });
+  const totalValue = sum(inventoryItems.map((i) => (i.quantity || 0) * (i.price || 0)));
   const report = /* @__PURE__ */ dom("div", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
@@ -5496,26 +5521,15 @@ function create(inventoryItems) {
     class: "col-7 line taxrate"
   }, "Tax Rate"), /* @__PURE__ */ dom("div", {
     class: "placeholder lineitems"
-  }));
-  const lineItems = inventoryItems.map((item) => {
-    return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-      class: "col-1-3"
-    }, /* @__PURE__ */ dom("a", {
-      href: routes.inventory(item.id)
-    }, item.code)), /* @__PURE__ */ dom("div", {
-      class: "col-4 quantity"
-    }, asQuantity(item.quantity)), /* @__PURE__ */ dom("div", {
-      class: "col-5 currency"
-    }, asCurrency(item.price)), /* @__PURE__ */ dom("div", {
-      class: "col-6 currency"
-    }, noZero(asCurrency(item.price * (item.quantity - 0)))), /* @__PURE__ */ dom("div", {
-      class: "col-7 taxrate"
-    }, asTaxRate(item.taxrate)), /* @__PURE__ */ dom("div", {
-      class: "col-1-last text smaller"
-    }, item.description || ""));
-  });
+  }), /* @__PURE__ */ dom("div", {
+    class: "line col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-c-2"
+  }, "Total Value"), /* @__PURE__ */ dom("div", {
+    class: "col-a currency"
+  }, asCurrency(totalValue)));
   const lineItemTarget = report.querySelector(".lineitems.placeholder");
-  lineItems.forEach((i) => moveChildrenBefore(i, lineItemTarget));
+  inventoryItem.forEach((i) => moveChildrenBefore(i, lineItemTarget));
   return report;
 }
 function asTaxRate(v) {

@@ -6,35 +6,15 @@ import {
 import { asNumber } from "../../fun/asNumber.js";
 import { moveChildrenBefore } from "../../fun/dom.js";
 import { noZero } from "../../fun/isZero.js";
+import { sum } from "../../fun/sum.js";
 import { routes } from "../../router.js";
 import { Inventory } from "../../services/inventory.js";
 
 export function create(
   inventoryItems: Inventory[]
 ): HTMLElement {
-  const report = (
-    <div class="grid-6">
-      <div class="col-1-3 line">
-        Item Code
-      </div>
-      <div class="col-4 line quantity">
-        Qty
-      </div>
-      <div class="col-5 line currency">
-        Price
-      </div>
-      <div class="col-6 line value">
-        Value
-      </div>
-      <div class="col-7 line taxrate">
-        Tax Rate
-      </div>
-      <div class="placeholder lineitems"></div>
-    </div>
-  ) as HTMLElement;
-
-  const lineItems = inventoryItems.map(
-    (item) => {
+  const inventoryItem =
+    inventoryItems.map((item) => {
       return (
         <div>
           <div class="col-1-3">
@@ -56,7 +36,7 @@ export function create(
             {noZero(
               asCurrency(
                 item.price *
-                  (item.quantity - 0)
+                  item.quantity
               )
             )}
           </div>
@@ -68,14 +48,49 @@ export function create(
           </div>
         </div>
       );
-    }
+    });
+
+  const totalValue = sum(
+    inventoryItems.map(
+      (i) =>
+        (i.quantity || 0) *
+        (i.price || 0)
+    )
   );
+
+  const report = (
+    <div class="grid-6">
+      <div class="col-1-3 line">
+        Item Code
+      </div>
+      <div class="col-4 line quantity">
+        Qty
+      </div>
+      <div class="col-5 line currency">
+        Price
+      </div>
+      <div class="col-6 line value">
+        Value
+      </div>
+      <div class="col-7 line taxrate">
+        Tax Rate
+      </div>
+      <div class="placeholder lineitems"></div>
+      <div class="line col-1-last"></div>
+      <div class="col-c-2">
+        Total Value
+      </div>
+      <div class="col-a currency">
+        {asCurrency(totalValue)}
+      </div>
+    </div>
+  ) as HTMLElement;
 
   const lineItemTarget =
     report.querySelector(
       ".lineitems.placeholder"
     )!;
-  lineItems.forEach((i) =>
+  inventoryItem.forEach((i) =>
     moveChildrenBefore(
       i,
       lineItemTarget
