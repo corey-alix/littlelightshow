@@ -74,6 +74,10 @@ input.auto-label {
   position: absolute;
 }
 
+.relative {
+  position: relative;
+}
+
 .fixed {
   position: fixed;
 }
@@ -296,9 +300,6 @@ hr {
   font-size: 20pt;
 }
 
-.contact {
-}
-
 .subtitle {
   font-size: 12pt;
 }
@@ -503,6 +504,14 @@ body.dark button {
 
 .date {
   white-space: nowrap;
+}
+
+.taxrate {
+  text-align: right;
+}
+
+.taxrate::after {
+  content: "%";
 }
 
 @media (max-width: 639px) {

@@ -1,7 +1,4 @@
-import "./fun/sort.js";
 import { init as systemInit } from "./index.js";
-
-import { hookupTriggers } from "./fun/hookupTriggers.js";
 
 import {
   forceUpdatestampIndex,

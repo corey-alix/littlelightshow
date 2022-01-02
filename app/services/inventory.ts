@@ -2,7 +2,7 @@ import { StorageModel } from "./StorageModel";
 
 const INVENTORY_TABLE = "inventory";
 
-interface Inventory {
+export interface Inventory {
   id?: string;
   code: string;
   price: number;

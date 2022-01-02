@@ -1,3 +1,4 @@
+import "./fun/sort.js";
 import { setMode } from "./fun/setMode";
 import { globals } from "./globals";
 const { primaryContact } = globals;
