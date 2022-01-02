@@ -3,7 +3,6 @@ import {
   on,
   trigger,
 } from "../fun/on.js";
-import { inventoryModel } from "../services/inventory.js";
 import { routes } from "../router.js";
 import {
   upsertItem as saveInvoice,
@@ -178,25 +177,6 @@ async function tryToSaveInvoice(
     formDom.reportValidity();
     return false;
   }
-  formDom
-    .querySelectorAll(".line-item")
-    .forEach((lineItemForm) => {
-      const [itemInput, priceInput] = [
-        "#item",
-        "#price",
-      ].map(
-        (id) =>
-          lineItemForm.querySelector(
-            id
-          ) as HTMLInputElement
-      );
-      inventoryModel.upsertItem({
-        id: itemInput.value,
-        code: itemInput.value,
-        price: priceInput.valueAsNumber,
-        taxrate: TAXRATE,
-      });
-    });
   const requestModel = asModel(formDom);
   if (requestModel.id) {
     // confirm invoice changed

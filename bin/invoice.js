@@ -4819,6 +4819,32 @@ function trigger(domNode, eventName) {
   domNode.dispatchEvent(new Event(eventName));
 }
 
+// app/router.ts
+var routes = {
+  home: () => "/index.html",
+  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
+  createInvoice: () => `/app/invoice/invoice.html`,
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
+  allInvoices: () => `/app/invoice/invoices.html`,
+  createInventory: () => `/app/inventory/index.html`,
+  inventory: (id) => `/app/inventory/index.html?id=${id}`,
+  allInventoryItems: () => `/app/inventory/index.html?id=all`,
+  allLedgers: () => `/app/gl/index.html?print=all`,
+  printLedger: (id) => `/app/gl/index.html?print=${id}`,
+  createLedger: () => "/app/gl/index.html",
+  editLedger: (id) => `/app/gl/index.html?id=${id}`,
+  dashboard: () => "/app/index.html",
+  admin: () => "/app/admin/index.html",
+  gl: {
+    byAccount: (id) => `/app/gl/index.html?account=${id}`
+  }
+};
+
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return (value || 0).toFixed(2);
+}
+
 // app/fun/ticksInSeconds.ts
 function ticksInSeconds(ticks) {
   return ticks / 1e3;
@@ -5113,60 +5139,6 @@ function setFutureSyncTime(tableName, syncTime) {
   setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
 }
 
-// app/services/inventory.ts
-var INVENTORY_TABLE = "inventory";
-var InventoryModel = class extends StorageModel {
-  async upgradeTo104() {
-    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
-    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
-  }
-};
-var inventoryModel = new InventoryModel({
-  tableName: INVENTORY_TABLE,
-  offline: false
-});
-async function forceDatalist() {
-  let dataList = document.querySelector(`#inventory_list`);
-  if (dataList)
-    return dataList;
-  dataList = document.createElement("datalist");
-  dataList.id = "inventory_list";
-  const items = await inventoryModel.getItems();
-  items.sortBy({ code: "string" }).forEach((item) => {
-    const option = document.createElement("option");
-    option.value = item.code;
-    dataList.appendChild(option);
-  });
-  document.body.appendChild(dataList);
-  return dataList;
-}
-
-// app/router.ts
-var routes = {
-  home: () => "/index.html",
-  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
-  createInvoice: () => `/app/invoice/invoice.html`,
-  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
-  allInvoices: () => `/app/invoice/invoices.html`,
-  createInventory: () => `/app/inventory/index.html`,
-  inventory: (id) => `/app/inventory/index.html?id=${id}`,
-  allInventoryItems: () => `/app/inventory/index.html?id=all`,
-  allLedgers: () => `/app/gl/index.html?print=all`,
-  printLedger: (id) => `/app/gl/index.html?print=${id}`,
-  createLedger: () => "/app/gl/index.html",
-  editLedger: (id) => `/app/gl/index.html?id=${id}`,
-  dashboard: () => "/app/index.html",
-  admin: () => "/app/admin/index.html",
-  gl: {
-    byAccount: (id) => `/app/gl/index.html?account=${id}`
-  }
-};
-
-// app/fun/asCurrency.ts
-function asCurrency(value) {
-  return (value || 0).toFixed(2);
-}
-
 // app/services/invoices.ts
 var { TAXRATE } = globals;
 var INVOICE_TABLE = "invoices";
@@ -5449,6 +5421,34 @@ function extendTextInputBehaviors(form) {
   textInput.forEach(selectOnFocus);
   const trimInput = textInput.filter((i) => i.classList.contains("trim"));
   trimInput.forEach(formatTrim);
+}
+
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
+  tableName: INVENTORY_TABLE,
+  offline: false
+});
+async function forceDatalist() {
+  let dataList = document.querySelector(`#inventory_list`);
+  if (dataList)
+    return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = "inventory_list";
+  const items = await inventoryModel.getItems();
+  items.sortBy({ code: "string" }).forEach((item) => {
+    const option = document.createElement("option");
+    option.value = item.code;
+    dataList.appendChild(option);
+  });
+  document.body.appendChild(dataList);
+  return dataList;
 }
 
 // app/invoice/PaymentManager.ts
@@ -6162,18 +6162,6 @@ async function tryToSaveInvoice(formDom) {
     formDom.reportValidity();
     return false;
   }
-  formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
-    const [itemInput, priceInput] = [
-      "#item",
-      "#price"
-    ].map((id) => lineItemForm.querySelector(id));
-    inventoryModel.upsertItem({
-      id: itemInput.value,
-      code: itemInput.value,
-      price: priceInput.valueAsNumber,
-      taxrate: TAXRATE4
-    });
-  });
   const requestModel = asModel(formDom);
   if (requestModel.id) {
     const priorModel = await invoiceModel.getItem(requestModel.id);
