@@ -5420,6 +5420,16 @@ function formatAsCurrency(input) {
     }
   });
 }
+function formatTrim(input) {
+  const change = () => {
+    const textValue = (input.value || "").trim();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  };
+  change();
+  input.addEventListener("change", change);
+}
 function getValueAsNumber(input) {
   if (!input.value)
     return 0;
@@ -5432,6 +5442,12 @@ function extendNumericInputBehaviors(form) {
   numberInput.forEach(selectOnFocus);
   const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
   currencyInput.forEach(formatAsCurrency);
+}
+function extendTextInputBehaviors(form) {
+  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
+  textInput.forEach(selectOnFocus);
+  const trimInput = textInput.filter((i) => i.classList.contains("trim"));
+  trimInput.forEach(formatTrim);
 }
 
 // app/invoice/PaymentManager.ts
@@ -5656,6 +5672,7 @@ async function create(invoice) {
   }
   on(form, "change", () => compute(form));
   extendNumericInputBehaviors(form);
+  extendTextInputBehaviors(form);
   hookupTriggers(form);
   hookupEvents(form);
   if (!invoice.mops?.length) {
@@ -5745,14 +5762,15 @@ function renderInvoiceItem(item) {
     class: "form-label col-1-last"
   }, "Item"), /* @__PURE__ */ dom("input", {
     name: "item",
-    class: "bold col-1-3",
+    class: "bold col-1-3 text trim",
     required: true,
     type: "text",
     value: item.item,
     list: "inventory_list"
   }), /* @__PURE__ */ dom("input", {
     name: "description",
-    class: "col-4-last",
+    class: "col-4-last text trim",
+    type: "text",
     value: item.description || ""
   }), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-2 quantity"

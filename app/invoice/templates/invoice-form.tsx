@@ -5,7 +5,10 @@ import {
   moveChildrenBefore,
 } from "../../fun/dom.js";
 import { hookupTriggers } from "../../fun/hookupTriggers.js";
-import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
+import {
+  extendNumericInputBehaviors,
+  extendTextInputBehaviors,
+} from "../../fun/behavior/form.js";
 import {
   on,
   trigger,
@@ -317,6 +320,7 @@ export async function create(
   );
 
   extendNumericInputBehaviors(form);
+  extendTextInputBehaviors(form);
   hookupTriggers(form);
   hookupEvents(form);
 
@@ -539,7 +543,7 @@ function renderInvoiceItem(
       </label>
       <input
         name="item"
-        class="bold col-1-3"
+        class="bold col-1-3 text trim"
         required
         type="text"
         value={item.item}
@@ -547,7 +551,8 @@ function renderInvoiceItem(
       />
       <input
         name="description"
-        class="col-4-last"
+        class="col-4-last text trim"
+        type="text"
         value={item.description || ""}
       />
       <label class="form-label col-1-2 quantity">

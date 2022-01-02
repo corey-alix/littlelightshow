@@ -8,38 +8,38 @@ export function create(
     return <form>Item not found</form>;
   return (
     <form class="grid-6">
-      <div class="col-1-4 line">
+      <div class="col-1-c line">
         Item Code
       </div>
-      <div class="col-5 line currency">
+      <div class="col-b line currency">
         Price
       </div>
-      <div class="col-last line taxrate">
+      <div class="col-a line taxrate">
         Tax Rate
       </div>
       <input
-        class="col-1-4 trim text"
+        class="col-1-c trim text"
         name="code"
         type="text"
         value={inventoryItem.code}
       />
       <input
-        class="col-5 currency"
+        class="col-b currency"
         name="price"
         type="number"
         value={inventoryItem.price}
       />
       <input
-        class="col-last taxrate"
+        class="col-a taxrate"
         name="taxrate"
         type="number"
         value={inventoryItem.taxrate}
       />
-      <div class="col-1-last line">
+      <div class="col-1-a line">
         Description
       </div>
       <input
-        class="col-1-last text trim"
+        class="col-1-a text trim"
         name="description"
         type="text"
         value={
@@ -54,7 +54,7 @@ export function create(
         Save
       </button>
       <button
-        class="bold button col-6"
+        class="button col-a"
         data-event="delete"
       >
         Delete

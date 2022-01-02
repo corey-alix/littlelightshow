@@ -15,7 +15,7 @@ export function create(
       <div class="col-5 line currency">
         Price
       </div>
-      <div class="col-6 line taxrate">
+      <div class="col-last line taxrate">
         Tax Rate
       </div>
       <div class="placeholder lineitems"></div>
@@ -32,16 +32,16 @@ export function create(
                 item.id!
               )}
             >
-              "{item.code}"
+              {item.code}
             </a>
           </div>
           <div class="col-5 currency">
             {asCurrency(item.price)}
           </div>
-          <div class="col-6 taxrate">
+          <div class="col-last taxrate">
             {asTaxRate(item.taxrate)}
           </div>
-          <div class="col-2-6 text">
+          <div class="col-1-last text smaller">
             {item.description || ""}
           </div>
         </div>

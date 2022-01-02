@@ -5467,7 +5467,7 @@ function create(inventoryItems) {
   }, "Item Code"), /* @__PURE__ */ dom("div", {
     class: "col-5 line currency"
   }, "Price"), /* @__PURE__ */ dom("div", {
-    class: "col-6 line taxrate"
+    class: "col-last line taxrate"
   }, "Tax Rate"), /* @__PURE__ */ dom("div", {
     class: "placeholder lineitems"
   }));
@@ -5476,12 +5476,12 @@ function create(inventoryItems) {
       class: "col-1-4"
     }, /* @__PURE__ */ dom("a", {
       href: routes.inventory(item.id)
-    }, '"', item.code, '"')), /* @__PURE__ */ dom("div", {
+    }, item.code)), /* @__PURE__ */ dom("div", {
       class: "col-5 currency"
     }, asCurrency(item.price)), /* @__PURE__ */ dom("div", {
-      class: "col-6 taxrate"
+      class: "col-last taxrate"
     }, asTaxRate(item.taxrate)), /* @__PURE__ */ dom("div", {
-      class: "col-2-6 text"
+      class: "col-1-last text smaller"
     }, item.description || ""));
   });
   const lineItemTarget = report.querySelector(".lineitems.placeholder");
@@ -5499,30 +5499,30 @@ function create2(inventoryItem) {
   return /* @__PURE__ */ dom("form", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
-    class: "col-1-4 line"
+    class: "col-1-c line"
   }, "Item Code"), /* @__PURE__ */ dom("div", {
-    class: "col-5 line currency"
+    class: "col-b line currency"
   }, "Price"), /* @__PURE__ */ dom("div", {
-    class: "col-last line taxrate"
+    class: "col-a line taxrate"
   }, "Tax Rate"), /* @__PURE__ */ dom("input", {
-    class: "col-1-4 trim text",
+    class: "col-1-c trim text",
     name: "code",
     type: "text",
     value: inventoryItem.code
   }), /* @__PURE__ */ dom("input", {
-    class: "col-5 currency",
+    class: "col-b currency",
     name: "price",
     type: "number",
     value: inventoryItem.price
   }), /* @__PURE__ */ dom("input", {
-    class: "col-last taxrate",
+    class: "col-a taxrate",
     name: "taxrate",
     type: "number",
     value: inventoryItem.taxrate
   }), /* @__PURE__ */ dom("div", {
-    class: "col-1-last line"
+    class: "col-1-a line"
   }, "Description"), /* @__PURE__ */ dom("input", {
-    class: "col-1-last text trim",
+    class: "col-1-a text trim",
     name: "description",
     type: "text",
     value: inventoryItem.description || inventoryItem.code
@@ -5530,7 +5530,7 @@ function create2(inventoryItem) {
     class: "bold button col-1",
     "data-event": "submit"
   }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "bold button col-6",
+    class: "button col-a",
     "data-event": "delete"
   }, "Delete"));
 }
