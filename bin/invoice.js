@@ -5662,11 +5662,7 @@ async function create(invoice) {
     class: "button if-desktop",
     "data-event": "delete",
     type: "button"
-  }, "Delete"), /* @__PURE__ */ dom("button", {
-    class: "button if-desktop",
-    "data-event": "list-all-invoices",
-    type: "button"
-  }, "Show All")), /* @__PURE__ */ dom("div", {
+  }, "Delete")), /* @__PURE__ */ dom("div", {
     class: "vspacer-2"
   }));
   const labor = form.querySelector("[name=labor]");
@@ -5996,11 +5992,7 @@ function create3(invoices) {
     class: "bold col-7-last currency"
   }, asCurrency(balanceDue)), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-last"
-  }), /* @__PURE__ */ dom("button", {
-    type: "button",
-    class: "button col-1-2",
-    "data-event": "create-invoice"
-  }, "Create Invoice")), target);
+  })), target);
   hookupTriggers(target);
   return target;
 }

@@ -580,7 +580,16 @@ body.dark button {
   }
 }
 
+@media (max-width: 959px) {
+  .col-8 {
+    display: none;
+  }
+}
+
 @media (min-width: 960px) {
+  .col-8 {
+    grid-column: 8;
+  }
 }
 
 @media print {

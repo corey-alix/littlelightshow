@@ -244,13 +244,6 @@ export async function create(
         >
           Delete
         </button>
-        <button
-          class="button if-desktop"
-          data-event="list-all-invoices"
-          type="button"
-        >
-          Show All
-        </button>
       </div>
       <div class="vspacer-2"></div>
     </form>

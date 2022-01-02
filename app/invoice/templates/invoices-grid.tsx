@@ -73,13 +73,6 @@ export function create(
           {asCurrency(balanceDue)}
         </label>
         <div class="vspacer-2 col-1-last"></div>
-        <button
-          type="button"
-          class="button col-1-2"
-          data-event="create-invoice"
-        >
-          Create Invoice
-        </button>
       </div>,
       target
     );

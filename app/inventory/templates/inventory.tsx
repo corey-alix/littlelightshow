@@ -17,7 +17,7 @@ export function create(
     inventoryItems.map((item) => {
       return (
         <div>
-          <div class="col-1-3">
+          <div class="col-1-4">
             <a
               href={routes.inventory(
                 item.id!
@@ -26,13 +26,13 @@ export function create(
               {item.code}
             </a>
           </div>
-          <div class="col-4 quantity">
+          <div class="col-5 quantity">
             {asQuantity(item.quantity)}
           </div>
-          <div class="col-5 currency">
+          <div class="col-6 currency">
             {asCurrency(item.price)}
           </div>
-          <div class="col-6 currency">
+          <div class="col-7 currency">
             {noZero(
               asCurrency(
                 item.price *
@@ -40,7 +40,7 @@ export function create(
               )
             )}
           </div>
-          <div class="col-7 taxrate">
+          <div class="col-8 taxrate">
             {asTaxRate(item.taxrate)}
           </div>
           <div class="col-1-last text smaller">
@@ -60,19 +60,19 @@ export function create(
 
   const report = (
     <div class="grid-6">
-      <div class="col-1-3 line">
+      <div class="col-1-4 line">
         Item Code
       </div>
-      <div class="col-4 line quantity">
+      <div class="col-5 line quantity">
         Qty
       </div>
-      <div class="col-5 line currency">
+      <div class="col-6 line currency">
         Price
       </div>
-      <div class="col-6 line value">
+      <div class="col-7 line value">
         Value
       </div>
-      <div class="col-7 line taxrate">
+      <div class="col-8 line taxrate">
         Tax Rate
       </div>
       <div class="placeholder lineitems"></div>
