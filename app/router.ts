@@ -8,8 +8,10 @@ export const routes = {
     `/app/invoice/invoice.html?id=${id}`,
   allInvoices: () =>
     `/app/invoice/invoices.html`,
+  inventory: (id: string) =>
+    `/app/inventory/index.html?id=${id}`,
   allInventoryItems: () =>
-    `/app/inventory/inventory.html`,
+    `/app/inventory/index.html`,
   allLedgers: () =>
     `/app/gl/index.html?print=all`,
   printLedger: (id: string) =>

@@ -1,6 +1,7 @@
 import { dom } from "../../dom.js";
 import { asCurrency } from "../../fun/asCurrency.js";
 import { moveChildrenBefore } from "../../fun/dom.js";
+import { routes } from "../../router.js";
 import { Inventory } from "../../services/inventory.js";
 
 export function create(
@@ -26,7 +27,13 @@ export function create(
       return (
         <div>
           <div class="col-1">
-            {item.code}
+            <a
+              href={routes.inventory(
+                item.id!
+              )}
+            >
+              {item.code}
+            </a>
           </div>
           <div class="col-2 currency">
             {asCurrency(item.price)}

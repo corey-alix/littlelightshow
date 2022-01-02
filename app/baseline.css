@@ -511,7 +511,7 @@ body.dark button {
 }
 
 .taxrate::after {
-  content: "%";
+  content: " %";
 }
 
 @media (max-width: 639px) {

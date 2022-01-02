@@ -4833,6 +4833,8 @@ var routes = {
   createInvoice: () => `/app/invoice/invoice.html`,
   invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
   allInvoices: () => `/app/invoice/invoices.html`,
+  inventory: (id) => `/app/inventory/index.html?id=${id}`,
+  allInventoryItems: () => `/app/inventory/index.html`,
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
   createLedger: () => "/app/gl/index.html",
@@ -5640,6 +5642,7 @@ async function upgradeFromCurrentVersion() {
 async function upgradeFrom103To104() {
   inventoryModel.upgradeTo104();
   await inventoryModel.synchronize();
+  setGlobalState("VERSION", VERSION);
   toast("upgraded from 1.0.3 to 1.0.4");
 }
 

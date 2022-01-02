@@ -4709,6 +4709,29 @@ var require_faunadb = __commonJS({
   }
 });
 
+// app/fun/sort.ts
+var sortOps = {
+  number: (a, b) => a - b,
+  "-number": (a, b) => -(a - b),
+  gl: (a, b) => a >= 0 ? a - b : b - a,
+  "abs(number)": (a, b) => Math.abs(a) - Math.abs(b),
+  "-abs(number)": (a, b) => -(Math.abs(a) - Math.abs(b)),
+  string: (a, b) => a.localeCompare(b),
+  date: (a, b) => a.valueOf() - b.valueOf(),
+  noop: () => 0
+};
+Array.prototype.sortBy = function(sortBy) {
+  return sort(this, sortBy);
+};
+function sort(items, sortBy) {
+  const keys = Object.keys(sortBy);
+  return [...items].sort((a, b) => {
+    let result = 0;
+    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
+    return result;
+  });
+}
+
 // app/fun/setMode.ts
 var modes = {
   light_mode: "light",
@@ -4810,6 +4833,8 @@ var routes = {
   createInvoice: () => `/app/invoice/invoice.html`,
   invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
   allInvoices: () => `/app/invoice/invoices.html`,
+  inventory: (id) => `/app/inventory/index.html?id=${id}`,
+  allInventoryItems: () => `/app/inventory/index.html`,
   allLedgers: () => `/app/gl/index.html?print=all`,
   printLedger: (id) => `/app/gl/index.html?print=${id}`,
   createLedger: () => "/app/gl/index.html",
@@ -5401,6 +5426,7 @@ async function upgradeFromCurrentVersion() {
 async function upgradeFrom103To104() {
   inventoryModel.upgradeTo104();
   await inventoryModel.synchronize();
+  setGlobalState("VERSION", VERSION);
   toast("upgraded from 1.0.3 to 1.0.4");
 }
 export {
