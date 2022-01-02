@@ -4,6 +4,7 @@ import {
   forceUpdatestampIndex,
   forceUpdatestampTable,
   importInvoicesToGeneralLedger,
+  removeDuplicateInventoryItems,
 } from "./services/admin.js";
 import {
   getItems as loadAllLedgers,
@@ -138,11 +139,34 @@ export async function init() {
 
   on(
     domNode,
+    "clean-inventory-data",
+    async () => {
+      removeDuplicateInventoryItems();
+    }
+  );
+
+  on(
+    domNode,
     "synchronize-invoice-data",
     async () => {
       try {
         await invoiceModel.synchronize();
         toast("invoice sync completed");
+      } catch (ex) {
+        reportError(ex);
+      }
+    }
+  );
+
+  on(
+    domNode,
+    "synchronize-inventory-data",
+    async () => {
+      try {
+        await inventoryModel.synchronize();
+        toast(
+          "inventory sync completed"
+        );
       } catch (ex) {
         reportError(ex);
       }

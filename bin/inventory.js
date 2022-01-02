@@ -4711,13 +4711,13 @@ var require_faunadb = __commonJS({
 
 // app/fun/sort.ts
 var sortOps = {
-  number: (a, b) => a - b,
-  "-number": (a, b) => -(a - b),
+  number: (a, b) => (a || 0) - (b || 0),
+  "-number": (a, b) => -((a || 0) - (b || 0)),
   gl: (a, b) => a >= 0 ? a - b : b - a,
-  "abs(number)": (a, b) => Math.abs(a) - Math.abs(b),
-  "-abs(number)": (a, b) => -(Math.abs(a) - Math.abs(b)),
-  string: (a, b) => a.localeCompare(b),
-  date: (a, b) => a.valueOf() - b.valueOf(),
+  "abs(number)": (a, b) => Math.abs(a || 0) - Math.abs(b || 0),
+  "-abs(number)": (a, b) => -(Math.abs(a || 0) - Math.abs(b || 0)),
+  string: (a, b) => (a || "").localeCompare(b || ""),
+  date: (a, b) => (a || 0).valueOf() - (b || 0).valueOf(),
   noop: () => 0
 };
 Array.prototype.sortBy = function(sortBy) {

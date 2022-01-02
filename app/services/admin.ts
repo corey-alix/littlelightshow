@@ -17,6 +17,36 @@ import {
 import { split } from "../fun/split";
 import { distinct } from "../fun/distinct.js";
 import { asCurrency } from "../fun/asCurrency.js";
+import { inventoryModel } from "./inventory.js";
+
+export async function removeDuplicateInventoryItems() {
+  const inventoryItems =
+    await inventoryModel.getItems();
+  const itemCodes = distinct(
+    inventoryItems.map((i) => i.code)
+  );
+  for (let code of itemCodes) {
+    const duplicates =
+      inventoryItems.filter(
+        (i) => i.code === code
+      );
+    if (duplicates.length <= 1)
+      continue;
+
+    const deleteOrder =
+      duplicates.sortBy({
+        taxrate: "-number",
+      });
+
+    while (deleteOrder.length > 1) {
+      const deleteMe =
+        deleteOrder.pop()!;
+      await inventoryModel.removeItem(
+        deleteMe.id!
+      );
+    }
+  }
+}
 
 export async function forceUpdatestampTable(
   tableName: string

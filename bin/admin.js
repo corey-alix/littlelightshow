@@ -4711,13 +4711,13 @@ var require_faunadb = __commonJS({
 
 // app/fun/sort.ts
 var sortOps = {
-  number: (a, b) => a - b,
-  "-number": (a, b) => -(a - b),
+  number: (a, b) => (a || 0) - (b || 0),
+  "-number": (a, b) => -((a || 0) - (b || 0)),
   gl: (a, b) => a >= 0 ? a - b : b - a,
-  "abs(number)": (a, b) => Math.abs(a) - Math.abs(b),
-  "-abs(number)": (a, b) => -(Math.abs(a) - Math.abs(b)),
-  string: (a, b) => a.localeCompare(b),
-  date: (a, b) => a.valueOf() - b.valueOf(),
+  "abs(number)": (a, b) => Math.abs(a || 0) - Math.abs(b || 0),
+  "-abs(number)": (a, b) => -(Math.abs(a || 0) - Math.abs(b || 0)),
+  string: (a, b) => (a || "").localeCompare(b || ""),
+  date: (a, b) => (a || 0).valueOf() - (b || 0).valueOf(),
   noop: () => 0
 };
 Array.prototype.sortBy = function(sortBy) {
@@ -5441,8 +5441,37 @@ function distinct(items) {
   ];
 }
 
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
+  tableName: INVENTORY_TABLE,
+  offline: false
+});
+
 // app/services/admin.ts
 var { TAXRATE: TAXRATE2 } = globals;
+async function removeDuplicateInventoryItems() {
+  const inventoryItems = await inventoryModel.getItems();
+  const itemCodes = distinct(inventoryItems.map((i) => i.code));
+  for (let code of itemCodes) {
+    const duplicates = inventoryItems.filter((i) => i.code === code);
+    if (duplicates.length <= 1)
+      continue;
+    const deleteOrder = duplicates.sortBy({
+      taxrate: "-number"
+    });
+    while (deleteOrder.length > 1) {
+      const deleteMe = deleteOrder.pop();
+      await inventoryModel.removeItem(deleteMe.id);
+    }
+  }
+}
 async function forceUpdatestampTable(tableName) {
   const client = createClient();
   return await client.query(import_faunadb5.query.CreateCollection({
@@ -5583,19 +5612,6 @@ function createLedger(invoice) {
   return ledger;
 }
 
-// app/services/inventory.ts
-var INVENTORY_TABLE = "inventory";
-var InventoryModel = class extends StorageModel {
-  async upgradeTo104() {
-    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
-    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
-  }
-};
-var inventoryModel = new InventoryModel({
-  tableName: INVENTORY_TABLE,
-  offline: false
-});
-
 // app/index.ts
 var { primaryContact } = globals;
 var VERSION = "1.0.4";
@@ -5713,10 +5729,21 @@ async function init2() {
     });
     toDelete.forEach((id) => invoiceModel.removeItem(id));
   });
+  on(domNode, "clean-inventory-data", async () => {
+    removeDuplicateInventoryItems();
+  });
   on(domNode, "synchronize-invoice-data", async () => {
     try {
       await invoiceModel.synchronize();
       toast("invoice sync completed");
+    } catch (ex) {
+      reportError(ex);
+    }
+  });
+  on(domNode, "synchronize-inventory-data", async () => {
+    try {
+      await inventoryModel.synchronize();
+      toast("inventory sync completed");
     } catch (ex) {
       reportError(ex);
     }
