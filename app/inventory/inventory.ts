@@ -19,6 +19,7 @@ import { invoiceModel } from "../services/invoices.js";
 import { isNull } from "../isUndefined.js";
 import { routes } from "../router.js";
 import { globals } from "../globals.js";
+import { gotoUrl } from "../fun/gotoUrl.js";
 
 export async function init(
   target = document.body
@@ -92,8 +93,13 @@ export async function init(
     });
 
     on(formDom, "clear", async () => {
-      location.href =
-        routes.createInventory();
+      gotoUrl(routes.createInventory());
+    });
+
+    on(formDom, "show-all", () => {
+      gotoUrl(
+        routes.allInventoryItems()
+      );
     });
 
     hookupTriggers(formDom);
@@ -126,19 +132,25 @@ export async function init(
         inventoryItem,
         formDom
       );
-      location.href = routes.inventory(
-        inventoryItem.id!
+      gotoUrl(
+        routes.inventory(
+          inventoryItem.id!
+        )
       );
     });
 
     on(formDom, "clear", async () => {
-      location.href =
-        routes.createInventory();
+      gotoUrl(routes.createInventory());
     });
 
     on(formDom, "delete", () => {
-      location.href =
-        routes.createInventory();
+      gotoUrl(routes.createInventory());
+    });
+
+    on(formDom, "show-all", () => {
+      gotoUrl(
+        routes.allInventoryItems()
+      );
     });
 
     return;

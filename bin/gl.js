@@ -5508,6 +5508,11 @@ function extendNumericInputBehaviors(form) {
   currencyInput.forEach(formatAsCurrency);
 }
 
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
+}
+
 // app/gl/templates/glgrid.tsx
 function asModel(form) {
   const result = {
@@ -5570,7 +5575,7 @@ function hookupHandlers(domNode) {
     summaryArea.appendChild(summaryReport);
   });
   on(domNode, "print-all", async () => {
-    location.href = routes.allLedgers();
+    gotoUrl(routes.allLedgers());
   });
   on(domNode, "print", async () => {
     if (!domNode.reportValidity())
@@ -5581,7 +5586,7 @@ function hookupHandlers(domNode) {
     }
     const model = asModel(domNode);
     await upsertItem(model);
-    location.href = routes.printLedger(model.id);
+    gotoUrl(routes.printLedger(model.id));
   });
   on(domNode, "print-detail", async () => {
     const ledgers = await getItems();
@@ -5596,13 +5601,13 @@ function hookupHandlers(domNode) {
     document.body.appendChild(report);
   });
   on(domNode, "clear", async () => {
-    location.href = routes.createLedger();
+    gotoUrl(routes.createLedger());
   });
   on(domNode, "delete", async () => {
     try {
       const id = domNode["id"].value;
       await removeItem(id);
-      location.href = routes.allLedgers();
+      gotoUrl(routes.allLedgers());
     } catch (ex) {
       reportError(ex);
     }
@@ -5617,7 +5622,7 @@ function hookupHandlers(domNode) {
     const model = asModel(domNode);
     await upsertItem(model);
     toast(`saved ${model.id}`);
-    location.href = routes.editLedger(model.id);
+    gotoUrl(routes.editLedger(model.id));
   });
   on(domNode, "add-row", () => {
     const row = createRow();
@@ -5818,7 +5823,7 @@ async function create4(id) {
     }, "Create General Ledger")), target);
   }
   on(target, "create-ledger", () => {
-    location.href = routes.createLedger();
+    gotoUrl(routes.createLedger());
   });
   hookupTriggers(target);
   return target;
@@ -5906,10 +5911,10 @@ async function validate() {
 // app/identify.ts
 async function identify() {
   if (!localStorage.getItem("user")) {
-    location.href = routes.identity({
+    gotoUrl(routes.identity({
       target: location.href,
       context: CONTEXT
-    });
+    }));
     return false;
   }
   try {

@@ -5203,13 +5203,18 @@ async function validate() {
   await client.ping();
 }
 
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
+}
+
 // app/identify.ts
 async function identify() {
   if (!localStorage.getItem("user")) {
-    location.href = routes.identity({
+    gotoUrl(routes.identity({
       target: location.href,
       context: CONTEXT
-    });
+    }));
     return false;
   }
   try {
@@ -5716,7 +5721,7 @@ function addAnotherItem(formDom) {
 }
 function hookupEvents(formDom) {
   on(formDom, "list-all-invoices", () => {
-    window.location.href = routes.allInvoices();
+    gotoUrl(routes.allInvoices());
   });
   on(formDom, "remove-last-item", () => {
     itemsToRemove.forEach((item) => item.remove());
@@ -5737,7 +5742,7 @@ function hookupEvents(formDom) {
     focus.focus();
   });
   on(formDom, "clear", () => {
-    location.href = routes.createInvoice();
+    gotoUrl(routes.createInvoice());
   });
 }
 function renderMopLineItem(item) {
@@ -6107,7 +6112,7 @@ async function renderInvoices(target) {
     target.appendChild(formDom);
     on(formDom, "create-invoice", () => {
       try {
-        location.href = routes.createInvoice();
+        gotoUrl(routes.createInvoice());
       } catch (ex) {
         reportError(ex);
       }

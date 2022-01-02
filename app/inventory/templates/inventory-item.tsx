@@ -88,6 +88,12 @@ export function create(
       >
         Delete
       </button>
+      <button
+        class="button col-a"
+        data-event="show-all"
+      >
+        Show All
+      </button>
     </form>
   );
 }

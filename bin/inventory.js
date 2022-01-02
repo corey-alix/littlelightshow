@@ -4882,13 +4882,18 @@ function reportError(message) {
   });
 }
 
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
+}
+
 // app/identify.ts
 async function identify() {
   if (!localStorage.getItem("user")) {
-    location.href = routes.identity({
+    gotoUrl(routes.identity({
       target: location.href,
       context: CONTEXT
-    });
+    }));
     return false;
   }
   try {
@@ -5602,7 +5607,10 @@ function create2(inventoryItem) {
   }, "Clear"), /* @__PURE__ */ dom("button", {
     class: "button col-a",
     "data-event": "delete"
-  }, "Delete"));
+  }, "Delete"), /* @__PURE__ */ dom("button", {
+    class: "button col-a",
+    "data-event": "show-all"
+  }, "Show All"));
 }
 
 // app/inventory/inventory.ts
@@ -5643,7 +5651,10 @@ async function init2(target = document.body) {
       toast("Item Deleted");
     });
     on(formDom, "clear", async () => {
-      location.href = routes.createInventory();
+      gotoUrl(routes.createInventory());
+    });
+    on(formDom, "show-all", () => {
+      gotoUrl(routes.allInventoryItems());
     });
     hookupTriggers(formDom);
     extendNumericInputBehaviors(formDom);
@@ -5665,13 +5676,16 @@ async function init2(target = document.body) {
     extendTextInputBehaviors(formDom);
     on(formDom, "submit", async () => {
       await saveChanges(inventoryItem, formDom);
-      location.href = routes.inventory(inventoryItem.id);
+      gotoUrl(routes.inventory(inventoryItem.id));
     });
     on(formDom, "clear", async () => {
-      location.href = routes.createInventory();
+      gotoUrl(routes.createInventory());
     });
     on(formDom, "delete", () => {
-      location.href = routes.createInventory();
+      gotoUrl(routes.createInventory());
+    });
+    on(formDom, "show-all", () => {
+      gotoUrl(routes.allInventoryItems());
     });
     return;
   }

@@ -27,6 +27,7 @@ import {
   reportError,
   toast,
 } from "../../ux/Toaster.js";
+import { gotoUrl } from "../../fun/gotoUrl.js";
 
 function asModel(
   form: HTMLFormElement
@@ -161,7 +162,7 @@ function hookupHandlers(
   });
 
   on(domNode, "print-all", async () => {
-    location.href = routes.allLedgers();
+    gotoUrl(routes.allLedgers());
   });
 
   on(domNode, "print", async () => {
@@ -177,8 +178,8 @@ function hookupHandlers(
     const model = asModel(domNode);
     await saveLedger(model);
 
-    location.href = routes.printLedger(
-      model.id
+    gotoUrl(
+      routes.printLedger(model.id)
     );
   });
 
@@ -209,8 +210,7 @@ function hookupHandlers(
   );
 
   on(domNode, "clear", async () => {
-    location.href =
-      routes.createLedger();
+    gotoUrl(routes.createLedger());
   });
 
   on(domNode, "delete", async () => {
@@ -221,8 +221,7 @@ function hookupHandlers(
         ] as any as HTMLInputElement
       ).value;
       await deleteLedger(id);
-      location.href =
-        routes.allLedgers();
+      gotoUrl(routes.allLedgers());
     } catch (ex) {
       reportError(ex);
     }
@@ -241,8 +240,8 @@ function hookupHandlers(
     const model = asModel(domNode);
     await saveLedger(model);
     toast(`saved ${model.id}`);
-    location.href = routes.editLedger(
-      model.id
+    gotoUrl(
+      routes.editLedger(model.id)
     );
   });
 

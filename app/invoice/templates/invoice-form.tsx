@@ -29,6 +29,7 @@ import { asCurrency } from "../../fun/asCurrency.js";
 import { getValueAsNumber } from "../../fun/behavior/input.js";
 import { asNumber } from "../../fun/asNumber.js";
 import { sum } from "../../fun/sum.js";
+import { gotoUrl } from "../../fun/gotoUrl.js";
 
 const { primaryContact, TAXRATE } =
   globals;
@@ -391,8 +392,7 @@ function hookupEvents(
     formDom,
     "list-all-invoices",
     () => {
-      window.location.href =
-        routes.allInvoices();
+      gotoUrl(routes.allInvoices());
     }
   );
 
@@ -446,8 +446,7 @@ function hookupEvents(
   );
 
   on(formDom, "clear", () => {
-    location.href =
-      routes.createInvoice();
+    gotoUrl(routes.createInvoice());
   });
 }
 

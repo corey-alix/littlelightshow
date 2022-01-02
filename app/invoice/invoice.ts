@@ -29,6 +29,7 @@ import { globals } from "../globals.js";
 const { TAXRATE } = globals;
 
 import { asCurrency } from "../fun/asCurrency.js";
+import { gotoUrl } from "../fun/gotoUrl.js";
 
 async function setup() {
   await identify();
@@ -73,8 +74,9 @@ export async function renderInvoices(
       "create-invoice",
       () => {
         try {
-          location.href =
-            routes.createInvoice();
+          gotoUrl(
+            routes.createInvoice()
+          );
         } catch (ex) {
           reportError(ex);
         }

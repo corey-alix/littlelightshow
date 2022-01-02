@@ -4882,13 +4882,18 @@ function reportError(message) {
   });
 }
 
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
+}
+
 // app/identify.ts
 async function identify() {
   if (!localStorage.getItem("user")) {
-    location.href = routes.identity({
+    gotoUrl(routes.identity({
       target: location.href,
       context: CONTEXT
-    });
+    }));
     return false;
   }
   try {
