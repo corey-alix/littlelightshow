@@ -27,24 +27,42 @@ export function formatAsCurrency(
   );
 }
 
-export function formatTrim(
+export function formatUppercase(
   input: HTMLInputElement
 ) {
-  const change = () => {
+  addFormatter(() => {
     const textValue = (
       input.value || ""
-    ).trim();
+    ).toUpperCase();
     if (textValue != input.value) {
       input.value = textValue;
     }
-  };
+  }, input);
+}
 
+function addFormatter(
+  change: () => void,
+  input: HTMLInputElement
+) {
   change();
 
   input.addEventListener(
     "change",
     change
   );
+}
+
+export function formatTrim(
+  input: HTMLInputElement
+) {
+  addFormatter(() => {
+    const textValue = (
+      input.value || ""
+    ).trim();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
 }
 
 export function getValueAsNumber(

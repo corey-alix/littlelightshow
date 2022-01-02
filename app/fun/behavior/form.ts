@@ -1,6 +1,7 @@
 import {
   formatAsCurrency,
   formatTrim,
+  formatUppercase,
   selectOnFocus,
 } from "./input";
 
@@ -33,9 +34,15 @@ export function extendTextInputBehaviors(
   ) as Array<HTMLInputElement>;
   textInput.forEach(selectOnFocus);
 
-  const trimInput = textInput.filter(
-    (i) => i.classList.contains("trim")
-  );
+  textInput
+    .filter((i) =>
+      i.classList.contains("trim")
+    )
+    .forEach(formatTrim);
 
-  trimInput.forEach(formatTrim);
+  textInput
+    .filter((i) =>
+      i.classList.contains("uppercase")
+    )
+    .forEach(formatUppercase);
 }

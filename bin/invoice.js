@@ -5393,15 +5393,25 @@ function formatAsCurrency(input) {
     }
   });
 }
+function formatUppercase(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").toUpperCase();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+function addFormatter(change, input) {
+  change();
+  input.addEventListener("change", change);
+}
 function formatTrim(input) {
-  const change = () => {
+  addFormatter(() => {
     const textValue = (input.value || "").trim();
     if (textValue != input.value) {
       input.value = textValue;
     }
-  };
-  change();
-  input.addEventListener("change", change);
+  }, input);
 }
 function getValueAsNumber(input) {
   if (!input.value)
@@ -5419,8 +5429,8 @@ function extendNumericInputBehaviors(form) {
 function extendTextInputBehaviors(form) {
   const textInput = Array.from(form.querySelectorAll("input[type=text]"));
   textInput.forEach(selectOnFocus);
-  const trimInput = textInput.filter((i) => i.classList.contains("trim"));
-  trimInput.forEach(formatTrim);
+  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
+  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
 }
 
 // app/services/inventory.ts

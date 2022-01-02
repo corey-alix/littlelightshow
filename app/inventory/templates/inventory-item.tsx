@@ -36,7 +36,7 @@ export function create(
         Price
       </div>
       <input
-        class="col-1-c trim text"
+        class="col-1-c trim text uppercase"
         name="code"
         type="text"
         placeholder="Short code"
