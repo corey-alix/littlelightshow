@@ -15,7 +15,7 @@
     "build": "npm-run-all -p build:index build:gl build:invoice build:inventory build:admin build:test",
     "deploy": "git checkout v1.0.2 && git merge v1.0.3 && git push && git checkout v1.0.3",
     "dev": "npm-run-all -c -p debug build lint",
-    "lint": "tsc"
+    "lint": "tsc -w"
   },
   "repository": {
     "type": "git",

@@ -116,6 +116,9 @@ async function populateInventoryFromInvoice() {
         await inventoryModel.upsertItem(
           {
             code: item.item,
+            description:
+              item.description,
+            quantity: item.quantity,
             price: item.price,
             taxrate:
               item.tax === 0
