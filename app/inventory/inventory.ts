@@ -8,7 +8,11 @@ import {
   toast,
 } from "../ux/Toaster.js";
 import { hookupTriggers } from "../fun/hookupTriggers.js";
-import { extendNumericInputBehaviors } from "../fun/behavior/form.js";
+import {
+  extendNumericInputBehaviors,
+  extendTextInputBehaviors,
+} from "../fun/behavior/form.js";
+import { invoiceModel } from "../services/invoices.js";
 
 export async function init(
   target = document.body
@@ -40,11 +44,26 @@ export async function init(
         formDom.reportValidity();
         return false;
       }
+      const priorCode =
+        inventoryItem.code;
       inventoryItem.code = getValue(
         formDom,
         "code",
         inventoryItem.code
       );
+
+      await renameInvoiceItems(
+        priorCode,
+        inventoryItem.code
+      );
+
+      inventoryItem.description =
+        getValue(
+          formDom,
+          "description",
+          inventoryItem.description
+        );
+
       inventoryItem.price = getValue(
         formDom,
         "price",
@@ -75,6 +94,7 @@ export async function init(
     extendNumericInputBehaviors(
       formDom
     );
+    extendTextInputBehaviors(formDom);
   } else {
     const report = showInventoryItems(
       inventoryItems.sortBy({
@@ -104,4 +124,35 @@ function getValue<T>(
     return <T>(<any>value);
   }
   return defaultValue;
+}
+
+async function renameInvoiceItems(
+  priorCode: string,
+  code: string
+) {
+  if (priorCode === code) return;
+
+  const invoices =
+    await invoiceModel.getItems();
+
+  for (let invoice of invoices) {
+    const itemsToRename =
+      invoice.items?.filter(
+        (item) => item.item == priorCode
+      );
+    if (!!itemsToRename?.length) {
+      for (let item of itemsToRename) {
+        item.item = code;
+        item.description =
+          item.description ||
+          priorCode.trim();
+        await invoiceModel.upsertItem(
+          invoice
+        );
+        toast(
+          `updated invoice ${invoice.id}`
+        );
+      }
+    }
+  }
 }

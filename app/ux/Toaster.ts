@@ -53,6 +53,7 @@ export function toast(
 ) {
   if (!options)
     options = { mode: "info" };
+  console.info(message, options);
   toaster.toast({
     message,
     ...options,

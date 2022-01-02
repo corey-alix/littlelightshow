@@ -539,11 +539,16 @@ function renderInvoiceItem(
       </label>
       <input
         name="item"
-        class="bold col-1-last"
+        class="bold col-1-3"
         required
         type="text"
         value={item.item}
         list="inventory_list"
+      />
+      <input
+        name="description"
+        class="col-4-last"
+        value={item.description || ""}
       />
       <label class="form-label col-1-2 quantity">
         Quantity
@@ -595,6 +600,10 @@ function setupComputeOnLineItem(
   const priceInput = form.querySelector(
     "[name=price]"
   ) as HTMLInputElement;
+  const descriptionInput =
+    form.querySelector(
+      "[name=description]"
+    ) as HTMLInputElement;
   const totalInput = form.querySelector(
     "[name=total]"
   ) as HTMLInputElement;
@@ -631,6 +640,10 @@ function setupComputeOnLineItem(
         item.price.toFixed(2);
       trigger(priceInput, "change");
     }
+
+    if (item.description)
+      descriptionInput.value =
+        item.description;
   });
 }
 

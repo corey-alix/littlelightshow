@@ -5,6 +5,7 @@ const INVENTORY_TABLE = "inventory";
 export interface Inventory {
   id?: string;
   code: string;
+  description?: string;
   price: number;
   taxrate: number;
 }

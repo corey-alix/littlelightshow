@@ -4907,6 +4907,7 @@ var toaster = new Toaster();
 function toast(message, options) {
   if (!options)
     options = { mode: "info" };
+  console.info(message, options);
   toaster.toast({
     message,
     ...options
@@ -5744,11 +5745,15 @@ function renderInvoiceItem(item) {
     class: "form-label col-1-last"
   }, "Item"), /* @__PURE__ */ dom("input", {
     name: "item",
-    class: "bold col-1-last",
+    class: "bold col-1-3",
     required: true,
     type: "text",
     value: item.item,
     list: "inventory_list"
+  }), /* @__PURE__ */ dom("input", {
+    name: "description",
+    class: "col-4-last",
+    value: item.description || ""
   }), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-2 quantity"
   }, "Quantity"), /* @__PURE__ */ dom("label", {
@@ -5780,6 +5785,7 @@ function setupComputeOnLineItem(event, form) {
   const itemInput = form.querySelector("[name=item]");
   const quantityInput = form.querySelector("[name=quantity]");
   const priceInput = form.querySelector("[name=price]");
+  const descriptionInput = form.querySelector("[name=description]");
   const totalInput = form.querySelector("[name=total]");
   const computeTotal = () => {
     const qty = getValueAsNumber(quantityInput);
@@ -5799,6 +5805,8 @@ function setupComputeOnLineItem(event, form) {
       priceInput.value = item.price.toFixed(2);
       trigger(priceInput, "change");
     }
+    if (item.description)
+      descriptionInput.value = item.description;
   });
 }
 async function getInventoryItemByCode(code) {

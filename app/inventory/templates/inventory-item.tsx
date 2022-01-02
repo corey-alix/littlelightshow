@@ -14,25 +14,38 @@ export function create(
       <div class="col-5 line currency">
         Price
       </div>
-      <div class="col-6 line taxrate">
+      <div class="col-last line taxrate">
         Tax Rate
       </div>
       <input
-        class="col-1-4 line"
+        class="col-1-4 trim text"
         name="code"
+        type="text"
         value={inventoryItem.code}
       />
       <input
-        class="col-5 line currency"
+        class="col-5 currency"
         name="price"
         type="number"
         value={inventoryItem.price}
       />
       <input
-        class="col-6 line taxrate"
+        class="col-last taxrate"
         name="taxrate"
         type="number"
         value={inventoryItem.taxrate}
+      />
+      <div class="col-1-last line">
+        Description
+      </div>
+      <input
+        class="col-1-last text trim"
+        name="description"
+        type="text"
+        value={
+          inventoryItem.description ||
+          inventoryItem.code
+        }
       />
       <button
         class="bold button col-1"

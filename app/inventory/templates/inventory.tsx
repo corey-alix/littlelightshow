@@ -9,13 +9,13 @@ export function create(
 ): HTMLElement {
   const report = (
     <div class="grid-6">
-      <div class="col-1 line">
+      <div class="col-1-4 line">
         Item Code
       </div>
-      <div class="col-2 line currency">
+      <div class="col-5 line currency">
         Price
       </div>
-      <div class="col-3 line taxrate">
+      <div class="col-6 line taxrate">
         Tax Rate
       </div>
       <div class="placeholder lineitems"></div>
@@ -26,20 +26,23 @@ export function create(
     (item) => {
       return (
         <div>
-          <div class="col-1">
+          <div class="col-1-4">
             <a
               href={routes.inventory(
                 item.id!
               )}
             >
-              {item.code}
+              "{item.code}"
             </a>
           </div>
-          <div class="col-2 currency">
+          <div class="col-5 currency">
             {asCurrency(item.price)}
           </div>
-          <div class="col-3 taxrate">
+          <div class="col-6 taxrate">
             {asTaxRate(item.taxrate)}
+          </div>
+          <div class="col-2-6 text">
+            {item.description || ""}
           </div>
         </div>
       );

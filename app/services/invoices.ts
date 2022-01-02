@@ -7,6 +7,7 @@ const INVOICE_TABLE = "invoices";
 
 export interface InvoiceItem {
   item: string;
+  description?: string;
   quantity: number;
   price: number;
   total: number;

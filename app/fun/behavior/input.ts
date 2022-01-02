@@ -27,6 +27,26 @@ export function formatAsCurrency(
   );
 }
 
+export function formatTrim(
+  input: HTMLInputElement
+) {
+  const change = () => {
+    const textValue = (
+      input.value || ""
+    ).trim();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  };
+
+  change();
+
+  input.addEventListener(
+    "change",
+    change
+  );
+}
+
 export function getValueAsNumber(
   input: HTMLInputElement
 ) {
