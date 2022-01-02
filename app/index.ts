@@ -81,6 +81,7 @@ async function upgradeFrom103To104() {
   // pull in actual inventory items
   await inventoryModel.synchronize();
 
+  setGlobalState("VERSION", VERSION);
   toast("upgraded from 1.0.3 to 1.0.4");
 }
 
