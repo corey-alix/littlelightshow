@@ -9,11 +9,25 @@ interface Inventory {
   taxrate: number;
 }
 
+export class InventoryModel extends StorageModel<Inventory> {
+  async upgradeTo104(): Promise<void> {
+    // clear temporary id values
+    const deleteTheseItems = this.cache
+      .get()
+      .filter(
+        (i) => i.id && i.id === i.code
+      )
+      .map((i) => i.id!);
+    deleteTheseItems.forEach((id) =>
+      this.cache.deleteLineItem(id)
+    );
+  }
+}
+
 export const inventoryModel =
-  new StorageModel<Inventory>({
+  new InventoryModel({
     tableName: INVENTORY_TABLE,
-    maxAge: Number.MAX_SAFE_INTEGER,
-    offline: true,
+    offline: false,
   });
 
 export async function forceDatalist() {

@@ -4,12 +4,21 @@ littlelightshow
 
 ## Change Log
 
+- 2022-01-01: Introduce v1.0.4 branch
 - 2021-12-26: Show balance due on invoices
 - 2021-12-26: hyperlink GL entries
 - 2021-12-25: create "desktop" layout for GL and AR (invoice)
 - 2021-12-22: use storage API for sale items and account codes (always offline)
 - 2021-12-22: error reporting via toaster
 - 2021-12-22: create storage API (persist local, sync remotely)
+
+## v1.0.4
+
+- Add inventory module
+
+## v1.0.3
+
+- Show dates on GL account report
 
 ## v1.0.2
 

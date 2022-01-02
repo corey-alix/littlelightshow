@@ -26,7 +26,7 @@ export class StorageModel<
   T extends Partial<SynchronizationAttributes>
 > {
   private tableName: string;
-  private cache: ServiceCache<T>;
+  protected cache: ServiceCache<T>;
 
   constructor(
     private options: {

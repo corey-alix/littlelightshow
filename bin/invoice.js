@@ -5114,10 +5114,15 @@ function setFutureSyncTime(tableName, syncTime) {
 
 // app/services/inventory.ts
 var INVENTORY_TABLE = "inventory";
-var inventoryModel = new StorageModel({
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
   tableName: INVENTORY_TABLE,
-  maxAge: Number.MAX_SAFE_INTEGER,
-  offline: true
+  offline: false
 });
 async function forceDatalist() {
   let dataList = document.querySelector(`#inventory_list`);

@@ -65,6 +65,7 @@ export async function init() {
   const tableNames = [
     "general_ledger",
     "invoices",
+    "inventory",
   ];
 
   on(
@@ -193,34 +194,6 @@ export async function init() {
         `Roundtrip time: ${
           ticks.end - ticks.start
         }ms`
-      );
-    }
-  );
-
-  on(
-    domNode,
-    "invoice-to-inventory",
-    async () => {
-      debugger;
-      const invoices =
-        await invoiceModel.getItems();
-
-      invoices.forEach((invoice) => {
-        invoice.items.forEach(
-          async (item) => {
-            await inventoryModel.upsertItem(
-              {
-                id: item.item,
-                code: item.item,
-                price: item.price,
-                taxrate: TAXRATE,
-              }
-            );
-          }
-        );
-      });
-      toast(
-        "inventory updated with invoice line items"
       );
     }
   );

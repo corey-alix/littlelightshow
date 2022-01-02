@@ -5088,35 +5088,6 @@ function injectLabels(domNode) {
   });
 }
 
-// app/index.ts
-var { primaryContact } = globals;
-async function init() {
-  const domNode = document.body;
-  setInitialState({
-    TAX_RATE: 6,
-    CACHE_MAX_AGE: 600,
-    BATCH_SIZE: 64,
-    work_offline: true
-  });
-  setInitialState({ primaryContact });
-  await identify();
-  injectLabels(domNode);
-  extendNumericInputBehaviors(domNode);
-  hookupTriggers(domNode);
-  setMode();
-}
-function setInitialState(data) {
-  Object.keys(data).forEach((key) => {
-    const value = getGlobalState(key);
-    if (isUndefined(value)) {
-      setGlobalState(key, data[key]);
-    }
-  });
-}
-function isUndefined(value) {
-  return typeof value === "undefined";
-}
-
 // app/services/admin.ts
 var import_faunadb5 = __toModule(require_faunadb());
 
@@ -5609,6 +5580,69 @@ function createLedger(invoice) {
   return ledger;
 }
 
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
+  tableName: INVENTORY_TABLE,
+  offline: false
+});
+
+// app/index.ts
+var { primaryContact } = globals;
+var VERSION = "1.0.4";
+async function init() {
+  const domNode = document.body;
+  setInitialState({ VERSION: "1.0.3" });
+  setInitialState({
+    TAX_RATE: 6,
+    CACHE_MAX_AGE: 600,
+    BATCH_SIZE: 64,
+    work_offline: true,
+    VERSION
+  });
+  setInitialState({ primaryContact });
+  await upgradeFromCurrentVersion();
+  await identify();
+  injectLabels(domNode);
+  extendNumericInputBehaviors(domNode);
+  hookupTriggers(domNode);
+  setMode();
+}
+function setInitialState(data) {
+  Object.keys(data).forEach((key) => {
+    const value = getGlobalState(key);
+    if (isUndefined(value)) {
+      setGlobalState(key, data[key]);
+    }
+  });
+}
+function isUndefined(value) {
+  return typeof value === "undefined";
+}
+async function upgradeFromCurrentVersion() {
+  const currentVersion = getGlobalState("VERSION");
+  switch (currentVersion) {
+    case "1.0.3":
+      await upgradeFrom103To104();
+      break;
+    case "1.0.4":
+      break;
+    default:
+      throw `unexpected version: ${currentVersion}`;
+  }
+}
+async function upgradeFrom103To104() {
+  inventoryModel.upgradeTo104();
+  await inventoryModel.synchronize();
+  toast("upgraded from 1.0.3 to 1.0.4");
+}
+
 // app/services/accounts.ts
 var ACCOUNT_TABLE = "accounts";
 var accountModel = new StorageModel({
@@ -5617,16 +5651,7 @@ var accountModel = new StorageModel({
   offline: true
 });
 
-// app/services/inventory.ts
-var INVENTORY_TABLE = "inventory";
-var inventoryModel = new StorageModel({
-  tableName: INVENTORY_TABLE,
-  maxAge: Number.MAX_SAFE_INTEGER,
-  offline: true
-});
-
 // app/admin.ts
-var { TAXRATE: TAXRATE3 } = globals;
 var starterAccounts = [
   "AP",
   "AR",
@@ -5651,7 +5676,8 @@ async function init2() {
   }));
   const tableNames = [
     "general_ledger",
-    "invoices"
+    "invoices",
+    "inventory"
   ];
   on(domNode, "database-rebuild-collection", () => {
     tableNames.forEach(async (tableName) => {
@@ -5714,21 +5740,6 @@ async function init2() {
     const time = await getDatabaseTime();
     ticks.end = Date.now();
     toast(`Roundtrip time: ${ticks.end - ticks.start}ms`);
-  });
-  on(domNode, "invoice-to-inventory", async () => {
-    debugger;
-    const invoices = await invoiceModel.getItems();
-    invoices.forEach((invoice) => {
-      invoice.items.forEach(async (item) => {
-        await inventoryModel.upsertItem({
-          id: item.item,
-          code: item.item,
-          price: item.price,
-          taxrate: TAXRATE3
-        });
-      });
-    });
-    toast("inventory updated with invoice line items");
   });
   on(domNode, "invoice-to-gl", async () => {
     if (!confirm("import invoices into general ledger?"))
