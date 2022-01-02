@@ -74,6 +74,12 @@ export async function create(
         </div>
         <div class="col-7">Balance</div>
         <div class="placeholder line-items" />
+        <div class="col-c align-right">
+          Balance
+        </div>
+        <div class="col-a currency bold">
+          {asCurrency(runningBalance)}
+        </div>
       </div>
     </div>
   ) as HTMLElement;

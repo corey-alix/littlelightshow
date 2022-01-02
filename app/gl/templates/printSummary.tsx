@@ -28,15 +28,18 @@ export function create(
       });
   });
 
-  let grandTotal = 0;
+  const grandTotal = {
+    debit: 0,
+    credit: 0,
+  };
   const reportItems = Object.keys(
     totals
   )
     .sort()
     .map((account) => {
       const total = totals[account];
-      grandTotal +=
-        total.debit - total.credit;
+      grandTotal.debit += total.debit;
+      grandTotal.credit += total.credit;
       return (
         <div>
           <div class="col-1-4">
@@ -91,12 +94,18 @@ export function create(
   moveChildren(
     <div>
       <div class="col-1-last line"></div>
-      <div class="col-1-last vspacer-1"></div>
-      <div class="col-1-4">
-        Imbalance
+      <div class="col-1-3">Totals</div>
+      <div class="currency col-c">
+        {grandTotal.debit.toFixed(2)}
       </div>
-      <div class="currency col-last bold">
-        {grandTotal.toFixed(2)}
+      <div class="currency col-b">
+        {grandTotal.credit.toFixed(2)}
+      </div>
+      <div class="currency col-a bold">
+        {(
+          grandTotal.debit -
+          grandTotal.credit
+        ).toFixed(2)}
       </div>
     </div>,
     report

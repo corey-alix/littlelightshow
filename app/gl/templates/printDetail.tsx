@@ -3,6 +3,7 @@ import { moveChildren } from "../../fun/dom.js";
 import { Ledger } from "../../services/gl.js";
 import { asDateString } from "../../fun/asDateString";
 import { noZero } from "../../fun/isZero";
+import { asCurrency } from "../../fun/asCurrency.js";
 
 export function create(
   ledgers: Ledger[]
@@ -27,7 +28,10 @@ export function create(
       <div class="line col-1-last"></div>
     </div>
   );
-  const totals = [0, 0];
+  const totals = {
+    debit: 0,
+    credit: 0,
+  };
   let priorDate: string = "";
 
   ledgers.forEach((ledger) => {
@@ -42,8 +46,8 @@ export function create(
           amount >= 0 && amount;
         const credit =
           amount < 0 && -amount;
-        totals[0] += debit || 0;
-        totals[1] += credit || 0;
+        totals.debit += debit || 0;
+        totals.credit += credit || 0;
         let currentDate = asDateString(
           new Date(
             ledger.date || item["date"]
@@ -85,16 +89,25 @@ export function create(
     <div>
       <div class="line col-1-last"></div>
       <div class="col-5 currency">
-        {totals[0].toFixed(2)}
+        {totals.debit.toFixed(2)}
       </div>
-      <div class="col-6 currency">
-        {totals[1].toFixed(2)}
+      <div class="col-6-last currency">
+        {totals.credit.toFixed(2)}
       </div>
-      <div class="col-7 currency">
+      <div class="col-4-2 align-right">
+        {!!noZero(
+          asCurrency(
+            totals.debit - totals.credit
+          )
+        )
+          ? "Imbalance"
+          : ""}
+      </div>
+      <div class="col-6-last currency">
         {noZero(
-          (
-            totals[0] - totals[1]
-          ).toFixed(2)
+          asCurrency(
+            totals.debit - totals.credit
+          )
         )}
       </div>
     </div>,

@@ -5366,7 +5366,10 @@ function create(ledgers) {
   }, "Credit"), /* @__PURE__ */ dom("div", {
     class: "line col-1-last"
   }));
-  const totals = [0, 0];
+  const totals = {
+    debit: 0,
+    credit: 0
+  };
   let priorDate = "";
   ledgers.forEach((ledger) => {
     ledger.items.sortBy({
@@ -5376,8 +5379,8 @@ function create(ledgers) {
       const amount = item.amount;
       const debit = amount >= 0 && amount;
       const credit = amount < 0 && -amount;
-      totals[0] += debit || 0;
-      totals[1] += credit || 0;
+      totals.debit += debit || 0;
+      totals.credit += credit || 0;
       let currentDate = asDateString(new Date(ledger.date || item["date"]));
       const lineitem = /* @__PURE__ */ dom("div", null, currentDate != priorDate && /* @__PURE__ */ dom("div", {
         class: "col-1-last date section-title"
@@ -5401,11 +5404,13 @@ function create(ledgers) {
     class: "line col-1-last"
   }), /* @__PURE__ */ dom("div", {
     class: "col-5 currency"
-  }, totals[0].toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "col-6 currency"
-  }, totals[1].toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "col-7 currency"
-  }, noZero((totals[0] - totals[1]).toFixed(2)))), report);
+  }, totals.debit.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "col-6-last currency"
+  }, totals.credit.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "col-4-2 align-right"
+  }, !!noZero(asCurrency(totals.debit - totals.credit)) ? "Imbalance" : ""), /* @__PURE__ */ dom("div", {
+    class: "col-6-last currency"
+  }, noZero(asCurrency(totals.debit - totals.credit)))), report);
   return report;
 }
 
@@ -5422,10 +5427,14 @@ function create2(ledgers) {
       }
     });
   });
-  let grandTotal = 0;
+  const grandTotal = {
+    debit: 0,
+    credit: 0
+  };
   const reportItems = Object.keys(totals).sort().map((account) => {
     const total = totals[account];
-    grandTotal += total.debit - total.credit;
+    grandTotal.debit += total.debit;
+    grandTotal.credit += total.credit;
     return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
       class: "col-1-4"
     }, /* @__PURE__ */ dom("a", {
@@ -5453,12 +5462,14 @@ function create2(ledgers) {
   moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "col-1-last line"
   }), /* @__PURE__ */ dom("div", {
-    class: "col-1-last vspacer-1"
-  }), /* @__PURE__ */ dom("div", {
-    class: "col-1-4"
-  }, "Imbalance"), /* @__PURE__ */ dom("div", {
-    class: "currency col-last bold"
-  }, grandTotal.toFixed(2))), report);
+    class: "col-1-3"
+  }, "Totals"), /* @__PURE__ */ dom("div", {
+    class: "currency col-c"
+  }, grandTotal.debit.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "currency col-b"
+  }, grandTotal.credit.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "currency col-a bold"
+  }, (grandTotal.debit - grandTotal.credit).toFixed(2))), report);
   return report;
 }
 
@@ -5895,7 +5906,11 @@ async function create5(account) {
     class: "col-7"
   }, "Balance"), /* @__PURE__ */ dom("div", {
     class: "placeholder line-items"
-  })));
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-c align-right"
+  }, "Balance"), /* @__PURE__ */ dom("div", {
+    class: "col-a currency bold"
+  }, asCurrency(runningBalance))));
   const placeholder = result.querySelector(".placeholder");
   rows.forEach((item) => moveChildrenBefore(item, placeholder));
   return result;
