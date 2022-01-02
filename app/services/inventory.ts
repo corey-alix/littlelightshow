@@ -41,12 +41,16 @@ export async function forceDatalist() {
   dataList.id = "inventory_list";
   const items =
     await inventoryModel.getItems();
-  items.forEach((item) => {
-    const option =
-      document.createElement("option");
-    option.value = item.code;
-    dataList.appendChild(option);
-  });
+  items
+    .sortBy({ code: "string" })
+    .forEach((item) => {
+      const option =
+        document.createElement(
+          "option"
+        );
+      option.value = item.code;
+      dataList.appendChild(option);
+    });
   document.body.appendChild(dataList);
   return dataList;
 }

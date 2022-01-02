@@ -5132,7 +5132,7 @@ async function forceDatalist() {
   dataList = document.createElement("datalist");
   dataList.id = "inventory_list";
   const items = await inventoryModel.getItems();
-  items.forEach((item) => {
+  items.sortBy({ code: "string" }).forEach((item) => {
     const option = document.createElement("option");
     option.value = item.code;
     dataList.appendChild(option);
@@ -5764,6 +5764,7 @@ function renderInvoiceItem(item) {
     name: "item",
     class: "bold col-1-3 text trim",
     required: true,
+    autocomplete: "off",
     type: "text",
     value: item.item,
     list: "inventory_list"

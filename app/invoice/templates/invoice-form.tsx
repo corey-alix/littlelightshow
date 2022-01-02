@@ -545,6 +545,7 @@ function renderInvoiceItem(
         name="item"
         class="bold col-1-3 text trim"
         required
+        autocomplete="off"
         type="text"
         value={item.item}
         list="inventory_list"
