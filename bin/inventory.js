@@ -5380,6 +5380,11 @@ var ledgerModel = new StorageModel({
 function asCurrency(value) {
   return (value || 0).toFixed(2);
 }
+function asQuantity(value) {
+  if (typeof value === "string")
+    return value;
+  return (value || 0).toFixed(0);
+}
 
 // app/services/invoices.ts
 var INVOICE_TABLE = "invoices";
@@ -5400,6 +5405,14 @@ var inventoryModel = new InventoryModel({
   tableName: INVENTORY_TABLE,
   offline: false
 });
+
+// app/isUndefined.ts
+function isUndefined(value) {
+  return typeof value === "undefined";
+}
+function isNull(value) {
+  return value === null;
+}
 
 // app/index.ts
 var { primaryContact } = globals;
@@ -5430,9 +5443,6 @@ function setInitialState(data) {
     }
   });
 }
-function isUndefined(value) {
-  return typeof value === "undefined";
-}
 async function upgradeFromCurrentVersion() {
   const currentVersion = getGlobalState("VERSION");
   switch (currentVersion) {
@@ -5458,28 +5468,48 @@ function moveChildrenBefore(items, report) {
     report.before(items.firstChild);
 }
 
+// app/fun/isZero.ts
+function isZero(value) {
+  if (value === "0.00")
+    return true;
+  if (value === "-0.00")
+    return true;
+  return false;
+}
+function noZero(value) {
+  return isZero(value) ? "" : value;
+}
+
 // app/inventory/templates/inventory.tsx
 function create(inventoryItems) {
   const report = /* @__PURE__ */ dom("div", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
-    class: "col-1-4 line"
+    class: "col-1-3 line"
   }, "Item Code"), /* @__PURE__ */ dom("div", {
+    class: "col-4 line quantity"
+  }, "Qty"), /* @__PURE__ */ dom("div", {
     class: "col-5 line currency"
   }, "Price"), /* @__PURE__ */ dom("div", {
-    class: "col-last line taxrate"
+    class: "col-6 line value"
+  }, "Value"), /* @__PURE__ */ dom("div", {
+    class: "col-7 line taxrate"
   }, "Tax Rate"), /* @__PURE__ */ dom("div", {
     class: "placeholder lineitems"
   }));
   const lineItems = inventoryItems.map((item) => {
     return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-      class: "col-1-4"
+      class: "col-1-3"
     }, /* @__PURE__ */ dom("a", {
       href: routes.inventory(item.id)
     }, item.code)), /* @__PURE__ */ dom("div", {
+      class: "col-4 quantity"
+    }, asQuantity(item.quantity)), /* @__PURE__ */ dom("div", {
       class: "col-5 currency"
     }, asCurrency(item.price)), /* @__PURE__ */ dom("div", {
-      class: "col-last taxrate"
+      class: "col-6 currency"
+    }, noZero(asCurrency(item.price * (item.quantity - 0)))), /* @__PURE__ */ dom("div", {
+      class: "col-7 taxrate"
     }, asTaxRate(item.taxrate)), /* @__PURE__ */ dom("div", {
       class: "col-1-last text smaller"
     }, item.description || ""));
@@ -5499,33 +5529,40 @@ function create2(inventoryItem) {
   return /* @__PURE__ */ dom("form", {
     class: "grid-6"
   }, /* @__PURE__ */ dom("div", {
-    class: "col-1-c line"
-  }, "Item Code"), /* @__PURE__ */ dom("div", {
-    class: "col-b line currency"
-  }, "Price"), /* @__PURE__ */ dom("div", {
-    class: "col-a line taxrate"
-  }, "Tax Rate"), /* @__PURE__ */ dom("input", {
-    class: "col-1-c trim text",
-    name: "code",
-    type: "text",
-    value: inventoryItem.code
-  }), /* @__PURE__ */ dom("input", {
-    class: "col-b currency",
-    name: "price",
-    type: "number",
-    value: inventoryItem.price
-  }), /* @__PURE__ */ dom("input", {
-    class: "col-a taxrate",
-    name: "taxrate",
-    type: "number",
-    value: inventoryItem.taxrate
-  }), /* @__PURE__ */ dom("div", {
     class: "col-1-a line"
   }, "Description"), /* @__PURE__ */ dom("input", {
     class: "col-1-a text trim",
     name: "description",
     type: "text",
     value: inventoryItem.description || inventoryItem.code
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-c line"
+  }, "Item Code"), /* @__PURE__ */ dom("div", {
+    class: "col-b line quantity"
+  }, "Qty"), /* @__PURE__ */ dom("div", {
+    class: "col-a line currency"
+  }, "Price"), /* @__PURE__ */ dom("input", {
+    class: "col-1-c trim text",
+    name: "code",
+    type: "text",
+    value: inventoryItem.code
+  }), /* @__PURE__ */ dom("input", {
+    class: "col-b quantity",
+    name: "quantity",
+    type: "number",
+    value: inventoryItem.quantity
+  }), /* @__PURE__ */ dom("input", {
+    class: "col-a currency",
+    name: "price",
+    type: "number",
+    value: inventoryItem.price
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-a line taxrate"
+  }, "Tax Rate"), /* @__PURE__ */ dom("input", {
+    class: "col-a taxrate",
+    name: "taxrate",
+    type: "number",
+    value: inventoryItem.taxrate
   }), /* @__PURE__ */ dom("button", {
     class: "bold button col-1",
     "data-event": "submit"
@@ -5556,7 +5593,9 @@ async function init2(target = document.body) {
       inventoryItem.code = getValue(formDom, "code", inventoryItem.code);
       await renameInvoiceItems(priorCode, inventoryItem.code);
       inventoryItem.description = getValue(formDom, "description", inventoryItem.description);
+      inventoryItem.quantity = getValue(formDom, "quantity", inventoryItem.quantity);
       inventoryItem.price = getValue(formDom, "price", inventoryItem.price);
+      inventoryItem.taxrate = getValue(formDom, "taxrate", inventoryItem.taxrate);
       try {
         await inventoryModel.upsertItem(inventoryItem);
       } catch (ex) {
@@ -5583,10 +5622,10 @@ async function init2(target = document.body) {
   }
 }
 function getValue(form, name, defaultValue) {
-  const value = form[name].value;
-  if (value) {
+  const value = form[name]?.value;
+  if (!isNull(value)) {
     if (typeof defaultValue === "number")
-      return parseFloat(value);
+      return parseFloat(value || "0");
     return value;
   }
   return defaultValue;

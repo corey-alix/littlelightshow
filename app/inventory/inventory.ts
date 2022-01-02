@@ -65,16 +65,24 @@ export async function init(
           inventoryItem.description
         );
 
+      inventoryItem.quantity = getValue(
+        formDom,
+        "quantity",
+        inventoryItem.quantity
+      );
+
       inventoryItem.price = getValue(
         formDom,
         "price",
         inventoryItem.price
       );
+
       inventoryItem.taxrate = getValue(
         formDom,
         "taxrate",
         inventoryItem.taxrate
       );
+
       try {
         await inventoryModel.upsertItem(
           inventoryItem

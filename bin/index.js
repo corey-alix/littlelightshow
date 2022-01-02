@@ -5380,6 +5380,11 @@ var inventoryModel = new InventoryModel({
   offline: false
 });
 
+// app/isUndefined.ts
+function isUndefined(value) {
+  return typeof value === "undefined";
+}
+
 // app/index.ts
 var { primaryContact } = globals;
 var VERSION = "1.0.4";
@@ -5408,9 +5413,6 @@ function setInitialState(data) {
       setGlobalState(key, data[key]);
     }
   });
-}
-function isUndefined(value) {
-  return typeof value === "undefined";
 }
 async function upgradeFromCurrentVersion() {
   const currentVersion = getGlobalState("VERSION");

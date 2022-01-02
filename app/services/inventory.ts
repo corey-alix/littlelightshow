@@ -6,6 +6,7 @@ export interface Inventory {
   id?: string;
   code: string;
   description?: string;
+  quantity: number;
   price: number;
   taxrate: number;
 }
