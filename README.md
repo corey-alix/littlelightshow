@@ -4,6 +4,7 @@ littlelightshow
 
 ## Change Log
 
+- 2022-01-02: Introduce v1.0.5 branch
 - 2022-01-01: Introduce v1.0.4 branch
 - 2021-12-26: Show balance due on invoices
 - 2021-12-26: hyperlink GL entries
@@ -11,6 +12,10 @@ littlelightshow
 - 2021-12-22: use storage API for sale items and account codes (always offline)
 - 2021-12-22: error reporting via toaster
 - 2021-12-22: create storage API (persist local, sync remotely)
+
+## v1.0.5
+
+- Add PWA offline support
 
 ## v1.0.4
 
@@ -27,13 +32,15 @@ littlelightshow
 
 ## TODOs
 
-- Add taxable/taxrate to invoice items and ability to edit that data
 - Profit/Loss vs Asset/Liability -- how to organize accounts?
-- Invoice payments need to be scrapped into the GL as part of the invoice scraping process
 - Invoice summary report should show dates if space permits
   The issue will be that date should be optional yet not in the last column
+- Use PWA tech for offline detection
 
 ## Offline Support
+
+The admin panel has an offline mode that will not communicate with the database
+but still requires internet connectivity
 
 ### Offline storage and data sync
 
