@@ -9,30 +9,140 @@ html {
 }
 
 body {
-  visibility: hidden;
-  padding: 1rem;
-  margin: 0;
-  max-width: 768px;
-  min-width: 240px;
-  text-shadow: 0px 0px 1px black;
   min-height: calc(100vh - 2rem);
 }
 
-body.light {
-  visibility: visible;
-  background-color: rgb(196, 196, 196);
+html {
+  background-color: black;
 }
 
-body.dark {
-  visibility: visible;
-  background-color: rgb(64, 64, 64);
-  color: white;
+.body {
+  visibility: hidden;
 }
 
-body.holiday {
+.body.light {
   visibility: visible;
-  background-color: rgb(0, 135, 62);
-  color: rgba(253, 244, 220, 0.9);
+}
+
+.body.dark {
+  visibility: visible;
+}
+
+.body.holiday {
+  visibility: visible;
+}
+
+.body {
+  --color-black: black;
+  --color-red: red;
+  --color-white: white;
+  --color-focus: rgb(214, 0, 28);
+  --color-error: var(--color-red);
+  --main-bg-color: var(--color-black);
+  --wavy-decoration-color: var(
+    --hilite-bg-color
+  );
+  background-color: var(
+    --main-bg-color
+  );
+  --border-style: solid;
+  --focus-outline-color: var(
+    --color-focus
+  );
+  --title-color: var(--main-color);
+  --input-bg-color: var(
+    --main-bg-color
+  );
+  --input-color: var(--main-color);
+  --input-border-color: var(
+    --border-color
+  );
+  --line-color: var(--color-black);
+  --dialog-error-color: var(
+    --color-error
+  );
+  --anchor-color: var(
+    --hilite-bg-color
+  );
+}
+
+.body.dark {
+  --hilite-bg-color: rgb(80, 144, 80);
+  --color-focus: rgb(0, 214, 28);
+  --main-color: rgb(196, 196, 196);
+  --main-bg-color: rgb(64, 64, 64);
+  --dialog-bg-color: var(--color-white);
+  --dialog-color: var(--color-black);
+  --border-color: var(--color-black);
+  --banner-color: var(--main-color);
+  --title-color: var(--main-bg-color);
+  --title-bg-color: var(--main-color);
+  --button-color: var(--main-color);
+  --button-bg-color: var(
+    --hilite-bg-color
+  );
+  --button-border-color: var(
+    --main-color
+  );
+}
+
+.body.light {
+  --hilite-bg-color: rgb(64, 96, 64);
+  --color-focus: rgb(0, 214, 28);
+  --main-color: rgb(64, 64, 64);
+  --main-bg-color: rgb(196, 226, 196);
+  --dialog-bg-color: var(--color-black);
+  --dialog-color: var(--color-white);
+  --banner-color: rgba(
+    253,
+    244,
+    220,
+    0.9
+  );
+  --title-bg-color: rgb(128, 160, 128);
+  --border-color: var(--color-black);
+  --button-color: rgb(253, 244, 220);
+  --button-bg-color: var(
+    --hilite-bg-color
+  );
+  --button-border-color: rgb(
+    128,
+    160,
+    128
+  );
+}
+
+.body.holiday {
+  --hilite-bg-color: rgb(214, 0, 28);
+  --main-bg-color: rgb(0, 135, 62);
+  --main-color: rgba(
+    253,
+    244,
+    220,
+    0.9
+  );
+  --banner-color: rgba(
+    253,
+    244,
+    220,
+    0.9
+  );
+  --title-bg-color: rgb(128, 128, 128);
+  --border-color: rgb(64, 255, 64);
+  --border-style: dashed;
+  --button-color: rgba(
+    253,
+    244,
+    220,
+    0.9
+  );
+  --button-bg-color: var(
+    --hilite-bg-color
+  );
+  --hr-color: var(--hilite-bg-color);
+  --dialog-bg-color: var(
+    --title-bg-color
+  );
 }
 
 .smaller {
@@ -45,21 +155,10 @@ body.holiday {
 
 .toaster {
   opacity: 0.8;
-}
-
-body.light .toaster {
-  background-color: black;
-  color: white;
-}
-
-body.dark .toaster {
-  background-color: white;
-  color: black;
-}
-
-body.holiday .toaster {
-  background-color: black;
-  color: white;
+  background-color: var(
+    --dialog-bg-color
+  );
+  color: var(--dialog-color);
 }
 
 input.auto-label {
@@ -67,7 +166,7 @@ input.auto-label {
 }
 
 .toaster .error {
-  color: red;
+  color: var(--dialog-error-color);
   font-weight: bolder;
 }
 
@@ -115,87 +214,51 @@ input.auto-label {
   grid-row-gap: 0.5em;
 }
 
-body.light ::placeholder {
+.body ::placeholder {
   opacity: 0.5;
 }
 
-body.dark ::placeholder {
-  opacity: 0.5;
-}
-
-body.holiday ::placeholder {
-  opacity: 0.5;
-}
-
-a {
-  color: black;
+.body a {
+  color: var(--anchor-color);
   text-decoration: none;
+  cursor: default;
 }
 
-body.holiday a {
-  color: rgba(253, 244, 220, 0.9);
-}
-
-body.dark a {
-  color: white;
-}
-
-.hidden {
+.body .hidden {
   display: none;
 }
 
-.banner {
+.body .banner {
   background-image: url(../assets/bannerbush.png);
   background-size: cover;
-  color: rgba(253, 244, 220, 0.9);
+  color: var(--banner-color);
   border-radius: 0.5em;
   font-weight: bolder;
   padding: 1em;
 }
 
-section.category {
+.body section.category {
   padding: 0;
 }
 
-div.section-title {
+.body div.section-title {
   width: 100%;
   min-height: 2rem;
   padding-top: 0.5rem;
-  color: white;
-  background: black;
   text-align: center;
   vertical-align: middle;
+  color: var(--title-color);
+  background: var(--title-bg-color);
 }
 
-body.light div.section-title {
-  color: white;
-  background: rgba(128, 128, 128, 1);
-}
-
-body.dark div.section-title {
-  color: black;
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.margin {
+.body .margin {
   margin: 0.5em;
 }
 
-.border {
-  border: 1px solid white;
-}
-
-body.dark .border {
-  border-color: white;
-}
-
-body.light .border {
-  border-color: black;
-}
-
-body.holiday .border {
-  border-color: rgb(64, 255, 64);
-  border-style: dashed;
+.body .border {
+  border-width: 1px;
+  border-style: var(--border-style);
+  border-color: var(--border-color);
 }
 
 .rounded-top {
@@ -215,8 +278,7 @@ body.holiday .border {
   padding: 0.5rem;
 }
 
-.netlify-identity-item,
-.button {
+.netlify-identity-item {
   display: block;
   min-height: 2rem;
   padding: 0.5rem;
@@ -227,25 +289,28 @@ body.holiday .border {
   border: 1px solid black;
 }
 
-body.holiday .button {
-  color: rgba(253, 244, 220, 0.9);
-  background: rgb(214, 0, 28);
-}
-
-body.dark .button {
-  border-color: white;
-  color: white;
-  background: black;
+.body .button {
+  display: block;
+  min-height: 2rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  line-height: 1rem;
+  color: var(--button-color);
+  background: var(--button-bg-color);
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(
+    --button-border-color
+  );
   text-decoration: none;
 }
 
 hr {
   border: solid;
   border-width: 1px;
-}
-
-.holiday hr {
-  color: rgb(214, 0, 28);
+  width: 100%;
 }
 
 .form-label {
@@ -256,10 +321,6 @@ hr {
   width: 100%;
   min-height: 2rem;
   border: 1px solid;
-}
-
-.grid-6 input:focus {
-  outline: 1px solid rgb(214, 0, 28);
 }
 
 .form-label > input {
@@ -479,24 +540,28 @@ form textarea {
   grid-column: 6;
 }
 
-.line {
-  border-bottom: 1px solid black;
+.body .line {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: var(
+    --line-color
+  );
 }
 
-body.dark .line {
-  border-bottom-color: white;
+.body input,
+.body textarea {
+  background: var(--input-bg-color);
+  color: var(--input-color);
+  border-color: var(
+    --input-border-color
+  );
 }
 
-body.dark input,
-body.dark textarea {
-  background: rgb(32, 32, 32);
-  color: rgb(224, 224, 224);
-  border-color: black;
-}
-
-body.dark button {
-  color: black;
-  background: silver;
+.body input:focus,
+.body textarea:focus {
+  outline-color: var(
+    --focus-outline-color
+  );
 }
 
 .bold {
@@ -521,10 +586,8 @@ body.dark button {
 
 .wavy {
   text-decoration: underline wavy;
-  text-decoration-color: rgb(
-    214,
-    0,
-    28
+  text-decoration-color: var(
+    --wavy-decoration-color
   );
 }
 
