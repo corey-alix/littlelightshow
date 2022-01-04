@@ -52,7 +52,7 @@
 }
 
 .body.light {
-  --button-color: var(--color-black);
+  --button-color: var(--color-white);
   --color-error: var(--color-red);
   --color-focus: var(--color-lime);
   --dialog-color: var(--color-white);
