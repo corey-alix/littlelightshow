@@ -4960,7 +4960,7 @@ var Toaster = class {
     if (!target) {
       target = document.createElement("div");
       target.id = "toaster";
-      target.classList.add("toaster", "border", "rounded-top", "fixed", "bottom", "right");
+      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
       document.body.appendChild(target);
     }
     const message = document.createElement("div");
@@ -5958,6 +5958,8 @@ function setMode(mode) {
   localStorage.setItem("mode", mode);
   document.body.classList.remove(...Object.values(modes));
   document.body.classList.add(mode);
+  const isFontier = getGlobalState("textier") == true;
+  document.body.classList.toggle("textier", isFontier);
 }
 
 // app/fun/detect.ts

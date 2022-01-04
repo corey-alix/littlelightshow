@@ -4732,23 +4732,6 @@ function sort(items, sortBy) {
   });
 }
 
-// app/fun/setMode.ts
-var modes = {
-  light_mode: "light",
-  dark_mode: "dark",
-  holiday_mode: "holiday"
-};
-function setMode(mode) {
-  if (!mode)
-    mode = localStorage.getItem("mode") || modes.light_mode;
-  localStorage.setItem("mode", mode);
-  document.body.classList.remove(...Object.values(modes));
-  document.body.classList.add(mode);
-}
-
-// app/globals.ts
-var import_faunadb = __toModule(require_faunadb());
-
 // app/fun/globalState.ts
 var globalState;
 function forceGlobalState() {
@@ -4778,7 +4761,24 @@ function getGlobalState(key) {
   return value;
 }
 
+// app/fun/setMode.ts
+var modes = {
+  light_mode: "light",
+  dark_mode: "dark",
+  holiday_mode: "holiday"
+};
+function setMode(mode) {
+  if (!mode)
+    mode = localStorage.getItem("mode") || modes.light_mode;
+  localStorage.setItem("mode", mode);
+  document.body.classList.remove(...Object.values(modes));
+  document.body.classList.add(mode);
+  const isFontier = getGlobalState("textier") == true;
+  document.body.classList.toggle("textier", isFontier);
+}
+
 // app/globals.ts
+var import_faunadb = __toModule(require_faunadb());
 var _accessKeys;
 var GlobalModel = class {
   constructor() {
@@ -4855,7 +4855,7 @@ var Toaster = class {
     if (!target) {
       target = document.createElement("div");
       target.id = "toaster";
-      target.classList.add("toaster", "border", "rounded-top", "fixed", "bottom", "right");
+      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
       document.body.appendChild(target);
     }
     const message = document.createElement("div");
@@ -5683,7 +5683,7 @@ var accountModel = new StorageModel({
   offline: true
 });
 
-// app/admin.ts
+// app/admin/admin.ts
 var starterAccounts = [
   "AP",
   "AR",
@@ -5702,6 +5702,14 @@ var starterAccounts = [
 async function init2() {
   await init();
   const domNode = document.body;
+  on(domNode, "font_mode:yes", () => {
+    setGlobalState("textier", true);
+    setMode();
+  });
+  on(domNode, "font_mode:no", () => {
+    setGlobalState("textier", false);
+    setMode();
+  });
   Object.keys(modes).forEach((mode) => on(domNode, mode, () => {
     setMode(modes[mode]);
     toast(`theme changed to ${mode}`);
