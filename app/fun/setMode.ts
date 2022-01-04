@@ -1,3 +1,5 @@
+import { getGlobalState } from "./globalState";
+
 export const modes = {
   light_mode: "light",
   dark_mode: "dark",
@@ -17,4 +19,12 @@ export function setMode(mode?: string) {
   );
 
   document.body.classList.add(mode);
+
+  const isFontier =
+    true ==
+    getGlobalState<boolean>("textier");
+  document.body.classList.toggle(
+    "textier",
+    isFontier
+  );
 }

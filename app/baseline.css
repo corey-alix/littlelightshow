@@ -6,6 +6,10 @@
   font-size: min(20pt, max(10pt, 3vw));
 }
 
+.textier * {
+  font-size: min(24pt, max(12pt, 4vw));
+}
+
 html {
   background-color: black;
 }
@@ -459,6 +463,11 @@ form textarea {
   outline-color: var(
     --focus-outline-color
   );
+}
+
+.body input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
 }
 
 .bold {
