@@ -4,6 +4,7 @@ littlelightshow
 
 ## Change Log
 
+- 2022-01-03: v1.0.5 branch deploys with textier
 - 2022-01-02: Introduce v1.0.5 branch
 - 2022-01-01: Introduce v1.0.4 branch
 - 2021-12-26: Show balance due on invoices
