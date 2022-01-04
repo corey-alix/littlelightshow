@@ -2,6 +2,8 @@
 
 littlelightshow
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/07115bde-5926-46c8-a1b4-7275dba80ae9/deploy-status)](https://app.netlify.com/sites/lightshow/deploys)
+
 ## Change Log
 
 - 2022-01-03: v1.0.5 branch deploys with textier
@@ -77,5 +79,6 @@ This is wasteful if there is no server-side processing but there seems to be no 
 
 ## Links
 
-https://lightshow.netlify.app
-https://littlelightshow.com
+- [Next Light Show](https://v1-0-5--lightshow.netlify.app/)
+- [Live Site](https://lightshow.netlify.app)
+- [Shopify Site](https://littlelightshow.com)
