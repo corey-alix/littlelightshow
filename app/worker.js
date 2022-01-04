@@ -91,7 +91,7 @@ function run() {
     version: 1,
     cacheName: "cache",
     databaseName: "meta",
-    update: false
+    update: true
   });
 }
 run();
