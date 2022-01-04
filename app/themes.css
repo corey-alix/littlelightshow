@@ -11,9 +11,7 @@
 }
 
 .body {
-  --anchor-color: var(
-    --hilite-bg-color
-  );
+  --anchor-color: var(--main-color);
   --banner-color: var(
     --christmas-white
   );
@@ -26,8 +24,10 @@
     --main-color
   );
   --button-color: var(--main-color);
-  --dialog-bg-color: var(--color-white);
-  --dialog-color: var(--color-black);
+  --dialog-bg-color: var(
+    --hilite-bg-color
+  );
+  --dialog-color: var(--main-color);
   --dialog-error-color: var(
     --color-error
   );
@@ -55,6 +55,7 @@
   --button-color: var(--color-black);
   --color-error: var(--color-red);
   --color-focus: var(--color-lime);
+  --dialog-color: var(--color-white);
   --hilite-bg-color: var(--color-taupe);
   --main-bg-color: var(--color-white);
   --main-color: var(--color-charcoal);
@@ -75,6 +76,12 @@
   --border-style: dashed;
   --color-error: var(--color-red);
   --color-focus: var(--color-lime);
+  --dialog-bg-color: var(
+    --christmas-white
+  );
+  --dialog-color: var(
+    --christmas-green
+  );
   --hilite-bg-color: var(
     --christmas-red
   );

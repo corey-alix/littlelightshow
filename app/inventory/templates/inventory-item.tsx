@@ -4,6 +4,7 @@ import {
   asQuantity,
 } from "../../fun/asCurrency.js";
 import { noZero } from "../../fun/isZero.js";
+import { globals } from "../../globals.js";
 import { Inventory } from "../../services/inventory.js";
 
 export function create(
@@ -13,6 +14,9 @@ export function create(
     return <form>Item not found</form>;
   return (
     <form class="grid-6">
+      <h1 class="centered col-1-last">
+        {`Inventory form for ${globals.primaryContact.companyName}`}
+      </h1>
       <div class="col-1-a line">
         Description
       </div>

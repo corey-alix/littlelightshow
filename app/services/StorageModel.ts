@@ -66,7 +66,8 @@ export class StorageModel<
     const result = [] as Array<
       T & SynchronizationAttributes
     >;
-    while (true) {
+    let maximum_query_count = 1;
+    while (maximum_query_count--) {
       const response =
         (await client.query(
           q.Map(
@@ -168,10 +169,11 @@ export class StorageModel<
           ].update_date
         );
 
+      after = response.after;
+      if (!after) break;
+
       if (dataToImport.length < size)
         break;
-
-      after = response.after;
     }
     return result;
   }

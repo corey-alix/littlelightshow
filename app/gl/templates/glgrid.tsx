@@ -28,6 +28,7 @@ import {
   toast,
 } from "../../ux/Toaster.js";
 import { gotoUrl } from "../../fun/gotoUrl.js";
+import { globals } from "../../globals.js";
 
 function asModel(
   form: HTMLFormElement
@@ -296,6 +297,9 @@ export function create(
   forceDatalist();
   const ledger: HTMLFormElement = (
     <form class="grid-6">
+      <h1 class="centered col-1-last">
+        {`Ledger Entry for ${globals.primaryContact.companyName}`}
+      </h1>
       <input
         hidden
         name="id"

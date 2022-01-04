@@ -7,6 +7,7 @@ import { asNumber } from "../../fun/asNumber.js";
 import { moveChildrenBefore } from "../../fun/dom.js";
 import { noZero } from "../../fun/isZero.js";
 import { sum } from "../../fun/sum.js";
+import { globals } from "../../globals.js";
 import { routes } from "../../router.js";
 import { Inventory } from "../../services/inventory.js";
 
@@ -60,6 +61,9 @@ export function create(
 
   const report = (
     <div class="grid-6">
+      <h1 class="centered col-1-last">
+        {`Inventory Items for ${globals.primaryContact.companyName}`}
+      </h1>
       <div class="col-1-4 line">
         Item Code
       </div>

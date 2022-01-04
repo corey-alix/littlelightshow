@@ -4,6 +4,7 @@ import { moveChildren } from "../../fun/dom.js";
 import { hookupTriggers } from "../../fun/hookupTriggers.js";
 import { noZero } from "../../fun/isZero.js";
 import { sum } from "../../fun/sum.js";
+import { globals } from "../../globals.js";
 
 import { Invoice } from "../../services/invoices.js";
 
@@ -26,6 +27,9 @@ export function create(
   const target: HTMLFormElement =
     invoices.length ? (
       <form class="grid-6">
+        <h1 class="centered col-1-last">
+          {`Invoices for ${globals.primaryContact.companyName}`}
+        </h1>
         <div class="bold col-1-4">
           Client
         </div>

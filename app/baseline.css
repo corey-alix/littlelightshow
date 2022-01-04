@@ -12,6 +12,8 @@ html {
 
 body {
   min-height: calc(100vh - 2rem);
+  min-width: 240px;
+  max-width: 960px;
 }
 
 html {
@@ -34,6 +36,11 @@ html {
   visibility: visible;
 }
 
+.body {
+  padding: 1rem;
+  margin: 0;
+}
+
 .smaller {
   font-size: smaller;
 }
@@ -43,11 +50,11 @@ html {
 }
 
 .toaster {
-  opacity: 0.8;
   background-color: var(
     --dialog-bg-color
   );
   color: var(--dialog-color);
+  border: 1px solid var(--main-color);
 }
 
 input.auto-label {
@@ -77,12 +84,12 @@ input.auto-label {
 
 .bottom {
   top: auto;
-  bottom: 1rem;
+  bottom: 0;
 }
 
 .right {
   left: auto;
-  right: 1rem;
+  right: 0;
 }
 
 .if-print-to-pdf {
