@@ -5930,6 +5930,8 @@ async function validate() {
 
 // app/identify.ts
 async function identify() {
+  if (isOffline())
+    return false;
   if (!localStorage.getItem("user")) {
     gotoUrl(routes.identity({
       target: location.href,

@@ -1,10 +1,14 @@
-import { CONTEXT } from "./globals.js";
+import {
+  CONTEXT,
+  isOffline,
+} from "./globals.js";
 import { validate } from "./services/validateAccessToken.js";
 import { routes } from "./router.js";
 import { reportError } from "./ux/Toaster.js";
 import { gotoUrl } from "./fun/gotoUrl";
 
 export async function identify() {
+  if (isOffline()) return false;
   if (!localStorage.getItem("user")) {
     gotoUrl(
       routes.identity({
