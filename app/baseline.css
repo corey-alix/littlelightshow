@@ -54,16 +54,16 @@ html {
     --dialog-bg-color
   );
   color: var(--dialog-color);
-  border: 1px solid var(--main-color);
-}
-
-input.auto-label {
-  display: block;
+  border: 1px solid var(--main-bg-color);
 }
 
 .toaster .error {
   color: var(--dialog-error-color);
   font-weight: bolder;
+}
+
+input.auto-label {
+  display: block;
 }
 
 .width-100 {

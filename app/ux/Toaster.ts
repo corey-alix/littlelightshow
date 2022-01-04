@@ -15,7 +15,6 @@ class Toaster {
       target.id = "toaster";
       target.classList.add(
         "toaster",
-        "border",
         "rounded-top",
         "fixed",
         "bottom",
