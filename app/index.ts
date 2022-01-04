@@ -1,6 +1,9 @@
 import "./fun/sort.js";
 import { setMode } from "./fun/setMode";
-import { globals } from "./globals";
+import {
+  globals,
+  isOffline,
+} from "./globals";
 const { primaryContact } = globals;
 import {
   getGlobalState,
@@ -38,7 +41,8 @@ export async function init() {
   });
   setInitialState({ primaryContact });
 
-  await upgradeFromCurrentVersion();
+  if (!isOffline())
+    await upgradeFromCurrentVersion();
 
   await identify();
   injectLabels(domNode);
