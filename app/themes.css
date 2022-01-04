@@ -1,0 +1,92 @@
+:root {
+  --christmas-green: rgb(0, 135, 62);
+  --christmas-red: rgb(214, 0, 28);
+  --christmas-white: rgb(253, 244, 220);
+  --color-black: rgb(40, 40, 40);
+  --color-red: var(--christmas-red);
+  --color-white: rgb(180, 180, 180);
+  --color-lime: rgb(0, 214, 28);
+  --color-charcoal: rgb(32, 64, 64);
+  --color-taupe: rgb(64, 96, 92);
+}
+
+.body {
+  --anchor-color: var(
+    --hilite-bg-color
+  );
+  --banner-color: var(
+    --christmas-white
+  );
+  --border-color: var(--color-black);
+  --border-style: solid;
+  --button-bg-color: var(
+    --hilite-bg-color
+  );
+  --button-border-color: var(
+    --main-color
+  );
+  --button-color: var(--main-color);
+  --dialog-bg-color: var(--color-white);
+  --dialog-color: var(--color-black);
+  --dialog-error-color: var(
+    --color-error
+  );
+  --focus-outline-color: var(
+    --color-focus
+  );
+  --input-bg-color: var(
+    --main-bg-color
+  );
+  --input-border-color: var(
+    --border-color
+  );
+  --input-color: var(--main-color);
+  --line-color: var(--color-black);
+  --main-bg-color: var(--color-black);
+  --title-bg-color: var(--main-color);
+  --title-color: var(--main-bg-color);
+  --wavy-decoration-color: var(
+    --hilite-bg-color
+  );
+  --hr-color: var(--hilite-bg-color);
+}
+
+.body.light {
+  --button-color: var(--color-black);
+  --color-error: var(--color-red);
+  --color-focus: var(--color-lime);
+  --hilite-bg-color: var(--color-taupe);
+  --main-bg-color: var(--color-white);
+  --main-color: var(--color-charcoal);
+}
+
+.body.dark {
+  --color-error: var(--color-red);
+  --color-focus: var(--color-lime);
+  --hilite-bg-color: var(--color-black);
+  --main-bg-color: var(
+    --color-charcoal
+  );
+  --main-color: var(--color-white);
+}
+
+.body.holiday {
+  --border-color: var(--christmas-red);
+  --border-style: dashed;
+  --color-error: var(--color-red);
+  --color-focus: var(--color-lime);
+  --hilite-bg-color: var(
+    --christmas-red
+  );
+  --main-bg-color: var(
+    --christmas-green
+  );
+  --main-color: var(--christmas-white);
+}
+
+.body {
+  color: var(--main-color);
+  background-color: var(
+    --main-bg-color
+  );
+}

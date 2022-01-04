@@ -1,3 +1,5 @@
+@import url(themes.css);
+
 * {
   font-family: "Segoe UI", Tahoma,
     Geneva, Verdana, sans-serif;
@@ -30,119 +32,6 @@ html {
 
 .body.holiday {
   visibility: visible;
-}
-
-.body {
-  --color-black: black;
-  --color-red: red;
-  --color-white: white;
-  --color-focus: rgb(214, 0, 28);
-  --color-error: var(--color-red);
-  --main-bg-color: var(--color-black);
-  --wavy-decoration-color: var(
-    --hilite-bg-color
-  );
-  background-color: var(
-    --main-bg-color
-  );
-  --border-style: solid;
-  --focus-outline-color: var(
-    --color-focus
-  );
-  --title-color: var(--main-color);
-  --input-bg-color: var(
-    --main-bg-color
-  );
-  --input-color: var(--main-color);
-  --input-border-color: var(
-    --border-color
-  );
-  --line-color: var(--color-black);
-  --dialog-error-color: var(
-    --color-error
-  );
-  --anchor-color: var(
-    --hilite-bg-color
-  );
-}
-
-.body.dark {
-  --hilite-bg-color: rgb(80, 144, 80);
-  --color-focus: rgb(0, 214, 28);
-  --main-color: rgb(196, 196, 196);
-  --main-bg-color: rgb(64, 64, 64);
-  --dialog-bg-color: var(--color-white);
-  --dialog-color: var(--color-black);
-  --border-color: var(--color-black);
-  --banner-color: var(--main-color);
-  --title-color: var(--main-bg-color);
-  --title-bg-color: var(--main-color);
-  --button-color: var(--main-color);
-  --button-bg-color: var(
-    --hilite-bg-color
-  );
-  --button-border-color: var(
-    --main-color
-  );
-}
-
-.body.light {
-  --hilite-bg-color: rgb(64, 96, 64);
-  --color-focus: rgb(0, 214, 28);
-  --main-color: rgb(64, 64, 64);
-  --main-bg-color: rgb(196, 226, 196);
-  --dialog-bg-color: var(--color-black);
-  --dialog-color: var(--color-white);
-  --banner-color: rgba(
-    253,
-    244,
-    220,
-    0.9
-  );
-  --title-bg-color: rgb(128, 160, 128);
-  --border-color: var(--color-black);
-  --button-color: rgb(253, 244, 220);
-  --button-bg-color: var(
-    --hilite-bg-color
-  );
-  --button-border-color: rgb(
-    128,
-    160,
-    128
-  );
-}
-
-.body.holiday {
-  --hilite-bg-color: rgb(214, 0, 28);
-  --main-bg-color: rgb(0, 135, 62);
-  --main-color: rgba(
-    253,
-    244,
-    220,
-    0.9
-  );
-  --banner-color: rgba(
-    253,
-    244,
-    220,
-    0.9
-  );
-  --title-bg-color: rgb(128, 128, 128);
-  --border-color: rgb(64, 255, 64);
-  --border-style: dashed;
-  --button-color: rgba(
-    253,
-    244,
-    220,
-    0.9
-  );
-  --button-bg-color: var(
-    --hilite-bg-color
-  );
-  --hr-color: var(--hilite-bg-color);
-  --dialog-bg-color: var(
-    --title-bg-color
-  );
 }
 
 .smaller {
@@ -290,27 +179,28 @@ input.auto-label {
 }
 
 .body .button {
-  display: block;
-  min-height: 2rem;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
-  text-align: center;
-  border-radius: 0.5rem;
-  line-height: 1rem;
-  color: var(--button-color);
   background: var(--button-bg-color);
-  border-width: 1px;
-  border-style: solid;
   border-color: var(
     --button-border-color
   );
+  border-radius: 0.5rem;
+  border-style: solid;
+  border-width: 1px;
+  color: var(--button-color);
+  display: block;
+  line-height: 1rem;
+  margin-bottom: 0.5rem;
+  min-height: 2rem;
+  padding: 0.5rem;
+  text-align: center;
   text-decoration: none;
 }
 
-hr {
+.body hr {
   border: solid;
   border-width: 1px;
   width: 100%;
+  color: var(--hr-color);
 }
 
 .form-label {

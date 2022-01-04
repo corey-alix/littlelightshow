@@ -2,17 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
-    />
-    <title>
-      Little Light Show CSS Tester
-    </title>
-    <link
-      rel="stylesheet"
-      href="../app/baseline.css"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Little Light Show CSS Tester</title>
+    <link rel="stylesheet" href="../app/baseline.css" />
     <style>
       body {
         max-width: 100vw !important;
@@ -29,113 +21,57 @@
   <body class="light">
     <div class="line"></div>
     <div class="banner">
-      <div class="centered">
-        Banner Title
-      </div>
+      <div class="centered">Banner Title</div>
     </div>
     <div class="grid-6 padding">
-      <div
-        class="section-title col-1-last"
-      >
-        Buttons
-      </div>
+      <div class="section-title col-1-last">Buttons</div>
       <div class="col-1">Button</div>
-      <button class="col-2">
-        Click
-      </button>
-      <div class="col-1">
-        Button with Button Class
-      </div>
-      <button class="col-2 button">
-        Click
-      </button>
-      <div class="col-1">
-        Input Button with Button Class
-      </div>
-      <input
-        class="col-2 button"
-        type="button"
-        value="Click"
-      />
-      <div class="col-1">
-        Anchor with Button Class
-      </div>
+      <button class="col-2">Click</button>
+      <div class="col-1">Button with Button Class</div>
+      <button class="col-2 button">Click</button>
+      <div class="col-1">Input Button with Button Class</div>
+      <input class="col-2 button" type="button" value="Click" />
+      <div class="col-1">Anchor with Button Class</div>
       <a class="col-2 button">Click</a>
-      <div
-        class="section-title col-1-last"
-      >
-        Separators
-      </div>
+      <div class="section-title col-1-last">Separators</div>
       <div class="col-1">hr</div>
       <hr class="col-2-5" />
       <div class="col-1">line</div>
       <div class="line col-2-5"></div>
-      <div class="border col-2-4">
-        Bordered Item
+      <div class="border col-2-4">Bordered Item</div>
+      <div class="section-title col-1-last">Toaster</div>
+      <div class="col-1">Toaster</div>
+      <div class="col-2-5 toaster">
+        <div class="error">Toaster Error</div>
+        <div class="info">Toaster Info</div>
       </div>
-      <div
-        class="section-title col-1-last"
-      >
-        Toaster
-      </div>
-      <div class="col-2 toaster">
-        <div class="error">
-          Toaster Error
-        </div>
-        <div class="info">
-          Toaster Info
-        </div>
-      </div>
-      <div
-        class="section-title col-1-last"
-      >
-        Form Inputs
-      </div>
-      <div class="col-1">
-        anchor tag
-      </div>
-      <a class="col-2">Anchor Tag</a>
-      <div class="col-1">label</div>
-      <label class="col-2">Hello</label>
-      <input
-        class="col-2"
-        type="text"
-        placeholder="input text"
-      />
-      <textarea
-        class="col-2"
-        placeholder="textarea"
-      >
-Text Area</textarea
-      >
+      <div class="section-title col-1-last">Form Inputs</div>
+      <div class="col-1">anchor tag</div>
+      <a class="col-2-5">Anchor Tag</a>
+      <div class="col-1">Label</div>
+      <label class="col-2-5">Hello</label>
+      <div class="col-1">Input</div>
+      <input class="col-2" type="text" placeholder="input text" />
+      <div class="col-1">Text Area</div>
+      <textarea class="col-2-5" placeholder="textarea">Text Area</textarea>
     </div>
   </body>
 
   <script>
-    const themes =
-      "light,dark,holiday".split(",");
+    const themes = "light,dark,holiday".split(",");
     (function () {
-      const template =
-        document.body.innerHTML;
+      const template = document.body.innerHTML;
 
       document.body.innerHTML = "";
       themes.forEach((theme) => {
-        const themeDiv =
-          document.createElement("div");
+        const themeDiv = document.createElement("div");
         themeDiv.innerHTML = template;
-        const themeDivTitle =
-          document.createElement("div");
-        themeDivTitle.className =
-          "section-title";
+        const themeDivTitle = document.createElement("div");
+        themeDivTitle.className = "section-title";
         themeDivTitle.innerText = theme;
-        themeDiv.insertBefore(
-          themeDivTitle,
-          themeDiv.firstChild
-        );
+        themeDiv.insertBefore(themeDivTitle, themeDiv.firstChild);
         themeDiv.className = `body ${theme} block`;
-        document.body.appendChild(
-          themeDiv
-        );
+        document.body.appendChild(themeDiv);
       });
     })();
   </script>
