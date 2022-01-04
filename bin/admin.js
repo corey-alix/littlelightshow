@@ -5201,7 +5201,8 @@ var StorageModel = class {
     let after = null;
     const client = createClient();
     const result = [];
-    while (true) {
+    let maximum_query_count = 1;
+    while (maximum_query_count--) {
       const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.LTE(lowerBound, import_faunadb4.query.Select([0], import_faunadb4.query.Var("item"))), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), after ? {
         size,
         after
@@ -5226,9 +5227,11 @@ var StorageModel = class {
       });
       this.cache.renew();
       dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
+      after = response.after;
+      if (!after)
+        break;
       if (dataToImport.length < size)
         break;
-      after = response.after;
     }
     return result;
   }
@@ -5637,7 +5640,8 @@ async function init() {
     VERSION
   });
   setInitialState({ primaryContact });
-  await upgradeFromCurrentVersion();
+  if (!isOffline())
+    await upgradeFromCurrentVersion();
   await identify();
   injectLabels(domNode);
   extendNumericInputBehaviors(domNode);
