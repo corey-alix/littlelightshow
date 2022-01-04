@@ -28,6 +28,7 @@ import { isUndefined } from "./isUndefined";
 const VERSION = "1.0.4";
 
 export async function init() {
+  await registerServiceWorker();
   const domNode = document.body;
 
   setInitialState({ VERSION: "1.0.3" });
@@ -133,4 +134,12 @@ async function populateInventoryFromInvoice() {
       }
     );
   }
+}
+
+async function registerServiceWorker() {
+  const worker =
+    await navigator.serviceWorker.register(
+      "/app/worker.js",
+      { type: "module" }
+    );
 }

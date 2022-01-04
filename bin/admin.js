@@ -5630,6 +5630,7 @@ function isUndefined(value) {
 var { primaryContact } = globals;
 var VERSION = "1.0.4";
 async function init() {
+  await registerServiceWorker();
   const domNode = document.body;
   setInitialState({ VERSION: "1.0.3" });
   setInitialState({
@@ -5673,6 +5674,9 @@ async function upgradeFrom103To104() {
   await inventoryModel.synchronize();
   setGlobalState("VERSION", VERSION);
   toast("upgraded from 1.0.3 to 1.0.4");
+}
+async function registerServiceWorker() {
+  const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 
 // app/services/accounts.ts
