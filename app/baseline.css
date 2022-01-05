@@ -10,6 +10,10 @@
   font-size: min(24pt, max(12pt, 4vw));
 }
 
+.anorexic * {
+  font-size: min(12pt, max(6pt, 2vw));
+}
+
 html {
   background-color: black;
 }

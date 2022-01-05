@@ -41,21 +41,21 @@
     --border-color
   );
   --input-color: var(--main-color);
-  --line-color: var(--color-black);
+  --line-color: var(--main-color);
   --main-bg-color: var(--color-black);
   --title-bg-color: var(--main-color);
   --title-color: var(--main-bg-color);
   --wavy-decoration-color: var(
     --hilite-bg-color
   );
-  --hr-color: var(--hilite-bg-color);
+  --hr-color: var(--line-color);
 }
 
 .body.light {
   --button-bg-color: var(--color-white);
   --color-error: var(--color-red);
   --color-focus: var(--color-lime);
-  --dialog-color: var(--color-white);
+  --dialog-color: var(--color-black);
   --dialog-bg-color: var(--color-white);
   --hilite-bg-color: var(--color-taupe);
   --main-bg-color: var(
