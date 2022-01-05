@@ -5507,19 +5507,21 @@ async function upgradeFromCurrentVersion() {
   const currentVersion = getGlobalState("VERSION");
   switch (currentVersion) {
     case "1.0.3":
-      await upgradeFrom103To104();
+      await upgradeFrom103To105();
+      toast(`upgraded to ${currentVersion}`);
       break;
     case "1.0.4":
+      break;
+    case "1.0.5":
       break;
     default:
       throw `unexpected version: ${currentVersion}`;
   }
 }
-async function upgradeFrom103To104() {
+async function upgradeFrom103To105() {
   inventoryModel.upgradeTo104();
   await inventoryModel.synchronize();
   setGlobalState("VERSION", VERSION);
-  toast("upgraded from 1.0.3 to 1.0.4");
 }
 async function registerServiceWorker() {
   const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
