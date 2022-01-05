@@ -3,19 +3,14 @@ import { create as createLedgerForm } from "./templates/glgrid.js";
 import { create as printLedger } from "./templates/print.js";
 import { create as printAccount } from "./templates/by-account.js";
 import { getItem as loadLedger } from "../services/gl.js";
-import { identify } from "../identify.js";
-import { setMode } from "../fun/setMode.js";
-import { removeCssRestrictors } from "../fun/detect.js";
 import { reportError } from "../ux/Toaster.js";
-import { execute } from "../fql/gl-by-account.js";
+import { init as systemInit } from "../index.js";
 
 export async function init(
   domNode: HTMLElement
 ) {
   try {
-    await identify();
-    setMode();
-    removeCssRestrictors();
+    await systemInit();
     const queryParams =
       new URLSearchParams(
         window.location.search

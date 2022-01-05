@@ -4739,7 +4739,7 @@ var GlobalModel = class {
     });
     this.CURRENT_USER = localStorage.getItem("user");
     this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
-    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
+    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 1e3;
     this.primaryContact = getGlobalState("primaryContact") || {
       companyName: "Little Light Show",
       fullName: "Nathan Alix",

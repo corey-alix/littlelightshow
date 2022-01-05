@@ -14,13 +14,10 @@ import {
   invoiceModel,
 } from "../services/invoices.js";
 
-import { identify } from "../identify.js";
 import { create as createFormTemplate } from "./templates/invoice-form.js";
 import { create as createPrintTemplate } from "./templates/invoice-print.js";
 import { create as createGridTemplate } from "./templates/invoices-grid.js";
 import { get, set } from "../fun/get";
-import { removeCssRestrictors } from "../fun/detect.js";
-import { setMode } from "../fun/setMode.js";
 import {
   reportError,
   toast,
@@ -30,18 +27,13 @@ const { TAXRATE } = globals;
 
 import { asCurrency } from "../fun/asCurrency.js";
 import { gotoUrl } from "../fun/gotoUrl.js";
-
-async function setup() {
-  await identify();
-  setMode();
-  removeCssRestrictors();
-}
+import { init as systemInit } from "../index.js";
 
 export async function init(
   target = document.body
 ) {
   try {
-    await setup();
+    await systemInit();
     const queryParams =
       new URLSearchParams(
         window.location.search
@@ -63,7 +55,7 @@ export async function renderInvoices(
   target: HTMLElement
 ) {
   try {
-    await setup();
+    await systemInit();
     const invoices =
       await getAllInvoices();
     const formDom =

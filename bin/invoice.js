@@ -539,9 +539,9 @@ var require_browser_ponyfill = __commonJS({
           var form = new FormData();
           body.trim().split("&").forEach(function(bytes) {
             if (bytes) {
-              var split = bytes.split("=");
-              var name = split.shift().replace(/\+/g, " ");
-              var value = split.join("=").replace(/\+/g, " ");
+              var split2 = bytes.split("=");
+              var name = split2.shift().replace(/\+/g, " ");
+              var value = split2.join("=").replace(/\+/g, " ");
               form.append(decodeURIComponent(name), decodeURIComponent(value));
             }
           });
@@ -607,9 +607,9 @@ var require_browser_ponyfill = __commonJS({
           exports2.DOMException.prototype = Object.create(Error.prototype);
           exports2.DOMException.prototype.constructor = exports2.DOMException;
         }
-        function fetch(input, init2) {
+        function fetch(input, init3) {
           return new Promise(function(resolve, reject) {
-            var request = new Request(input, init2);
+            var request = new Request(input, init3);
             if (request.signal && request.signal.aborted) {
               return reject(new exports2.DOMException("Aborted", "AbortError"));
             }
@@ -3124,15 +3124,15 @@ var require_PageHelper = __commonJS({
     }
     PageHelper.prototype.map = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q3) {
-        return query.Map(q3, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query.Map(q4, lambda);
       });
       return rv;
     };
     PageHelper.prototype.filter = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q3) {
-        return query.Filter(q3, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query.Filter(q4, lambda);
       });
       return rv;
     };
@@ -3201,13 +3201,13 @@ var require_PageHelper = __commonJS({
           cursorOpts.before = null;
         }
       }
-      var q3 = query.Paginate(this.set, opts);
+      var q4 = query.Paginate(this.set, opts);
       if (this._faunaFunctions.length > 0) {
         this._faunaFunctions.forEach(function(lambda) {
-          q3 = lambda(q3);
+          q4 = lambda(q4);
         });
       }
-      return this.client.query(q3, this.options);
+      return this.client.query(q4, this.options);
     };
     PageHelper.prototype._clone = function() {
       return Object.create(PageHelper.prototype, {
@@ -4342,7 +4342,7 @@ var require_stream = __commonJS({
     var errors = require_errors();
     var json = require_json();
     var http = require_http3();
-    var q3 = require_query();
+    var q4 = require_query();
     var util = require_util();
     var DefaultEvents = ["start", "error", "version", "history_rewrite"];
     var DocumentStreamEvents = DefaultEvents.concat(["snapshot"]);
@@ -4352,14 +4352,14 @@ var require_stream = __commonJS({
       });
       this._client = client;
       this._onEvent = onEvent;
-      this._query = q3.wrap(expression);
+      this._query = q4.wrap(expression);
       this._urlParams = options.fields ? { fields: options.fields.join(",") } : null;
       this._abort = new AbortController();
       this._state = "idle";
     }
     StreamClient.prototype.snapshot = function() {
       var self2 = this;
-      self2._client.query(q3.Get(self2._query)).then(function(doc) {
+      self2._client.query(q4.Get(self2._query)).then(function(doc) {
         self2._onEvent({
           type: "snapshot",
           event: doc
@@ -4774,7 +4774,7 @@ var GlobalModel = class {
     });
     this.CURRENT_USER = localStorage.getItem("user");
     this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
-    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
+    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 1e3;
     this.primaryContact = getGlobalState("primaryContact") || {
       companyName: "Little Light Show",
       fullName: "Nathan Alix",
@@ -4969,8 +4969,7 @@ var StorageModel = class {
   }
   async loadLatestData(args) {
     const size = BATCH_SIZE;
-    const upperBound = args.before_date;
-    const lowerBound = args.after_date;
+    const { upperBound, lowerBound } = args;
     let after = null;
     const client = createClient();
     const result = [];
@@ -5001,10 +5000,10 @@ var StorageModel = class {
       this.cache.renew();
       dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
       after = response.after;
-      if (!after)
+      if (!after) {
+        setFutureSyncTime(this.tableName, upperBound);
         break;
-      if (dataToImport.length < size)
-        break;
+      }
     }
     return result;
   }
@@ -5017,8 +5016,8 @@ var StorageModel = class {
     const currentSyncTime = await getDatabaseTime();
     const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
     await this.loadLatestData({
-      after_date: priorSyncTime,
-      before_date: currentSyncTime
+      lowerBound: priorSyncTime,
+      upperBound: currentSyncTime
     });
     this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
       if (!item.id)
@@ -5032,7 +5031,6 @@ var StorageModel = class {
     dataToExport.forEach(async (item) => {
       await this.upsertItem(item);
     });
-    setFutureSyncTime(this.tableName, currentSyncTime);
     this.cache.renew();
   }
   async removeItem(id) {
@@ -5070,7 +5068,8 @@ var StorageModel = class {
       if (!!this.cache.getById(id)) {
         this.cache.renew();
       } else {
-        await this.synchronize();
+        if (!this.isOffline())
+          await this.synchronize();
       }
     }
     const result = this.cache.getById(id);
@@ -5197,38 +5196,6 @@ function normalizeInvoice(invoice) {
     invoice.items.forEach((i) => i.tax = parseFloat(asCurrency(i.total * invoice.taxrate)));
   }
   return raw;
-}
-
-// app/services/validateAccessToken.ts
-var import_faunadb4 = __toModule(require_faunadb());
-async function validate() {
-  const client = createClient();
-  await client.ping();
-}
-
-// app/fun/gotoUrl.ts
-function gotoUrl(url) {
-  location.replace(url);
-}
-
-// app/identify.ts
-async function identify() {
-  if (isOffline())
-    return false;
-  if (!localStorage.getItem("user")) {
-    gotoUrl(routes.identity({
-      target: location.href,
-      context: CONTEXT
-    }));
-    return false;
-  }
-  try {
-    await validate();
-  } catch (ex) {
-    reportError(ex);
-    return false;
-  }
-  return true;
 }
 
 // app/dom.ts
@@ -5516,6 +5483,11 @@ function sum(values) {
   if (!values.length)
     return 0;
   return values.reduce((a, b) => a + b, 0);
+}
+
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
 }
 
 // app/invoice/templates/invoice-form.tsx
@@ -6043,6 +6015,77 @@ function set(formDom, values) {
   });
 }
 
+// app/fun/setMode.ts
+var modes = {
+  light_mode: "light",
+  dark_mode: "dark",
+  holiday_mode: "holiday"
+};
+function setMode(mode) {
+  if (!mode)
+    mode = localStorage.getItem("mode") || modes.light_mode;
+  localStorage.setItem("mode", mode);
+  document.body.classList.remove(...Object.values(modes));
+  document.body.classList.add(mode);
+  const isFontier = getGlobalState("textier") == true;
+  document.body.classList.toggle("textier", isFontier);
+}
+
+// app/services/validateAccessToken.ts
+var import_faunadb4 = __toModule(require_faunadb());
+async function validate() {
+  const client = createClient();
+  await client.ping();
+}
+
+// app/identify.ts
+async function identify() {
+  if (isOffline())
+    return false;
+  if (!localStorage.getItem("user")) {
+    gotoUrl(routes.identity({
+      target: location.href,
+      context: CONTEXT
+    }));
+    return false;
+  }
+  return true;
+  try {
+    await validate();
+  } catch (ex) {
+    reportError(ex);
+    return false;
+  }
+  return true;
+}
+
+// app/ux/injectLabels.ts
+function injectLabels(domNode) {
+  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
+  inputsToWrap.forEach((input) => {
+    const label = dom("label");
+    label.className = "border padding rounded wrap " + input.className;
+    label.innerText = input.placeholder;
+    input.parentElement.insertBefore(label, input);
+    label.appendChild(input);
+  });
+}
+
+// app/services/admin.ts
+var import_faunadb5 = __toModule(require_faunadb());
+
+// app/services/gl.ts
+var LEDGER_TABLE = "general_ledger";
+var ledgerModel = new StorageModel({
+  tableName: LEDGER_TABLE,
+  offline: false
+});
+
+// app/isUndefined.ts
+function isUndefined(value) {
+  return typeof value === "undefined";
+}
+
 // app/fun/detect.ts
 var userAgent = navigator.userAgent.toLocaleUpperCase();
 var isChrome = userAgent.includes("CHROME");
@@ -6069,32 +6112,68 @@ function removeCssRule(name) {
   }
 }
 
-// app/fun/setMode.ts
-var modes = {
-  light_mode: "light",
-  dark_mode: "dark",
-  holiday_mode: "holiday"
-};
-function setMode(mode) {
-  if (!mode)
-    mode = localStorage.getItem("mode") || modes.light_mode;
-  localStorage.setItem("mode", mode);
-  document.body.classList.remove(...Object.values(modes));
-  document.body.classList.add(mode);
-  const isFontier = getGlobalState("textier") == true;
-  document.body.classList.toggle("textier", isFontier);
+// app/index.ts
+var { primaryContact: primaryContact3 } = globals;
+var VERSION = "1.0.5";
+async function init() {
+  const domNode = document.body;
+  if (!isOffline()) {
+    await registerServiceWorker();
+    setInitialState({
+      VERSION: "1.0.3"
+    });
+    setInitialState({
+      TAX_RATE: 6,
+      CACHE_MAX_AGE: 600,
+      BATCH_SIZE: 64,
+      work_offline: true,
+      VERSION
+    });
+    setInitialState({ primaryContact: primaryContact3 });
+    await upgradeFromCurrentVersion();
+    await identify();
+  }
+  injectLabels(domNode);
+  extendNumericInputBehaviors(domNode);
+  hookupTriggers(domNode);
+  setMode();
+  removeCssRestrictors();
+}
+function setInitialState(data) {
+  Object.keys(data).forEach((key) => {
+    const value = getGlobalState(key);
+    if (isUndefined(value)) {
+      setGlobalState(key, data[key]);
+    }
+  });
+}
+async function upgradeFromCurrentVersion() {
+  const currentVersion = getGlobalState("VERSION");
+  switch (currentVersion) {
+    case "1.0.3":
+      await upgradeFrom103To104();
+      break;
+    case "1.0.4":
+      break;
+    default:
+      throw `unexpected version: ${currentVersion}`;
+  }
+}
+async function upgradeFrom103To104() {
+  inventoryModel.upgradeTo104();
+  await inventoryModel.synchronize();
+  setGlobalState("VERSION", VERSION);
+  toast("upgraded from 1.0.3 to 1.0.4");
+}
+async function registerServiceWorker() {
+  const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 
 // app/invoice/invoice.ts
 var { TAXRATE: TAXRATE4 } = globals;
-async function setup() {
-  await identify();
-  setMode();
-  removeCssRestrictors();
-}
-async function init(target = document.body) {
+async function init2(target = document.body) {
   try {
-    await setup();
+    await init();
     const queryParams = new URLSearchParams(window.location.search);
     if (queryParams.has("id")) {
       await renderInvoice2(target, queryParams.get("id"));
@@ -6107,7 +6186,7 @@ async function init(target = document.body) {
 }
 async function renderInvoices(target) {
   try {
-    await setup();
+    await init();
     const invoices = await getItems();
     const formDom = create3(invoices);
     target.appendChild(formDom);
@@ -6256,7 +6335,7 @@ function deepEqual(requestModel, priorModel) {
   return JSON.stringify(requestModel) === JSON.stringify(priorModel);
 }
 export {
-  init,
+  init2 as init,
   print,
   renderInvoices
 };

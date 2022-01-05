@@ -4788,7 +4788,7 @@ var GlobalModel = class {
     });
     this.CURRENT_USER = localStorage.getItem("user");
     this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
-    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 10;
+    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 1e3;
     this.primaryContact = getGlobalState("primaryContact") || {
       companyName: "Little Light Show",
       fullName: "Nathan Alix",
@@ -4898,6 +4898,7 @@ async function identify() {
     }));
     return false;
   }
+  return true;
   try {
     await validate();
   } catch (ex) {
@@ -5224,8 +5225,7 @@ var StorageModel = class {
   }
   async loadLatestData(args) {
     const size = BATCH_SIZE;
-    const upperBound = args.before_date;
-    const lowerBound = args.after_date;
+    const { upperBound, lowerBound } = args;
     let after = null;
     const client = createClient();
     const result = [];
@@ -5256,10 +5256,10 @@ var StorageModel = class {
       this.cache.renew();
       dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
       after = response.after;
-      if (!after)
+      if (!after) {
+        setFutureSyncTime(this.tableName, upperBound);
         break;
-      if (dataToImport.length < size)
-        break;
+      }
     }
     return result;
   }
@@ -5272,8 +5272,8 @@ var StorageModel = class {
     const currentSyncTime = await getDatabaseTime();
     const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
     await this.loadLatestData({
-      after_date: priorSyncTime,
-      before_date: currentSyncTime
+      lowerBound: priorSyncTime,
+      upperBound: currentSyncTime
     });
     this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
       if (!item.id)
@@ -5287,7 +5287,6 @@ var StorageModel = class {
     dataToExport.forEach(async (item) => {
       await this.upsertItem(item);
     });
-    setFutureSyncTime(this.tableName, currentSyncTime);
     this.cache.renew();
   }
   async removeItem(id) {
@@ -5325,7 +5324,8 @@ var StorageModel = class {
       if (!!this.cache.getById(id)) {
         this.cache.renew();
       } else {
-        await this.synchronize();
+        if (!this.isOffline())
+          await this.synchronize();
       }
     }
     const result = this.cache.getById(id);
@@ -5442,28 +5442,58 @@ function isNull(value) {
   return value === null;
 }
 
+// app/fun/detect.ts
+var userAgent = navigator.userAgent.toLocaleUpperCase();
+var isChrome = userAgent.includes("CHROME");
+var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
+function removeCssRestrictors() {
+  if (isChrome) {
+    removeCssRule(".if-print-to-pdf");
+  }
+  if (!isMobile) {
+    removeCssRule(".if-desktop");
+  }
+}
+function removeCssRule(name) {
+  const sheets = document.styleSheets;
+  for (let sheetIndex = 0; sheetIndex < sheets.length; sheetIndex++) {
+    const sheet = sheets[sheetIndex];
+    for (let ruleIndex = 0; ruleIndex < sheet.cssRules.length; ruleIndex++) {
+      const rule = sheet.cssRules[ruleIndex];
+      if (rule.selectorText === name) {
+        sheet.deleteRule(ruleIndex);
+        return;
+      }
+    }
+  }
+}
+
 // app/index.ts
 var { primaryContact } = globals;
-var VERSION = "1.0.4";
+var VERSION = "1.0.5";
 async function init() {
-  await registerServiceWorker();
   const domNode = document.body;
-  setInitialState({ VERSION: "1.0.3" });
-  setInitialState({
-    TAX_RATE: 6,
-    CACHE_MAX_AGE: 600,
-    BATCH_SIZE: 64,
-    work_offline: true,
-    VERSION
-  });
-  setInitialState({ primaryContact });
-  if (!isOffline())
+  if (!isOffline()) {
+    await registerServiceWorker();
+    setInitialState({
+      VERSION: "1.0.3"
+    });
+    setInitialState({
+      TAX_RATE: 6,
+      CACHE_MAX_AGE: 600,
+      BATCH_SIZE: 64,
+      work_offline: true,
+      VERSION
+    });
+    setInitialState({ primaryContact });
     await upgradeFromCurrentVersion();
-  await identify();
+    await identify();
+  }
   injectLabels(domNode);
   extendNumericInputBehaviors(domNode);
   hookupTriggers(domNode);
   setMode();
+  removeCssRestrictors();
 }
 function setInitialState(data) {
   Object.keys(data).forEach((key) => {

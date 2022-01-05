@@ -115,7 +115,7 @@ class WorkerFetcher {
           fetch(event.request).then(
             (response) => {
               cache.put(
-                event.request,
+                queryFreeUrl,
                 response
               );
             }

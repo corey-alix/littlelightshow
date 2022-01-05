@@ -24,32 +24,37 @@ import {
   toast,
 } from "./ux/Toaster";
 import { isUndefined } from "./isUndefined";
+import { removeCssRestrictors } from "./fun/detect.js";
 
-const VERSION = "1.0.4";
+const VERSION = "1.0.5";
 
 export async function init() {
-  await registerServiceWorker();
   const domNode = document.body;
 
-  setInitialState({ VERSION: "1.0.3" });
+  if (!isOffline()) {
+    await registerServiceWorker();
+    setInitialState({
+      VERSION: "1.0.3",
+    });
 
-  setInitialState({
-    TAX_RATE: 6,
-    CACHE_MAX_AGE: 600,
-    BATCH_SIZE: 64,
-    work_offline: true,
-    VERSION,
-  });
-  setInitialState({ primaryContact });
+    setInitialState({
+      TAX_RATE: 6,
+      CACHE_MAX_AGE: 600,
+      BATCH_SIZE: 64,
+      work_offline: true,
+      VERSION,
+    });
+    setInitialState({ primaryContact });
 
-  if (!isOffline())
     await upgradeFromCurrentVersion();
+    await identify();
+  }
 
-  await identify();
   injectLabels(domNode);
   extendNumericInputBehaviors(domNode);
   hookupTriggers(domNode);
   setMode();
+  removeCssRestrictors();
 }
 
 function setInitialState(

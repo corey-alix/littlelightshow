@@ -34,7 +34,7 @@ var WorkerFetcher = class {
       if (response) {
         if (update)
           fetch(event.request).then((response2) => {
-            cache.put(event.request, response2);
+            cache.put(queryFreeUrl, response2);
           });
       } else {
         response = await fetch(request);

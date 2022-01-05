@@ -53,19 +53,23 @@ export class StorageModel<
 
   // return items [after_date, before_date)
   async loadLatestData(args: {
-    after_date: number;
-    before_date: number;
+    lowerBound: number;
+    upperBound: number;
   }) {
     const size = BATCH_SIZE;
 
-    const upperBound = args.before_date;
-    const lowerBound = args.after_date;
+    const { upperBound, lowerBound } =
+      args;
 
     let after = null;
     const client = createClient();
     const result = [] as Array<
       T & SynchronizationAttributes
     >;
+
+    // only get one batch, advancing the sync time to date of last fetched record
+    // so if BATCH_SIZE items are fetched then the last item (and possibly more) will
+    // be fetched again, so BATCH_SIZE should be large.
     let maximum_query_count = 1;
     while (maximum_query_count--) {
       const response =
@@ -125,6 +129,7 @@ export class StorageModel<
               SynchronizationAttributes;
           }>;
         };
+
       const dataToImport =
         response.data.map((item) => ({
           ...item.data,
@@ -170,11 +175,17 @@ export class StorageModel<
         );
 
       after = response.after;
-      if (!after) break;
-
-      if (dataToImport.length < size)
+      if (!after) {
+        // preserve the timestamp for a future sync run
+        // notice the next sync will pull in the data we just pushed
+        setFutureSyncTime(
+          this.tableName,
+          upperBound
+        );
         break;
+      }
     }
+
     return result;
   }
 
@@ -203,8 +214,8 @@ export class StorageModel<
       );
 
     await this.loadLatestData({
-      after_date: priorSyncTime,
-      before_date: currentSyncTime,
+      lowerBound: priorSyncTime,
+      upperBound: currentSyncTime,
     });
 
     // apply local deletes
@@ -232,13 +243,6 @@ export class StorageModel<
       async (item) => {
         await this.upsertItem(item);
       }
-    );
-
-    // preserve the timestamp for a future sync run
-    // notice the next sync will pull in the data we just pushed
-    setFutureSyncTime(
-      this.tableName,
-      currentSyncTime
     );
 
     // reset the cache expiration stamp
@@ -302,7 +306,8 @@ export class StorageModel<
       if (!!this.cache.getById(id)) {
         this.cache.renew();
       } else {
-        await this.synchronize();
+        if (!this.isOffline())
+          await this.synchronize();
       }
     }
 

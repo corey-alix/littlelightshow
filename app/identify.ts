@@ -18,6 +18,7 @@ export async function identify() {
     );
     return false;
   }
+  return true;
 
   try {
     await validate();

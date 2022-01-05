@@ -22,7 +22,7 @@ class GlobalModel {
   public readonly BATCH_SIZE =
     getGlobalState<number>(
       "BATCH_SIZE"
-    ) || 10;
+    ) || 1000;
 
   public readonly primaryContact =
     getGlobalState<{
