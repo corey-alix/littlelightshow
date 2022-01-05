@@ -6118,6 +6118,7 @@ var VERSION = "1.0.5";
 async function init() {
   const domNode = document.body;
   if (!isOffline()) {
+    await identify();
     await registerServiceWorker();
     setInitialState({
       VERSION: "1.0.3"
@@ -6131,7 +6132,6 @@ async function init() {
     });
     setInitialState({ primaryContact: primaryContact3 });
     await upgradeFromCurrentVersion();
-    await identify();
   }
   injectLabels(domNode);
   extendNumericInputBehaviors(domNode);

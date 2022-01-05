@@ -32,6 +32,7 @@ export async function init() {
   const domNode = document.body;
 
   if (!isOffline()) {
+    await identify();
     await registerServiceWorker();
     setInitialState({
       VERSION: "1.0.3",
@@ -47,7 +48,6 @@ export async function init() {
     setInitialState({ primaryContact });
 
     await upgradeFromCurrentVersion();
-    await identify();
   }
 
   injectLabels(domNode);
