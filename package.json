@@ -16,7 +16,7 @@
     "build:test": "     esbuild --watch --sourcemap --format=esm --bundle test/test.ts               --outfile=bin/test.js",
     "build": "npm-run-all -p build:worker build:index build:gl build:invoice build:inventory build:todo build:admin build:test",
     "deploy": "git checkout v1.0.2 && git merge v1.0.3 && git push && git checkout v1.0.3",
-    "dev": "npm-run-all -c -p debug build watch:lint",
+    "dev": "npm-run-all -c -p build watch:lint",
     "watch:lint": "npm run lint -- -w",
     "lint": "tsc"
   },
