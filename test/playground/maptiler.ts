@@ -60,6 +60,46 @@ export async function run() {
     ],
     zoom: 20,
   });
+
+  const addressInfo =
+    await reverseGeocode(whereAmI);
+  const popupInfo = reportAddress(
+    addressInfo
+  );
+
+  const marker = new mapboxgl.Marker({
+    color: "#FF0000",
+    draggable: true,
+  })
+    .setLngLat([
+      whereAmI.lon,
+      whereAmI.lat,
+    ])
+    .setPopup(
+      new mapboxgl.Popup().setHTML(
+        `${popupInfo}`
+      )
+    )
+    .addTo(map);
+
+  marker.on("dragend", async () => {
+    const { lng: lon, lat } =
+      marker.getLngLat();
+    const addressInfo =
+      await reverseGeocode({
+        lon,
+        lat,
+      });
+    const popupInfo = reportAddress(
+      addressInfo
+    );
+    marker.setPopup(
+      new mapboxgl.Popup().setHTML(
+        `${popupInfo}`
+      )
+    );
+    marker.togglePopup();
+  });
 }
 
 async function reverseGeocode(

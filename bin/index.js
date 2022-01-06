@@ -4844,6 +4844,7 @@ var routes = {
   admin: () => "/app/admin/index.html",
   createTodo: () => "/app/todo/index.html",
   todo: (id) => `/app/todo/index.html?id=${id}`,
+  maptiler: () => `/test/playground/maptiler.html`,
   gl: {
     byAccount: (id) => `/app/gl/index.html?account=${id}`
   }

@@ -30,6 +30,8 @@ export const routes = {
     "/app/todo/index.html",
   todo: (id: string) =>
     `/app/todo/index.html?id=${id}`,
+  maptiler: () =>
+    `/test/playground/maptiler.html`,
   gl: {
     byAccount: (id: string) =>
       `/app/gl/index.html?account=${id}`,

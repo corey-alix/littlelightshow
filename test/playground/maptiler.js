@@ -17,6 +17,30 @@ async function run() {
     ],
     zoom: 20
   });
+  const addressInfo = await reverseGeocode(whereAmI);
+  const popupInfo = reportAddress(addressInfo);
+  const marker = new mapboxgl.Marker({
+    color: "#FF0000",
+    draggable: true
+  }).setLngLat([
+    whereAmI.lon,
+    whereAmI.lat
+  ]).setPopup(new mapboxgl.Popup().setHTML(`${popupInfo}`)).addTo(map);
+  marker.on("dragend", async () => {
+    const { lng: lon, lat } = marker.getLngLat();
+    const addressInfo2 = await reverseGeocode({
+      lon,
+      lat
+    });
+    const popupInfo2 = reportAddress(addressInfo2);
+    marker.setPopup(new mapboxgl.Popup().setHTML(`${popupInfo2}`));
+    marker.togglePopup();
+  });
+}
+async function reverseGeocode(location) {
+  const response = await fetch(maptilerEndpoints.reverseGeocode(location));
+  const data = await response.json();
+  return data;
 }
 async function getCurrentLocation() {
   return new Promise((good, bad) => {
@@ -28,6 +52,15 @@ async function getCurrentLocation() {
       bad(msg);
     });
   });
+}
+function reportAddress(location) {
+  if (!location.features)
+    throw "nothing found";
+  const street = location.features.find((f) => f.place_type.includes("street"));
+  if (street) {
+    return street.address || street.text;
+  }
+  return location.features[0].place_name;
 }
 export {
   run
