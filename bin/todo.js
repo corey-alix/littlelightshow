@@ -5520,7 +5520,7 @@ function moveChildren(items, report) {
 
 // app/todo/grid-template.tsx
 function renderItem(item) {
-  const date = asDateString(new Date(item.date));
+  const date = dayjs(asDateString(new Date(item.date))).from(asDateString());
   return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "col-1 date"
   }, /* @__PURE__ */ dom("a", {
@@ -5572,7 +5572,7 @@ async function init2(todoWidget) {
   }
   const render = async () => {
     if (todoItemsPlaceholder) {
-      const todoItems = (await todoModel.getItems()).sortBy({ date: "-number" });
+      const todoItems = (await todoModel.getItems()).sortBy({ date: "number" });
       const todoItemsGrid = create(todoItems);
       todoItemsPlaceholder.innerText = "";
       todoItemsPlaceholder.appendChild(todoItemsGrid);

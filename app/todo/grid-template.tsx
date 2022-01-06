@@ -1,3 +1,4 @@
+declare var dayjs;
 import { dom } from "../dom";
 import { Todo } from "../services/todo";
 import { moveChildren } from "../fun/dom";
@@ -10,9 +11,9 @@ dom;
 function renderItem(
   item: Todo
 ): HTMLElement {
-  const date = asDateString(
-    new Date(item.date)
-  );
+  const date = dayjs(
+    asDateString(new Date(item.date))
+  ).from(asDateString());
   return (
     <div>
       <div class="col-1 date">

@@ -59,7 +59,7 @@ export async function init(
     if (todoItemsPlaceholder) {
       const todoItems = (
         await todoModel.getItems()
-      ).sortBy({ date: "-number" });
+      ).sortBy({ date: "number" });
       const todoItemsGrid =
         createTodoGrid(todoItems);
       todoItemsPlaceholder.innerText =
