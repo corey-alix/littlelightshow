@@ -5637,7 +5637,7 @@ function create(inventoryItems) {
   }), /* @__PURE__ */ dom("div", {
     class: "line col-1-last"
   }), /* @__PURE__ */ dom("div", {
-    class: "col-c-2"
+    class: "col-c-2 align-right"
   }, "Total Value"), /* @__PURE__ */ dom("div", {
     class: "col-a currency"
   }, asCurrency(totalValue)));

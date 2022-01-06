@@ -6047,7 +6047,7 @@ function renderInvoice(invoice) {
   const invoiceTotal = totalInvoice(invoice);
   return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
     class: "col-1-4",
-    href: `invoice?id=${invoice.id}`
+    href: `${routes.invoice(invoice.id)}`
   }, invoice.clientname), /* @__PURE__ */ dom("label", {
     class: "col-5 currency"
   }, asCurrency(invoice.labor)), /* @__PURE__ */ dom("label", {

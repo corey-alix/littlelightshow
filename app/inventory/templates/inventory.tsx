@@ -81,7 +81,7 @@ export function create(
       </div>
       <div class="placeholder lineitems"></div>
       <div class="line col-1-last"></div>
-      <div class="col-c-2">
+      <div class="col-c-2 align-right">
         Total Value
       </div>
       <div class="col-a currency">

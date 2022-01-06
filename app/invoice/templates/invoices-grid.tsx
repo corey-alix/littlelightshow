@@ -5,6 +5,7 @@ import { hookupTriggers } from "../../fun/hookupTriggers.js";
 import { noZero } from "../../fun/isZero.js";
 import { sum } from "../../fun/sum.js";
 import { globals } from "../../globals.js";
+import { routes } from "../../router.js";
 
 import { Invoice } from "../../services/invoices.js";
 
@@ -114,7 +115,9 @@ function renderInvoice(
     <div>
       <a
         class="col-1-4"
-        href={`invoice?id=${invoice.id}`}
+        href={`${routes.invoice(
+          invoice.id!
+        )}`}
       >
         {invoice.clientname}
       </a>
