@@ -89,7 +89,7 @@ var AppServiceWorker = class {
 function run() {
   new AppServiceWorker({
     version: 1,
-    cacheName: "cache",
+    cacheName: "lls",
     databaseName: "meta",
     update: true
   });

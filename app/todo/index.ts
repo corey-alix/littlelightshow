@@ -16,22 +16,25 @@ import {
   getFormValue,
 } from "../fun/setFormValue";
 
-export async function init() {
+export async function init(
+  todoWidget: HTMLElement
+) {
   await systemInit();
 
+  const formDom =
+    todoWidget.querySelector(
+      "form"
+    ) as HTMLFormElement;
+  if (!formDom)
+    throw "form not found in todo widget";
+
   const todoItemsPlaceholder =
-    document.body.querySelector(
+    todoWidget.querySelector(
       ".todo-items.placeholder"
     ) as HTMLElement;
 
   if (!todoItemsPlaceholder)
-    throw "todo-items placeholder not found";
-
-  const formDom =
-    document.body.querySelector(
-      "form"
-    ) as HTMLFormElement;
-  if (!formDom) throw "form not found";
+    throw "todo-items placeholder not found in todo widget";
 
   const id = getQueryParameter("id");
   const activeTodoItem =
@@ -67,24 +70,20 @@ export async function init() {
     }
   };
 
-  on(
-    document.body,
-    "delete",
-    async () => {
-      if (!id) {
-        trigger(document.body, "reset");
-        return;
-      }
-      try {
-        await todoModel.removeItem(id);
-        trigger(document.body, "reset");
-      } catch (ex) {
-        reportError(ex);
-      }
+  on(todoWidget, "delete", async () => {
+    if (!id) {
+      trigger(todoWidget, "reset");
+      return;
     }
-  );
+    try {
+      await todoModel.removeItem(id);
+      trigger(todoWidget, "reset");
+    } catch (ex) {
+      reportError(ex);
+    }
+  });
 
-  on(document.body, "reset", () => {
+  on(todoWidget, "reset", () => {
     setGlobalState(
       "todo-date",
       asDateString(new Date())
@@ -93,30 +92,26 @@ export async function init() {
     gotoUrl(routes.createTodo());
   });
 
-  on(
-    document.body,
-    "submit",
-    async () => {
-      const date = getFormValue(
-        formDom,
-        "todo-date"
-      );
+  on(todoWidget, "submit", async () => {
+    const date = getFormValue(
+      formDom,
+      "todo-date"
+    );
 
-      const comment = getFormValue(
-        formDom,
-        "todo-comment"
-      );
+    const comment = getFormValue(
+      formDom,
+      "todo-comment"
+    );
 
-      await todoModel.upsertItem({
-        id,
-        date: new Date(date).valueOf(),
-        comment,
-      });
+    await todoModel.upsertItem({
+      id,
+      date: new Date(date).valueOf(),
+      comment,
+    });
 
-      toast("Saved");
-      render();
-    }
-  );
+    toast("Saved");
+    render();
+  });
 
   render();
 }

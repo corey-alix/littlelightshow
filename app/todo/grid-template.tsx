@@ -3,6 +3,8 @@ import { Todo } from "../services/todo";
 import { moveChildren } from "../fun/dom";
 import { routes } from "../router";
 import { asDateString } from "../fun/asDateString";
+import { gotoUrl } from "../fun/gotoUrl";
+
 dom;
 
 function renderItem(
@@ -15,14 +17,16 @@ function renderItem(
     <div>
       <div class="col-1 date">
         <a
-          href={`${routes.todo(
-            item.id
-          )}`}
+          click={() =>
+            gotoUrl(
+              routes.todo(item.id)
+            )
+          }
         >
           {date}
         </a>
       </div>
-      <div class="col-2-last text">
+      <div class="col-2-last text pre no-overflow max-height-100">
         {item.comment}
       </div>
     </div>

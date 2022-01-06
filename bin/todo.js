@@ -5524,9 +5524,9 @@ function renderItem(item) {
   return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
     class: "col-1 date"
   }, /* @__PURE__ */ dom("a", {
-    href: `${routes.todo(item.id)}`
+    click: () => gotoUrl(routes.todo(item.id))
   }, date)), /* @__PURE__ */ dom("div", {
-    class: "col-2-last text"
+    class: "col-2-last text pre no-overflow max-height-100"
   }, item.comment));
 }
 function create(items) {
@@ -5556,14 +5556,14 @@ function getFormValue(formDom, name) {
 }
 
 // app/todo/index.ts
-async function init2() {
+async function init2(todoWidget) {
   await init();
-  const todoItemsPlaceholder = document.body.querySelector(".todo-items.placeholder");
-  if (!todoItemsPlaceholder)
-    throw "todo-items placeholder not found";
-  const formDom = document.body.querySelector("form");
+  const formDom = todoWidget.querySelector("form");
   if (!formDom)
-    throw "form not found";
+    throw "form not found in todo widget";
+  const todoItemsPlaceholder = todoWidget.querySelector(".todo-items.placeholder");
+  if (!todoItemsPlaceholder)
+    throw "todo-items placeholder not found in todo widget";
   const id = getQueryParameter("id");
   const activeTodoItem = id && await todoModel.getItem(id);
   if (activeTodoItem) {
@@ -5578,24 +5578,24 @@ async function init2() {
       todoItemsPlaceholder.appendChild(todoItemsGrid);
     }
   };
-  on(document.body, "delete", async () => {
+  on(todoWidget, "delete", async () => {
     if (!id) {
-      trigger(document.body, "reset");
+      trigger(todoWidget, "reset");
       return;
     }
     try {
       await todoModel.removeItem(id);
-      trigger(document.body, "reset");
+      trigger(todoWidget, "reset");
     } catch (ex) {
       reportError(ex);
     }
   });
-  on(document.body, "reset", () => {
+  on(todoWidget, "reset", () => {
     setGlobalState("todo-date", asDateString(new Date()));
     setGlobalState("todo-comment", "");
     gotoUrl(routes.createTodo());
   });
-  on(document.body, "submit", async () => {
+  on(todoWidget, "submit", async () => {
     const date = getFormValue(formDom, "todo-date");
     const comment = getFormValue(formDom, "todo-comment");
     await todoModel.upsertItem({
