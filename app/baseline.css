@@ -377,13 +377,6 @@ form textarea {
   height: auto;
 }
 
-.print {
-  width: 800px !important;
-  background-color: white !important;
-  color: black !important;
-  padding: 1rem;
-}
-
 .col-1 {
   grid-column: 1;
 }
@@ -604,24 +597,26 @@ form textarea {
 }
 
 @media print {
-  * {
-    font-size: 1rem;
-    transition: none !important;
-    text-shadow: none;
-    background: white;
-    color: black;
+  body.print {
+    visibility: visible;
+    max-width: 8in !important;
+    width: 8in !important;
+    background-color: white !important;
+    color: black !important;
+    padding: 1rem;
   }
 
-  a {
-    color: black;
-    text-decoration: none;
+  body.print * {
+    font-size: 12pt !important;
   }
 
-  ::placeholder {
-    color: transparent;
+  .grid-6 {
+    grid-template-columns: repeat(
+      7,
+      auto
+    );
   }
-
-  #invoice-form {
-    display: none;
+  .col-7 {
+    display: inline-block;
   }
 }

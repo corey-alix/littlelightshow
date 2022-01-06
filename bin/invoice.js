@@ -6224,14 +6224,20 @@ async function registerServiceWorker() {
   const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 
+// app/fun/getQueryParameter.ts
+function getQueryParameter(name) {
+  const queryParams = new URLSearchParams(window.location.search);
+  return queryParams.get(name);
+}
+
 // app/invoice/invoice.ts
 var { TAXRATE: TAXRATE4 } = globals;
 async function init2(target = document.body) {
   try {
     await init();
-    const queryParams = new URLSearchParams(window.location.search);
-    if (queryParams.has("id")) {
-      await renderInvoice2(target, queryParams.get("id"));
+    const id = getQueryParameter("id");
+    if (!!id) {
+      await renderInvoice2(target, id);
     } else {
       await renderInvoice2(target);
     }

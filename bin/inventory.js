@@ -5709,13 +5709,18 @@ function create2(inventoryItem) {
   }, "Delete"));
 }
 
+// app/fun/getQueryParameter.ts
+function getQueryParameter(name) {
+  const queryParams = new URLSearchParams(window.location.search);
+  return queryParams.get(name);
+}
+
 // app/inventory/inventory.ts
 async function init2(target = document.body) {
   await init();
   const inventoryItems = await inventoryModel.getItems();
-  const queryParams = new URLSearchParams(window.location.search);
-  if (queryParams.has("id")) {
-    const id = queryParams.get("id");
+  const id = getQueryParameter("id");
+  if (!!id) {
     if (id === "all") {
       const report = create(inventoryItems.sortBy({
         code: "string"

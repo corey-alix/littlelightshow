@@ -72,7 +72,9 @@ export async function create(
         <div class="col-2-5">
           Comment
         </div>
-        <div class="col-7">Balance</div>
+        <div class="col-7 align-right">
+          Balance
+        </div>
         <div class="placeholder line-items" />
         <div class="col-c align-right">
           Balance

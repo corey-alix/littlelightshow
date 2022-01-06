@@ -5970,7 +5970,7 @@ async function create5(account) {
   }, "Amount"), /* @__PURE__ */ dom("div", {
     class: "col-2-5"
   }, "Comment"), /* @__PURE__ */ dom("div", {
-    class: "col-7"
+    class: "col-7 align-right"
   }, "Balance"), /* @__PURE__ */ dom("div", {
     class: "placeholder line-items"
   }), /* @__PURE__ */ dom("div", {
@@ -6149,13 +6149,21 @@ async function registerServiceWorker() {
   const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 
+// app/fun/getQueryParameter.ts
+function getQueryParameter(name) {
+  const queryParams = new URLSearchParams(window.location.search);
+  return queryParams.get(name);
+}
+
 // app/gl/gl.ts
 async function init2(domNode) {
   try {
     await init();
-    const queryParams = new URLSearchParams(window.location.search);
-    if (queryParams.has("print")) {
-      const printId = queryParams.get("print");
+    window.addEventListener("beforeprint", () => {
+      document.body.classList.add("print");
+    });
+    const printId = getQueryParameter("print");
+    if (!!printId) {
       const target = domNode;
       switch (printId) {
         case "all": {
@@ -6171,16 +6179,16 @@ async function init2(domNode) {
       }
       return;
     }
-    if (queryParams.has("id")) {
-      const id = queryParams.get("id");
+    const id = getQueryParameter("id");
+    if (!!id) {
       const ledger = await getItem(id);
       if (!ledger)
         throw `cannot find ledger: ${id}`;
       domNode.appendChild(create3(ledger));
       return;
     }
-    if (queryParams.has("account")) {
-      const account = queryParams.get("account");
+    const account = getQueryParameter("account");
+    if (!!account) {
       const report = await create5(account);
       domNode.appendChild(report);
       return;

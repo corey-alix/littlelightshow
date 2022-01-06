@@ -12,6 +12,16 @@ export async function init(
 ) {
   try {
     await systemInit();
+
+    window.addEventListener(
+      "beforeprint",
+      () => {
+        document.body.classList.add(
+          "print"
+        );
+      }
+    );
+
     const printId =
       getQueryParameter("print");
     if (!!printId) {

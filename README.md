@@ -6,8 +6,9 @@ littlelightshow
 
 ## Change Log
 
-- 2022-01-05: added TODO module
-- 2022-01-04: added Service Worker to cache web resources (html, js, css)
+- 2022-01-05: add "print" style to debug print media
+- 2022-01-05: add TODO module
+- 2022-01-04: add Service Worker to cache web resources (html, js, css)
 - 2022-01-03: v1.0.5 branch deploys with textier
 - 2022-01-02: Introduce v1.0.5 branch
 - 2022-01-01: Introduce v1.0.4 branch
@@ -20,7 +21,7 @@ littlelightshow
 
 ## v1.0.5
 
-- Add TODO support
+- Add TODO module
 - Add PWA offline support
 
 ## v1.0.4
