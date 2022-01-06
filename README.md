@@ -19,6 +19,7 @@ littlelightshow
 
 ## v1.0.5
 
+- Add TODO support
 - Add PWA offline support
 
 ## v1.0.4

@@ -19,12 +19,15 @@ import {
 } from "./services/admin";
 import { invoiceModel } from "./services/invoices";
 import { inventoryModel } from "./services/inventory";
-import {
-  reportError,
-  toast,
-} from "./ux/Toaster";
-import { isUndefined } from "./isUndefined";
+import { toast } from "./ux/Toaster";
+import { isUndefined } from "./fun/isUndefined";
 import { removeCssRestrictors } from "./fun/detect.js";
+
+export { toast } from "./ux/Toaster.js";
+export {
+  on,
+  trigger,
+} from "./fun/on.js";
 
 const VERSION = "1.0.5";
 

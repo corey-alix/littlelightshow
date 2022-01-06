@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <title>
+      Little Light Show Todo
+    </title>
+    <link
+      rel="stylesheet"
+      href="/app/baseline.css"
+    />
+  </head>
+  <body class="body">
+    <div class="section-title rounded">
+      TODO
+    </div>
+    <form>
+      <label class="form-label"
+        >Date<input
+          type="date"
+          data-bind="todo-date"
+      /></label>
+      <label class="form-label"
+        >Comment<textarea
+          data-bind="todo-comment"
+        ></textarea>
+      </label>
+      <button
+        data-event="submit"
+        type="button"
+      >
+        Save
+      </button>
+      <button
+        data-event="reset"
+        type="reset"
+      >
+        Clear
+      </button>
+    </form>
+    <div class="vspacer-2"></div>
+    <div class="section-title rounded">
+      Your TODO Items
+      <div
+        class="placeholder todo-items"
+      ></div>
+    </div>
+    <script type="module">
+      import {
+        init,
+        on,
+        trigger,
+        toast,
+      } from "/bin/index.js";
+      await init();
+
+      on(
+        document.body,
+        "submit",
+        () => {
+          toast(
+            "TODO: Save to collection and re-render the grid"
+          );
+        }
+      );
+    </script>
+  </body>
+</html>

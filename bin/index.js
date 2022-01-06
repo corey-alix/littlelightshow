@@ -4993,6 +4993,12 @@ function hookupTriggers(domNode) {
       on(eventItem, "change", () => {
         setGlobalState(bindTo, item.value);
       });
+    } else if (isTextAreaElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
     } else {
       throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
     }
@@ -5006,6 +5012,9 @@ function isButtonElement(eventItem, isInput) {
 }
 function getInputType(eventItem) {
   return isInputElement(eventItem) && eventItem.type;
+}
+function isTextAreaElement(eventItem) {
+  return eventItem.tagName === "TEXTAREA";
 }
 function isInputElement(eventItem) {
   return eventItem.tagName === "INPUT";
@@ -5391,7 +5400,7 @@ var inventoryModel = new InventoryModel({
   offline: false
 });
 
-// app/isUndefined.ts
+// app/fun/isUndefined.ts
 function isUndefined(value) {
   return typeof value === "undefined";
 }
@@ -5481,7 +5490,10 @@ async function registerServiceWorker() {
   const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 export {
-  init
+  init,
+  on,
+  toast,
+  trigger
 };
 /*
 object-assign

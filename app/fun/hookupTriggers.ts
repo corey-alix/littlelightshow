@@ -104,6 +104,18 @@ export function hookupTriggers(
             item.value
           );
         });
+      } else if (
+        isTextAreaElement(eventItem)
+      ) {
+        const item =
+          eventItem as HTMLTextAreaElement;
+        item.value = valueInfo || "";
+        on(eventItem, "change", () => {
+          setGlobalState(
+            bindTo,
+            item.value
+          );
+        });
       } else {
         throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
       }
@@ -138,6 +150,14 @@ function getInputType(
   return (
     isInputElement(eventItem) &&
     (eventItem as HTMLInputElement).type
+  );
+}
+
+function isTextAreaElement(
+  eventItem: Element
+) {
+  return (
+    eventItem.tagName === "TEXTAREA"
   );
 }
 
