@@ -28,21 +28,16 @@ const { TAXRATE } = globals;
 import { asCurrency } from "../fun/asCurrency.js";
 import { gotoUrl } from "../fun/gotoUrl.js";
 import { init as systemInit } from "../index.js";
+import { getQueryParameter } from "../fun/getQueryParameter.js";
 
 export async function init(
   target = document.body
 ) {
   try {
     await systemInit();
-    const queryParams =
-      new URLSearchParams(
-        window.location.search
-      );
-    if (queryParams.has("id")) {
-      await renderInvoice(
-        target,
-        queryParams.get("id")!
-      );
+    const id = getQueryParameter("id");
+    if (!!id) {
+      await renderInvoice(target, id);
     } else {
       await renderInvoice(target);
     }

@@ -5,20 +5,16 @@ import { create as printAccount } from "./templates/by-account.js";
 import { getItem as loadLedger } from "../services/gl.js";
 import { reportError } from "../ux/Toaster.js";
 import { init as systemInit } from "../index.js";
+import { getQueryParameter } from "../fun/getQueryParameter.js";
 
 export async function init(
   domNode: HTMLElement
 ) {
   try {
     await systemInit();
-    const queryParams =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    if (queryParams.has("print")) {
-      const printId =
-        queryParams.get("print")!;
+    const printId =
+      getQueryParameter("print");
+    if (!!printId) {
       const target = domNode;
       switch (printId) {
         case "all": {
@@ -37,8 +33,8 @@ export async function init(
       return;
     }
 
-    if (queryParams.has("id")) {
-      const id = queryParams.get("id")!;
+    const id = getQueryParameter("id");
+    if (!!id) {
       const ledger = await loadLedger(
         id
       );
@@ -50,9 +46,9 @@ export async function init(
       return;
     }
 
-    if (queryParams.has("account")) {
-      const account =
-        queryParams.get("account")!;
+    const account =
+      getQueryParameter("account");
+    if (!!account) {
       const report = await printAccount(
         account
       );

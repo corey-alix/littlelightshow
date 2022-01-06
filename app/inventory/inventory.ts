@@ -20,6 +20,7 @@ import { isNull } from "../fun/isUndefined.js";
 import { routes } from "../router.js";
 import { globals } from "../globals.js";
 import { gotoUrl } from "../fun/gotoUrl.js";
+import { getQueryParameter } from "../fun/getQueryParameter.js";
 
 export async function init(
   target = document.body
@@ -28,14 +29,8 @@ export async function init(
   const inventoryItems =
     await inventoryModel.getItems();
 
-  const queryParams =
-    new URLSearchParams(
-      window.location.search
-    );
-
-  if (queryParams.has("id")) {
-    const id = queryParams.get("id")!;
-
+  const id = getQueryParameter("id")!;
+  if (!!id) {
     if (id === "all") {
       const report = showInventoryItems(
         inventoryItems.sortBy({
