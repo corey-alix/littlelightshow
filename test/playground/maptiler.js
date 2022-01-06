@@ -5556,7 +5556,6 @@ var maptilerEndpoints = {
 async function run() {
   await init();
   on(document.body, "nav-back", () => {
-    debugger;
     window.history.back();
   });
   const whereAmI = await getCurrentLocation();

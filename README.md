@@ -6,6 +6,7 @@ littlelightshow
 
 ## Change Log
 
+- 2022-01-05: introduce maptiler map with "where am i"
 - 2022-01-05: add "print" style to debug print media
 - 2022-01-05: add TODO module
 - 2022-01-04: add Service Worker to cache web resources (html, js, css)
@@ -21,6 +22,7 @@ littlelightshow
 
 ## v1.0.5
 
+- Add Map module
 - Add TODO module
 - Add PWA offline support
 

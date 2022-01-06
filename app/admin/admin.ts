@@ -21,7 +21,6 @@ import {
 } from "../ux/Toaster.js";
 import { inventoryModel } from "../services/inventory.js";
 import { getDatabaseTime } from "../services/getDatabaseTime.js";
-import { globals } from "../globals.js";
 import { setGlobalState } from "../fun/globalState.js";
 import { FaunaException } from "./FaunaException";
 import {

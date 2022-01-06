@@ -56,7 +56,6 @@ export async function run() {
   await systemInit();
 
   on(document.body, "nav-back", () => {
-    debugger;
     window.history.back();
   });
 
