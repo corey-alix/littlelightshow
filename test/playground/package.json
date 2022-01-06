@@ -1,0 +1,12 @@
+{
+  "name": "playground",
+  "version": "1.0.0",
+  "description": "",
+  "main": "maptiler.js",
+  "scripts": {
+    "test": "npx esbuild --bundle maptiler.ts --outfile=maptiler.js --format=esm --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
