@@ -16,17 +16,14 @@ function renderItem(
   ).from(asDateString());
   return (
     <div>
-      <div class="col-1 date">
-        <a
-          click={() =>
-            gotoUrl(
-              routes.todo(item.id)
-            )
-          }
-        >
-          {date}
-        </a>
-      </div>
+      <a
+        class="col-1 date no-select"
+        click={() =>
+          gotoUrl(routes.todo(item.id))
+        }
+      >
+        {date}
+      </a>
       <div class="col-2-last text pre no-overflow max-height-100">
         {item.comment}
       </div>

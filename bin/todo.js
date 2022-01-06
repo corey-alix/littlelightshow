@@ -5521,11 +5521,10 @@ function moveChildren(items, report) {
 // app/todo/grid-template.tsx
 function renderItem(item) {
   const date = dayjs(asDateString(new Date(item.date))).from(asDateString());
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "col-1 date"
-  }, /* @__PURE__ */ dom("a", {
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
+    class: "col-1 date no-select",
     click: () => gotoUrl(routes.todo(item.id))
-  }, date)), /* @__PURE__ */ dom("div", {
+  }, date), /* @__PURE__ */ dom("div", {
     class: "col-2-last text pre no-overflow max-height-100"
   }, item.comment));
 }

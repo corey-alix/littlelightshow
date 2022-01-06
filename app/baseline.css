@@ -90,6 +90,10 @@ input.auto-label {
   max-height: 200vh;
 }
 
+.no-select {
+  user-select: none;
+}
+
 .no-overflow {
   overflow: hidden;
 }
