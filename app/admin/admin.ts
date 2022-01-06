@@ -25,6 +25,7 @@ import { inventoryModel } from "../services/inventory.js";
 import { getDatabaseTime } from "../services/getDatabaseTime.js";
 import { globals } from "../globals.js";
 import { setGlobalState } from "../fun/globalState.js";
+import { FaunaException } from "./FaunaException";
 const { TAXRATE } = globals;
 
 const starterAccounts = [
@@ -42,13 +43,6 @@ const starterAccounts = [
   "TOOLS",
   "Utilities",
 ];
-
-interface FaunaException {
-  name: string;
-  message: string;
-  description: string;
-  requestResult: any;
-}
 
 export async function init() {
   await systemInit();

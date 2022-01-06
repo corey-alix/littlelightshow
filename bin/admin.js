@@ -5256,9 +5256,11 @@ var StorageModel = class {
     const priorSyncTime = getPriorSyncTime(this.tableName);
     const currentSyncTime = await getDatabaseTime();
     const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
-    await this.loadLatestData({
-      lowerBound: priorSyncTime,
-      upperBound: currentSyncTime
+    await retryOnInvalidRef(this.tableName, async () => {
+      await this.loadLatestData({
+        lowerBound: priorSyncTime,
+        upperBound: currentSyncTime
+      });
     });
     this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
       if (!item.id)
@@ -5334,19 +5336,21 @@ var StorageModel = class {
     if (offlineId)
       data.id = "";
     if (!data.id) {
-      const result = await client.query(import_faunadb4.query.Create(import_faunadb4.query.Collection(this.tableName), {
-        data: {
-          ...data,
-          user: CURRENT_USER,
-          create_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
-          update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+      await retryOnInvalidRef(this.tableName, async () => {
+        const result = await client.query(import_faunadb4.query.Create(import_faunadb4.query.Collection(this.tableName), {
+          data: {
+            ...data,
+            user: CURRENT_USER,
+            create_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
+            update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+          }
+        }));
+        {
+          offlineId && this.cache.deleteLineItem(offlineId);
+          data.id = result.ref.value.id;
+          this.cache.updateLineItem(data);
         }
-      }));
-      {
-        offlineId && this.cache.deleteLineItem(offlineId);
-        data.id = result.ref.value.id;
-        this.cache.updateLineItem(data);
-      }
+      });
       return;
     }
     await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), data.id), {
@@ -5380,6 +5384,28 @@ function getPriorSyncTime(tableName) {
 }
 function setFutureSyncTime(tableName, syncTime) {
   setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
+}
+async function retryOnInvalidRef(tableName, op) {
+  try {
+    await op();
+  } catch (ex) {
+    const error = ex;
+    if (error.message !== "invalid ref")
+      throw ex;
+    try {
+      await forceUpdatestampTable(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    try {
+      await forceUpdatestampIndex(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    await op();
+  }
 }
 
 // app/services/gl.ts

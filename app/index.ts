@@ -16,7 +16,7 @@ import { injectLabels } from "./ux/injectLabels";
 import {
   forceUpdatestampIndex,
   forceUpdatestampTable,
-} from "./services/admin";
+} from "./services/forceUpdatestampTable";
 import { invoiceModel } from "./services/invoices";
 import { inventoryModel } from "./services/inventory";
 import { toast } from "./ux/Toaster";

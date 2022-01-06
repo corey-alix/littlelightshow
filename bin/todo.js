@@ -539,9 +539,9 @@ var require_browser_ponyfill = __commonJS({
           var form = new FormData();
           body.trim().split("&").forEach(function(bytes) {
             if (bytes) {
-              var split2 = bytes.split("=");
-              var name = split2.shift().replace(/\+/g, " ");
-              var value = split2.join("=").replace(/\+/g, " ");
+              var split = bytes.split("=");
+              var name = split.shift().replace(/\+/g, " ");
+              var value = split.join("=").replace(/\+/g, " ");
               form.append(decodeURIComponent(name), decodeURIComponent(value));
             }
           });
@@ -5116,8 +5116,31 @@ function injectLabels(domNode) {
   });
 }
 
-// app/services/admin.ts
-var import_faunadb5 = __toModule(require_faunadb());
+// app/services/forceUpdatestampTable.ts
+var import_faunadb3 = __toModule(require_faunadb());
+async function forceUpdatestampTable(tableName) {
+  const client = createClient();
+  return await client.query(import_faunadb3.query.CreateCollection({
+    name: tableName
+  }));
+}
+async function forceUpdatestampIndex(tableName) {
+  const client = createClient();
+  const query = import_faunadb3.query.CreateIndex({
+    name: `${tableName}_updates`,
+    source: import_faunadb3.query.Collection(tableName),
+    values: [
+      {
+        field: ["data", "update_date"],
+        reverse: false
+      },
+      {
+        field: ["ref"]
+      }
+    ]
+  });
+  return await client.query(query);
+}
 
 // app/fun/ticksInSeconds.ts
 function ticksInSeconds(ticks) {
@@ -5182,13 +5205,13 @@ var ServiceCache = class {
 };
 
 // app/services/StorageModel.ts
-var import_faunadb4 = __toModule(require_faunadb());
+var import_faunadb5 = __toModule(require_faunadb());
 
 // app/services/getDatabaseTime.ts
-var import_faunadb3 = __toModule(require_faunadb());
+var import_faunadb4 = __toModule(require_faunadb());
 async function getDatabaseTime() {
   const client = createClient();
-  const response = await client.query(import_faunadb3.query.Now());
+  const response = await client.query(import_faunadb4.query.Now());
   return new Date(response.value).valueOf();
 }
 
@@ -5214,10 +5237,10 @@ var StorageModel = class {
     const result = [];
     let maximum_query_count = 1;
     while (maximum_query_count--) {
-      const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.LTE(lowerBound, import_faunadb4.query.Select([0], import_faunadb4.query.Var("item"))), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), after ? {
+      const response = await client.query(import_faunadb5.query.Map(import_faunadb5.query.Paginate(import_faunadb5.query.Filter(import_faunadb5.query.Match(import_faunadb5.query.Index(`${this.tableName}_updates`)), import_faunadb5.query.Lambda("item", import_faunadb5.query.And(import_faunadb5.query.LTE(lowerBound, import_faunadb5.query.Select([0], import_faunadb5.query.Var("item"))), import_faunadb5.query.LT(import_faunadb5.query.Select([0], import_faunadb5.query.Var("item")), upperBound)))), after ? {
         size,
         after
-      } : { size }), import_faunadb4.query.Lambda("item", import_faunadb4.query.Get(import_faunadb4.query.Select([1], import_faunadb4.query.Var("item"))))));
+      } : { size }), import_faunadb5.query.Lambda("item", import_faunadb5.query.Get(import_faunadb5.query.Select([1], import_faunadb5.query.Var("item"))))));
       const dataToImport = response.data.map((item) => ({
         ...item.data,
         id: item.ref.value.id
@@ -5254,9 +5277,11 @@ var StorageModel = class {
     const priorSyncTime = getPriorSyncTime(this.tableName);
     const currentSyncTime = await getDatabaseTime();
     const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
-    await this.loadLatestData({
-      lowerBound: priorSyncTime,
-      upperBound: currentSyncTime
+    await retryOnInvalidRef(this.tableName, async () => {
+      await this.loadLatestData({
+        lowerBound: priorSyncTime,
+        upperBound: currentSyncTime
+      });
     });
     this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
       if (!item.id)
@@ -5288,12 +5313,12 @@ var StorageModel = class {
       return;
     }
     const client = createClient();
-    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), id), {
+    await client.query(import_faunadb5.query.Replace(import_faunadb5.query.Ref(import_faunadb5.query.Collection(this.tableName), id), {
       data: {
         id,
         user: CURRENT_USER,
-        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
-        delete_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+        update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now()),
+        delete_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
       }
     }));
     this.cache.deleteLineItem(id);
@@ -5332,26 +5357,28 @@ var StorageModel = class {
     if (offlineId)
       data.id = "";
     if (!data.id) {
-      const result = await client.query(import_faunadb4.query.Create(import_faunadb4.query.Collection(this.tableName), {
-        data: {
-          ...data,
-          user: CURRENT_USER,
-          create_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
-          update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+      await retryOnInvalidRef(this.tableName, async () => {
+        const result = await client.query(import_faunadb5.query.Create(import_faunadb5.query.Collection(this.tableName), {
+          data: {
+            ...data,
+            user: CURRENT_USER,
+            create_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now()),
+            update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
+          }
+        }));
+        {
+          offlineId && this.cache.deleteLineItem(offlineId);
+          data.id = result.ref.value.id;
+          this.cache.updateLineItem(data);
         }
-      }));
-      {
-        offlineId && this.cache.deleteLineItem(offlineId);
-        data.id = result.ref.value.id;
-        this.cache.updateLineItem(data);
-      }
+      });
       return;
     }
-    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), data.id), {
+    await client.query(import_faunadb5.query.Replace(import_faunadb5.query.Ref(import_faunadb5.query.Collection(this.tableName), data.id), {
       data: {
         ...data,
         user: CURRENT_USER,
-        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+        update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
       }
     }));
     this.cache.updateLineItem(data);
@@ -5379,13 +5406,28 @@ function getPriorSyncTime(tableName) {
 function setFutureSyncTime(tableName, syncTime) {
   setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
 }
-
-// app/services/gl.ts
-var LEDGER_TABLE = "general_ledger";
-var ledgerModel = new StorageModel({
-  tableName: LEDGER_TABLE,
-  offline: false
-});
+async function retryOnInvalidRef(tableName, op) {
+  try {
+    await op();
+  } catch (ex) {
+    const error = ex;
+    if (error.message !== "invalid ref")
+      throw ex;
+    try {
+      await forceUpdatestampTable(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    try {
+      await forceUpdatestampIndex(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    await op();
+  }
+}
 
 // app/services/invoices.ts
 var INVOICE_TABLE = "invoices";
@@ -5503,7 +5545,7 @@ var TodoModel = class extends StorageModel {
 };
 var todoModel = new TodoModel({
   tableName: TABLE_NAME,
-  offline: true
+  offline: false
 });
 
 // app/fun/getQueryParameter.ts
@@ -5597,15 +5639,16 @@ async function init2(todoWidget) {
   on(todoWidget, "submit", async () => {
     const date = getFormValue(formDom, "todo-date");
     const comment = getFormValue(formDom, "todo-comment");
-    await todoModel.upsertItem({
+    const item = {
       id,
       date: new Date(date).valueOf(),
       comment
-    });
+    };
+    await todoModel.upsertItem(item);
     toast("Saved");
-    render();
+    gotoUrl(routes.todo(item.id));
   });
-  render();
+  await render();
 }
 export {
   init2 as init

@@ -1,9 +1,5 @@
-import { query as q } from "faunadb";
 import { sum } from "../fun/sum.js";
-import {
-  createClient,
-  globals,
-} from "../globals.js";
+import { globals } from "../globals.js";
 const { TAXRATE } = globals;
 import {
   Ledger,
@@ -46,39 +42,6 @@ export async function removeDuplicateInventoryItems() {
       );
     }
   }
-}
-
-export async function forceUpdatestampTable(
-  tableName: string
-) {
-  const client = createClient();
-  return await client.query(
-    q.CreateCollection({
-      name: tableName,
-    })
-  );
-}
-
-export async function forceUpdatestampIndex(
-  tableName: string
-) {
-  const client = createClient();
-
-  const query = q.CreateIndex({
-    name: `${tableName}_updates`,
-    source: q.Collection(tableName),
-    values: [
-      {
-        field: ["data", "update_date"],
-        reverse: false,
-      },
-      {
-        field: ["ref"],
-      },
-    ],
-  });
-
-  return await client.query(query);
 }
 
 export async function importInvoicesToGeneralLedger() {

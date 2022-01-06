@@ -103,15 +103,17 @@ export async function init(
       "todo-comment"
     );
 
-    await todoModel.upsertItem({
+    const item = {
       id,
       date: new Date(date).valueOf(),
       comment,
-    });
+    };
+
+    await todoModel.upsertItem(item);
 
     toast("Saved");
-    render();
+    gotoUrl(routes.todo(item.id));
   });
 
-  render();
+  await render();
 }

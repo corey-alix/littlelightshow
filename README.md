@@ -6,6 +6,7 @@ littlelightshow
 
 ## Change Log
 
+- 2022-01-05: added TODO module
 - 2022-01-04: added Service Worker to cache web resources (html, js, css)
 - 2022-01-03: v1.0.5 branch deploys with textier
 - 2022-01-02: Introduce v1.0.5 branch

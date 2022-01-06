@@ -12,5 +12,5 @@ export class TodoModel extends StorageModel<Todo> {}
 
 export const todoModel = new TodoModel({
   tableName: TABLE_NAME,
-  offline: true,
+  offline: false,
 });

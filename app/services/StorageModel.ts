@@ -1,3 +1,5 @@
+import type { FaunaException } from "../admin/FaunaException";
+
 import { ServiceCache } from "./ServiceCache.js";
 import { query as q } from "faunadb";
 import {
@@ -11,6 +13,10 @@ import {
 } from "../fun/globalState";
 import { toast } from "../ux/Toaster.js";
 import { getDatabaseTime } from "./getDatabaseTime.js";
+import {
+  forceUpdatestampIndex,
+  forceUpdatestampTable,
+} from "./forceUpdatestampTable";
 
 const { BATCH_SIZE, CURRENT_USER } =
   globals;
@@ -213,10 +219,15 @@ export class StorageModel<
             priorSyncTime
       );
 
-    await this.loadLatestData({
-      lowerBound: priorSyncTime,
-      upperBound: currentSyncTime,
-    });
+    await retryOnInvalidRef(
+      this.tableName,
+      async () => {
+        await this.loadLatestData({
+          lowerBound: priorSyncTime,
+          upperBound: currentSyncTime,
+        });
+      }
+    );
 
     // apply local deletes
     this.cache
@@ -352,41 +363,51 @@ export class StorageModel<
     if (offlineId) data.id = "";
 
     if (!data.id) {
-      const result =
-        (await client.query(
-          q.Create(
-            q.Collection(
-              this.tableName
-            ),
-            {
-              data: {
-                ...data,
-                user: CURRENT_USER,
-                create_date: q.ToMillis(
-                  q.Now()
+      await retryOnInvalidRef(
+        this.tableName,
+        async () => {
+          const result =
+            (await client.query(
+              q.Create(
+                q.Collection(
+                  this.tableName
                 ),
-                update_date: q.ToMillis(
-                  q.Now()
-                ),
-              },
-            }
-          )
-        )) as {
-          data: T[];
-          ref: {
-            value: { id: string };
-          };
-        };
+                {
+                  data: {
+                    ...data,
+                    user: CURRENT_USER,
+                    create_date:
+                      q.ToMillis(
+                        q.Now()
+                      ),
+                    update_date:
+                      q.ToMillis(
+                        q.Now()
+                      ),
+                  },
+                }
+              )
+            )) as {
+              data: T[];
+              ref: {
+                value: { id: string };
+              };
+            };
 
-      // replace the temporary item with the real one
-      {
-        offlineId &&
-          this.cache.deleteLineItem(
-            offlineId
-          );
-        data.id = result.ref.value.id;
-        this.cache.updateLineItem(data);
-      }
+          // replace the temporary item with the real one
+          {
+            offlineId &&
+              this.cache.deleteLineItem(
+                offlineId
+              );
+            data.id =
+              result.ref.value.id;
+            this.cache.updateLineItem(
+              data
+            );
+          }
+        }
+      );
       return;
     }
 
@@ -463,4 +484,43 @@ function setFutureSyncTime(
     `timeOfLastSynchronization_${tableName}`,
     syncTime
   );
+}
+
+async function retryOnInvalidRef(
+  tableName: string,
+  op: () => Promise<void>
+) {
+  try {
+    await op();
+  } catch (ex) {
+    // if "invalid ref" then create the table and try again
+    const error = ex as FaunaException;
+    if (error.message !== "invalid ref")
+      throw ex;
+    try {
+      await forceUpdatestampTable(
+        tableName
+      );
+    } catch (ex) {
+      if (
+        (ex as FaunaException)
+          .message !==
+        "instance already exists"
+      )
+        throw ex;
+    }
+    try {
+      await forceUpdatestampIndex(
+        tableName
+      );
+    } catch (ex) {
+      if (
+        (ex as FaunaException)
+          .message !==
+        "instance already exists"
+      )
+        throw ex;
+    }
+    await op();
+  }
 }
