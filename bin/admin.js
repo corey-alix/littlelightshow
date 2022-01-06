@@ -4784,8 +4784,10 @@ var GlobalModel = class {
   constructor() {
     __privateAdd(this, _accessKeys, {
       FAUNADB_SERVER_SECRET: localStorage.getItem("FAUNADB_SERVER_SECRET"),
-      FAUNADB_DOMAIN: "db.us.fauna.com"
+      FAUNADB_DOMAIN: "db.us.fauna.com",
+      MAPTILERKEY: localStorage.getItem("MAPTILER_SERVER_SECRET")
     });
+    this.MAPTILERKEY = __privateGet(this, _accessKeys).MAPTILERKEY;
     this.CURRENT_USER = localStorage.getItem("user");
     this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
     this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 1e3;
@@ -4844,6 +4846,7 @@ var routes = {
   admin: () => "/app/admin/index.html",
   createTodo: () => "/app/todo/index.html",
   todo: (id) => `/app/todo/index.html?id=${id}`,
+  maptiler: () => `/test/playground/maptiler.html`,
   gl: {
     byAccount: (id) => `/app/gl/index.html?account=${id}`
   }
@@ -5111,14 +5114,35 @@ function injectLabels(domNode) {
   });
 }
 
-// app/services/admin.ts
-var import_faunadb5 = __toModule(require_faunadb());
+// app/services/forceUpdatestampTable.ts
+var import_faunadb3 = __toModule(require_faunadb());
+async function forceUpdatestampTable(tableName) {
+  const client = createClient();
+  return await client.query(import_faunadb3.query.CreateCollection({
+    name: tableName
+  }));
+}
+async function forceUpdatestampIndex(tableName) {
+  const client = createClient();
+  const query = import_faunadb3.query.CreateIndex({
+    name: `${tableName}_updates`,
+    source: import_faunadb3.query.Collection(tableName),
+    values: [
+      {
+        field: ["data", "update_date"],
+        reverse: false
+      },
+      {
+        field: ["ref"]
+      }
+    ]
+  });
+  return await client.query(query);
+}
 
-// app/fun/sum.ts
-function sum(values) {
-  if (!values.length)
-    return 0;
-  return values.reduce((a, b) => a + b, 0);
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return (value || 0).toFixed(2);
 }
 
 // app/fun/ticksInSeconds.ts
@@ -5184,13 +5208,13 @@ var ServiceCache = class {
 };
 
 // app/services/StorageModel.ts
-var import_faunadb4 = __toModule(require_faunadb());
+var import_faunadb5 = __toModule(require_faunadb());
 
 // app/services/getDatabaseTime.ts
-var import_faunadb3 = __toModule(require_faunadb());
+var import_faunadb4 = __toModule(require_faunadb());
 async function getDatabaseTime() {
   const client = createClient();
-  const response = await client.query(import_faunadb3.query.Now());
+  const response = await client.query(import_faunadb4.query.Now());
   return new Date(response.value).valueOf();
 }
 
@@ -5216,10 +5240,10 @@ var StorageModel = class {
     const result = [];
     let maximum_query_count = 1;
     while (maximum_query_count--) {
-      const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.LTE(lowerBound, import_faunadb4.query.Select([0], import_faunadb4.query.Var("item"))), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), after ? {
+      const response = await client.query(import_faunadb5.query.Map(import_faunadb5.query.Paginate(import_faunadb5.query.Filter(import_faunadb5.query.Match(import_faunadb5.query.Index(`${this.tableName}_updates`)), import_faunadb5.query.Lambda("item", import_faunadb5.query.And(import_faunadb5.query.LTE(lowerBound, import_faunadb5.query.Select([0], import_faunadb5.query.Var("item"))), import_faunadb5.query.LT(import_faunadb5.query.Select([0], import_faunadb5.query.Var("item")), upperBound)))), after ? {
         size,
         after
-      } : { size }), import_faunadb4.query.Lambda("item", import_faunadb4.query.Get(import_faunadb4.query.Select([1], import_faunadb4.query.Var("item"))))));
+      } : { size }), import_faunadb5.query.Lambda("item", import_faunadb5.query.Get(import_faunadb5.query.Select([1], import_faunadb5.query.Var("item"))))));
       const dataToImport = response.data.map((item) => ({
         ...item.data,
         id: item.ref.value.id
@@ -5292,12 +5316,12 @@ var StorageModel = class {
       return;
     }
     const client = createClient();
-    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), id), {
+    await client.query(import_faunadb5.query.Replace(import_faunadb5.query.Ref(import_faunadb5.query.Collection(this.tableName), id), {
       data: {
         id,
         user: CURRENT_USER,
-        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
-        delete_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+        update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now()),
+        delete_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
       }
     }));
     this.cache.deleteLineItem(id);
@@ -5337,12 +5361,12 @@ var StorageModel = class {
       data.id = "";
     if (!data.id) {
       await retryOnInvalidRef(this.tableName, async () => {
-        const result = await client.query(import_faunadb4.query.Create(import_faunadb4.query.Collection(this.tableName), {
+        const result = await client.query(import_faunadb5.query.Create(import_faunadb5.query.Collection(this.tableName), {
           data: {
             ...data,
             user: CURRENT_USER,
-            create_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
-            update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+            create_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now()),
+            update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
           }
         }));
         {
@@ -5353,11 +5377,11 @@ var StorageModel = class {
       });
       return;
     }
-    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), data.id), {
+    await client.query(import_faunadb5.query.Replace(import_faunadb5.query.Ref(import_faunadb5.query.Collection(this.tableName), data.id), {
       data: {
         ...data,
         user: CURRENT_USER,
-        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+        update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
       }
     }));
     this.cache.updateLineItem(data);
@@ -5408,25 +5432,6 @@ async function retryOnInvalidRef(tableName, op) {
   }
 }
 
-// app/services/gl.ts
-var LEDGER_TABLE = "general_ledger";
-var ledgerModel = new StorageModel({
-  tableName: LEDGER_TABLE,
-  offline: false
-});
-async function upsertItem(data) {
-  return ledgerModel.upsertItem(data);
-}
-async function getItems() {
-  const items = await ledgerModel.getItems();
-  return items.filter((ledger) => ledger.items && ledger.items[0] && ledger.items[0].account);
-}
-
-// app/fun/asCurrency.ts
-function asCurrency(value) {
-  return (value || 0).toFixed(2);
-}
-
 // app/services/invoices.ts
 var { TAXRATE } = globals;
 var INVOICE_TABLE = "invoices";
@@ -5434,7 +5439,7 @@ var invoiceModel = new StorageModel({
   tableName: INVOICE_TABLE,
   offline: false
 });
-async function getItems2() {
+async function getItems() {
   const invoices = await invoiceModel.getItems();
   let normalizedInvoices = invoices.map(normalizeInvoice);
   const response = normalizedInvoices.filter((invoice) => invoice.items).map((invoice) => {
@@ -5475,6 +5480,136 @@ function normalizeInvoice(invoice) {
   return raw;
 }
 
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
+  tableName: INVENTORY_TABLE,
+  offline: false
+});
+
+// app/fun/isUndefined.ts
+function isUndefined(value) {
+  return typeof value === "undefined";
+}
+
+// app/fun/detect.ts
+var userAgent = navigator.userAgent.toLocaleUpperCase();
+var isChrome = userAgent.includes("CHROME");
+var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
+function removeCssRestrictors() {
+  if (isChrome) {
+    removeCssRule(".if-print-to-pdf");
+  }
+  if (!isMobile) {
+    removeCssRule(".if-desktop");
+  }
+}
+function removeCssRule(name) {
+  const sheets = document.styleSheets;
+  for (let sheetIndex = 0; sheetIndex < sheets.length; sheetIndex++) {
+    const sheet = sheets[sheetIndex];
+    try {
+      if (!sheet?.cssRules)
+        continue;
+    } catch (ex) {
+      continue;
+    }
+    for (let ruleIndex = 0; ruleIndex < sheet.cssRules.length; ruleIndex++) {
+      const rule = sheet.cssRules[ruleIndex];
+      if (rule.selectorText === name) {
+        sheet.deleteRule(ruleIndex);
+        return;
+      }
+    }
+  }
+}
+
+// app/index.ts
+var { primaryContact } = globals;
+var VERSION = "1.0.5";
+async function init() {
+  const domNode = document.body;
+  if (!isOffline()) {
+    await identify();
+    await registerServiceWorker();
+    setInitialState({
+      VERSION: "1.0.3"
+    });
+    setInitialState({
+      TAX_RATE: 6,
+      CACHE_MAX_AGE: 600,
+      BATCH_SIZE: 64,
+      work_offline: true,
+      VERSION
+    });
+    setInitialState({ primaryContact });
+    await upgradeFromCurrentVersion();
+  }
+  injectLabels(domNode);
+  extendNumericInputBehaviors(domNode);
+  hookupTriggers(domNode);
+  setMode();
+  removeCssRestrictors();
+}
+function setInitialState(data) {
+  Object.keys(data).forEach((key) => {
+    const value = getGlobalState(key);
+    if (isUndefined(value)) {
+      setGlobalState(key, data[key]);
+    }
+  });
+}
+async function upgradeFromCurrentVersion() {
+  const currentVersion = getGlobalState("VERSION");
+  switch (currentVersion) {
+    case "1.0.3":
+      await upgradeFrom103To105();
+      toast(`upgraded to ${currentVersion}`);
+      break;
+    case "1.0.4":
+      break;
+    case "1.0.5":
+      break;
+    default:
+      throw `unexpected version: ${currentVersion}`;
+  }
+}
+async function upgradeFrom103To105() {
+  inventoryModel.upgradeTo104();
+  await inventoryModel.synchronize();
+  setGlobalState("VERSION", VERSION);
+}
+async function registerServiceWorker() {
+  const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
+}
+
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
+// app/services/gl.ts
+var LEDGER_TABLE = "general_ledger";
+var ledgerModel = new StorageModel({
+  tableName: LEDGER_TABLE,
+  offline: false
+});
+async function upsertItem(data) {
+  return ledgerModel.upsertItem(data);
+}
+async function getItems2() {
+  const items = await ledgerModel.getItems();
+  return items.filter((ledger) => ledger.items && ledger.items[0] && ledger.items[0].account);
+}
+
 // app/fun/split.ts
 function split(items, test) {
   const result = [[], []];
@@ -5488,19 +5623,6 @@ function distinct(items) {
     ...new Set(items)
   ];
 }
-
-// app/services/inventory.ts
-var INVENTORY_TABLE = "inventory";
-var InventoryModel = class extends StorageModel {
-  async upgradeTo104() {
-    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
-    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
-  }
-};
-var inventoryModel = new InventoryModel({
-  tableName: INVENTORY_TABLE,
-  offline: false
-});
 
 // app/services/admin.ts
 var { TAXRATE: TAXRATE2 } = globals;
@@ -5520,32 +5642,9 @@ async function removeDuplicateInventoryItems() {
     }
   }
 }
-async function forceUpdatestampTable(tableName) {
-  const client = createClient();
-  return await client.query(import_faunadb5.query.CreateCollection({
-    name: tableName
-  }));
-}
-async function forceUpdatestampIndex(tableName) {
-  const client = createClient();
-  const query = import_faunadb5.query.CreateIndex({
-    name: `${tableName}_updates`,
-    source: import_faunadb5.query.Collection(tableName),
-    values: [
-      {
-        field: ["data", "update_date"],
-        reverse: false
-      },
-      {
-        field: ["ref"]
-      }
-    ]
-  });
-  return await client.query(query);
-}
 async function importInvoicesToGeneralLedger() {
-  const invoices = await getItems2();
-  const ledgers = await getItems();
+  const invoices = await getItems();
+  const ledgers = await getItems2();
   const [
     invoicesToImport,
     invoicesToUpdate
@@ -5660,96 +5759,6 @@ function createLedger(invoice) {
   return ledger;
 }
 
-// app/fun/isUndefined.ts
-function isUndefined(value) {
-  return typeof value === "undefined";
-}
-
-// app/fun/detect.ts
-var userAgent = navigator.userAgent.toLocaleUpperCase();
-var isChrome = userAgent.includes("CHROME");
-var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
-function removeCssRestrictors() {
-  if (isChrome) {
-    removeCssRule(".if-print-to-pdf");
-  }
-  if (!isMobile) {
-    removeCssRule(".if-desktop");
-  }
-}
-function removeCssRule(name) {
-  const sheets = document.styleSheets;
-  for (let sheetIndex = 0; sheetIndex < sheets.length; sheetIndex++) {
-    const sheet = sheets[sheetIndex];
-    for (let ruleIndex = 0; ruleIndex < sheet.cssRules.length; ruleIndex++) {
-      const rule = sheet.cssRules[ruleIndex];
-      if (rule.selectorText === name) {
-        sheet.deleteRule(ruleIndex);
-        return;
-      }
-    }
-  }
-}
-
-// app/index.ts
-var { primaryContact } = globals;
-var VERSION = "1.0.5";
-async function init() {
-  const domNode = document.body;
-  if (!isOffline()) {
-    await identify();
-    await registerServiceWorker();
-    setInitialState({
-      VERSION: "1.0.3"
-    });
-    setInitialState({
-      TAX_RATE: 6,
-      CACHE_MAX_AGE: 600,
-      BATCH_SIZE: 64,
-      work_offline: true,
-      VERSION
-    });
-    setInitialState({ primaryContact });
-    await upgradeFromCurrentVersion();
-  }
-  injectLabels(domNode);
-  extendNumericInputBehaviors(domNode);
-  hookupTriggers(domNode);
-  setMode();
-  removeCssRestrictors();
-}
-function setInitialState(data) {
-  Object.keys(data).forEach((key) => {
-    const value = getGlobalState(key);
-    if (isUndefined(value)) {
-      setGlobalState(key, data[key]);
-    }
-  });
-}
-async function upgradeFromCurrentVersion() {
-  const currentVersion = getGlobalState("VERSION");
-  switch (currentVersion) {
-    case "1.0.3":
-      await upgradeFrom103To105();
-      toast(`upgraded to ${currentVersion}`);
-      break;
-    case "1.0.4":
-      break;
-    case "1.0.5":
-      break;
-    default:
-      throw `unexpected version: ${currentVersion}`;
-  }
-}
-async function upgradeFrom103To105() {
-  inventoryModel.upgradeTo104();
-  await inventoryModel.synchronize();
-  setGlobalState("VERSION", VERSION);
-}
-async function registerServiceWorker() {
-  const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
-}
-
 // app/services/accounts.ts
 var ACCOUNT_TABLE = "accounts";
 var accountModel = new StorageModel({
@@ -5851,11 +5860,18 @@ async function init2() {
       reportError(ex);
     }
   });
-  on(domNode, "set-api-key", () => {
-    prompt2("Enter API Key", (secret) => {
+  on(domNode, "set-fauna-api-key", () => {
+    prompt2("Enter Fauna API Key", (secret) => {
       if (!secret)
         return;
       localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+    });
+  });
+  on(domNode, "set-maptiler-api-key", () => {
+    prompt2("Enter MapTiler API Key", (secret) => {
+      if (!secret)
+        return;
+      localStorage.setItem("MAPTILER_SERVER_SECRET", secret);
     });
   });
   on(domNode, "ping-local-storage", async () => {
@@ -5882,7 +5898,7 @@ async function init2() {
       id: account,
       code: account
     }));
-    const ledgers = await getItems();
+    const ledgers = await getItems2();
     ledgers.forEach(async (l) => l.items.forEach(async (item) => await accountModel.upsertItem({
       id: item.account,
       code: item.account

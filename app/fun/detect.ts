@@ -27,6 +27,11 @@ function removeCssRule(name: string) {
     sheetIndex++
   ) {
     const sheet = sheets[sheetIndex];
+    try {
+      if (!sheet?.cssRules) continue;
+    } catch (ex) {
+      continue;
+    }
     for (
       let ruleIndex = 0;
       ruleIndex < sheet.cssRules.length;

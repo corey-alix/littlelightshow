@@ -35,8 +35,10 @@ interface Geometry {
   coordinates: Array<number>;
 }
 
-const MAPTILERKEY =
-  "f0zkb15NK1sqOcE72HCf";
+import { globals } from "../../app/globals.js";
+
+const MAPTILERKEY = globals.MAPTILERKEY;
+
 const maptilerEndpoints = {
   street: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILERKEY}`,
   osm: `https://api.maptiler.com/maps/osm-standard/style.json?key=${MAPTILERKEY}`,
@@ -47,7 +49,17 @@ const maptilerEndpoints = {
     `https://api.maptiler.com/geocoding/${location.lon},${location.lat}.json?key=${MAPTILERKEY}`,
 };
 
+import { on } from "../../app/fun/on.js";
+import { init as systemInit } from "../../app/index.js";
+
 export async function run() {
+  await systemInit();
+
+  on(document.body, "nav-back", () => {
+    debugger;
+    window.history.back();
+  });
+
   const whereAmI =
     await getCurrentLocation();
   const map = new mapboxgl.Map({

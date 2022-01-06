@@ -1,8 +1,6 @@
 import { init as systemInit } from "../index.js";
 
 import {
-  forceUpdatestampIndex,
-  forceUpdatestampTable,
   importInvoicesToGeneralLedger,
   removeDuplicateInventoryItems,
 } from "../services/admin.js";
@@ -26,7 +24,10 @@ import { getDatabaseTime } from "../services/getDatabaseTime.js";
 import { globals } from "../globals.js";
 import { setGlobalState } from "../fun/globalState.js";
 import { FaunaException } from "./FaunaException";
-const { TAXRATE } = globals;
+import {
+  forceUpdatestampIndex,
+  forceUpdatestampTable,
+} from "../services/forceUpdatestampTable.js";
 
 const starterAccounts = [
   "AP",
@@ -192,19 +193,41 @@ export async function init() {
     }
   );
 
-  on(domNode, "set-api-key", () => {
-    prompt(
-      "Enter API Key",
-      (secret) => {
-        if (!secret) return;
-        localStorage.setItem(
-          "FAUNADB_SERVER_SECRET",
-          secret
-        );
-      }
-    );
-  });
+  on(
+    domNode,
+    "set-fauna-api-key",
+    () => {
+      prompt(
+        "Enter Fauna API Key",
+        (secret) => {
+          if (!secret) return;
+          localStorage.setItem(
+            "FAUNADB_SERVER_SECRET",
+            secret
+          );
+        }
+      );
+    }
+  );
 
+  on(
+    domNode,
+    "set-maptiler-api-key",
+    () => {
+      prompt(
+        "Enter MapTiler API Key",
+        (secret) => {
+          if (!secret) return;
+          localStorage.setItem(
+            "MAPTILER_SERVER_SECRET",
+            secret
+          );
+        }
+      );
+    }
+  );
+
+  // f0zkb15NK1sqOcE72HCf
   on(
     domNode,
     "ping-local-storage",

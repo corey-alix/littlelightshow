@@ -4784,8 +4784,10 @@ var GlobalModel = class {
   constructor() {
     __privateAdd(this, _accessKeys, {
       FAUNADB_SERVER_SECRET: localStorage.getItem("FAUNADB_SERVER_SECRET"),
-      FAUNADB_DOMAIN: "db.us.fauna.com"
+      FAUNADB_DOMAIN: "db.us.fauna.com",
+      MAPTILERKEY: localStorage.getItem("MAPTILER_SERVER_SECRET")
     });
+    this.MAPTILERKEY = __privateGet(this, _accessKeys).MAPTILERKEY;
     this.CURRENT_USER = localStorage.getItem("user");
     this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
     this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 1e3;
@@ -5505,6 +5507,12 @@ function removeCssRule(name) {
   const sheets = document.styleSheets;
   for (let sheetIndex = 0; sheetIndex < sheets.length; sheetIndex++) {
     const sheet = sheets[sheetIndex];
+    try {
+      if (!sheet?.cssRules)
+        continue;
+    } catch (ex) {
+      continue;
+    }
     for (let ruleIndex = 0; ruleIndex < sheet.cssRules.length; ruleIndex++) {
       const rule = sheet.cssRules[ruleIndex];
       if (rule.selectorText === name) {

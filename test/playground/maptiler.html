@@ -11,7 +11,8 @@
       rel="stylesheet"
     />
     <link
-      href="/static/css/cloud_base.css?t=1640075794"
+      media="screen"
+      href="/app/baseline.css"
       rel="stylesheet"
     />
     <style>
@@ -26,6 +27,13 @@
   </head>
   <body>
     <div id="map"></div>
+    <button
+      type="button"
+      class="button absolute rounded"
+      data-event="nav-back"
+    >
+      Back
+    </button>
     <script type="module">
       import { run } from "./maptiler.js";
       await run();

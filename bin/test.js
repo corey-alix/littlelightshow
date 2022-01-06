@@ -4735,8 +4735,10 @@ var GlobalModel = class {
   constructor() {
     __privateAdd(this, _accessKeys, {
       FAUNADB_SERVER_SECRET: localStorage.getItem("FAUNADB_SERVER_SECRET"),
-      FAUNADB_DOMAIN: "db.us.fauna.com"
+      FAUNADB_DOMAIN: "db.us.fauna.com",
+      MAPTILERKEY: localStorage.getItem("MAPTILER_SERVER_SECRET")
     });
+    this.MAPTILERKEY = __privateGet(this, _accessKeys).MAPTILERKEY;
     this.CURRENT_USER = localStorage.getItem("user");
     this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
     this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 1e3;

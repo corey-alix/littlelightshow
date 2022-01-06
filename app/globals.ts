@@ -8,7 +8,13 @@ class GlobalModel {
         "FAUNADB_SERVER_SECRET"
       ) as string,
     FAUNADB_DOMAIN: "db.us.fauna.com",
+    MAPTILERKEY: localStorage.getItem(
+      "MAPTILER_SERVER_SECRET"
+    ) as string,
   };
+
+  public readonly MAPTILERKEY =
+    this.#accessKeys.MAPTILERKEY;
 
   public readonly CURRENT_USER =
     localStorage.getItem("user");
