@@ -4842,6 +4842,8 @@ var routes = {
   editLedger: (id) => `/app/gl/index.html?id=${id}`,
   dashboard: () => "/app/index.html",
   admin: () => "/app/admin/index.html",
+  createTodo: () => "/app/todo/index.html",
+  todo: (id) => `/app/todo/index.html?id=${id}`,
   gl: {
     byAccount: (id) => `/app/gl/index.html?account=${id}`
   }
@@ -5019,6 +5021,12 @@ function hookupTriggers(domNode) {
       on(eventItem, "change", () => {
         setGlobalState(bindTo, item.value);
       });
+    } else if (isTextAreaElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
     } else {
       throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
     }
@@ -5032,6 +5040,9 @@ function isButtonElement(eventItem, isInput) {
 }
 function getInputType(eventItem) {
   return isInputElement(eventItem) && eventItem.type;
+}
+function isTextAreaElement(eventItem) {
+  return eventItem.tagName === "TEXTAREA";
 }
 function isInputElement(eventItem) {
   return eventItem.tagName === "INPUT";
@@ -5434,7 +5445,7 @@ var inventoryModel = new InventoryModel({
   offline: false
 });
 
-// app/isUndefined.ts
+// app/fun/isUndefined.ts
 function isUndefined(value) {
   return typeof value === "undefined";
 }

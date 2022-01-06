@@ -13,58 +13,57 @@
       href="/app/baseline.css"
     />
   </head>
-  <body class="body">
+  <body class="body todo">
     <div class="section-title rounded">
       TODO
     </div>
-    <form>
-      <label class="form-label"
+    <form class="grid-6">
+      <label class="form-label col-1-3"
         >Date<input
+          name="todo-date"
           type="date"
           data-bind="todo-date"
       /></label>
-      <label class="form-label"
+      <label
+        class="form-label col-1-last"
         >Comment<textarea
+          name="todo-comment"
           data-bind="todo-comment"
         ></textarea>
       </label>
       <button
+        class="button col-1"
         data-event="submit"
         type="button"
       >
         Save
       </button>
       <button
+        class="button col-2"
         data-event="reset"
-        type="reset"
+        type="button"
       >
         Clear
+      </button>
+      <button
+        class="button col-last"
+        data-event="delete"
+        type="button"
+      >
+        Delete
       </button>
     </form>
     <div class="vspacer-2"></div>
     <div class="section-title rounded">
       Your TODO Items
-      <div
-        class="placeholder todo-items"
-      ></div>
     </div>
+    <div
+      class="placeholder todo-items"
+    ></div>
     <script type="module">
-      import {
-        init,
-        on,
-        trigger,
-        toast,
-      } from "/bin/index.js";
-      await init();
-
-      on(
-        document.body,
-        "submit",
-        () => {
-          toast(
-            "TODO: Save to collection and re-render the grid"
-          );
-        }
+      import { init } from "/bin/todo.js";
+      init(
+        document.querySelector(".todo")
       );
     </script>
   </body>

@@ -16,7 +16,7 @@ import {
   extendTextInputBehaviors,
 } from "../fun/behavior/form.js";
 import { invoiceModel } from "../services/invoices.js";
-import { isNull } from "../isUndefined.js";
+import { isNull } from "../fun/isUndefined.js";
 import { routes } from "../router.js";
 import { globals } from "../globals.js";
 import { gotoUrl } from "../fun/gotoUrl.js";

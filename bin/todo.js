@@ -2014,10 +2014,10 @@ var require_query = __commonJS({
         collection: wrap(collection)
       });
     }
-    function Paginate(set2, opts) {
+    function Paginate(set, opts) {
       arity.between(1, 2, arguments, Paginate.name);
       opts = util.defaults(opts, {});
-      return new Expr(objectAssign({ paginate: wrap(set2) }, wrapValues(opts)));
+      return new Expr(objectAssign({ paginate: wrap(set) }, wrapValues(opts)));
     }
     function Exists(ref, ts) {
       arity.between(1, 2, arguments, Exists.name);
@@ -2115,17 +2115,17 @@ var require_query = __commonJS({
       arity.min(1, arguments, Difference.name);
       return new Expr({ difference: wrap(varargs(arguments)) });
     }
-    function Distinct(set2) {
+    function Distinct(set) {
       arity.exact(1, arguments, Distinct.name);
-      return new Expr({ distinct: wrap(set2) });
+      return new Expr({ distinct: wrap(set) });
     }
     function Join(source, target) {
       arity.exact(2, arguments, Join.name);
       return new Expr({ join: wrap(source), with: wrap(target) });
     }
-    function Range(set2, from, to) {
+    function Range(set, from, to) {
       arity.exact(3, arguments, Range.name);
-      return new Expr({ range: wrap(set2), from: wrap(from), to: wrap(to) });
+      return new Expr({ range: wrap(set), from: wrap(from), to: wrap(to) });
     }
     function Login(ref, params2) {
       arity.exact(2, arguments, Login.name);
@@ -3096,7 +3096,7 @@ var require_PageHelper = __commonJS({
     "use strict";
     var query = require_query();
     var objectAssign = require_object_assign();
-    function PageHelper(client, set2, params, options) {
+    function PageHelper(client, set, params, options) {
       if (params === void 0) {
         params = {};
       }
@@ -3119,7 +3119,7 @@ var require_PageHelper = __commonJS({
       this.options = {};
       objectAssign(this.options, options);
       this.client = client;
-      this.set = set2;
+      this.set = set;
       this._faunaFunctions = [];
     }
     PageHelper.prototype.map = function(lambda) {
@@ -4709,31 +4709,10 @@ var require_faunadb = __commonJS({
   }
 });
 
-// app/fun/sort.ts
-var sortOps = {
-  number: (a, b) => (a || 0) - (b || 0),
-  "-number": (a, b) => -((a || 0) - (b || 0)),
-  gl: (a, b) => a >= 0 ? a - b : b - a,
-  "abs(number)": (a, b) => Math.abs(a || 0) - Math.abs(b || 0),
-  "-abs(number)": (a, b) => -(Math.abs(a || 0) - Math.abs(b || 0)),
-  string: (a, b) => (a || "").localeCompare(b || ""),
-  date: (a, b) => (a || 0).valueOf() - (b || 0).valueOf(),
-  noop: () => 0
-};
-Array.prototype.sortBy = function(sortBy) {
-  return sort(this, sortBy);
-};
-function sort(items, sortBy) {
-  const keys = Object.keys(sortBy);
-  return [...items].sort((a, b) => {
-    let result = 0;
-    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
-    return result;
-  });
+// app/fun/asDateString.ts
+function asDateString(date = new Date()) {
+  return date.toISOString().split("T")[0];
 }
-
-// app/globals.ts
-var import_faunadb = __toModule(require_faunadb());
 
 // app/fun/globalState.ts
 var globalState;
@@ -4764,7 +4743,13 @@ function getGlobalState(key) {
   return value;
 }
 
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
+}
+
 // app/globals.ts
+var import_faunadb = __toModule(require_faunadb());
 var _accessKeys;
 var GlobalModel = class {
   constructor() {
@@ -4819,6 +4804,52 @@ function trigger(domNode, eventName) {
   domNode.dispatchEvent(new Event(eventName));
 }
 
+// app/fun/sort.ts
+var sortOps = {
+  number: (a, b) => (a || 0) - (b || 0),
+  "-number": (a, b) => -((a || 0) - (b || 0)),
+  gl: (a, b) => a >= 0 ? a - b : b - a,
+  "abs(number)": (a, b) => Math.abs(a || 0) - Math.abs(b || 0),
+  "-abs(number)": (a, b) => -(Math.abs(a || 0) - Math.abs(b || 0)),
+  string: (a, b) => (a || "").localeCompare(b || ""),
+  date: (a, b) => (a || 0).valueOf() - (b || 0).valueOf(),
+  noop: () => 0
+};
+Array.prototype.sortBy = function(sortBy) {
+  return sort(this, sortBy);
+};
+function sort(items, sortBy) {
+  const keys = Object.keys(sortBy);
+  return [...items].sort((a, b) => {
+    let result = 0;
+    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
+    return result;
+  });
+}
+
+// app/fun/setMode.ts
+var modes = {
+  light_mode: "light",
+  dark_mode: "dark",
+  holiday_mode: "holiday"
+};
+function setMode(mode) {
+  if (!mode)
+    mode = localStorage.getItem("mode") || modes.light_mode;
+  localStorage.setItem("mode", mode);
+  document.body.classList.remove(...Object.values(modes));
+  document.body.classList.add(mode);
+  const isFontier = getGlobalState("textier") == true;
+  document.body.classList.toggle("textier", isFontier);
+}
+
+// app/services/validateAccessToken.ts
+var import_faunadb2 = __toModule(require_faunadb());
+async function validate() {
+  const client = createClient();
+  await client.ping();
+}
+
 // app/router.ts
 var routes = {
   home: () => "/index.html",
@@ -4841,76 +4872,6 @@ var routes = {
     byAccount: (id) => `/app/gl/index.html?account=${id}`
   }
 };
-
-// app/fun/asCurrency.ts
-function asCurrency(value) {
-  return (value || 0).toFixed(2);
-}
-
-// app/fun/ticksInSeconds.ts
-function ticksInSeconds(ticks) {
-  return ticks / 1e3;
-}
-
-// app/services/ServiceCache.ts
-var MAX_AGE = getGlobalState("CACHE_MAX_AGE") || 0;
-var ServiceCache = class {
-  constructor(options) {
-    this.options = options;
-    options.maxAge = options.maxAge || MAX_AGE;
-    this.table = options.table;
-    const raw = localStorage.getItem(`table_${this.table}`);
-    if (!raw) {
-      this.data = [];
-      this.lastWrite = 0;
-    } else {
-      const info = JSON.parse(raw);
-      this.lastWrite = info.lastWrite;
-      this.data = info.data;
-    }
-  }
-  lastWriteTime() {
-    return this.lastWrite;
-  }
-  renew() {
-    this.lastWrite = Date.now();
-    this.save();
-  }
-  save() {
-    localStorage.setItem(`table_${this.table}`, JSON.stringify({
-      lastWrite: this.lastWrite,
-      data: this.data
-    }));
-  }
-  deleteLineItem(id) {
-    const index = this.data.findIndex((i) => i.id === id);
-    if (-1 < index)
-      this.data.splice(index, 1);
-    this.save();
-  }
-  updateLineItem(lineItem) {
-    const index = this.data.findIndex((i) => i.id === lineItem.id);
-    if (-1 < index) {
-      this.data[index] = lineItem;
-    } else {
-      this.data.push(lineItem);
-    }
-    this.save();
-  }
-  expired() {
-    const age = ticksInSeconds(Date.now() - this.lastWrite);
-    return this.options.maxAge < age;
-  }
-  getById(id) {
-    return this.data.find((item) => item.id === id);
-  }
-  get() {
-    return this.data;
-  }
-};
-
-// app/services/StorageModel.ts
-var import_faunadb3 = __toModule(require_faunadb());
 
 // app/ux/Toaster.ts
 var DEFAULT_DELAY = 5e3;
@@ -4947,346 +4908,48 @@ function reportError(message) {
   });
 }
 
-// app/services/getDatabaseTime.ts
-var import_faunadb2 = __toModule(require_faunadb());
-async function getDatabaseTime() {
-  const client = createClient();
-  const response = await client.query(import_faunadb2.query.Now());
-  return new Date(response.value).valueOf();
-}
-
-// app/services/StorageModel.ts
-var { BATCH_SIZE, CURRENT_USER } = globals;
-var StorageModel = class {
-  constructor(options) {
-    this.options = options;
-    this.tableName = options.tableName;
-    this.cache = new ServiceCache({
-      table: options.tableName,
-      maxAge: options.maxAge
-    });
-  }
-  isOffline() {
-    return this.options.offline || isOffline();
-  }
-  async loadLatestData(args) {
-    const size = BATCH_SIZE;
-    const { upperBound, lowerBound } = args;
-    let after = null;
-    const client = createClient();
-    const result = [];
-    let maximum_query_count = 1;
-    while (maximum_query_count--) {
-      const response = await client.query(import_faunadb3.query.Map(import_faunadb3.query.Paginate(import_faunadb3.query.Filter(import_faunadb3.query.Match(import_faunadb3.query.Index(`${this.tableName}_updates`)), import_faunadb3.query.Lambda("item", import_faunadb3.query.And(import_faunadb3.query.LTE(lowerBound, import_faunadb3.query.Select([0], import_faunadb3.query.Var("item"))), import_faunadb3.query.LT(import_faunadb3.query.Select([0], import_faunadb3.query.Var("item")), upperBound)))), after ? {
-        size,
-        after
-      } : { size }), import_faunadb3.query.Lambda("item", import_faunadb3.query.Get(import_faunadb3.query.Select([1], import_faunadb3.query.Var("item"))))));
-      const dataToImport = response.data.map((item) => ({
-        ...item.data,
-        id: item.ref.value.id
-      }));
-      result.push(...dataToImport);
-      dataToImport.forEach((item) => {
-        if (!item.id)
-          throw `item must have an id`;
-        const currentItem = this.cache.getById(item.id);
-        if (currentItem && this.isUpdated(currentItem)) {
-          toast(`item changed remotely and locally: ${item.id}`);
-        }
-        if (!!item.delete_date) {
-          this.cache.deleteLineItem(item.id);
-        } else {
-          this.cache.updateLineItem(item);
-        }
-      });
-      this.cache.renew();
-      dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
-      after = response.after;
-      if (!after) {
-        setFutureSyncTime(this.tableName, upperBound);
-        break;
-      }
-    }
-    return result;
-  }
-  async synchronize() {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    if (this.isOffline())
-      throw "cannot synchronize in offline mode";
-    const priorSyncTime = getPriorSyncTime(this.tableName);
-    const currentSyncTime = await getDatabaseTime();
-    const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
-    await this.loadLatestData({
-      lowerBound: priorSyncTime,
-      upperBound: currentSyncTime
-    });
-    this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
-      if (!item.id)
-        throw "all items must have an id";
-      if (isOfflineId(item.id)) {
-        this.cache.deleteLineItem(item.id);
-      } else {
-        await this.removeItem(item.id);
-      }
-    });
-    dataToExport.forEach(async (item) => {
-      await this.upsertItem(item);
-    });
-    this.cache.renew();
-  }
-  async removeItem(id) {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    if (isOfflineId(id)) {
-      this.cache.deleteLineItem(id);
-      return;
-    }
-    if (this.isOffline()) {
-      const item = this.cache.getById(id);
-      if (!item)
-        throw "cannot remove an item that is not already there";
-      item.delete_date = Date.now();
-      this.cache.updateLineItem(item);
-      return;
-    }
-    const client = createClient();
-    await client.query(import_faunadb3.query.Replace(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), id), {
-      data: {
-        id,
-        user: CURRENT_USER,
-        update_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now()),
-        delete_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now())
-      }
+// app/identify.ts
+async function identify() {
+  if (isOffline())
+    return false;
+  if (!localStorage.getItem("user")) {
+    gotoUrl(routes.identity({
+      target: location.href,
+      context: CONTEXT
     }));
-    this.cache.deleteLineItem(id);
+    return false;
   }
-  async getItem(id) {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    if (!this.isOffline() && this.cache.expired()) {
-      await this.synchronize();
-    } else {
-      if (!!this.cache.getById(id)) {
-        this.cache.renew();
-      } else {
-        if (!this.isOffline())
-          await this.synchronize();
-      }
-    }
-    const result = this.cache.getById(id);
-    if (!result)
-      throw `unable to load item: ${this.tableName} ${id}`;
-    if (!!result.delete_date)
-      throw "item marked for deletion";
-    return result;
+  return true;
+  try {
+    await validate();
+  } catch (ex) {
+    reportError(ex);
+    return false;
   }
-  async upsertItem(data) {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    const client = createClient();
-    data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
-    data.update_date = Date.now();
-    this.cache.updateLineItem(data);
-    if (this.isOffline()) {
-      return;
-    }
-    const offlineId = data.id && isOfflineId(data.id) ? data.id : "";
-    if (offlineId)
-      data.id = "";
-    if (!data.id) {
-      const result = await client.query(import_faunadb3.query.Create(import_faunadb3.query.Collection(this.tableName), {
-        data: {
-          ...data,
-          user: CURRENT_USER,
-          create_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now()),
-          update_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now())
-        }
-      }));
-      {
-        offlineId && this.cache.deleteLineItem(offlineId);
-        data.id = result.ref.value.id;
-        this.cache.updateLineItem(data);
-      }
-      return;
-    }
-    await client.query(import_faunadb3.query.Replace(import_faunadb3.query.Ref(import_faunadb3.query.Collection(this.tableName), data.id), {
-      data: {
-        ...data,
-        user: CURRENT_USER,
-        update_date: import_faunadb3.query.ToMillis(import_faunadb3.query.Now())
-      }
-    }));
-    this.cache.updateLineItem(data);
-  }
-  isUpdated(data) {
-    return (data.update_date || 0) > this.cache.lastWriteTime();
-  }
-  async getItems() {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    if (this.cache.expired() && !this.isOffline()) {
-      await this.synchronize();
-    } else {
-      this.cache.renew();
-    }
-    return this.cache.get().filter((item) => !item.delete_date);
-  }
-};
-function isOfflineId(itemId) {
-  return !!itemId && "9" < itemId[0];
-}
-function getPriorSyncTime(tableName) {
-  return getGlobalState(`timeOfLastSynchronization_${tableName}`) || 0;
-}
-function setFutureSyncTime(tableName, syncTime) {
-  setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
+  return true;
 }
 
-// app/services/invoices.ts
-var { TAXRATE } = globals;
-var INVOICE_TABLE = "invoices";
-var invoiceModel = new StorageModel({
-  tableName: INVOICE_TABLE,
-  offline: false
-});
-async function removeItem(id) {
-  return invoiceModel.removeItem(id);
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
 }
-async function getItem(id) {
-  return invoiceModel.getItem(id);
-}
-async function upsertItem(data) {
-  return invoiceModel.upsertItem(data);
-}
-async function getItems() {
-  const invoices = await invoiceModel.getItems();
-  let normalizedInvoices = invoices.map(normalizeInvoice);
-  const response = normalizedInvoices.filter((invoice) => invoice.items).map((invoice) => {
-    invoice.date = invoice.date || invoice.create_date;
-    invoice.labor = (invoice.labor || 0) - 0;
-    invoice.additional = (invoice.additional || 0) - 0;
-    invoice.items.forEach((item) => {
-      item.item = (item.item || "").toLocaleUpperCase();
-      item.quantity = (item.quantity || 0) - 0;
-      item.price = (item.price || 0) - 0;
-      item.total = (item.total || 0) - 0;
-    });
-    return invoice;
-  }).sortBy({ date: "date" }).reverse();
-  return response;
-}
-function normalizeInvoice(invoice) {
-  let raw = invoice;
-  if (raw.data) {
-    raw.data.id = invoice.id;
-    raw.data.mops = invoice.mops || [];
-    invoice = raw = raw.data;
-  }
-  invoice.mops = invoice.mops || [];
-  invoice.items = invoice.items || [];
-  if (raw["paid"] && raw["mop"]) {
-    invoice.mops.push({
-      mop: raw["mop"],
-      paid: raw["paid"]
-    });
-    delete raw["paid"];
-    delete raw["mop"];
-  }
-  if (!invoice.taxrate && TAXRATE) {
-    invoice.taxrate = TAXRATE;
-    invoice.items.forEach((i) => i.tax = parseFloat(asCurrency(i.total * invoice.taxrate)));
-  }
-  return raw;
-}
-
-// app/dom.ts
-function asStyle(o) {
-  if (typeof o === "string")
-    return o;
-  return Object.keys(o).map((k) => `${k}:${o[k]}`).join(";");
-}
-function defaults(a, ...b) {
-  b.filter((b2) => !!b2).forEach((b2) => {
-    Object.keys(b2).filter((k) => a[k] === void 0).forEach((k) => a[k] = b2[k]);
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
   });
-  return a;
-}
-var rules = {
-  style: asStyle
-};
-var default_args = {
-  button: {
-    type: "button"
-  }
-};
-function dom(tag, args, ...children) {
-  if (typeof tag === "string") {
-    let element = document.createElement(tag);
-    if (default_args[tag]) {
-      args = defaults(args ?? {}, default_args[tag]);
-    }
-    if (args) {
-      Object.keys(args).forEach((key) => {
-        let value = rules[key] ? rules[key](args[key]) : args[key];
-        if (typeof value === "string") {
-          element.setAttribute(key, value);
-        } else if (value instanceof Function) {
-          element.addEventListener(key, value);
-        } else {
-          element.setAttribute(key, value + "");
-        }
-      });
-    }
-    let addChildren = (children2) => {
-      children2 && children2.forEach((c) => {
-        if (typeof c === "string") {
-          element.appendChild(document.createTextNode(c));
-        } else if (c instanceof HTMLElement) {
-          element.appendChild(c);
-        } else if (c instanceof Array) {
-          addChildren(c);
-        } else {
-          console.log("addChildren cannot add to dom node", c);
-        }
-      });
-    };
-    children && addChildren(children);
-    return element;
-  }
-  {
-    let element = tag(args);
-    let addChildren = (children2) => {
-      children2 && children2.forEach((c) => {
-        if (typeof c === "string" || c instanceof HTMLElement) {
-          element.setContent(c);
-        } else if (c instanceof Array) {
-          addChildren(c);
-        } else if (typeof c === "object") {
-          element.addChild(c);
-        } else {
-          console.log("addChildren cannot add to widget", c);
-        }
-      });
-    };
-    children && addChildren(children);
-    return element;
-  }
 }
 
-// app/fun/asDateString.ts
-function asDateString(date = new Date()) {
-  return date.toISOString().split("T")[0];
-}
-
-// app/fun/dom.ts
-function moveChildren(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
-}
-function moveChildrenBefore(items, report) {
-  while (items.firstChild)
-    report.before(items.firstChild);
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
 }
 
 // app/fun/hookupTriggers.ts
@@ -5367,707 +5030,78 @@ function isNumericInputElement(item) {
   return isInputElement(item) && getInputType(item) === "number";
 }
 
-// app/fun/behavior/input.ts
-function selectOnFocus(element) {
-  on(element, "focus", () => element.select());
+// app/dom.ts
+function asStyle(o) {
+  if (typeof o === "string")
+    return o;
+  return Object.keys(o).map((k) => `${k}:${o[k]}`).join(";");
 }
-function formatAsCurrency(input) {
-  input.step = "0.01";
-  input.addEventListener("change", () => {
-    const textValue = input.value;
-    const numericValue = input.valueAsNumber?.toFixed(2);
-    if (textValue != numericValue) {
-      input.value = numericValue;
-    }
+function defaults(a, ...b) {
+  b.filter((b2) => !!b2).forEach((b2) => {
+    Object.keys(b2).filter((k) => a[k] === void 0).forEach((k) => a[k] = b2[k]);
   });
+  return a;
 }
-function formatUppercase(input) {
-  addFormatter(() => {
-    const textValue = (input.value || "").toUpperCase();
-    if (textValue != input.value) {
-      input.value = textValue;
-    }
-  }, input);
-}
-function addFormatter(change, input) {
-  change();
-  input.addEventListener("change", change);
-}
-function formatTrim(input) {
-  addFormatter(() => {
-    const textValue = (input.value || "").trim();
-    if (textValue != input.value) {
-      input.value = textValue;
-    }
-  }, input);
-}
-function getValueAsNumber(input) {
-  if (!input.value)
-    return 0;
-  return input.valueAsNumber;
-}
-
-// app/fun/behavior/form.ts
-function extendNumericInputBehaviors(form) {
-  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
-  numberInput.forEach(selectOnFocus);
-  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
-  currencyInput.forEach(formatAsCurrency);
-}
-function extendTextInputBehaviors(form) {
-  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
-  textInput.forEach(selectOnFocus);
-  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
-  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
-}
-
-// app/services/inventory.ts
-var INVENTORY_TABLE = "inventory";
-var InventoryModel = class extends StorageModel {
-  async upgradeTo104() {
-    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
-    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+var rules = {
+  style: asStyle
+};
+var default_args = {
+  button: {
+    type: "button"
   }
 };
-var inventoryModel = new InventoryModel({
-  tableName: INVENTORY_TABLE,
-  offline: false
-});
-async function forceDatalist() {
-  let dataList = document.querySelector(`#inventory_list`);
-  if (dataList)
-    return dataList;
-  dataList = document.createElement("datalist");
-  dataList.id = "inventory_list";
-  const items = await inventoryModel.getItems();
-  items.sortBy({ code: "string" }).forEach((item) => {
-    const option = document.createElement("option");
-    option.value = item.code;
-    dataList.appendChild(option);
-  });
-  document.body.appendChild(dataList);
-  return dataList;
-}
-
-// app/invoice/PaymentManager.ts
-var TABLE_NAME = "mops";
-var Manager = class {
-  constructor() {
-    this.data = JSON.parse(localStorage.getItem(TABLE_NAME) || "{}");
-  }
-  getItemByCode(code) {
-    return this.data[code];
-  }
-  persistItem(item) {
-    this.data[item.id] = item;
-  }
-  persistItems() {
-    localStorage.setItem(TABLE_NAME, JSON.stringify(this.data));
-  }
-};
-var manager = new Manager();
-manager.persistItem({ id: "CASH" });
-manager.persistItem({ id: "CHECK" });
-manager.persistItems();
-function forceDatalist2() {
-  let dataList = document.querySelector(`#${TABLE_NAME}_list`);
-  if (dataList)
-    return dataList;
-  dataList = document.createElement("datalist");
-  dataList.id = `${TABLE_NAME}_list`;
-  Object.entries(manager.data).forEach(([key, value]) => {
-    const option = document.createElement("option");
-    option.value = key;
-    dataList.appendChild(option);
-  });
-  document.body.appendChild(dataList);
-  return dataList;
-}
-
-// app/fun/asNumber.ts
-function asNumber(node) {
-  return node.valueAsNumber || 0;
-}
-
-// app/fun/sum.ts
-function sum(values) {
-  if (!values.length)
-    return 0;
-  return values.reduce((a, b) => a + b, 0);
-}
-
-// app/fun/gotoUrl.ts
-function gotoUrl(url) {
-  location.replace(url);
-}
-
-// app/invoice/templates/invoice-form.tsx
-var { primaryContact, TAXRATE: TAXRATE2 } = globals;
-var itemsToRemove = [];
-async function create(invoice) {
-  await forceDatalist();
-  const form = /* @__PURE__ */ dom("form", {
-    class: "grid-6",
-    id: "invoice-form"
-  }, /* @__PURE__ */ dom("h1", {
-    class: "col-1-last centered"
-  }, `Invoice Form for ${primaryContact.companyName}`), /* @__PURE__ */ dom("input", {
-    class: "form-label hidden",
-    readonly: true,
-    type: "text",
-    name: "id",
-    value: invoice.id
-  }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-last"
-  }, "Client"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-3"
-  }, "Client Name"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-last"
-  }, "Date"), /* @__PURE__ */ dom("input", {
-    class: "col-1-3",
-    type: "text",
-    placeholder: "clientname",
-    name: "clientname",
-    required: true,
-    value: invoice.clientname
-  }), /* @__PURE__ */ dom("input", {
-    class: "col-4-last",
-    type: "date",
-    placeholder: "Date",
-    name: "date",
-    required: true,
-    value: asDateString(new Date(invoice.date || Date.now()))
-  }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-3"
-  }, "Telephone"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-last"
-  }, "Email"), /* @__PURE__ */ dom("input", {
-    type: "tel",
-    class: "col-1-3",
-    placeholder: "telephone",
-    name: "telephone",
-    value: invoice.telephone
-  }), /* @__PURE__ */ dom("input", {
-    type: "email",
-    class: "col-4-last",
-    placeholder: "email",
-    name: "email",
-    value: invoice.email
-  }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-last"
-  }, "Bill To", /* @__PURE__ */ dom("textarea", {
-    class: "address",
-    placeholder: "billto",
-    name: "billto"
-  }, invoice.billto)), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-last"
-  }, "Comments", /* @__PURE__ */ dom("textarea", {
-    class: "comments",
-    placeholder: "comments",
-    name: "comments"
-  }, invoice.comments)), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-last"
-  }), /* @__PURE__ */ dom("section", {
-    class: "line-items grid-6 col-1-last"
-  }, /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-last"
-  }, "Items")), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-last"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button col-1-3",
-    "data-event": "add-another-item",
-    type: "button"
-  }, "Add item"), /* @__PURE__ */ dom("button", {
-    class: "button col-4-last",
-    "data-event": "remove-last-item",
-    type: "button"
-  }, "Remove Last Item"), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-last"
-  }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-last"
-  }, "Summary"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-2 currency"
-  }, "Labor"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-3-2 currency"
-  }, "Other"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-5-last currency"
-  }, "Total + Tax"), /* @__PURE__ */ dom("input", {
-    type: "number",
-    class: "currency col-1-2",
-    placeholder: "labor",
-    name: "labor",
-    id: "labor",
-    value: invoice.labor.toFixed(2)
-  }), /* @__PURE__ */ dom("input", {
-    type: "number",
-    class: "currency col-3-2",
-    placeholder: "additional",
-    name: "additional",
-    value: invoice.additional.toFixed(2)
-  }), /* @__PURE__ */ dom("input", {
-    readonly: true,
-    type: "number",
-    class: "currency col-5-last",
-    id: "total_due",
-    name: "total_due"
-  }), /* @__PURE__ */ dom("div", {
-    class: "col-1 vspacer-1"
-  }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-last"
-  }, "Method of Payment"), /* @__PURE__ */ dom("div", {
-    class: "col-1-4"
-  }, "Payment Type"), /* @__PURE__ */ dom("div", {
-    class: "col-5-last currency"
-  }, "Amount"), /* @__PURE__ */ dom("div", {
-    id: "mop-line-item-end",
-    class: "hidden"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button col-1-2 if-desktop",
-    "data-event": "add-method-of-payment",
-    type: "button"
-  }, "Add Payment"), /* @__PURE__ */ dom("div", {
-    class: "form-label col-5-last currency if-desktop"
-  }, "Balance Due"), /* @__PURE__ */ dom("input", {
-    readonly: true,
-    class: "currency col-5-last bold if-desktop",
-    type: "number",
-    id: "balance_due"
-  }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-last flex"
-  }, /* @__PURE__ */ dom("button", {
-    class: "bold button",
-    "data-event": "submit",
-    type: "button"
-  }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button if-print-to-pdf",
-    "data-event": "print",
-    type: "button"
-  }, "Print"), /* @__PURE__ */ dom("button", {
-    class: "button if-desktop",
-    "data-event": "clear",
-    type: "button"
-  }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button if-desktop",
-    "data-event": "delete",
-    type: "button"
-  }, "Delete")), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2"
-  }));
-  const labor = form.querySelector("[name=labor]");
-  const additional = form.querySelector("[name=additional]");
-  on(labor, "change", () => trigger(form, "change"));
-  on(additional, "change", () => trigger(form, "change"));
-  {
-    const lineItemsTarget = form.querySelector(".line-items");
-    const lineItems = invoice.items.map(renderInvoiceItem);
-    lineItems.forEach((item) => setupComputeOnLineItem(form, item));
-    lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
-  }
-  {
-    const payementsTarget = form.querySelector("#mop-line-item-end");
-    const paymentItems = invoice.mops?.map(renderMopLineItem);
-    paymentItems?.forEach((item) => {
-    });
-    paymentItems?.forEach((item) => moveChildrenBefore(item, payementsTarget));
-  }
-  on(form, "change", () => compute(form));
-  extendNumericInputBehaviors(form);
-  extendTextInputBehaviors(form);
-  hookupTriggers(form);
-  hookupEvents(form);
-  if (!invoice.mops?.length) {
-    trigger(form, "add-method-of-payment");
-  }
-  compute(form);
-  return form;
-}
-function getFirstInput(itemPanel) {
-  return itemPanel.querySelector("input");
-}
-function addAnotherItem(formDom) {
-  const itemPanel = renderInvoiceItem({
-    quantity: 1,
-    item: "",
-    price: 0,
-    total: 0,
-    tax: 0
-  });
-  setupComputeOnLineItem(formDom, itemPanel);
-  const toFocus = getFirstInput(itemPanel);
-  const target = formDom.querySelector(".line-items") || formDom;
-  itemsToRemove.splice(0, itemsToRemove.length);
-  for (let i = 0; i < itemPanel.children.length; i++) {
-    itemsToRemove.push(itemPanel.children[i]);
-  }
-  extendNumericInputBehaviors(itemPanel);
-  moveChildren(itemPanel, target);
-  toFocus?.focus();
-}
-function hookupEvents(formDom) {
-  on(formDom, "list-all-invoices", () => {
-    gotoUrl(routes.allInvoices());
-  });
-  on(formDom, "remove-last-item", () => {
-    itemsToRemove.forEach((item) => item.remove());
-    trigger(formDom, "change");
-  });
-  on(formDom, "add-another-item", () => {
-    if (!formDom.reportValidity())
-      return;
-    addAnotherItem(formDom);
-    trigger(formDom, "change");
-  });
-  on(formDom, "add-method-of-payment", () => {
-    const target = formDom.querySelector("#mop-line-item-end") || formDom;
-    const mopLineItem = renderMopLineItem();
-    extendNumericInputBehaviors(mopLineItem);
-    const focus = getFirstInput(mopLineItem);
-    moveChildrenBefore(mopLineItem, target);
-    focus.focus();
-  });
-  on(formDom, "clear", () => {
-    gotoUrl(routes.createInvoice());
-  });
-}
-function renderMopLineItem(item) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("input", {
-    type: "select",
-    class: "col-1-4",
-    name: "method_of_payment",
-    value: item?.mop || "",
-    list: forceDatalist2().id
-  }), /* @__PURE__ */ dom("input", {
-    type: "number",
-    class: "col-5-last currency",
-    name: "amount_paid",
-    placeholder: "amount paid",
-    value: asCurrency(item?.paid || 0)
-  }));
-}
-function compute(form) {
-  const labor = form.querySelector("[name=labor]");
-  const additional = form.querySelector("[name=additional]");
-  const total_due = form.querySelector("[name=total_due]");
-  const balance_due = form.querySelector("#balance_due");
-  const totals = Array.from(form.querySelectorAll("input[name=total]")).map((input) => parseFloat(input.value || "0"));
-  const total = totals.reduce((a, b) => a + b, 0);
-  const tax = parseFloat(asCurrency(total * TAXRATE2));
-  const grandTotal = labor.valueAsNumber + additional.valueAsNumber + tax + total;
-  total_due.value = grandTotal.toFixed(2);
-  const total_payments = sum(Array.from(form.querySelectorAll("input[name=amount_paid]")).map(asNumber));
-  balance_due.value = (grandTotal - total_payments).toFixed(2);
-}
-function renderInvoiceItem(item) {
-  const form = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-last"
-  }, "Item"), /* @__PURE__ */ dom("input", {
-    name: "item",
-    class: "bold col-1-3 text trim",
-    required: true,
-    autocomplete: "off",
-    type: "text",
-    value: item.item,
-    list: "inventory_list"
-  }), /* @__PURE__ */ dom("input", {
-    name: "description",
-    class: "col-4-last text trim",
-    type: "text",
-    value: item.description || ""
-  }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-2 quantity"
-  }, "Quantity"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-3-2 currency"
-  }, "Price"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-5-last currency"
-  }, "Total"), /* @__PURE__ */ dom("input", {
-    name: "quantity",
-    required: true,
-    class: "quantity col-1-2",
-    type: "number",
-    value: item.quantity
-  }), /* @__PURE__ */ dom("input", {
-    name: "price",
-    required: true,
-    class: "currency col-3-2",
-    type: "number",
-    value: item.price.toFixed(2)
-  }), /* @__PURE__ */ dom("input", {
-    readonly: true,
-    name: "total",
-    class: "bold currency col-5-last",
-    type: "number",
-    value: item.total.toFixed(2)
-  }));
-  return form;
-}
-function setupComputeOnLineItem(event, form) {
-  const itemInput = form.querySelector("[name=item]");
-  const quantityInput = form.querySelector("[name=quantity]");
-  const priceInput = form.querySelector("[name=price]");
-  const descriptionInput = form.querySelector("[name=description]");
-  const totalInput = form.querySelector("[name=total]");
-  const computeTotal = () => {
-    const qty = getValueAsNumber(quantityInput);
-    const price = getValueAsNumber(priceInput);
-    const value = qty * price;
-    totalInput.value = value.toFixed(2);
-    trigger(event, "change");
-  };
-  on(quantityInput, "change", computeTotal);
-  on(priceInput, "change", computeTotal);
-  on(itemInput, "change", async () => {
-    const item = await getInventoryItemByCode(itemInput.value);
-    if (!item)
-      return;
-    const price = getValueAsNumber(priceInput);
-    if (item.price !== price) {
-      priceInput.value = item.price.toFixed(2);
-      trigger(priceInput, "change");
+function dom(tag, args, ...children) {
+  if (typeof tag === "string") {
+    let element = document.createElement(tag);
+    if (default_args[tag]) {
+      args = defaults(args ?? {}, default_args[tag]);
     }
-    if (item.description)
-      descriptionInput.value = item.description;
-  });
-}
-async function getInventoryItemByCode(code) {
-  const items = await inventoryModel.getItems();
-  return items.find((item) => item.code === code);
-}
-
-// app/invoice/templates/invoice-print.tsx
-var { primaryContact: primaryContact2, TAXRATE: TAXRATE3 } = globals;
-function create2(invoice) {
-  const report = /* @__PURE__ */ dom("div", {
-    class: "print page grid-6"
-  }, /* @__PURE__ */ dom("label", {
-    class: "bold col-1-2"
-  }, "Little Light Show"), /* @__PURE__ */ dom("label", {
-    class: "bold col-3-4 align-right"
-  }, "Invoice"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }), /* @__PURE__ */ dom("div", {
-    class: "col-1-6 vspacer"
-  }), /* @__PURE__ */ dom("label", {
-    class: "col-1-2"
-  }, primaryContact2.fullName), /* @__PURE__ */ dom("label", {
-    class: "col-5-2 align-right"
-  }, invoice.id), /* @__PURE__ */ dom("label", {
-    class: "col-1-2"
-  }, primaryContact2.addressLine1), /* @__PURE__ */ dom("label", {
-    class: "col-5-2 align-right"
-  }, new Date().toDateString()), /* @__PURE__ */ dom("label", {
-    class: "col-1-2"
-  }, primaryContact2.addressLine2), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1"
-  }, "Bill To:"), /* @__PURE__ */ dom("label", {
-    class: "col-2-2"
-  }, invoice.clientname), invoice.billto.split("\n").map((n) => /* @__PURE__ */ dom("label", {
-    class: "col-2-2"
-  }, n)), invoice.comments && /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), invoice.comments && invoice.comments.split("\n").map((n) => /* @__PURE__ */ dom("label", {
-    class: "col-2-5"
-  }, n)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1-3"
-  }, "Description"), /* @__PURE__ */ dom("label", {
-    class: "bold col-4 align-right"
-  }, "Quantity"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5 align-right"
-  }, "Rate"), /* @__PURE__ */ dom("label", {
-    class: "bold col-6 align-right"
-  }, "Amount"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
-  }));
+    if (args) {
+      Object.keys(args).forEach((key) => {
+        let value = rules[key] ? rules[key](args[key]) : args[key];
+        if (typeof value === "string") {
+          element.setAttribute(key, value);
+        } else if (value instanceof Function) {
+          element.addEventListener(key, value);
+        } else {
+          element.setAttribute(key, value + "");
+        }
+      });
+    }
+    let addChildren = (children2) => {
+      children2 && children2.forEach((c) => {
+        if (typeof c === "string") {
+          element.appendChild(document.createTextNode(c));
+        } else if (c instanceof HTMLElement) {
+          element.appendChild(c);
+        } else if (c instanceof Array) {
+          addChildren(c);
+        } else {
+          console.log("addChildren cannot add to dom node", c);
+        }
+      });
+    };
+    children && addChildren(children);
+    return element;
+  }
   {
-    invoice.items.forEach((item) => {
-      moveChildren(invoiceItem(item), report);
-    });
-    const totalItems = sum(invoice.items.map((i) => i.total));
-    const totalTax = sum(invoice.items.map((i) => i.tax));
-    const summary = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-      class: "line col-1-6"
-    }), /* @__PURE__ */ dom("div", {
-      class: "vspacer-2 col-1-6"
-    }), /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Total Supplies"), /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, totalItems.toFixed(2)), /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Tax (", 100 * TAXRATE3 + "", "%)"), /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, totalTax.toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Labor"), invoice.labor && /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, invoice.labor.toFixed(2)), invoice.additional && /* @__PURE__ */ dom("label", {
-      class: "col-5"
-    }, "Additional"), invoice.additional && /* @__PURE__ */ dom("label", {
-      class: "col-6 align-right"
-    }, invoice.additional.toFixed(2)), /* @__PURE__ */ dom("label", {
-      class: "bold col-5"
-    }, "Balance Due"), /* @__PURE__ */ dom("label", {
-      class: "bold col-6 align-right"
-    }, ((invoice.labor || 0) + (invoice.additional || 0) + totalItems + totalTax).toFixed(2)));
-    moveChildren(summary, report);
+    let element = tag(args);
+    let addChildren = (children2) => {
+      children2 && children2.forEach((c) => {
+        if (typeof c === "string" || c instanceof HTMLElement) {
+          element.setContent(c);
+        } else if (c instanceof Array) {
+          addChildren(c);
+        } else if (typeof c === "object") {
+          element.addChild(c);
+        } else {
+          console.log("addChildren cannot add to widget", c);
+        }
+      });
+    };
+    children && addChildren(children);
+    return element;
   }
-  return report;
-}
-function invoiceItem(item) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "tall col-1-3"
-  }, item.item), /* @__PURE__ */ dom("label", {
-    class: "tall col-4 align-right"
-  }, item.quantity.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "tall col-5 align-right"
-  }, item.price.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "tall col-6 align-right"
-  }, item.total.toFixed(2)));
-}
-
-// app/fun/isZero.ts
-function isZero(value) {
-  if (value === "0.00")
-    return true;
-  if (value === "-0.00")
-    return true;
-  return false;
-}
-function noZero(value) {
-  return isZero(value) ? "" : value;
-}
-
-// app/invoice/templates/invoices-grid.tsx
-function create3(invoices) {
-  const total = sum(invoices.map(totalInvoice));
-  const labor = sum(invoices.map((i) => i.labor));
-  const payments = sum(invoices.map(totalPayments));
-  const balanceDue = total - payments;
-  const target = invoices.length ? /* @__PURE__ */ dom("form", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("h1", {
-    class: "centered col-1-last"
-  }, `Invoices for ${globals.primaryContact.companyName}`), /* @__PURE__ */ dom("div", {
-    class: "bold col-1-4"
-  }, "Client"), /* @__PURE__ */ dom("div", {
-    class: "bold col-5 align-right"
-  }, "Labor"), /* @__PURE__ */ dom("div", {
-    class: "bold col-6 align-right"
-  }, "Total"), /* @__PURE__ */ dom("div", {
-    class: "bold col-7-last align-right"
-  }, "Balance Due"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-last"
-  })) : /* @__PURE__ */ dom("form", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("div", {
-    class: "col-1-last centered"
-  }, "No invoices defined"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-last"
-  }));
-  invoices.map(renderInvoice).forEach((item) => moveChildren(item, target));
-  invoices.length && moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-last"
-  }), /* @__PURE__ */ dom("div", {
-    class: "line col-1-last"
-  }), /* @__PURE__ */ dom("label", {
-    class: "bold col-1-4"
-  }, "Total"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5 currency"
-  }, asCurrency(labor)), /* @__PURE__ */ dom("label", {
-    class: "bold col-6 currency"
-  }, asCurrency(total)), /* @__PURE__ */ dom("label", {
-    class: "bold col-7-last currency"
-  }, asCurrency(balanceDue)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-last"
-  })), target);
-  hookupTriggers(target);
-  return target;
-}
-function totalInvoice(invoice) {
-  const total = sum(invoice.items.map((i) => i.total));
-  const tax = sum(invoice.items.map((i) => i.tax));
-  return total + tax + invoice.labor + invoice.additional;
-}
-function renderInvoice(invoice) {
-  const invoiceTotal = totalInvoice(invoice);
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
-    class: "col-1-4",
-    href: `invoice?id=${invoice.id}`
-  }, invoice.clientname), /* @__PURE__ */ dom("label", {
-    class: "col-5 currency"
-  }, asCurrency(invoice.labor)), /* @__PURE__ */ dom("label", {
-    class: "col-6 currency"
-  }, asCurrency(invoiceTotal)), /* @__PURE__ */ dom("label", {
-    class: "col-7 currency"
-  }, noZero(asCurrency(invoiceTotal - totalPayments(invoice)))));
-}
-function totalPayments(invoice) {
-  return sum(invoice.mops.map((i) => i.paid));
-}
-
-// app/fun/get.ts
-function isDefined(value) {
-  return typeof value !== "undefined";
-}
-function get(formDom, key) {
-  if (!isDefined(formDom[key]))
-    throw `form element not found: ${key}`;
-  return formDom[key].value;
-}
-function set(formDom, values) {
-  const keys = Object.keys(values);
-  keys.forEach((key) => {
-    if (!isDefined(formDom[key]))
-      throw `form element not found: ${key}`;
-    formDom[key].value = values[key];
-  });
-}
-
-// app/fun/setMode.ts
-var modes = {
-  light_mode: "light",
-  dark_mode: "dark",
-  holiday_mode: "holiday"
-};
-function setMode(mode) {
-  if (!mode)
-    mode = localStorage.getItem("mode") || modes.light_mode;
-  localStorage.setItem("mode", mode);
-  document.body.classList.remove(...Object.values(modes));
-  document.body.classList.add(mode);
-  const isFontier = getGlobalState("textier") == true;
-  document.body.classList.toggle("textier", isFontier);
-}
-
-// app/services/validateAccessToken.ts
-var import_faunadb4 = __toModule(require_faunadb());
-async function validate() {
-  const client = createClient();
-  await client.ping();
-}
-
-// app/identify.ts
-async function identify() {
-  if (isOffline())
-    return false;
-  if (!localStorage.getItem("user")) {
-    gotoUrl(routes.identity({
-      target: location.href,
-      context: CONTEXT
-    }));
-    return false;
-  }
-  return true;
-  try {
-    await validate();
-  } catch (ex) {
-    reportError(ex);
-    return false;
-  }
-  return true;
 }
 
 // app/ux/injectLabels.ts
@@ -6085,10 +5119,291 @@ function injectLabels(domNode) {
 // app/services/admin.ts
 var import_faunadb5 = __toModule(require_faunadb());
 
+// app/fun/ticksInSeconds.ts
+function ticksInSeconds(ticks) {
+  return ticks / 1e3;
+}
+
+// app/services/ServiceCache.ts
+var MAX_AGE = getGlobalState("CACHE_MAX_AGE") || 0;
+var ServiceCache = class {
+  constructor(options) {
+    this.options = options;
+    options.maxAge = options.maxAge || MAX_AGE;
+    this.table = options.table;
+    const raw = localStorage.getItem(`table_${this.table}`);
+    if (!raw) {
+      this.data = [];
+      this.lastWrite = 0;
+    } else {
+      const info = JSON.parse(raw);
+      this.lastWrite = info.lastWrite;
+      this.data = info.data;
+    }
+  }
+  lastWriteTime() {
+    return this.lastWrite;
+  }
+  renew() {
+    this.lastWrite = Date.now();
+    this.save();
+  }
+  save() {
+    localStorage.setItem(`table_${this.table}`, JSON.stringify({
+      lastWrite: this.lastWrite,
+      data: this.data
+    }));
+  }
+  deleteLineItem(id) {
+    const index = this.data.findIndex((i) => i.id === id);
+    if (-1 < index)
+      this.data.splice(index, 1);
+    this.save();
+  }
+  updateLineItem(lineItem) {
+    const index = this.data.findIndex((i) => i.id === lineItem.id);
+    if (-1 < index) {
+      this.data[index] = lineItem;
+    } else {
+      this.data.push(lineItem);
+    }
+    this.save();
+  }
+  expired() {
+    const age = ticksInSeconds(Date.now() - this.lastWrite);
+    return this.options.maxAge < age;
+  }
+  getById(id) {
+    return this.data.find((item) => item.id === id);
+  }
+  get() {
+    return this.data;
+  }
+};
+
+// app/services/StorageModel.ts
+var import_faunadb4 = __toModule(require_faunadb());
+
+// app/services/getDatabaseTime.ts
+var import_faunadb3 = __toModule(require_faunadb());
+async function getDatabaseTime() {
+  const client = createClient();
+  const response = await client.query(import_faunadb3.query.Now());
+  return new Date(response.value).valueOf();
+}
+
+// app/services/StorageModel.ts
+var { BATCH_SIZE, CURRENT_USER } = globals;
+var StorageModel = class {
+  constructor(options) {
+    this.options = options;
+    this.tableName = options.tableName;
+    this.cache = new ServiceCache({
+      table: options.tableName,
+      maxAge: options.maxAge
+    });
+  }
+  isOffline() {
+    return this.options.offline || isOffline();
+  }
+  async loadLatestData(args) {
+    const size = BATCH_SIZE;
+    const { upperBound, lowerBound } = args;
+    let after = null;
+    const client = createClient();
+    const result = [];
+    let maximum_query_count = 1;
+    while (maximum_query_count--) {
+      const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.LTE(lowerBound, import_faunadb4.query.Select([0], import_faunadb4.query.Var("item"))), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), after ? {
+        size,
+        after
+      } : { size }), import_faunadb4.query.Lambda("item", import_faunadb4.query.Get(import_faunadb4.query.Select([1], import_faunadb4.query.Var("item"))))));
+      const dataToImport = response.data.map((item) => ({
+        ...item.data,
+        id: item.ref.value.id
+      }));
+      result.push(...dataToImport);
+      dataToImport.forEach((item) => {
+        if (!item.id)
+          throw `item must have an id`;
+        const currentItem = this.cache.getById(item.id);
+        if (currentItem && this.isUpdated(currentItem)) {
+          toast(`item changed remotely and locally: ${item.id}`);
+        }
+        if (!!item.delete_date) {
+          this.cache.deleteLineItem(item.id);
+        } else {
+          this.cache.updateLineItem(item);
+        }
+      });
+      this.cache.renew();
+      dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
+      after = response.after;
+      if (!after) {
+        setFutureSyncTime(this.tableName, upperBound);
+        break;
+      }
+    }
+    return result;
+  }
+  async synchronize() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.isOffline())
+      throw "cannot synchronize in offline mode";
+    const priorSyncTime = getPriorSyncTime(this.tableName);
+    const currentSyncTime = await getDatabaseTime();
+    const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
+    await this.loadLatestData({
+      lowerBound: priorSyncTime,
+      upperBound: currentSyncTime
+    });
+    this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
+      if (!item.id)
+        throw "all items must have an id";
+      if (isOfflineId(item.id)) {
+        this.cache.deleteLineItem(item.id);
+      } else {
+        await this.removeItem(item.id);
+      }
+    });
+    dataToExport.forEach(async (item) => {
+      await this.upsertItem(item);
+    });
+    this.cache.renew();
+  }
+  async removeItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (isOfflineId(id)) {
+      this.cache.deleteLineItem(id);
+      return;
+    }
+    if (this.isOffline()) {
+      const item = this.cache.getById(id);
+      if (!item)
+        throw "cannot remove an item that is not already there";
+      item.delete_date = Date.now();
+      this.cache.updateLineItem(item);
+      return;
+    }
+    const client = createClient();
+    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), id), {
+      data: {
+        id,
+        user: CURRENT_USER,
+        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
+        delete_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+      }
+    }));
+    this.cache.deleteLineItem(id);
+  }
+  async getItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (!this.isOffline() && this.cache.expired()) {
+      await this.synchronize();
+    } else {
+      if (!!this.cache.getById(id)) {
+        this.cache.renew();
+      } else {
+        if (!this.isOffline())
+          await this.synchronize();
+      }
+    }
+    const result = this.cache.getById(id);
+    if (!result)
+      throw `unable to load item: ${this.tableName} ${id}`;
+    if (!!result.delete_date)
+      throw "item marked for deletion";
+    return result;
+  }
+  async upsertItem(data) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    const client = createClient();
+    data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
+    data.update_date = Date.now();
+    this.cache.updateLineItem(data);
+    if (this.isOffline()) {
+      return;
+    }
+    const offlineId = data.id && isOfflineId(data.id) ? data.id : "";
+    if (offlineId)
+      data.id = "";
+    if (!data.id) {
+      const result = await client.query(import_faunadb4.query.Create(import_faunadb4.query.Collection(this.tableName), {
+        data: {
+          ...data,
+          user: CURRENT_USER,
+          create_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
+          update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+        }
+      }));
+      {
+        offlineId && this.cache.deleteLineItem(offlineId);
+        data.id = result.ref.value.id;
+        this.cache.updateLineItem(data);
+      }
+      return;
+    }
+    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), data.id), {
+      data: {
+        ...data,
+        user: CURRENT_USER,
+        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+      }
+    }));
+    this.cache.updateLineItem(data);
+  }
+  isUpdated(data) {
+    return (data.update_date || 0) > this.cache.lastWriteTime();
+  }
+  async getItems() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.cache.expired() && !this.isOffline()) {
+      await this.synchronize();
+    } else {
+      this.cache.renew();
+    }
+    return this.cache.get().filter((item) => !item.delete_date);
+  }
+};
+function isOfflineId(itemId) {
+  return !!itemId && "9" < itemId[0];
+}
+function getPriorSyncTime(tableName) {
+  return getGlobalState(`timeOfLastSynchronization_${tableName}`) || 0;
+}
+function setFutureSyncTime(tableName, syncTime) {
+  setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
+}
+
 // app/services/gl.ts
 var LEDGER_TABLE = "general_ledger";
 var ledgerModel = new StorageModel({
   tableName: LEDGER_TABLE,
+  offline: false
+});
+
+// app/services/invoices.ts
+var INVOICE_TABLE = "invoices";
+var invoiceModel = new StorageModel({
+  tableName: INVOICE_TABLE,
+  offline: false
+});
+
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
+  tableName: INVENTORY_TABLE,
   offline: false
 });
 
@@ -6124,7 +5439,7 @@ function removeCssRule(name) {
 }
 
 // app/index.ts
-var { primaryContact: primaryContact3 } = globals;
+var { primaryContact } = globals;
 var VERSION = "1.0.5";
 async function init() {
   const domNode = document.body;
@@ -6141,7 +5456,7 @@ async function init() {
       work_offline: true,
       VERSION
     });
-    setInitialState({ primaryContact: primaryContact3 });
+    setInitialState({ primaryContact });
     await upgradeFromCurrentVersion();
   }
   injectLabels(domNode);
@@ -6182,179 +5497,123 @@ async function registerServiceWorker() {
   const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 
-// app/invoice/invoice.ts
-var { TAXRATE: TAXRATE4 } = globals;
-async function init2(target = document.body) {
-  try {
-    await init();
-    const queryParams = new URLSearchParams(window.location.search);
-    if (queryParams.has("id")) {
-      await renderInvoice2(target, queryParams.get("id"));
-    } else {
-      await renderInvoice2(target);
+// app/services/todo.ts
+var TABLE_NAME = "todo";
+var TodoModel = class extends StorageModel {
+};
+var todoModel = new TodoModel({
+  tableName: TABLE_NAME,
+  offline: true
+});
+
+// app/fun/getQueryParameter.ts
+function getQueryParameter(name) {
+  const queryParams = new URLSearchParams(window.location.search);
+  return queryParams.get(name);
+}
+
+// app/fun/dom.ts
+function moveChildren(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
+}
+
+// app/todo/grid-template.tsx
+function renderItem(item) {
+  const date = asDateString(new Date(item.date));
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "col-1 date"
+  }, /* @__PURE__ */ dom("a", {
+    href: `${routes.todo(item.id)}`
+  }, date)), /* @__PURE__ */ dom("div", {
+    class: "col-2-last text"
+  }, item.comment));
+}
+function create(items) {
+  const grid = /* @__PURE__ */ dom("div", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("div", {
+    class: "col-1 line date"
+  }, "Date"), /* @__PURE__ */ dom("div", {
+    class: "col-2-last line text"
+  }, "Comment"));
+  items.map(renderItem).forEach((item) => moveChildren(item, grid));
+  return grid;
+}
+
+// app/fun/setFormValue.ts
+function setFormValue(formDom, name, value) {
+  const input = formDom[name];
+  if (!input)
+    throw `input not found: ${name}`;
+  input.value = value;
+}
+function getFormValue(formDom, name) {
+  const input = formDom[name];
+  if (!input)
+    throw `input not found: ${name}`;
+  return input.value;
+}
+
+// app/todo/index.ts
+async function init2() {
+  await init();
+  const todoItemsPlaceholder = document.body.querySelector(".todo-items.placeholder");
+  if (!todoItemsPlaceholder)
+    throw "todo-items placeholder not found";
+  const formDom = document.body.querySelector("form");
+  if (!formDom)
+    throw "form not found";
+  const id = getQueryParameter("id");
+  const activeTodoItem = id && await todoModel.getItem(id);
+  if (activeTodoItem) {
+    setFormValue(formDom, "todo-comment", activeTodoItem.comment);
+    setFormValue(formDom, "todo-date", asDateString(new Date(activeTodoItem.date)));
+  }
+  const render = async () => {
+    if (todoItemsPlaceholder) {
+      const todoItems = (await todoModel.getItems()).sortBy({ date: "-number" });
+      const todoItemsGrid = create(todoItems);
+      todoItemsPlaceholder.innerText = "";
+      todoItemsPlaceholder.appendChild(todoItemsGrid);
     }
-  } catch (ex) {
-    reportError(ex);
-  }
-}
-async function renderInvoices(target) {
-  try {
-    await init();
-    const invoices = await getItems();
-    const formDom = create3(invoices);
-    target.appendChild(formDom);
-    on(formDom, "create-invoice", () => {
-      try {
-        gotoUrl(routes.createInvoice());
-      } catch (ex) {
-        reportError(ex);
-      }
-    });
-  } catch (ex) {
-    reportError(ex);
-  }
-}
-async function renderInvoice2(target, invoiceId) {
-  let invoice;
-  if (invoiceId) {
-    invoice = await getItem(invoiceId);
-    if (!invoice)
-      throw "invoice not found";
-  } else {
-    invoice = {
-      id: "",
-      date: Date.now(),
-      clientname: "",
-      billto: "",
-      comments: "",
-      email: "",
-      telephone: "",
-      items: [],
-      labor: 0,
-      additional: 0,
-      mops: [],
-      taxrate: TAXRATE4
-    };
-  }
-  const formDom = await create(invoice);
-  target.appendChild(formDom);
-  hookupEvents2(formDom);
-  trigger(formDom, "change");
-}
-function hookupEvents2(formDom) {
-  on(formDom, "print", async () => {
-    if (await tryToSaveInvoice(formDom)) {
-      const requestModel = asModel(formDom);
-      print(formDom.parentElement || formDom, requestModel);
-    }
-  });
-  on(formDom, "delete", async () => {
-    if (await tryToDeleteInvoice(formDom))
-      trigger(formDom, "list-all-invoices");
-  });
-  on(formDom, "submit", async () => {
-    if (await tryToSaveInvoice(formDom)) {
-      toast("Invoice saved");
-    }
-  });
-}
-async function tryToDeleteInvoice(formDom) {
-  const id = get(formDom, "id");
-  if (!id)
-    throw "unable to delete this invoice";
-  await removeItem(id);
-  return true;
-}
-async function tryToSaveInvoice(formDom) {
-  if (!formDom.checkValidity()) {
-    formDom.reportValidity();
-    return false;
-  }
-  const requestModel = asModel(formDom);
-  if (requestModel.id) {
-    const priorModel = await invoiceModel.getItem(requestModel.id);
-    if (deepEqual(requestModel, priorModel)) {
-      toast("No changes found");
-      return false;
-    }
-  }
-  await upsertItem(requestModel);
-  set(formDom, { id: requestModel.id });
-  return true;
-}
-function asModel(formDom) {
-  const data = new FormData(formDom);
-  const requestModel = {
-    id: data.get("id"),
-    clientname: data.get("clientname"),
-    date: new Date(data.get("date")).valueOf(),
-    billto: data.get("billto"),
-    telephone: data.get("telephone"),
-    email: data.get("email"),
-    comments: data.get("comments"),
-    items: [],
-    labor: Number.parseFloat(data.get("labor") || "0"),
-    additional: Number.parseFloat(data.get("additional") || "0"),
-    mops: [],
-    taxrate: TAXRATE4
   };
-  const mops = data.getAll("method_of_payment");
-  const payments = data.getAll("amount_paid");
-  requestModel.mops = mops.map((mop, i) => ({
-    mop,
-    paid: parseFloat(payments[i])
-  }));
-  let currentItem = null;
-  for (let [key, value] of data.entries()) {
-    switch (key) {
-      case "item":
-        currentItem = {};
-        requestModel.items.push(currentItem);
-        currentItem.item = value;
-        break;
-      case "quantity":
-        if (!currentItem)
-          throw "item expected";
-        currentItem.quantity = parseFloat(value);
-        break;
-      case "price":
-        if (!currentItem)
-          throw "item expected";
-        currentItem.price = parseFloat(value);
-        break;
-      case "total":
-        if (!currentItem)
-          throw "item expected";
-        currentItem.total = parseFloat(value);
-        currentItem.tax = parseFloat(asCurrency(requestModel.taxrate * currentItem.total));
-        break;
+  on(document.body, "delete", async () => {
+    if (!id) {
+      trigger(document.body, "reset");
+      return;
     }
-  }
-  return requestModel;
-}
-function print(target, invoice) {
-  try {
-    target.classList.add("print");
-    const toPrint = create2(invoice);
-    target.innerHTML = "";
-    target.appendChild(toPrint);
-    window.document.title = invoice.clientname;
-    window.print();
-  } catch (ex) {
-    reportError(ex);
-  }
-}
-function deepEqual(requestModel, priorModel) {
-  return JSON.stringify(requestModel) === JSON.stringify(priorModel);
+    try {
+      await todoModel.removeItem(id);
+      trigger(document.body, "reset");
+    } catch (ex) {
+      reportError(ex);
+    }
+  });
+  on(document.body, "reset", () => {
+    setGlobalState("todo-date", asDateString(new Date()));
+    setGlobalState("todo-comment", "");
+    gotoUrl(routes.createTodo());
+  });
+  on(document.body, "submit", async () => {
+    const date = getFormValue(formDom, "todo-date");
+    const comment = getFormValue(formDom, "todo-comment");
+    await todoModel.upsertItem({
+      id,
+      date: new Date(date).valueOf(),
+      comment
+    });
+    toast("Saved");
+    render();
+  });
+  render();
 }
 export {
-  init2 as init,
-  print,
-  renderInvoices
+  init2 as init
 };
 /*
 object-assign
 (c) Sindre Sorhus
 @license MIT
 */
-//# sourceMappingURL=invoice.js.map
+//# sourceMappingURL=todo.js.map

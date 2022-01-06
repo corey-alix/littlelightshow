@@ -5343,6 +5343,8 @@ var routes = {
   editLedger: (id) => `/app/gl/index.html?id=${id}`,
   dashboard: () => "/app/index.html",
   admin: () => "/app/admin/index.html",
+  createTodo: () => "/app/todo/index.html",
+  todo: (id) => `/app/todo/index.html?id=${id}`,
   gl: {
     byAccount: (id) => `/app/gl/index.html?account=${id}`
   }

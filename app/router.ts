@@ -1,3 +1,5 @@
+import { isUndefined } from "./fun/isUndefined";
+
 export const routes = {
   home: () => "/index.html",
   identity: ({ context, target }) =>
@@ -24,6 +26,10 @@ export const routes = {
     `/app/gl/index.html?id=${id}`,
   dashboard: () => "/app/index.html",
   admin: () => "/app/admin/index.html",
+  createTodo: () =>
+    "/app/todo/index.html",
+  todo: (id: string) =>
+    `/app/todo/index.html?id=${id}`,
   gl: {
     byAccount: (id: string) =>
       `/app/gl/index.html?account=${id}`,

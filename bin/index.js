@@ -4842,6 +4842,8 @@ var routes = {
   editLedger: (id) => `/app/gl/index.html?id=${id}`,
   dashboard: () => "/app/index.html",
   admin: () => "/app/admin/index.html",
+  createTodo: () => "/app/todo/index.html",
+  todo: (id) => `/app/todo/index.html?id=${id}`,
   gl: {
     byAccount: (id) => `/app/gl/index.html?account=${id}`
   }
@@ -5490,10 +5492,7 @@ async function registerServiceWorker() {
   const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 export {
-  init,
-  on,
-  toast,
-  trigger
+  init
 };
 /*
 object-assign
