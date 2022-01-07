@@ -9,7 +9,7 @@ import { on } from "../fun/on.js";
 import {
   reportError,
   toast,
-} from "../ux/Toaster.js";
+} from "../ux/toasterWriter";
 import { hookupTriggers } from "../fun/hookupTriggers.js";
 import {
   extendNumericInputBehaviors,

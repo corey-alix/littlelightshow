@@ -4871,6 +4871,329 @@ var Toaster = class {
     target.insertBefore(message, null);
   }
 };
+
+// app/fun/ticksInSeconds.ts
+function ticksInSeconds(ticks) {
+  return ticks / 1e3;
+}
+
+// app/services/ServiceCache.ts
+var MAX_AGE = getGlobalState("CACHE_MAX_AGE") || 0;
+var ServiceCache = class {
+  constructor(options) {
+    this.options = options;
+    options.maxAge = Math.max(options.maxAge || MAX_AGE, MAX_AGE);
+    this.table = options.table;
+    const raw = localStorage.getItem(`table_${this.table}`);
+    if (!raw) {
+      this.data = [];
+      this.lastWrite = 0;
+    } else {
+      const info = JSON.parse(raw);
+      this.lastWrite = info.lastWrite;
+      this.data = info.data;
+    }
+  }
+  lastWriteTime() {
+    return this.lastWrite;
+  }
+  renew() {
+    this.lastWrite = Date.now();
+    this.save();
+  }
+  save() {
+    localStorage.setItem(`table_${this.table}`, JSON.stringify({
+      lastWrite: this.lastWrite,
+      data: this.data
+    }));
+  }
+  deleteLineItem(id) {
+    const index = this.data.findIndex((i) => i.id === id);
+    if (-1 < index)
+      this.data.splice(index, 1);
+    this.save();
+  }
+  updateLineItem(lineItem) {
+    const index = this.data.findIndex((i) => i.id === lineItem.id);
+    if (-1 < index) {
+      this.data[index] = lineItem;
+    } else {
+      this.data.push(lineItem);
+    }
+    this.save();
+  }
+  expired() {
+    const age = ticksInSeconds(Date.now() - this.lastWrite);
+    return this.options.maxAge < age;
+  }
+  getById(id) {
+    return this.data.find((item) => item.id === id);
+  }
+  get() {
+    return this.data;
+  }
+};
+
+// app/services/StorageModel.ts
+var import_faunadb5 = __toModule(require_faunadb());
+
+// app/services/getDatabaseTime.ts
+var import_faunadb3 = __toModule(require_faunadb());
+async function getDatabaseTime() {
+  const client = createClient();
+  const response = await client.query(import_faunadb3.query.Now());
+  return new Date(response.value).valueOf();
+}
+
+// app/services/forceUpdatestampTable.ts
+var import_faunadb4 = __toModule(require_faunadb());
+async function forceUpdatestampTable(tableName) {
+  const client = createClient();
+  return await client.query(import_faunadb4.query.CreateCollection({
+    name: tableName
+  }));
+}
+async function forceUpdatestampIndex(tableName) {
+  const client = createClient();
+  const query = import_faunadb4.query.CreateIndex({
+    name: `${tableName}_updates`,
+    source: import_faunadb4.query.Collection(tableName),
+    values: [
+      {
+        field: ["data", "update_date"],
+        reverse: false
+      },
+      {
+        field: ["ref"]
+      }
+    ]
+  });
+  return await client.query(query);
+}
+
+// app/services/StorageModel.ts
+var { BATCH_SIZE, CURRENT_USER } = globals;
+var StorageModel = class {
+  constructor(options) {
+    this.options = options;
+    this.tableName = options.tableName;
+    this.cache = new ServiceCache({
+      table: options.tableName,
+      maxAge: options.maxAge
+    });
+  }
+  isOffline() {
+    return this.options.offline || isOffline();
+  }
+  async loadLatestData(args) {
+    const size = BATCH_SIZE;
+    const { upperBound, lowerBound } = args;
+    let after = null;
+    const client = createClient();
+    const result = [];
+    let maximum_query_count = 1;
+    while (maximum_query_count--) {
+      const response = await client.query(import_faunadb5.query.Map(import_faunadb5.query.Paginate(import_faunadb5.query.Filter(import_faunadb5.query.Match(import_faunadb5.query.Index(`${this.tableName}_updates`)), import_faunadb5.query.Lambda("item", import_faunadb5.query.And(import_faunadb5.query.LTE(lowerBound, import_faunadb5.query.Select([0], import_faunadb5.query.Var("item"))), import_faunadb5.query.LT(import_faunadb5.query.Select([0], import_faunadb5.query.Var("item")), upperBound)))), after ? {
+        size,
+        after
+      } : { size }), import_faunadb5.query.Lambda("item", import_faunadb5.query.Get(import_faunadb5.query.Select([1], import_faunadb5.query.Var("item"))))));
+      const dataToImport = response.data.map((item) => ({
+        ...item.data,
+        id: item.ref.value.id
+      }));
+      result.push(...dataToImport);
+      dataToImport.forEach((item) => {
+        if (!item.id)
+          throw `item must have an id`;
+        const currentItem = this.cache.getById(item.id);
+        if (currentItem && this.isUpdated(currentItem)) {
+        }
+        if (!!item.delete_date) {
+          this.cache.deleteLineItem(item.id);
+        } else {
+          this.cache.updateLineItem(item);
+        }
+      });
+      this.cache.renew();
+      dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
+      after = response.after;
+      if (!after) {
+        setFutureSyncTime(this.tableName, upperBound);
+        break;
+      }
+    }
+    return result;
+  }
+  async synchronize() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.isOffline())
+      throw "cannot synchronize in offline mode";
+    const priorSyncTime = getPriorSyncTime(this.tableName);
+    const currentSyncTime = await getDatabaseTime();
+    const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
+    await retryOnInvalidRef(this.tableName, async () => {
+      await this.loadLatestData({
+        lowerBound: priorSyncTime,
+        upperBound: currentSyncTime
+      });
+    });
+    this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
+      if (!item.id)
+        throw "all items must have an id";
+      if (isOfflineId(item.id)) {
+        this.cache.deleteLineItem(item.id);
+      } else {
+        await this.removeItem(item.id);
+      }
+    });
+    dataToExport.forEach(async (item) => {
+      await this.upsertItem(item);
+    });
+    this.cache.renew();
+  }
+  async removeItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (isOfflineId(id)) {
+      this.cache.deleteLineItem(id);
+      return;
+    }
+    if (this.isOffline()) {
+      const item = this.cache.getById(id);
+      if (!item)
+        throw "cannot remove an item that is not already there";
+      item.delete_date = Date.now();
+      this.cache.updateLineItem(item);
+      return;
+    }
+    const client = createClient();
+    await client.query(import_faunadb5.query.Replace(import_faunadb5.query.Ref(import_faunadb5.query.Collection(this.tableName), id), {
+      data: {
+        id,
+        user: CURRENT_USER,
+        update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now()),
+        delete_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
+      }
+    }));
+    this.cache.deleteLineItem(id);
+  }
+  async getItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (!this.isOffline() && this.cache.expired()) {
+      await this.synchronize();
+    } else {
+      if (!!this.cache.getById(id)) {
+        this.cache.renew();
+      } else {
+        if (!this.isOffline())
+          await this.synchronize();
+      }
+    }
+    const result = this.cache.getById(id);
+    if (!result)
+      throw `unable to load item: ${this.tableName} ${id}`;
+    if (!!result.delete_date)
+      throw "item marked for deletion";
+    return result;
+  }
+  async upsertItem(data) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    const client = createClient();
+    data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
+    data.update_date = Date.now();
+    this.cache.updateLineItem(data);
+    if (this.isOffline()) {
+      return;
+    }
+    const offlineId = data.id && isOfflineId(data.id) ? data.id : "";
+    if (offlineId)
+      data.id = "";
+    if (!data.id) {
+      await retryOnInvalidRef(this.tableName, async () => {
+        const result = await client.query(import_faunadb5.query.Create(import_faunadb5.query.Collection(this.tableName), {
+          data: {
+            ...data,
+            user: CURRENT_USER,
+            create_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now()),
+            update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
+          }
+        }));
+        {
+          offlineId && this.cache.deleteLineItem(offlineId);
+          data.id = result.ref.value.id;
+          this.cache.updateLineItem(data);
+        }
+      });
+      return;
+    }
+    await client.query(import_faunadb5.query.Replace(import_faunadb5.query.Ref(import_faunadb5.query.Collection(this.tableName), data.id), {
+      data: {
+        ...data,
+        user: CURRENT_USER,
+        update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
+      }
+    }));
+    this.cache.updateLineItem(data);
+  }
+  isUpdated(data) {
+    return (data.update_date || 0) > this.cache.lastWriteTime();
+  }
+  async getItems() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.cache.expired() && !this.isOffline()) {
+      await this.synchronize();
+    } else {
+      this.cache.renew();
+    }
+    return this.cache.get().filter((item) => !item.delete_date);
+  }
+};
+function isOfflineId(itemId) {
+  return !!itemId && "9" < itemId[0];
+}
+function getPriorSyncTime(tableName) {
+  return getGlobalState(`timeOfLastSynchronization_${tableName}`) || 0;
+}
+function setFutureSyncTime(tableName, syncTime) {
+  setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
+}
+async function retryOnInvalidRef(tableName, op) {
+  try {
+    await op();
+  } catch (ex) {
+    const error = ex;
+    if (error.message !== "invalid ref")
+      throw ex;
+    try {
+      await forceUpdatestampTable(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    try {
+      await forceUpdatestampIndex(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    await op();
+  }
+}
+
+// app/services/log.ts
+var TABLE_NAME = "log";
+var LogModel = class extends StorageModel {
+};
+var logStore = new LogModel({
+  tableName: TABLE_NAME,
+  offline: false
+});
+
+// app/ux/toasterWriter.ts
 var toaster = new Toaster();
 function toast(message, options) {
   if (!options)
@@ -4885,6 +5208,7 @@ function reportError(message) {
   toast(message + "", {
     mode: "error"
   });
+  logStore.upsertItem({ message }).catch((ex) => console.log(ex));
 }
 
 // app/fun/gotoUrl.ts
@@ -5123,319 +5447,6 @@ function injectLabels(domNode) {
   });
 }
 
-// app/services/forceUpdatestampTable.ts
-var import_faunadb3 = __toModule(require_faunadb());
-async function forceUpdatestampTable(tableName) {
-  const client = createClient();
-  return await client.query(import_faunadb3.query.CreateCollection({
-    name: tableName
-  }));
-}
-async function forceUpdatestampIndex(tableName) {
-  const client = createClient();
-  const query = import_faunadb3.query.CreateIndex({
-    name: `${tableName}_updates`,
-    source: import_faunadb3.query.Collection(tableName),
-    values: [
-      {
-        field: ["data", "update_date"],
-        reverse: false
-      },
-      {
-        field: ["ref"]
-      }
-    ]
-  });
-  return await client.query(query);
-}
-
-// app/fun/ticksInSeconds.ts
-function ticksInSeconds(ticks) {
-  return ticks / 1e3;
-}
-
-// app/services/ServiceCache.ts
-var MAX_AGE = getGlobalState("CACHE_MAX_AGE") || 0;
-var ServiceCache = class {
-  constructor(options) {
-    this.options = options;
-    options.maxAge = Math.max(options.maxAge || MAX_AGE, MAX_AGE);
-    this.table = options.table;
-    const raw = localStorage.getItem(`table_${this.table}`);
-    if (!raw) {
-      this.data = [];
-      this.lastWrite = 0;
-    } else {
-      const info = JSON.parse(raw);
-      this.lastWrite = info.lastWrite;
-      this.data = info.data;
-    }
-  }
-  lastWriteTime() {
-    return this.lastWrite;
-  }
-  renew() {
-    this.lastWrite = Date.now();
-    this.save();
-  }
-  save() {
-    localStorage.setItem(`table_${this.table}`, JSON.stringify({
-      lastWrite: this.lastWrite,
-      data: this.data
-    }));
-  }
-  deleteLineItem(id) {
-    const index = this.data.findIndex((i) => i.id === id);
-    if (-1 < index)
-      this.data.splice(index, 1);
-    this.save();
-  }
-  updateLineItem(lineItem) {
-    const index = this.data.findIndex((i) => i.id === lineItem.id);
-    if (-1 < index) {
-      this.data[index] = lineItem;
-    } else {
-      this.data.push(lineItem);
-    }
-    this.save();
-  }
-  expired() {
-    const age = ticksInSeconds(Date.now() - this.lastWrite);
-    return this.options.maxAge < age;
-  }
-  getById(id) {
-    return this.data.find((item) => item.id === id);
-  }
-  get() {
-    return this.data;
-  }
-};
-
-// app/services/StorageModel.ts
-var import_faunadb5 = __toModule(require_faunadb());
-
-// app/services/getDatabaseTime.ts
-var import_faunadb4 = __toModule(require_faunadb());
-async function getDatabaseTime() {
-  const client = createClient();
-  const response = await client.query(import_faunadb4.query.Now());
-  return new Date(response.value).valueOf();
-}
-
-// app/services/StorageModel.ts
-var { BATCH_SIZE, CURRENT_USER } = globals;
-var StorageModel = class {
-  constructor(options) {
-    this.options = options;
-    this.tableName = options.tableName;
-    this.cache = new ServiceCache({
-      table: options.tableName,
-      maxAge: options.maxAge
-    });
-  }
-  isOffline() {
-    return this.options.offline || isOffline();
-  }
-  async loadLatestData(args) {
-    const size = BATCH_SIZE;
-    const { upperBound, lowerBound } = args;
-    let after = null;
-    const client = createClient();
-    const result = [];
-    let maximum_query_count = 1;
-    while (maximum_query_count--) {
-      const response = await client.query(import_faunadb5.query.Map(import_faunadb5.query.Paginate(import_faunadb5.query.Filter(import_faunadb5.query.Match(import_faunadb5.query.Index(`${this.tableName}_updates`)), import_faunadb5.query.Lambda("item", import_faunadb5.query.And(import_faunadb5.query.LTE(lowerBound, import_faunadb5.query.Select([0], import_faunadb5.query.Var("item"))), import_faunadb5.query.LT(import_faunadb5.query.Select([0], import_faunadb5.query.Var("item")), upperBound)))), after ? {
-        size,
-        after
-      } : { size }), import_faunadb5.query.Lambda("item", import_faunadb5.query.Get(import_faunadb5.query.Select([1], import_faunadb5.query.Var("item"))))));
-      const dataToImport = response.data.map((item) => ({
-        ...item.data,
-        id: item.ref.value.id
-      }));
-      result.push(...dataToImport);
-      dataToImport.forEach((item) => {
-        if (!item.id)
-          throw `item must have an id`;
-        const currentItem = this.cache.getById(item.id);
-        if (currentItem && this.isUpdated(currentItem)) {
-          toast(`item changed remotely and locally: ${item.id}`);
-        }
-        if (!!item.delete_date) {
-          this.cache.deleteLineItem(item.id);
-        } else {
-          this.cache.updateLineItem(item);
-        }
-      });
-      this.cache.renew();
-      dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
-      after = response.after;
-      if (!after) {
-        setFutureSyncTime(this.tableName, upperBound);
-        break;
-      }
-    }
-    return result;
-  }
-  async synchronize() {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    if (this.isOffline())
-      throw "cannot synchronize in offline mode";
-    const priorSyncTime = getPriorSyncTime(this.tableName);
-    const currentSyncTime = await getDatabaseTime();
-    const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
-    await retryOnInvalidRef(this.tableName, async () => {
-      await this.loadLatestData({
-        lowerBound: priorSyncTime,
-        upperBound: currentSyncTime
-      });
-    });
-    this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
-      if (!item.id)
-        throw "all items must have an id";
-      if (isOfflineId(item.id)) {
-        this.cache.deleteLineItem(item.id);
-      } else {
-        await this.removeItem(item.id);
-      }
-    });
-    dataToExport.forEach(async (item) => {
-      await this.upsertItem(item);
-    });
-    this.cache.renew();
-  }
-  async removeItem(id) {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    if (isOfflineId(id)) {
-      this.cache.deleteLineItem(id);
-      return;
-    }
-    if (this.isOffline()) {
-      const item = this.cache.getById(id);
-      if (!item)
-        throw "cannot remove an item that is not already there";
-      item.delete_date = Date.now();
-      this.cache.updateLineItem(item);
-      return;
-    }
-    const client = createClient();
-    await client.query(import_faunadb5.query.Replace(import_faunadb5.query.Ref(import_faunadb5.query.Collection(this.tableName), id), {
-      data: {
-        id,
-        user: CURRENT_USER,
-        update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now()),
-        delete_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
-      }
-    }));
-    this.cache.deleteLineItem(id);
-  }
-  async getItem(id) {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    if (!this.isOffline() && this.cache.expired()) {
-      await this.synchronize();
-    } else {
-      if (!!this.cache.getById(id)) {
-        this.cache.renew();
-      } else {
-        if (!this.isOffline())
-          await this.synchronize();
-      }
-    }
-    const result = this.cache.getById(id);
-    if (!result)
-      throw `unable to load item: ${this.tableName} ${id}`;
-    if (!!result.delete_date)
-      throw "item marked for deletion";
-    return result;
-  }
-  async upsertItem(data) {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    const client = createClient();
-    data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
-    data.update_date = Date.now();
-    this.cache.updateLineItem(data);
-    if (this.isOffline()) {
-      return;
-    }
-    const offlineId = data.id && isOfflineId(data.id) ? data.id : "";
-    if (offlineId)
-      data.id = "";
-    if (!data.id) {
-      await retryOnInvalidRef(this.tableName, async () => {
-        const result = await client.query(import_faunadb5.query.Create(import_faunadb5.query.Collection(this.tableName), {
-          data: {
-            ...data,
-            user: CURRENT_USER,
-            create_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now()),
-            update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
-          }
-        }));
-        {
-          offlineId && this.cache.deleteLineItem(offlineId);
-          data.id = result.ref.value.id;
-          this.cache.updateLineItem(data);
-        }
-      });
-      return;
-    }
-    await client.query(import_faunadb5.query.Replace(import_faunadb5.query.Ref(import_faunadb5.query.Collection(this.tableName), data.id), {
-      data: {
-        ...data,
-        user: CURRENT_USER,
-        update_date: import_faunadb5.query.ToMillis(import_faunadb5.query.Now())
-      }
-    }));
-    this.cache.updateLineItem(data);
-  }
-  isUpdated(data) {
-    return (data.update_date || 0) > this.cache.lastWriteTime();
-  }
-  async getItems() {
-    if (!CURRENT_USER)
-      throw "user must be signed in";
-    if (this.cache.expired() && !this.isOffline()) {
-      await this.synchronize();
-    } else {
-      this.cache.renew();
-    }
-    return this.cache.get().filter((item) => !item.delete_date);
-  }
-};
-function isOfflineId(itemId) {
-  return !!itemId && "9" < itemId[0];
-}
-function getPriorSyncTime(tableName) {
-  return getGlobalState(`timeOfLastSynchronization_${tableName}`) || 0;
-}
-function setFutureSyncTime(tableName, syncTime) {
-  setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
-}
-async function retryOnInvalidRef(tableName, op) {
-  try {
-    await op();
-  } catch (ex) {
-    const error = ex;
-    if (error.message !== "invalid ref")
-      throw ex;
-    try {
-      await forceUpdatestampTable(tableName);
-    } catch (ex2) {
-      if (ex2.message !== "instance already exists")
-        throw ex2;
-    }
-    try {
-      await forceUpdatestampIndex(tableName);
-    } catch (ex2) {
-      if (ex2.message !== "instance already exists")
-        throw ex2;
-    }
-    await op();
-  }
-}
-
 // app/services/invoices.ts
 var INVOICE_TABLE = "invoices";
 var invoiceModel = new StorageModel({
@@ -5533,7 +5544,7 @@ async function upgradeFromCurrentVersion() {
   switch (currentVersion) {
     case "1.0.3":
       await upgradeFrom103To105();
-      toast(`upgraded to ${currentVersion}`);
+      toast(`upgraded from ${currentVersion} to ${VERSION}`);
       break;
     case "1.0.4":
       break;

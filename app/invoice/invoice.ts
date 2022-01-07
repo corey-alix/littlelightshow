@@ -21,7 +21,7 @@ import { get, set } from "../fun/get";
 import {
   reportError,
   toast,
-} from "../ux/Toaster.js";
+} from "../ux/toasterWriter";
 import { globals } from "../globals.js";
 const { TAXRATE } = globals;
 

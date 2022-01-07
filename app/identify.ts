@@ -4,7 +4,7 @@ import {
 } from "./globals.js";
 import { validate } from "./services/validateAccessToken.js";
 import { routes } from "./router.js";
-import { reportError } from "./ux/Toaster.js";
+import { reportError } from "./ux/toasterWriter";
 import { gotoUrl } from "./fun/gotoUrl";
 
 export async function identify() {

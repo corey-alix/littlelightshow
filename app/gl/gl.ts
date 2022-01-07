@@ -3,7 +3,7 @@ import { create as createLedgerForm } from "./templates/glgrid.js";
 import { create as printLedger } from "./templates/print.js";
 import { create as printAccount } from "./templates/by-account.js";
 import { getItem as loadLedger } from "../services/gl.js";
-import { reportError } from "../ux/Toaster.js";
+import { reportError } from "../ux/toasterWriter";
 import { init as systemInit } from "../index.js";
 import { getQueryParameter } from "../fun/getQueryParameter.js";
 

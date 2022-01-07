@@ -1,6 +1,6 @@
 const DEFAULT_DELAY = 5000;
 
-class Toaster {
+export class Toaster {
   toast(options: {
     message: string;
     mode: string;
@@ -42,27 +42,4 @@ class Toaster {
 
     target.insertBefore(message, null);
   }
-}
-
-const toaster = new Toaster();
-
-export function toast(
-  message: string,
-  options?: { mode: string }
-) {
-  if (!options)
-    options = { mode: "info" };
-  console.info(message, options);
-  toaster.toast({
-    message,
-    ...options,
-  });
-}
-
-export function reportError(
-  message: any
-) {
-  toast(message + "", {
-    mode: "error",
-  });
 }

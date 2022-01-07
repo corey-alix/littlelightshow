@@ -11,7 +11,7 @@ import {
   getGlobalState,
   setGlobalState,
 } from "../fun/globalState";
-import { toast } from "../ux/Toaster.js";
+import { toast } from "../ux/toasterWriter";
 import { getDatabaseTime } from "./getDatabaseTime.js";
 import {
   forceUpdatestampIndex,
@@ -155,9 +155,7 @@ export class StorageModel<
           currentItem &&
           this.isUpdated(currentItem)
         ) {
-          toast(
-            `item changed remotely and locally: ${item.id}`
-          );
+          // item pushed to server has now been pulled back
         }
         if (!!item.delete_date) {
           this.cache.deleteLineItem(

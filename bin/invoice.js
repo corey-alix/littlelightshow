@@ -4915,41 +4915,6 @@ var ServiceCache = class {
 // app/services/StorageModel.ts
 var import_faunadb4 = __toModule(require_faunadb());
 
-// app/ux/Toaster.ts
-var DEFAULT_DELAY = 5e3;
-var Toaster = class {
-  toast(options) {
-    let target = document.querySelector("#toaster");
-    if (!target) {
-      target = document.createElement("div");
-      target.id = "toaster";
-      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
-      document.body.appendChild(target);
-    }
-    const message = document.createElement("div");
-    message.classList.add(options.mode || "error", "padding", "margin");
-    message.innerHTML = options.message;
-    message.addEventListener("click", () => message.remove());
-    setTimeout(() => message.remove(), DEFAULT_DELAY);
-    target.insertBefore(message, null);
-  }
-};
-var toaster = new Toaster();
-function toast(message, options) {
-  if (!options)
-    options = { mode: "info" };
-  console.info(message, options);
-  toaster.toast({
-    message,
-    ...options
-  });
-}
-function reportError(message) {
-  toast(message + "", {
-    mode: "error"
-  });
-}
-
 // app/services/getDatabaseTime.ts
 var import_faunadb2 = __toModule(require_faunadb());
 async function getDatabaseTime() {
@@ -5020,7 +4985,6 @@ var StorageModel = class {
           throw `item must have an id`;
         const currentItem = this.cache.getById(item.id);
         if (currentItem && this.isUpdated(currentItem)) {
-          toast(`item changed remotely and locally: ${item.id}`);
         }
         if (!!item.delete_date) {
           this.cache.deleteLineItem(item.id);
@@ -6090,6 +6054,53 @@ function set(formDom, values) {
   });
 }
 
+// app/ux/Toaster.ts
+var DEFAULT_DELAY = 5e3;
+var Toaster = class {
+  toast(options) {
+    let target = document.querySelector("#toaster");
+    if (!target) {
+      target = document.createElement("div");
+      target.id = "toaster";
+      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
+      document.body.appendChild(target);
+    }
+    const message = document.createElement("div");
+    message.classList.add(options.mode || "error", "padding", "margin");
+    message.innerHTML = options.message;
+    message.addEventListener("click", () => message.remove());
+    setTimeout(() => message.remove(), DEFAULT_DELAY);
+    target.insertBefore(message, null);
+  }
+};
+
+// app/services/log.ts
+var TABLE_NAME2 = "log";
+var LogModel = class extends StorageModel {
+};
+var logStore = new LogModel({
+  tableName: TABLE_NAME2,
+  offline: false
+});
+
+// app/ux/toasterWriter.ts
+var toaster = new Toaster();
+function toast(message, options) {
+  if (!options)
+    options = { mode: "info" };
+  console.info(message, options);
+  toaster.toast({
+    message,
+    ...options
+  });
+}
+function reportError(message) {
+  toast(message + "", {
+    mode: "error"
+  });
+  logStore.upsertItem({ message }).catch((ex) => console.log(ex));
+}
+
 // app/fun/setMode.ts
 var modes = {
   light_mode: "light",
@@ -6223,7 +6234,7 @@ async function upgradeFromCurrentVersion() {
   switch (currentVersion) {
     case "1.0.3":
       await upgradeFrom103To105();
-      toast(`upgraded to ${currentVersion}`);
+      toast(`upgraded from ${currentVersion} to ${VERSION}`);
       break;
     case "1.0.4":
       break;

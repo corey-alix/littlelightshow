@@ -19,7 +19,7 @@ import {
 } from "./services/forceUpdatestampTable";
 import { invoiceModel } from "./services/invoices";
 import { inventoryModel } from "./services/inventory";
-import { toast } from "./ux/Toaster";
+import { toast } from "./ux/toasterWriter";
 import { isUndefined } from "./fun/isUndefined";
 import { removeCssRestrictors } from "./fun/detect.js";
 
@@ -73,7 +73,7 @@ async function upgradeFromCurrentVersion() {
     case "1.0.3":
       await upgradeFrom103To105();
       toast(
-        `upgraded to ${currentVersion}`
+        `upgraded from ${currentVersion} to ${VERSION}`
       );
       break;
     case "1.0.4":

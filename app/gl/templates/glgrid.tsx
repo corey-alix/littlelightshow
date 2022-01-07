@@ -26,7 +26,7 @@ import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
 import {
   reportError,
   toast,
-} from "../../ux/Toaster.js";
+} from "../../ux/toasterWriter";
 import { gotoUrl } from "../../fun/gotoUrl.js";
 import { globals } from "../../globals.js";
 

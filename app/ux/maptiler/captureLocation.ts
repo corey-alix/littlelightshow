@@ -1,5 +1,5 @@
 import { locationModel } from "../../services/location.js";
-import { reportError } from "../Toaster.js";
+import { reportError } from "../toasterWriter";
 import type { Location } from "../../dts/location";
 
 export async function captureLocation(

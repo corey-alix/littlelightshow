@@ -5579,7 +5579,7 @@ async function upgradeFromCurrentVersion() {
   switch (currentVersion) {
     case "1.0.3":
       await upgradeFrom103To105();
-      toast(`upgraded to ${currentVersion}`);
+      toast(`upgraded from ${currentVersion} to ${VERSION}`);
       break;
     case "1.0.4":
       break;
