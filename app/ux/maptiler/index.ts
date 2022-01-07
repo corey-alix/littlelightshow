@@ -1,9 +1,6 @@
-declare var mapboxgl: any;
+import type { Location } from "../../dts/location";
 
-interface Location {
-  lon: number;
-  lat: number;
-}
+declare var mapboxgl: any;
 
 interface FeatureCollection {
   type: "FeatureCollection";
@@ -36,7 +33,6 @@ interface Geometry {
 }
 
 import { globals } from "../../globals.js";
-import { locationModel } from "../../services/location.js";
 
 const MAPTILERKEY = globals.MAPTILERKEY;
 
@@ -52,7 +48,10 @@ const maptilerEndpoints = {
 
 import { on } from "../../fun/on.js";
 import { init as systemInit } from "../../index.js";
-import { reportError } from "../Toaster.js";
+import {
+  getCurrentLocation,
+  captureLocation,
+} from "./captureLocation";
 
 export async function run() {
   await systemInit();
@@ -114,6 +113,7 @@ export async function run() {
       )
     );
     marker.togglePopup();
+    captureLocation({ lat, lon });
   });
 }
 
@@ -128,27 +128,6 @@ async function reverseGeocode(
   const data =
     (await response.json()) as FeatureCollection;
   return data;
-}
-
-async function getCurrentLocation() {
-  return new Promise<Location>(
-    (good, bad) => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          // good
-          const lat =
-            position.coords.latitude;
-          const lon =
-            position.coords.longitude;
-          good({ lon, lat });
-        },
-        (msg) => {
-          // bad
-          bad(msg);
-        }
-      );
-    }
-  );
 }
 
 function reportAddress(
@@ -167,17 +146,4 @@ function reportAddress(
   }
   return location.features[0]
     .place_name;
-}
-function captureLocation(
-  whereAmI: Location
-) {
-  locationModel
-    .upsertItem({
-      date: new Date().valueOf(),
-      lat: whereAmI.lat,
-      lon: whereAmI.lon,
-    })
-    .catch((ex) => {
-      reportError(ex);
-    });
 }
