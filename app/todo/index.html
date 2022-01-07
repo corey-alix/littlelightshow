@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <title>
+      Little Light Show Todo
+    </title>
+    <link
+      media="screen"
+      rel="stylesheet"
+      href="/app/baseline.css"
+    />
+    <link
+      media="print"
+      rel="stylesheet"
+      href="/app/print.css"
+    />
+  </head>
+  <body class="body todo">
+    <form
+      class="grid-6 border rounded padding no-print"
+    >
+      <div
+        class="section-title rounded col-1-last"
+      >
+        TODO
+      </div>
+      <div
+        class="form-label col-1-last line"
+      >
+        Date
+      </div>
+      <input
+        class="date col-1-last"
+        name="todo-date"
+        type="date"
+        data-bind="todo-date"
+      />
+      <div
+        class="form-label col-1-last line"
+        >Comment</div><textarea
+          class="comments height-25 col-1-last"
+          name="todo-comment"
+          data-bind="todo-comment"
+        ></textarea>
+      </label>
+      <button
+        class="button col-1"
+        data-event="submit"
+        type="button"
+      >
+        Save
+      </button>
+      <button
+        class="button col-b"
+        data-event="reset"
+        type="button"
+      >
+        New
+      </button>
+      <button
+        class="button col-a"
+        data-event="delete"
+        type="button"
+      >
+        Delete
+      </button>
+    </form>
+    <div class="vspacer-2"></div>
+    <div class="section-title rounded sticky-top">
+      Your TODO Items
+    </div>
+    <div
+      class="placeholder todo-items"
+    ></div>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/dayjs.min.js"
+      integrity="sha512-bwD3VD/j6ypSSnyjuaURidZksoVx3L1RPvTkleC48SbHCZsemT3VKMD39KknPnH728LLXVMTisESIBOAb5/W0Q=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.7/plugin/relativeTime.min.js"
+      integrity="sha512-7YYTlJ8OTdmDMztOy8q+zfRI/+y/IWnVp1oS4kiTKa+X2P09k/ObWUemEjtMoumu8v4A0s1NZu7WjfR+UxhRCQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script type="module">
+      dayjs.extend(
+        dayjs_plugin_relativeTime
+      );
+      console.log(
+        dayjs("1999-01-01").fromNow()
+      );
+      import { init } from "/bin/todo.js";
+      init(
+        document.querySelector(".todo")
+      );
+    </script>
+  </body>
+</html>

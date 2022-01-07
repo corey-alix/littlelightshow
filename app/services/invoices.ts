@@ -1,78 +1,131 @@
-import { query as q } from "faunadb";
-import { createClient, CURRENT_USER } from "../globals.js";
+import { asCurrency } from "../fun/asCurrency";
+import { globals } from "../globals.js";
+const { TAXRATE } = globals;
+import { StorageModel } from "./StorageModel";
 
 const INVOICE_TABLE = "invoices";
 
 export interface InvoiceItem {
   item: string;
+  description?: string;
   quantity: number;
   price: number;
   total: number;
+  tax: number;
 }
 
 export interface Invoice {
-  labor: number;
-  additional: number;
-  id: string;
+  id?: string;
   clientname: string;
   billto: string;
   telephone?: string;
   email?: string;
+  date: number;
   comments?: string;
+  // TODO: labor + additional should become mobs (method of billing)
+  labor: number;
+  // TODO: labor + additional should become mobs (method of billing)
+  additional: number;
   items: Array<InvoiceItem>;
+  mops: Array<{
+    mop: string;
+    paid: number;
+  }>;
+  taxrate: number;
 }
 
-export async function save(invoice: Invoice) {
-  if (!CURRENT_USER) throw "user must be signed in";
+export const invoiceModel =
+  new StorageModel<Invoice>({
+    tableName: INVOICE_TABLE,
+    offline: false,
+  });
 
-  const client = createClient();
-
-  if (!invoice.id) {
-    const result = (await client.query(
-      q.Create(q.Collection(INVOICE_TABLE), {
-        data: { ...invoice, user: CURRENT_USER, create_date: Date.now() },
-      })
-    )) as { data: any; ref: any };
-    invoice.id = result.ref.id;
-  } else {
-    const result = await client.query(
-      q.Update(q.Ref(q.Collection(INVOICE_TABLE), invoice.id), {
-        data: { ...invoice, user: CURRENT_USER, update_date: Date.now() },
-      })
-    );
-  }
+export async function removeItem(
+  id: string
+) {
+  return invoiceModel.removeItem(id);
 }
 
-export async function invoices() {
-  if (!CURRENT_USER) throw "user must be signed in";
+export async function getItem(
+  id: string
+) {
+  return invoiceModel.getItem(id);
+}
 
-  const client = createClient();
+export async function upsertItem(
+  data: Invoice
+) {
+  return invoiceModel.upsertItem(data);
+}
 
-  const result: any = await client.query(
-    q.Map(
-      q.Paginate(q.Documents(q.Collection(INVOICE_TABLE)), { size: 100 }),
-      q.Lambda("ref", q.Get(q.Var("ref")))
-    )
+export async function getItems() {
+  const invoices =
+    await invoiceModel.getItems();
+
+  let normalizedInvoices = invoices.map(
+    normalizeInvoice
   );
 
-  const invoices = result.data as Array<{ data: Invoice }>;
-  invoices.reverse();
-  // copy ref into invoice id
-  invoices.forEach((invoice: any) => {
-    invoice.data.id = invoice.ref.value.id;
-  });
-  return invoices
-    .filter((invoice) => invoice.data.items)
-    .map((invoice) => invoice.data)
+  const response = normalizedInvoices
+    .filter((invoice) => invoice.items)
     .map((invoice) => {
-      invoice.labor = (invoice.labor || 0) - 0;
-      invoice.additional = (invoice.additional || 0) - 0;
+      invoice.date =
+        invoice.date ||
+        (invoice as any).create_date;
+      invoice.labor =
+        (invoice.labor || 0) - 0;
+      invoice.additional =
+        (invoice.additional || 0) - 0;
       invoice.items.forEach((item) => {
-        item.item = (item.item || "").toLocaleUpperCase();
-        item.quantity = (item.quantity || 0) - 0;
-        item.price = (item.price || 0) - 0;
-        item.total = (item.total || 0) - 0;
+        item.item = (
+          item.item || ""
+        ).toLocaleUpperCase();
+        item.quantity =
+          (item.quantity || 0) - 0;
+        item.price =
+          (item.price || 0) - 0;
+        item.total =
+          (item.total || 0) - 0;
       });
       return invoice;
+    })
+    .sortBy({ date: "date" })
+    .reverse();
+
+  return response;
+}
+
+function normalizeInvoice(
+  invoice: Invoice
+) {
+  let raw = invoice as any;
+  if (raw.data) {
+    raw.data.id = invoice.id;
+    raw.data.mops = invoice.mops || [];
+    invoice = raw = raw.data;
+  }
+  invoice.mops = invoice.mops || [];
+  invoice.items = invoice.items || [];
+
+  if (raw["paid"] && raw["mop"]) {
+    invoice.mops.push({
+      mop: raw["mop"],
+      paid: raw["paid"],
     });
+    delete raw["paid"];
+    delete raw["mop"];
+  }
+
+  if (!invoice.taxrate && TAXRATE) {
+    invoice.taxrate = TAXRATE;
+    invoice.items.forEach(
+      (i) =>
+        (i.tax = parseFloat(
+          asCurrency(
+            i.total * invoice.taxrate
+          )
+        ))
+    );
+  }
+  return raw as Invoice;
 }

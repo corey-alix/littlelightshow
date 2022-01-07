@@ -12,28 +12,54 @@
       type="text/javascript"
       src="https://identity.netlify.com/v1/netlify-identity-widget.js"
     ></script>
-    <link rel="stylesheet" href="./baseline.css" />
+    <link
+      rel="stylesheet"
+      href="./baseline.css"
+    />
   </head>
-  <body class="holiday">
-    <div data-netlify-identity-menu></div>
+  <body>
+    <div
+      data-netlify-identity-menu
+    ></div>
 
     <script type="module">
       (function () {
-        const query = new URLSearchParams(location.search);
+        const query =
+          new URLSearchParams(
+            location.search
+          );
         if (query.has("context")) {
-          if (query.get("context") === "dev") {
-            localStorage.setItem("user", "mock@email.com");
-            location.href = query.get("target");
+          if (
+            query.get("context") ===
+            "dev"
+          ) {
+            localStorage.setItem(
+              "user",
+              "mock@email.com"
+            );
+            location.href =
+              query.get("target");
             return;
           }
         }
-        netlifyIdentity.on("login", (user) => {
-          if (user.app_metadata.provider === "google") {
-            const userName = user.email;
-            localStorage.setItem("user", userName);
-            location.href = query.get("target");
+        netlifyIdentity.on(
+          "login",
+          (user) => {
+            if (
+              user.app_metadata
+                .provider === "google"
+            ) {
+              const userName =
+                user.email;
+              localStorage.setItem(
+                "user",
+                userName
+              );
+              location.href =
+                query.get("target");
+            }
           }
-        });
+        );
       })();
     </script>
   </body>

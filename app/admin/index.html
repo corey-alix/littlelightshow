@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <title>Administration</title>
+    <link
+      rel="stylesheet"
+      href="/app/baseline.css"
+    />
+  </head>
+  <body class="body flex textier">
+    <div
+      class="border padding rounded flex width-100"
+    >
+      <div
+        class="section-title rounded"
+      >
+        UX Themes
+      </div>
+      <button
+        class="button"
+        data-event="holiday_mode"
+      >
+        Holiday Mode
+      </button>
+
+      <button
+        class="button"
+        data-event="dark_mode"
+      >
+        Dark Mode
+      </button>
+
+      <button
+        class="button"
+        data-event="light_mode"
+      >
+        Light Mode
+      </button>
+      <label
+        >Larger Font
+        <input
+          type="checkbox"
+          data-event="font_mode"
+          data-bind="larger-font"
+      /></label>
+    </div>
+
+    <div
+      class="border padding rounded flex width-100"
+    >
+      <div
+        class="section-title rounded"
+      >
+        Inventory Utilities
+      </div>
+      <button
+        class="button"
+        data-event="clean-inventory-data"
+      >
+        Remove Duplicate Inventory Items
+      </button>
+      <button
+        class="button"
+        data-event="synchronize-inventory-data"
+      >
+        Synchronize Inventory Data
+      </button>
+      <div
+        class="section-title rounded"
+      >
+        Invoice Utilities
+      </div>
+      <button
+        class="button"
+        data-event="invoice-to-gl"
+      >
+        Invoices -> General Ledger
+      </button>
+      <button
+        class="button"
+        data-event="synchronize-invoice-data"
+      >
+        Synchronize Invoices
+      </button>
+      <button
+        class="button"
+        data-event="clean-invoice-data"
+      >
+        Clean Invoices
+      </button>
+      <label
+        class="border padding rounded"
+        >Tax Rate<br />
+        <input
+          type="number"
+          class="c4 rounded currency"
+          placeholder="Tax Rate (in %)"
+          data-bind="TAX_RATE"
+        />%</label
+      >
+    </div>
+
+    <div
+      class="border padding rounded flex width-100"
+    >
+      <div
+        class="section-title rounded"
+      >
+        General Ledger Utilities
+      </div>
+
+      <button
+        class="button"
+        data-event="gl-to-list-of-accounts"
+      >
+        General Ledger Accounts -> List
+        of Accounts
+      </button>
+      <button
+        class="button"
+        data-event="synchronize-ledger-data"
+      >
+        Synchronize General Ledger
+      </button>
+    </div>
+
+    <div
+      class="border padding rounded flex width-100"
+    >
+      <div
+        class="section-title rounded"
+      >
+        Diagnostics
+      </div>
+
+      <button
+        class="button"
+        data-event="database-rebuild-index"
+      >
+        Create Indexes
+      </button>
+
+      <button
+        class="button"
+        data-event="database-rebuild-collection"
+      >
+        Create Tables
+      </button>
+
+      <button
+        class="button"
+        data-event="ping-local-storage"
+      >
+        Ping local storage
+      </button>
+
+      <button
+        class="button"
+        data-event="set-fauna-api-key"
+      >
+        Set Fauna API key
+      </button>
+
+      <button
+        class="button"
+        data-event="set-maptiler-api-key"
+      >
+        Set MapTiler API Key
+      </button>
+
+      <label
+        class="border padding rounded"
+        >Max Cache Age (seconds)<br />
+        <input
+          type="number"
+          class="c4 rounded quantity"
+          placeholder="cache age"
+          data-bind="CACHE_MAX_AGE"
+      /></label>
+
+      <label
+        class="border padding rounded"
+        >Max record count per request<br />
+        <input
+          type="number"
+          class="c4 rounded quantity"
+          placeholder="batch size"
+          data-bind="BATCH_SIZE"
+      /></label>
+
+      <br />
+      <label
+        class="border padding rounded"
+        >Work Offline
+        <input
+          type="checkbox"
+          data-bind="work_offline"
+      /></label>
+
+      <div class="vspacer-2"></div>
+    </div>
+
+    <script type="module">
+      import { init } from "/bin/admin.js";
+      init();
+    </script>
+  </body>
+</html>

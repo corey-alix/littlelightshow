@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
     <title>Playground</title>
     <style>
       body {
@@ -9,50 +14,13 @@
       }
     </style>
   </head>
-  <body>
+  <body class="body">
     <h1>Playground</h1>
-    <input type="text" placeholder="faunadb key" id="faunadb" />
     <button id="run">Run</button>
     <div id="datadump"></div>
     <script type="module">
-      import { query } from "../app/services/portfolio.js";
-      import { createDatabase } from "../bin/test.js";
-      createDatabase();
-
-      const runButton = document.querySelector("#run");
-      const keyInput = document.querySelector("#faunadb");
-      const outputArea = document.querySelector("#datadump");
-
-      keyInput.value = localStorage.getItem("FAUNADB_SERVER_SECRET");
-
-      function renderItem(data) {
-        const fieldNames = Object.keys(data);
-        const container = document.createElement("div");
-        const labels = fieldNames.map((fieldName) => {
-          const label = document.createElement("label");
-          label.innerText = fieldName;
-          const input = document.createElement("input");
-          input.value = data[fieldName];
-          label.appendChild(input);
-          container.appendChild(label);
-        });
-        return container;
-      }
-
-      async function test(key) {
-        const response = await query(key);
-        console.log({ response });
-        response.data.forEach((item) => {
-          console.log(item.data);
-          outputArea.appendChild(renderItem(item.data));
-        });
-      }
-
-      runButton.addEventListener("click", () => {
-        const key = keyInput.value;
-        test(key);
-        localStorage.setItem("dbkey", key);
-      });
+      import { init } from "../bin/test.js";
+      init();
     </script>
   </body>
 </html>

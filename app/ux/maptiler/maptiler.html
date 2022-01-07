@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <script src="https://cdn.maptiler.com/mapbox-gl-js/v1.13.2/mapbox-gl.js"></script>
+    <link
+      href="https://cdn.maptiler.com/mapbox-gl-js/v1.13.2/mapbox-gl.css"
+      rel="stylesheet"
+    />
+    <link
+      media="screen"
+      href="/app/baseline.css"
+      rel="stylesheet"
+    />
+    <style>
+      #map {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+    </style>
+  </head>
+  <body class="body">
+    <div id="map"></div>
+    <button
+      type="button"
+      class="button absolute rounded"
+      data-event="nav-back"
+    >
+      Back
+    </button>
+    <script type="module">
+      import { run } from "/bin/maptiler.js";
+      await run();
+    </script>
+  </body>
+</html>

@@ -19,6 +19,19 @@ var __reExport = (target, module, desc) => {
 var __toModule = (module) => {
   return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
 };
+var __accessCheck = (obj, member, msg) => {
+  if (!member.has(obj))
+    throw TypeError("Cannot " + msg);
+};
+var __privateGet = (obj, member, getter) => {
+  __accessCheck(obj, member, "read from private field");
+  return getter ? getter.call(obj) : member.get(obj);
+};
+var __privateAdd = (obj, member, value) => {
+  if (member.has(obj))
+    throw TypeError("Cannot add the same private member more than once");
+  member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+};
 
 // node_modules/fn-annotate/index.js
 var require_fn_annotate = __commonJS({
@@ -594,9 +607,9 @@ var require_browser_ponyfill = __commonJS({
           exports2.DOMException.prototype = Object.create(Error.prototype);
           exports2.DOMException.prototype.constructor = exports2.DOMException;
         }
-        function fetch(input, init2) {
+        function fetch(input, init3) {
           return new Promise(function(resolve, reject) {
-            var request = new Request(input, init2);
+            var request = new Request(input, init3);
             if (request.signal && request.signal.aborted) {
               return reject(new exports2.DOMException("Aborted", "AbortError"));
             }
@@ -936,12 +949,12 @@ var require_util = __commonJS({
     function checkInstanceHasProperty(obj, prop) {
       return typeof obj === "object" && obj !== null && Boolean(obj[prop]);
     }
-    function formatUrl(base, path, query2) {
-      query2 = typeof query2 === "object" ? querystringify(query2) : query2;
+    function formatUrl(base, path, query) {
+      query = typeof query === "object" ? querystringify(query) : query;
       return [
         base,
         path ? path.charAt(0) === "/" ? "" : "/" + path : "",
-        query2 ? query2.charAt(0) === "?" ? "" : "?" + query2 : ""
+        query ? query.charAt(0) === "?" ? "" : "?" + query : ""
       ].join("");
     }
     function querystringify(obj, prefix) {
@@ -3081,7 +3094,7 @@ var require_json = __commonJS({
 var require_PageHelper = __commonJS({
   "node_modules/faunadb/src/PageHelper.js"(exports, module) {
     "use strict";
-    var query2 = require_query();
+    var query = require_query();
     var objectAssign = require_object_assign();
     function PageHelper(client, set, params, options) {
       if (params === void 0) {
@@ -3111,15 +3124,15 @@ var require_PageHelper = __commonJS({
     }
     PageHelper.prototype.map = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q3) {
-        return query2.Map(q3, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query.Map(q4, lambda);
       });
       return rv;
     };
     PageHelper.prototype.filter = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q3) {
-        return query2.Filter(q3, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query.Filter(q4, lambda);
       });
       return rv;
     };
@@ -3188,13 +3201,13 @@ var require_PageHelper = __commonJS({
           cursorOpts.before = null;
         }
       }
-      var q3 = query2.Paginate(this.set, opts);
+      var q4 = query.Paginate(this.set, opts);
       if (this._faunaFunctions.length > 0) {
         this._faunaFunctions.forEach(function(lambda) {
-          q3 = lambda(q3);
+          q4 = lambda(q4);
         });
       }
-      return this.client.query(q3, this.options);
+      return this.client.query(q4, this.options);
     };
     PageHelper.prototype._clone = function() {
       return Object.create(PageHelper.prototype, {
@@ -3214,10 +3227,10 @@ var require_PageHelper = __commonJS({
 var require_RequestResult = __commonJS({
   "node_modules/faunadb/src/RequestResult.js"(exports, module) {
     "use strict";
-    function RequestResult(method, path, query2, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
+    function RequestResult(method, path, query, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
       this.method = method;
       this.path = path;
-      this.query = query2;
+      this.query = query;
       this.requestRaw = requestRaw;
       this.requestContent = requestContent;
       this.responseRaw = responseRaw;
@@ -4329,7 +4342,7 @@ var require_stream = __commonJS({
     var errors = require_errors();
     var json = require_json();
     var http = require_http3();
-    var q3 = require_query();
+    var q4 = require_query();
     var util = require_util();
     var DefaultEvents = ["start", "error", "version", "history_rewrite"];
     var DocumentStreamEvents = DefaultEvents.concat(["snapshot"]);
@@ -4339,14 +4352,14 @@ var require_stream = __commonJS({
       });
       this._client = client;
       this._onEvent = onEvent;
-      this._query = q3.wrap(expression);
+      this._query = q4.wrap(expression);
       this._urlParams = options.fields ? { fields: options.fields.join(",") } : null;
       this._abort = new AbortController();
       this._state = "idle";
     }
     StreamClient.prototype.snapshot = function() {
       var self2 = this;
-      self2._client.query(q3.Get(self2._query)).then(function(doc) {
+      self2._client.query(q4.Get(self2._query)).then(function(doc) {
         self2._onEvent({
           type: "snapshot",
           event: doc
@@ -4521,7 +4534,7 @@ var require_Client = __commonJS({
     var errors = require_errors();
     var http = require_http3();
     var json = require_json();
-    var query2 = require_query();
+    var query = require_query();
     var stream = require_stream();
     var util = require_util();
     var values = require_values();
@@ -4552,7 +4565,7 @@ var require_Client = __commonJS({
     }
     Client.apiVersion = packageJson.apiVersion;
     Client.prototype.query = function(expression, options) {
-      return this._execute("POST", "", query2.wrap(expression), null, options);
+      return this._execute("POST", "", query.wrap(expression), null, options);
     };
     Client.prototype.paginate = function(expression, params, options) {
       params = util.defaults(params, {});
@@ -4571,26 +4584,26 @@ var require_Client = __commonJS({
     Client.prototype.close = function(opts) {
       return this._http.close(opts);
     };
-    Client.prototype._execute = function(method, path, data, query3, options) {
-      query3 = util.defaults(query3, null);
+    Client.prototype._execute = function(method, path, data, query2, options) {
+      query2 = util.defaults(query2, null);
       if (path instanceof values.Ref || util.checkInstanceHasProperty(path, "_isFaunaRef")) {
         path = path.value;
       }
-      if (query3 !== null) {
-        query3 = util.removeUndefinedValues(query3);
+      if (query2 !== null) {
+        query2 = util.removeUndefinedValues(query2);
       }
       var startTime = Date.now();
       var self2 = this;
       var body = ["GET", "HEAD"].indexOf(method) >= 0 ? void 0 : JSON.stringify(data);
       return this._http.execute(Object.assign({}, options, {
         path,
-        query: query3,
+        query: query2,
         method,
         body
       })).then(function(response) {
         var endTime = Date.now();
         var responseObject = json.parseJSON(response.body);
-        var result = new RequestResult(method, path, query3, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
+        var result = new RequestResult(method, path, query2, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
         self2._handleRequestResult(response, result, options);
         return responseObject["resource"];
       });
@@ -4635,18 +4648,18 @@ var require_clientLogger = __commonJS({
       };
     }
     function showRequestResult(requestResult) {
-      var query2 = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
+      var query = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
       var out = "";
-      function log(str) {
+      function log2(str) {
         out = out + str;
       }
-      log("Fauna " + method + " /" + path + _queryString(query2) + "\n");
+      log2("Fauna " + method + " /" + path + _queryString(query) + "\n");
       if (requestContent != null) {
-        log("  Request JSON: " + _showJSON(requestContent) + "\n");
+        log2("  Request JSON: " + _showJSON(requestContent) + "\n");
       }
-      log("  Response headers: " + _showJSON(responseHeaders) + "\n");
-      log("  Response JSON: " + _showJSON(responseContent) + "\n");
-      log("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
+      log2("  Response headers: " + _showJSON(responseHeaders) + "\n");
+      log2("  Response JSON: " + _showJSON(responseContent) + "\n");
+      log2("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
       return out;
     }
     function _indent(str) {
@@ -4656,16 +4669,16 @@ var require_clientLogger = __commonJS({
     function _showJSON(object) {
       return _indent(json.toJSON(object, true));
     }
-    function _queryString(query2) {
-      if (query2 == null) {
+    function _queryString(query) {
+      if (query == null) {
         return "";
       }
-      var keys = Object.keys(query2);
+      var keys = Object.keys(query);
       if (keys.length === 0) {
         return "";
       }
       var pairs = keys.map(function(key) {
-        return key + "=" + query2[key];
+        return key + "=" + query[key];
       });
       return "?" + pairs.join("&");
     }
@@ -4679,7 +4692,7 @@ var require_clientLogger = __commonJS({
 // node_modules/faunadb/index.js
 var require_faunadb = __commonJS({
   "node_modules/faunadb/index.js"(exports, module) {
-    var query2 = require_query();
+    var query = require_query();
     var util = require_util();
     var parseJSON = require_json().parseJSON;
     module.exports = util.mergeObjects({
@@ -4690,11 +4703,34 @@ var require_faunadb = __commonJS({
       clientLogger: require_clientLogger(),
       errors: require_errors(),
       values: require_values(),
-      query: query2,
+      query,
       parseJSON
-    }, query2);
+    }, query);
   }
 });
+
+// app/fun/sort.ts
+var sortOps = {
+  number: (a, b) => (a || 0) - (b || 0),
+  "-number": (a, b) => -((a || 0) - (b || 0)),
+  gl: (a, b) => a >= 0 ? a - b : b - a,
+  "abs(number)": (a, b) => Math.abs(a || 0) - Math.abs(b || 0),
+  "-abs(number)": (a, b) => -(Math.abs(a || 0) - Math.abs(b || 0)),
+  string: (a, b) => (a || "").localeCompare(b || ""),
+  date: (a, b) => (a || 0).valueOf() - (b || 0).valueOf(),
+  noop: () => 0
+};
+Array.prototype.sortBy = function(sortBy) {
+  return sort(this, sortBy);
+};
+function sort(items, sortBy) {
+  const keys = Object.keys(sortBy);
+  return [...items].sort((a, b) => {
+    let result = 0;
+    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
+    return result;
+  });
+}
 
 // app/dom.ts
 function asStyle(o) {
@@ -4770,68 +4806,830 @@ function dom(tag, args, ...children) {
   }
 }
 
-// app/services/gl.ts
-var import_faunadb2 = __toModule(require_faunadb());
+// app/fun/dom.ts
+function moveChildren(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
+}
+function moveChildrenBefore(items, report) {
+  while (items.firstChild)
+    report.before(items.firstChild);
+}
+
+// app/fun/globalState.ts
+var globalState;
+function forceGlobalState() {
+  return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
+}
+function setGlobalState(key, value) {
+  const state = forceGlobalState();
+  const [head, ...tail] = key.split(".");
+  if (!tail.length) {
+    state[key] = value;
+  } else {
+    let o = state[head] = state[head] || {};
+    tail.forEach((k) => o[k] = o[k] || {});
+    o[tail[tail.length - 1]] = value;
+  }
+  localStorage.setItem("__GLOBAL_STATE__", JSON.stringify(state));
+}
+function getGlobalState(key) {
+  const state = forceGlobalState();
+  const [head, ...tail] = key.split(".");
+  if (!tail.length)
+    return state[head];
+  let value = state[head];
+  if (!!value && typeof value !== "object")
+    throw `key does not define an object: ${head}`;
+  tail.every((k) => typeof value === "object" && (value = value[k]) && true);
+  return value;
+}
+
+// app/fun/ticksInSeconds.ts
+function ticksInSeconds(ticks) {
+  return ticks / 1e3;
+}
+
+// app/services/ServiceCache.ts
+var MAX_AGE = getGlobalState("CACHE_MAX_AGE") || 0;
+var ServiceCache = class {
+  constructor(options) {
+    this.options = options;
+    options.maxAge = Math.max(options.maxAge || MAX_AGE, MAX_AGE);
+    this.table = options.table;
+    const raw = localStorage.getItem(`table_${this.table}`);
+    if (!raw) {
+      this.data = [];
+      this.lastWrite = 0;
+    } else {
+      const info = JSON.parse(raw);
+      this.lastWrite = info.lastWrite;
+      this.data = info.data;
+    }
+  }
+  lastWriteTime() {
+    return this.lastWrite;
+  }
+  renew() {
+    this.lastWrite = Date.now();
+    this.save();
+  }
+  save() {
+    localStorage.setItem(`table_${this.table}`, JSON.stringify({
+      lastWrite: this.lastWrite,
+      data: this.data
+    }));
+  }
+  deleteLineItem(id) {
+    const index = this.data.findIndex((i) => i.id === id);
+    if (-1 < index)
+      this.data.splice(index, 1);
+    this.save();
+  }
+  updateLineItem(lineItem) {
+    const index = this.data.findIndex((i) => i.id === lineItem.id);
+    if (-1 < index) {
+      this.data[index] = lineItem;
+    } else {
+      this.data.push(lineItem);
+    }
+    this.save();
+  }
+  expired() {
+    const age = ticksInSeconds(Date.now() - this.lastWrite);
+    return this.options.maxAge < age;
+  }
+  getById(id) {
+    return this.data.find((item) => item.id === id);
+  }
+  get() {
+    return this.data;
+  }
+};
+
+// app/services/StorageModel.ts
+var import_faunadb4 = __toModule(require_faunadb());
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var accessKeys = {
-  FAUNADB_SERVER_SECRET: "",
-  FAUNADB_ADMIN_SECRET: "",
-  FAUNADB_DOMAIN: "db.us.fauna.com"
-};
-if (globalThis.process?.env) {
-  accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
-  accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
-} else if (localStorage) {
-  accessKeys.FAUNADB_SERVER_SECRET = localStorage.getItem("FAUNADB_SERVER_SECRET");
-  accessKeys.FAUNADB_ADMIN_SECRET = localStorage.getItem("FAUNADB_ADMIN_SECRET");
-  if (!accessKeys.FAUNADB_SERVER_SECRET) {
-    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
-    accessKeys.FAUNADB_SERVER_SECRET = secret;
-    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+var _accessKeys;
+var GlobalModel = class {
+  constructor() {
+    __privateAdd(this, _accessKeys, {
+      FAUNADB_SERVER_SECRET: localStorage.getItem("FAUNADB_SERVER_SECRET"),
+      FAUNADB_DOMAIN: "db.us.fauna.com",
+      MAPTILERKEY: localStorage.getItem("MAPTILER_SERVER_SECRET")
+    });
+    this.MAPTILERKEY = __privateGet(this, _accessKeys).MAPTILERKEY;
+    this.CURRENT_USER = localStorage.getItem("user");
+    this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
+    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 1e3;
+    this.primaryContact = getGlobalState("primaryContact") || {
+      companyName: "Little Light Show",
+      fullName: "Nathan Alix",
+      addressLine1: "4 Andrea Lane",
+      addressLine2: "Greenville, SC 29615",
+      telephone: ""
+    };
+    if (!__privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET) {
+      const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
+      __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET = secret;
+      localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+    }
   }
-  if (!accessKeys.FAUNADB_SERVER_SECRET)
-    console.error("set FAUNADB_SERVER_SECRET in local storage");
-  if (!accessKeys.FAUNADB_ADMIN_SECRET)
-    console.error("set FAUNADB_ADMIN_SECRET in local storage");
-}
+  createClient() {
+    return new import_faunadb.default.Client({
+      secret: __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET,
+      domain: __privateGet(this, _accessKeys).FAUNADB_DOMAIN
+    });
+  }
+};
+_accessKeys = new WeakMap();
+var globals = new GlobalModel();
+var createClient = () => globals.createClient();
+var isDebug = location.href.includes("localhost") || location.search.includes("debug");
+var isOffline = () => getGlobalState("work_offline") === true;
 function isNetlifyBuildContext() {
   return 0 <= location.href.indexOf("netlify");
 }
-var domain = accessKeys.FAUNADB_DOMAIN;
-var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
-var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
-var CURRENT_USER = localStorage.getItem("user");
-function createClient() {
-  return new import_faunadb.default.Client({ secret: FAUNADB_SERVER_SECRET, domain });
+
+// app/services/getDatabaseTime.ts
+var import_faunadb2 = __toModule(require_faunadb());
+async function getDatabaseTime() {
+  const client = createClient();
+  const response = await client.query(import_faunadb2.query.Now());
+  return new Date(response.value).valueOf();
+}
+
+// app/services/forceUpdatestampTable.ts
+var import_faunadb3 = __toModule(require_faunadb());
+async function forceUpdatestampTable(tableName) {
+  const client = createClient();
+  return await client.query(import_faunadb3.query.CreateCollection({
+    name: tableName
+  }));
+}
+async function forceUpdatestampIndex(tableName) {
+  const client = createClient();
+  const query = import_faunadb3.query.CreateIndex({
+    name: `${tableName}_updates`,
+    source: import_faunadb3.query.Collection(tableName),
+    values: [
+      {
+        field: ["data", "update_date"],
+        reverse: false
+      },
+      {
+        field: ["ref"]
+      }
+    ]
+  });
+  return await client.query(query);
+}
+
+// app/services/StorageModel.ts
+var { BATCH_SIZE, CURRENT_USER } = globals;
+var StorageModel = class {
+  constructor(options) {
+    this.options = options;
+    this.tableName = options.tableName;
+    this.cache = new ServiceCache({
+      table: options.tableName,
+      maxAge: options.maxAge
+    });
+  }
+  isOffline() {
+    return this.options.offline || isOffline();
+  }
+  async loadLatestData(args) {
+    const size = BATCH_SIZE;
+    const { upperBound, lowerBound } = args;
+    let after = null;
+    const client = createClient();
+    const result = [];
+    let maximum_query_count = 1;
+    while (maximum_query_count--) {
+      const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.LTE(lowerBound, import_faunadb4.query.Select([0], import_faunadb4.query.Var("item"))), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), after ? {
+        size,
+        after
+      } : { size }), import_faunadb4.query.Lambda("item", import_faunadb4.query.Get(import_faunadb4.query.Select([1], import_faunadb4.query.Var("item"))))));
+      const dataToImport = response.data.map((item) => ({
+        ...item.data,
+        id: item.ref.value.id
+      }));
+      result.push(...dataToImport);
+      dataToImport.forEach((item) => {
+        if (!item.id)
+          throw `item must have an id`;
+        const currentItem = this.cache.getById(item.id);
+        if (currentItem && this.isUpdated(currentItem)) {
+        }
+        if (!!item.delete_date) {
+          this.cache.deleteLineItem(item.id);
+        } else {
+          this.cache.updateLineItem(item);
+        }
+      });
+      this.cache.renew();
+      dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
+      after = response.after;
+      if (!after) {
+        setFutureSyncTime(this.tableName, upperBound);
+        break;
+      }
+    }
+    return result;
+  }
+  async synchronize() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.isOffline())
+      throw "cannot synchronize in offline mode";
+    const priorSyncTime = getPriorSyncTime(this.tableName);
+    const currentSyncTime = await getDatabaseTime();
+    const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
+    await retryOnInvalidRef(this.tableName, async () => {
+      await this.loadLatestData({
+        lowerBound: priorSyncTime,
+        upperBound: currentSyncTime
+      });
+    });
+    this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
+      if (!item.id)
+        throw "all items must have an id";
+      if (isOfflineId(item.id)) {
+        this.cache.deleteLineItem(item.id);
+      } else {
+        await this.removeItem(item.id);
+      }
+    });
+    dataToExport.forEach(async (item) => {
+      await this.upsertItem(item);
+    });
+    this.cache.renew();
+  }
+  async removeItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (isOfflineId(id)) {
+      this.cache.deleteLineItem(id);
+      return;
+    }
+    if (this.isOffline()) {
+      const item = this.cache.getById(id);
+      if (!item)
+        throw "cannot remove an item that is not already there";
+      item.delete_date = Date.now();
+      this.cache.updateLineItem(item);
+      return;
+    }
+    const client = createClient();
+    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), id), {
+      data: {
+        id,
+        user: CURRENT_USER,
+        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
+        delete_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+      }
+    }));
+    this.cache.deleteLineItem(id);
+  }
+  async getItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (!this.isOffline() && this.cache.expired()) {
+      await this.synchronize();
+    } else {
+      if (!!this.cache.getById(id)) {
+        this.cache.renew();
+      } else {
+        if (!this.isOffline())
+          await this.synchronize();
+      }
+    }
+    const result = this.cache.getById(id);
+    if (!result)
+      throw `unable to load item: ${this.tableName} ${id}`;
+    if (!!result.delete_date)
+      throw "item marked for deletion";
+    return result;
+  }
+  async upsertItem(data) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    const client = createClient();
+    data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
+    data.update_date = Date.now();
+    this.cache.updateLineItem(data);
+    if (this.isOffline()) {
+      return;
+    }
+    const offlineId = data.id && isOfflineId(data.id) ? data.id : "";
+    if (offlineId)
+      data.id = "";
+    if (!data.id) {
+      await retryOnInvalidRef(this.tableName, async () => {
+        const result = await client.query(import_faunadb4.query.Create(import_faunadb4.query.Collection(this.tableName), {
+          data: {
+            ...data,
+            user: CURRENT_USER,
+            create_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
+            update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+          }
+        }));
+        {
+          offlineId && this.cache.deleteLineItem(offlineId);
+          data.id = result.ref.value.id;
+          this.cache.updateLineItem(data);
+        }
+      });
+      return;
+    }
+    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), data.id), {
+      data: {
+        ...data,
+        user: CURRENT_USER,
+        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+      }
+    }));
+    this.cache.updateLineItem(data);
+  }
+  isUpdated(data) {
+    return (data.update_date || 0) > this.cache.lastWriteTime();
+  }
+  async getItems() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.cache.expired() && !this.isOffline()) {
+      await this.synchronize();
+    } else {
+      this.cache.renew();
+    }
+    return this.cache.get().filter((item) => !item.delete_date);
+  }
+};
+function isOfflineId(itemId) {
+  return !!itemId && "9" < itemId[0];
+}
+function getPriorSyncTime(tableName) {
+  return getGlobalState(`timeOfLastSynchronization_${tableName}`) || 0;
+}
+function setFutureSyncTime(tableName, syncTime) {
+  setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
+}
+async function retryOnInvalidRef(tableName, op) {
+  try {
+    await op();
+  } catch (ex) {
+    const error = ex;
+    if (error.message !== "invalid ref")
+      throw ex;
+    try {
+      await forceUpdatestampTable(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    try {
+      await forceUpdatestampIndex(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    await op();
+  }
 }
 
 // app/services/gl.ts
-var LEDGER_TABLE = "Todos";
-async function save(ledger) {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-  const client = createClient();
-  const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(LEDGER_TABLE), {
-    data: { ...ledger, user: CURRENT_USER, create_date: Date.now() }
+var LEDGER_TABLE = "general_ledger";
+var ledgerModel = new StorageModel({
+  tableName: LEDGER_TABLE,
+  offline: false
+});
+async function removeItem(id) {
+  return ledgerModel.removeItem(id);
+}
+async function getItem(id) {
+  return ledgerModel.getItem(id);
+}
+async function upsertItem(data) {
+  return ledgerModel.upsertItem(data);
+}
+async function getItems() {
+  const items = await ledgerModel.getItems();
+  return items.filter((ledger) => ledger.items && ledger.items[0] && ledger.items[0].account);
+}
+
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return (value || 0).toFixed(2);
+}
+
+// app/fun/asDateString.ts
+function asDateString(date = new Date()) {
+  return date.toISOString().split("T")[0];
+}
+function asTimeString(date = new Date()) {
+  return date.toISOString().split("T")[1].substring(0, 5);
+}
+
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
+// app/fun/asNumber.ts
+function asNumber(node) {
+  return node.valueAsNumber || 0;
+}
+
+// app/fun/setCurrency.ts
+function setCurrency(input, value) {
+  if (!input)
+    throw "no input found";
+  input.value = (value || 0).toFixed(2);
+}
+
+// app/router.ts
+var routes = {
+  home: () => "/index.html",
+  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
+  createInvoice: () => `/app/invoice/invoice.html`,
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
+  allInvoices: () => `/app/invoice/invoices.html`,
+  createInventory: () => `/app/inventory/index.html`,
+  inventory: (id) => `/app/inventory/index.html?id=${id}`,
+  allInventoryItems: () => `/app/inventory/index.html?id=all`,
+  allLedgers: () => `/app/gl/index.html?print=all`,
+  printLedger: (id) => `/app/gl/index.html?print=${id}`,
+  createLedger: () => "/app/gl/index.html",
+  editLedger: (id) => `/app/gl/index.html?id=${id}`,
+  dashboard: () => "/app/index.html",
+  admin: () => "/app/admin/index.html",
+  createTodo: () => "/app/todo/index.html",
+  todo: (id) => `/app/todo/index.html?id=${id}`,
+  maptiler: () => `/app/ux/maptiler/maptiler.html`,
+  gl: {
+    byAccount: (id) => `/app/gl/index.html?account=${id}`
+  }
+};
+
+// app/fun/on.ts
+function log(...message) {
+  if (!isDebug)
+    return;
+  console.log(...message);
+}
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  log("trigger", eventName);
+  domNode.dispatchEvent(new Event(eventName));
+}
+
+// app/fun/hookupTriggers.ts
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    const eventName = eventItem.dataset["event"];
+    if (!eventName)
+      throw "item must define a data-event";
+    const isInput = isInputElement(eventItem);
+    const inputType = getInputType(eventItem);
+    const isButton = isButtonElement(eventItem, isInput);
+    const isCheckbox = isCheckboxInput(eventItem);
+    if (isButton)
+      on(eventItem, "click", () => {
+        trigger(domNode, eventName);
+      });
+    else if (isCheckbox)
+      on(eventItem, "click", () => {
+        const checked = eventItem.checked;
+        trigger(domNode, eventName + (checked ? ":yes" : ":no"));
+      });
+    else if (isInput)
+      on(eventItem, "change", () => {
+        trigger(domNode, eventName);
+      });
+    else
+      throw `data-event not supported for this item: ${eventItem.outerHTML}`;
+  });
+  domNode.querySelectorAll("[data-bind]").forEach((eventItem) => {
+    const bindTo = eventItem.dataset["bind"];
+    if (!bindTo)
+      throw "item must define a data-bind";
+    const valueInfo = getGlobalState(bindTo);
+    if (isCheckboxInput(eventItem)) {
+      eventItem.checked = valueInfo === true;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, eventItem.checked);
+      });
+    } else if (isNumericInputElement(eventItem)) {
+      const item = eventItem;
+      item.valueAsNumber = valueInfo || 0;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.valueAsNumber);
+      });
+    } else if (isInputElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
+    } else if (isTextAreaElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
+    } else {
+      throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
+    }
+  });
+  domNode.querySelectorAll("[data-href]").forEach((eventItem) => {
+    const href = eventItem.dataset["href"];
+    if (!href)
+      throw "item must define a data-href";
+    const url = routes[href] && routes[href]() || href;
+    eventItem.addEventListener("click", () => {
+      location.href = url;
+    });
+  });
+}
+function isCheckboxInput(eventItem) {
+  return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
+}
+function isButtonElement(eventItem, isInput) {
+  return eventItem.tagName === "BUTTON" || isInput && getInputType(eventItem) === "button";
+}
+function getInputType(eventItem) {
+  return isInputElement(eventItem) && eventItem.type;
+}
+function isTextAreaElement(eventItem) {
+  return eventItem.tagName === "TEXTAREA";
+}
+function isInputElement(eventItem) {
+  return eventItem.tagName === "INPUT";
+}
+function isNumericInputElement(item) {
+  return isInputElement(item) && getInputType(item) === "number";
+}
+
+// app/fun/isZero.ts
+function isZero(value) {
+  if (value === "0.00")
+    return true;
+  if (value === "-0.00")
+    return true;
+  return false;
+}
+function noZero(value) {
+  return isZero(value) ? "" : value;
+}
+
+// app/gl/templates/printDetail.tsx
+function create(ledgers) {
+  ledgers = ledgers.sortBy({
+    date: "date",
+    id: "number"
+  }).reverse();
+  const report = /* @__PURE__ */ dom("div", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("div", {
+    class: "col-1-4 text"
+  }, "Account"), /* @__PURE__ */ dom("div", {
+    class: "col-5 currency"
+  }, "Debit"), /* @__PURE__ */ dom("div", {
+    class: "col-6-last currency"
+  }, "Credit"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-last"
   }));
+  const totals = {
+    debit: 0,
+    credit: 0
+  };
+  let priorDate = "";
+  ledgers.forEach((ledger) => {
+    ledger.items.sortBy({
+      account: "string",
+      amount: "gl"
+    }).forEach((item) => {
+      const amount = item.amount;
+      const debit = amount >= 0 && amount;
+      const credit = amount < 0 && -amount;
+      totals.debit += debit || 0;
+      totals.credit += credit || 0;
+      let currentDate = asDateString(new Date(ledger.date || item["date"]));
+      const lineitem = /* @__PURE__ */ dom("div", null, currentDate != priorDate && /* @__PURE__ */ dom("div", {
+        class: "col-1-last date section-title"
+      }, `${priorDate = currentDate}`), /* @__PURE__ */ dom("div", {
+        class: "col-1-4 text"
+      }, item.account), /* @__PURE__ */ dom("div", {
+        class: "col-5 currency"
+      }, debit && debit.toFixed(2)), /* @__PURE__ */ dom("div", {
+        class: "col-6-last currency"
+      }, credit && credit.toFixed(2)), /* @__PURE__ */ dom("div", {
+        class: "col-1-6 text"
+      }, /* @__PURE__ */ dom("a", {
+        href: `/app/gl/index.html?id=${ledger.id}`
+      }, item.comment || "no comment")), /* @__PURE__ */ dom("div", {
+        class: "vspacer-2"
+      }));
+      moveChildren(lineitem, report);
+    });
+  });
+  moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "line col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-5 currency"
+  }, totals.debit.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "col-6-last currency"
+  }, totals.credit.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "col-4-2 align-right"
+  }, !!noZero(asCurrency(totals.debit - totals.credit)) ? "Imbalance" : ""), /* @__PURE__ */ dom("div", {
+    class: "col-6-last currency"
+  }, noZero(asCurrency(totals.debit - totals.credit)))), report);
+  return report;
+}
+
+// app/gl/templates/printSummary.tsx
+function create2(ledgers) {
+  const totals = {};
+  ledgers.forEach((l) => {
+    l.items.sortBy({ account: "string" }).forEach((item) => {
+      totals[item.account] = totals[item.account] || { debit: 0, credit: 0 };
+      if (item.amount < 0) {
+        totals[item.account].credit -= item.amount;
+      } else {
+        totals[item.account].debit += item.amount;
+      }
+    });
+  });
+  const grandTotal = {
+    debit: 0,
+    credit: 0
+  };
+  const reportItems = Object.keys(totals).sort().map((account) => {
+    const total = totals[account];
+    grandTotal.debit += total.debit;
+    grandTotal.credit += total.credit;
+    return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+      class: "col-1-4"
+    }, /* @__PURE__ */ dom("a", {
+      href: routes.gl.byAccount(account)
+    }, account)), /* @__PURE__ */ dom("div", {
+      class: "currency col-5"
+    }, noZero(total.debit.toFixed(2))), /* @__PURE__ */ dom("div", {
+      class: "currency col-6"
+    }, noZero(total.credit.toFixed(2))), /* @__PURE__ */ dom("div", {
+      class: "currency col-7"
+    }, noZero((total.debit - total.credit).toFixed(2))));
+  });
+  const report = /* @__PURE__ */ dom("div", {
+    class: "grid-6 col-1-last"
+  }, /* @__PURE__ */ dom("div", {
+    class: "col-1-4 line"
+  }, "Account"), /* @__PURE__ */ dom("div", {
+    class: "col-5 line currency"
+  }, "Debit (+)"), /* @__PURE__ */ dom("div", {
+    class: "col-6 line currency"
+  }, "Credit (-)"), /* @__PURE__ */ dom("div", {
+    class: "col-7 line currency"
+  }, "Balance"));
+  reportItems.forEach((item) => moveChildren(item, report));
+  moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "col-1-last line"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-3"
+  }, "Totals"), /* @__PURE__ */ dom("div", {
+    class: "currency col-5"
+  }, grandTotal.debit.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "currency col-6"
+  }, grandTotal.credit.toFixed(2)), /* @__PURE__ */ dom("div", {
+    class: "currency col-7 bold"
+  }, (grandTotal.debit - grandTotal.credit).toFixed(2))), report);
+  return report;
+}
+
+// app/services/accounts.ts
+var ACCOUNT_TABLE = "accounts";
+var accountModel = new StorageModel({
+  tableName: ACCOUNT_TABLE,
+  maxAge: Number.MAX_SAFE_INTEGER,
+  offline: true
+});
+async function forceDatalist() {
+  let dataList = document.querySelector(`#listOfAccounts`);
+  if (dataList)
+    return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = "listOfAccounts";
+  const items = await accountModel.getItems();
+  items.sortBy({ code: "string" }).forEach((item) => {
+    const option = document.createElement("option");
+    option.value = item.code;
+    dataList.appendChild(option);
+  });
+  document.body.appendChild(dataList);
+  return dataList;
+}
+
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  });
+}
+
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
+}
+
+// app/ux/Toaster.ts
+var DEFAULT_DELAY = 5e3;
+var Toaster = class {
+  toast(options) {
+    let target = document.querySelector("#toaster");
+    if (!target) {
+      target = document.createElement("div");
+      target.id = "toaster";
+      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
+      document.body.appendChild(target);
+    }
+    const message = document.createElement("div");
+    message.classList.add(options.mode || "error", "padding", "margin");
+    message.innerHTML = options.message;
+    message.addEventListener("click", () => message.remove());
+    setTimeout(() => message.remove(), DEFAULT_DELAY);
+    target.insertBefore(message, null);
+  }
+};
+
+// app/services/log.ts
+var TABLE_NAME = "log";
+var LogModel = class extends StorageModel {
+};
+var logStore = new LogModel({
+  tableName: TABLE_NAME,
+  offline: false
+});
+
+// app/ux/toasterWriter.ts
+var toaster = new Toaster();
+function toast(message, options) {
+  if (!options)
+    options = { mode: "info" };
+  console.info(message, options);
+  toaster.toast({
+    message,
+    ...options
+  });
+}
+function reportError(message) {
+  toast(message + "", {
+    mode: "error"
+  });
+  logStore.upsertItem({ message }).catch((ex) => console.log(ex));
+}
+
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
 }
 
 // app/gl/templates/glgrid.tsx
 function asModel(form) {
-  const result = { items: [] };
+  const result = {
+    id: "",
+    items: [],
+    date: new Date().valueOf()
+  };
   const data = new FormData(form);
+  result.id = data.get("id") || "";
+  const batchDate = data.get("date");
+  result.date = new Date(batchDate).valueOf();
+  result.description = data.get("description") || "";
   let currentItem;
   for (let [key, value] of data.entries()) {
     switch (key) {
-      case "date":
+      case "account":
         currentItem = {};
         result.items.push(currentItem);
-        currentItem.date = new Date(value + "").valueOf();
-        break;
-      case "account":
         currentItem.account = value;
         break;
       case "debit":
@@ -4840,171 +5638,604 @@ function asModel(form) {
       case "credit":
         currentItem.amount = (currentItem.amount || 0) - parseFloat(value || "0");
         break;
+      case "comment":
+        currentItem.comment = value;
+        break;
     }
   }
+  result.items = result.items.filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment).sortBy({ account: "string" });
   return result;
 }
-function currentDay() {
-  const date = new Date();
-  return date.toISOString().split("T")[0];
-}
-function setCurrency(input, value) {
-  if (!input)
-    throw "no input found";
-  input.value = (value || 0).toFixed(2);
-}
-function sum(values) {
-  if (!values.length)
-    return 0;
-  return values.reduce((a, b) => a + b, 0);
-}
-function asNumber(node) {
-  return node.valueAsNumber || 0;
-}
-function hookupTriggers(domNode) {
-  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
-    eventItem.addEventListener("click", () => {
-      const eventName = eventItem.dataset["event"];
-      if (!eventName)
-        throw "item must define a data-event";
-      domNode.dispatchEvent(new Event(eventName));
-    });
-  });
-}
 function hookupHandlers(domNode) {
-  const tbody = domNode.querySelector("tbody");
-  const [totalCredits, totalDebits, totalError] = [
+  const lineItems = domNode.querySelector("#end-of-line-items");
+  const summaryArea = domNode.querySelector("#summary-area");
+  const [
+    totalCredits,
+    totalDebits,
+    totalError
+  ] = [
     "total_credit",
     "total_debit",
     "total_error"
   ].map((name) => domNode.querySelector(`[name=${name}]`));
-  domNode.addEventListener("change", () => {
-    const debits = Array.from(tbody.querySelectorAll("[name=debit]")).map(asNumber);
-    const credits = Array.from(tbody.querySelectorAll("[name=credit]")).map(asNumber);
+  on(domNode, "change", () => {
+    const debits = Array.from(domNode.querySelectorAll("[name=debit]")).map(asNumber);
+    const credits = Array.from(domNode.querySelectorAll("[name=credit]")).map(asNumber);
     const debitTotal = sum(debits);
     const creditTotal = sum(credits);
     setCurrency(totalDebits, debitTotal);
     setCurrency(totalCredits, creditTotal);
     setCurrency(totalError, debitTotal - creditTotal);
+    const ledger = asModel(domNode);
+    const summaryReport = create2([
+      ledger
+    ]);
+    summaryArea.innerText = "";
+    summaryArea.appendChild(summaryReport);
   });
-  domNode.addEventListener("submit", () => {
+  on(domNode, "print-all", async () => {
+    gotoUrl(routes.allLedgers());
+  });
+  on(domNode, "print", async () => {
     if (!domNode.reportValidity())
       return;
-    if (asNumber(domNode["total_error"]) !== 0)
+    if (asNumber(domNode["total_error"]) !== 0) {
       alert("Total error must be zero");
+      return;
+    }
     const model = asModel(domNode);
-    save(model);
+    await upsertItem(model);
+    gotoUrl(routes.printLedger(model.id));
   });
-  domNode.addEventListener("add-row", () => {
-    const tr = /* @__PURE__ */ dom("tr", null, /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
-      name: "date",
-      required: true,
-      type: "date",
-      placeholder: "date",
-      value: currentDay()
-    })), /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
-      name: "account",
-      required: true,
-      type: "text",
-      placeholder: "account",
-      list: "listOfAccounts"
-    })), /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
-      name: "debit",
-      class: "currency",
-      type: "number",
-      placeholder: "debit"
-    })), /* @__PURE__ */ dom("td", null, /* @__PURE__ */ dom("input", {
-      name: "credit",
-      class: "currency",
-      type: "number",
-      placeholder: "credit"
-    })));
-    tbody.appendChild(tr);
-    tr.querySelector("[name=account]").focus();
+  on(domNode, "print-detail", async () => {
+    const ledgers = await getItems();
+    const report = create(ledgers);
+    document.body.innerHTML = "";
+    document.body.appendChild(report);
+  });
+  on(domNode, "print-summary", async () => {
+    const ledgers = await getItems();
+    const report = create2(ledgers);
+    document.body.innerHTML = "";
+    document.body.appendChild(report);
+  });
+  on(domNode, "clear", async () => {
+    gotoUrl(routes.createLedger());
+  });
+  on(domNode, "delete", async () => {
+    try {
+      const id = domNode["id"].value;
+      await removeItem(id);
+      gotoUrl(routes.allLedgers());
+    } catch (ex) {
+      reportError(ex);
+    }
+  });
+  on(domNode, "submit", async () => {
+    if (!domNode.reportValidity())
+      return;
+    if (asNumber(domNode["total_error"]) !== 0) {
+      alert("Total error must be zero");
+      return;
+    }
+    const model = asModel(domNode);
+    await upsertItem(model);
+    toast(`saved ${model.id}`);
+    gotoUrl(routes.editLedger(model.id));
+  });
+  on(domNode, "add-row", () => {
+    const row = createRow();
+    extendNumericInputBehaviors(row);
+    const focus = row.querySelector("[name=account]");
+    moveChildrenBefore(row, lineItems);
+    focus.focus();
   });
 }
-function createGeneralLedgerGrid() {
-  const ledger = /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("datalist", {
-    id: "listOfAccounts"
-  }, /* @__PURE__ */ dom("option", null, "AP"), /* @__PURE__ */ dom("option", null, "AR"), /* @__PURE__ */ dom("option", null, "CASH"), /* @__PURE__ */ dom("option", null, "MOM/DAD"), /* @__PURE__ */ dom("option", null, "INVENTORY")), /* @__PURE__ */ dom("table", null, /* @__PURE__ */ dom("thead", null, /* @__PURE__ */ dom("th", {
-    class: "date"
-  }, "Date"), /* @__PURE__ */ dom("th", {
-    class: "text"
-  }, "Account"), /* @__PURE__ */ dom("th", {
-    class: "currency"
-  }, "Debit (+)"), /* @__PURE__ */ dom("th", {
-    class: "currency"
-  }, "Credit (-)")), /* @__PURE__ */ dom("tfoot", null, /* @__PURE__ */ dom("th", null), /* @__PURE__ */ dom("th", null, /* @__PURE__ */ dom("input", {
-    readonly: true,
+function createRow() {
+  return /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("input", {
+    class: "col-1-2",
+    name: "account",
+    required: true,
+    type: "text",
+    placeholder: "account",
+    list: "listOfAccounts"
+  }), /* @__PURE__ */ dom("input", {
+    name: "debit",
+    class: "currency col-3-2",
     type: "number",
-    class: "currency",
-    name: "total_error",
-    value: "0.00"
-  })), /* @__PURE__ */ dom("th", null, /* @__PURE__ */ dom("input", {
-    readonly: true,
+    placeholder: "debit"
+  }), /* @__PURE__ */ dom("input", {
+    name: "credit",
+    class: "currency col-5-last",
     type: "number",
-    class: "currency",
-    name: "total_debit",
-    value: "0.00"
-  })), /* @__PURE__ */ dom("th", null, /* @__PURE__ */ dom("input", {
-    type: "number",
-    readonly: true,
-    class: "currency",
-    name: "total_credit",
-    value: "0.00"
-  }))), /* @__PURE__ */ dom("tbody", null)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1"
+    placeholder: "credit"
+  }), /* @__PURE__ */ dom("input", {
+    name: "comment",
+    class: "text col-1-last",
+    type: "text",
+    placeholder: "comment"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer-1 col-1-last"
+  }));
+}
+function create3(ledgerModel2) {
+  forceDatalist();
+  const ledger = /* @__PURE__ */ dom("form", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("h1", {
+    class: "centered col-1-last"
+  }, `Ledger Entry for ${globals.primaryContact.companyName}`), /* @__PURE__ */ dom("input", {
+    hidden: true,
+    name: "id",
+    value: ledgerModel2?.id || ""
+  }), /* @__PURE__ */ dom("div", {
+    class: "date col-1"
+  }, "Date"), /* @__PURE__ */ dom("input", {
+    class: "col-2-last",
+    name: "date",
+    required: true,
+    type: "date",
+    placeholder: "date",
+    value: ledgerModel2?.date || asDateString()
+  }), /* @__PURE__ */ dom("label", {
+    class: "col-1"
+  }, "Batch Summary"), /* @__PURE__ */ dom("textarea", {
+    name: "description",
+    class: "col-2-last comments",
+    placeholder: "Describe the context for these entries"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    class: "text col-1-2"
+  }, "Account"), /* @__PURE__ */ dom("div", {
+    class: "currency col-3-2"
+  }, "Debit (+)"), /* @__PURE__ */ dom("div", {
+    class: "currency col-5-last"
+  }, "Credit (-)"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    id: "end-of-line-items",
+    class: "hidden"
   }), /* @__PURE__ */ dom("button", {
-    class: "button",
+    class: "button col-1-2",
     type: "button",
     "data-event": "add-row"
   }, "Add Row"), /* @__PURE__ */ dom("button", {
-    class: "button",
+    class: "button col-last-2",
     type: "button",
     "data-event": "submit"
-  }, "Save"));
+  }, "Save"), /* @__PURE__ */ dom("button", {
+    class: "button col-last-2 if-desktop",
+    type: "button",
+    "data-event": "delete"
+  }, "Delete"), /* @__PURE__ */ dom("div", {
+    class: "vspacer col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    class: "currency col-2-2"
+  }, "Total Debit"), /* @__PURE__ */ dom("input", {
+    readonly: true,
+    type: "number",
+    class: "currency col-4-last",
+    name: "total_debit",
+    value: "0.00"
+  }), /* @__PURE__ */ dom("div", {
+    class: "currency col-2-2"
+  }, "Total Credit"), /* @__PURE__ */ dom("input", {
+    type: "number",
+    readonly: true,
+    class: "currency col-4-last",
+    name: "total_credit",
+    value: "0.00"
+  }), /* @__PURE__ */ dom("div", {
+    class: "currency col-2-2"
+  }, "Imbalance"), /* @__PURE__ */ dom("input", {
+    readonly: true,
+    type: "number",
+    class: "currency col-4-last",
+    name: "total_error",
+    value: "0.00"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-last vspacer-1"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-last flex"
+  }, /* @__PURE__ */ dom("button", {
+    class: "button col-1 if-desktop",
+    type: "button",
+    "data-event": "print"
+  }, "Print"), /* @__PURE__ */ dom("button", {
+    class: "button col-1 if-desktop",
+    type: "button",
+    "data-event": "clear"
+  }, "Clear"), /* @__PURE__ */ dom("button", {
+    class: "button col-1 if-desktop",
+    type: "button",
+    "data-event": "print-all"
+  }, "Show All")), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-last if-desktop"
+  }), /* @__PURE__ */ dom("div", {
+    class: "section-title col-1-last"
+  }, "Summary"), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    id: "summary-area",
+    class: "col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-last"
+  }));
+  if (ledgerModel2) {
+    const lineItems = ledger.querySelector("#end-of-line-items");
+    ledger["date"].value = asDateString(new Date(ledgerModel2.date || Date.now()));
+    ledger["description"].value = ledgerModel2.description;
+    ledgerModel2.items.forEach((item) => {
+      const row = createRow();
+      row["account"].value = item.account;
+      if (item.amount < 0) {
+        row["credit"].value = asCurrency(-item.amount);
+      } else {
+        row["debit"].value = asCurrency(item.amount);
+      }
+      row["comment"].value = item.comment;
+      moveChildrenBefore(row, lineItems);
+    });
+  }
   hookupTriggers(ledger);
   hookupHandlers(ledger);
-  ledger.dispatchEvent(new Event("add-row"));
+  extendNumericInputBehaviors(ledger);
+  if (!ledgerModel2)
+    trigger(ledger, "add-row");
+  trigger(ledger, "change");
   return ledger;
 }
 
+// app/gl/templates/print.tsx
+async function create4(id) {
+  const target = /* @__PURE__ */ dom("div", null);
+  let ledgers;
+  if (id) {
+    const ledger = await getItem(id);
+    if (!ledger)
+      throw `ledger not found: ${id}`;
+    ledgers = [ledger];
+  } else {
+    ledgers = await getItems();
+  }
+  target.appendChild(createBanner());
+  target.appendChild(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "vspacer-2"
+  }), /* @__PURE__ */ dom("div", {
+    class: "section-title if-desktop"
+  }, "Account Summary")));
+  if (ledgers.length) {
+    target.appendChild(create2(ledgers));
+    target.appendChild(/* @__PURE__ */ dom("div", {
+      class: "vspacer-2"
+    }));
+    target.appendChild(create(ledgers));
+  } else {
+    moveChildren(/* @__PURE__ */ dom("div", {
+      class: "grid-6"
+    }, /* @__PURE__ */ dom("div", {
+      class: "centered row-1-6"
+    }, "No ledgers have been defined"), /* @__PURE__ */ dom("div", {
+      class: "vspacer-2 row-1-6"
+    }), /* @__PURE__ */ dom("button", {
+      class: "button row-1",
+      "data-event": "create-ledger"
+    }, "Create General Ledger")), target);
+  }
+  on(target, "create-ledger", () => {
+    gotoUrl(routes.createLedger());
+  });
+  hookupTriggers(target);
+  return target;
+}
+function createBanner() {
+  const { primaryContact: primaryContact2 } = globals;
+  return /* @__PURE__ */ dom("div", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("div", {
+    class: "col-1-last centered"
+  }, `General Ledger for ${primaryContact2.companyName}`), /* @__PURE__ */ dom("div", {
+    class: "line col-1-last if-desktop"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-3 if-desktop"
+  }, /* @__PURE__ */ dom("address", {
+    class: "col-1-5"
+  }, primaryContact2.fullName), /* @__PURE__ */ dom("address", {
+    class: "col-1-5"
+  }, primaryContact2.addressLine1), /* @__PURE__ */ dom("address", {
+    class: "col-1-5"
+  }, primaryContact2.addressLine2)), /* @__PURE__ */ dom("div", {
+    class: "col-4-last if-desktop"
+  }, /* @__PURE__ */ dom("div", {
+    class: "align-right col-6-last"
+  }, `Printed on ${asDateString()} @ ${asTimeString()}`)));
+}
+
+// app/fql/gl-by-account.ts
+async function execute(query) {
+  const items = await ledgerModel.getItems();
+  const lineItems = items.map((parent) => parent.items.map((child) => ({
+    parent,
+    child
+  }))).flat();
+  return lineItems.filter((item) => item.child.account === query.account);
+}
+
+// app/gl/templates/by-account.tsx
+async function create5(account) {
+  const items = await execute({
+    account
+  });
+  if (!items.length)
+    return /* @__PURE__ */ dom("div", null, "No items found");
+  let runningBalance = 0;
+  const rows = items.sort((a, b) => a.parent.date - b.parent.date || a.parent.id.localeCompare(b.parent.id)).map((item) => {
+    runningBalance += item.child.amount;
+    return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+      class: "currency col-1"
+    }, asCurrency(item.child.amount)), /* @__PURE__ */ dom("div", {
+      class: "col-2"
+    }, item.child.comment), /* @__PURE__ */ dom("div", {
+      class: "col-3-4"
+    }, asDateString(new Date(item.parent.date))), /* @__PURE__ */ dom("div", {
+      class: "currency col-7"
+    }, noZero(asCurrency(runningBalance))), /* @__PURE__ */ dom("div", {
+      class: "col-2-5"
+    }, /* @__PURE__ */ dom("a", {
+      href: routes.editLedger(item.parent.id)
+    }, item.parent.description || "")));
+  });
+  const result = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("h1", null, `Ledger Entries for ${account}`), /* @__PURE__ */ dom("div", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("div", {
+    class: "currency col-1"
+  }, "Amount"), /* @__PURE__ */ dom("div", {
+    class: "col-2-5"
+  }, "Comment"), /* @__PURE__ */ dom("div", {
+    class: "col-7 align-right"
+  }, "Balance"), /* @__PURE__ */ dom("div", {
+    class: "placeholder line-items"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-c align-right"
+  }, "Balance"), /* @__PURE__ */ dom("div", {
+    class: "col-a currency bold"
+  }, asCurrency(runningBalance))));
+  const placeholder = result.querySelector(".placeholder");
+  rows.forEach((item) => moveChildrenBefore(item, placeholder));
+  return result;
+}
+
+// app/fun/setMode.ts
+var modes = {
+  light_mode: "light",
+  dark_mode: "dark",
+  holiday_mode: "holiday"
+};
+function setMode(mode) {
+  if (!mode)
+    mode = localStorage.getItem("mode") || modes.light_mode;
+  localStorage.setItem("mode", mode);
+  document.body.classList.remove(...Object.values(modes));
+  document.body.classList.add(mode);
+  const isFontier = getGlobalState("textier") == true;
+  document.body.classList.toggle("textier", isFontier);
+}
+
 // app/services/validateAccessToken.ts
-var import_faunadb3 = __toModule(require_faunadb());
-var { query } = import_faunadb3.default;
-var q2 = query;
+var import_faunadb5 = __toModule(require_faunadb());
 async function validate() {
   const client = createClient();
-  return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
+  await client.ping();
 }
 
 // app/identify.ts
 async function identify() {
+  if (isOffline())
+    return false;
+  if (!localStorage.getItem("user")) {
+    gotoUrl(routes.identity({
+      target: location.href,
+      context: CONTEXT
+    }));
+    return false;
+  }
+  return true;
   try {
     await validate();
   } catch (ex) {
-    localStorage.setItem("FAUNADB_SERVER_SECRET", "");
-    console.log(ex);
-    return false;
-  }
-  if (!localStorage.getItem("user")) {
-    location.href = `/app/identity.html?target=${location.href}&context=${CONTEXT}`;
+    reportError(ex);
     return false;
   }
   return true;
 }
 
+// app/ux/injectLabels.ts
+function injectLabels(domNode) {
+  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
+  inputsToWrap.forEach((input) => {
+    const label = dom("label");
+    label.className = "border padding rounded wrap " + input.className;
+    label.innerText = input.placeholder;
+    input.parentElement.insertBefore(label, input);
+    label.appendChild(input);
+  });
+}
+
+// app/services/invoices.ts
+var INVOICE_TABLE = "invoices";
+var invoiceModel = new StorageModel({
+  tableName: INVOICE_TABLE,
+  offline: false
+});
+
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
+  tableName: INVENTORY_TABLE,
+  offline: false
+});
+
+// app/fun/isUndefined.ts
+function isUndefined(value) {
+  return typeof value === "undefined";
+}
+
+// app/fun/detect.ts
+var userAgent = navigator.userAgent.toLocaleUpperCase();
+var isChrome = userAgent.includes("CHROME");
+var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
+function removeCssRestrictors() {
+  if (isChrome) {
+    removeCssRule(".if-print-to-pdf");
+  }
+  if (!isMobile) {
+    removeCssRule(".if-desktop");
+  }
+}
+function removeCssRule(name) {
+  const sheets = document.styleSheets;
+  for (let sheetIndex = 0; sheetIndex < sheets.length; sheetIndex++) {
+    const sheet = sheets[sheetIndex];
+    try {
+      if (!sheet?.cssRules)
+        continue;
+    } catch (ex) {
+      continue;
+    }
+    for (let ruleIndex = 0; ruleIndex < sheet.cssRules.length; ruleIndex++) {
+      const rule = sheet.cssRules[ruleIndex];
+      if (rule.selectorText === name) {
+        sheet.deleteRule(ruleIndex);
+        return;
+      }
+    }
+  }
+}
+
+// app/index.ts
+var { primaryContact } = globals;
+var VERSION = "1.0.5";
+async function init() {
+  const domNode = document.body;
+  if (!isOffline()) {
+    await identify();
+    await registerServiceWorker();
+    setInitialState({
+      VERSION: "1.0.3"
+    });
+    setInitialState({
+      TAX_RATE: 6,
+      CACHE_MAX_AGE: 600,
+      BATCH_SIZE: 64,
+      work_offline: true,
+      VERSION
+    });
+    setInitialState({ primaryContact });
+    await upgradeFromCurrentVersion();
+  }
+  injectLabels(domNode);
+  extendNumericInputBehaviors(domNode);
+  hookupTriggers(domNode);
+  setMode();
+  removeCssRestrictors();
+}
+function setInitialState(data) {
+  Object.keys(data).forEach((key) => {
+    const value = getGlobalState(key);
+    if (isUndefined(value)) {
+      setGlobalState(key, data[key]);
+    }
+  });
+}
+async function upgradeFromCurrentVersion() {
+  const currentVersion = getGlobalState("VERSION");
+  switch (currentVersion) {
+    case "1.0.3":
+      await upgradeFrom103To105();
+      toast(`upgraded from ${currentVersion} to ${VERSION}`);
+      break;
+    case "1.0.4":
+      break;
+    case "1.0.5":
+      break;
+    default:
+      throw `unexpected version: ${currentVersion}`;
+  }
+}
+async function upgradeFrom103To105() {
+  inventoryModel.upgradeTo104();
+  await inventoryModel.synchronize();
+  setGlobalState("VERSION", VERSION);
+}
+async function registerServiceWorker() {
+  const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
+}
+
+// app/fun/getQueryParameter.ts
+function getQueryParameter(name) {
+  const queryParams = new URLSearchParams(window.location.search);
+  return queryParams.get(name);
+}
+
 // app/gl/gl.ts
-function init(domNode) {
-  const ledger = createGeneralLedgerGrid();
-  domNode.appendChild(ledger);
+async function init2(domNode) {
+  try {
+    await init();
+    window.addEventListener("beforeprint", () => {
+      document.body.classList.add("print");
+    });
+    const printId = getQueryParameter("print");
+    if (!!printId) {
+      const target = domNode;
+      switch (printId) {
+        case "all": {
+          const ledger = await create4();
+          target.appendChild(ledger);
+          break;
+        }
+        default: {
+          target.innerHTML = "";
+          const ledger = await create4(printId);
+          target.appendChild(ledger);
+        }
+      }
+      return;
+    }
+    const id = getQueryParameter("id");
+    if (!!id) {
+      const ledger = await getItem(id);
+      if (!ledger)
+        throw `cannot find ledger: ${id}`;
+      domNode.appendChild(create3(ledger));
+      return;
+    }
+    const account = getQueryParameter("account");
+    if (!!account) {
+      const report = await create5(account);
+      domNode.appendChild(report);
+      return;
+    }
+    {
+      const ledger = create3();
+      domNode.appendChild(ledger);
+    }
+  } catch (ex) {
+    reportError(ex);
+  }
 }
 export {
-  identify,
-  init
+  init2 as init
 };
 /*
 object-assign
 (c) Sindre Sorhus
 @license MIT
 */
+//# sourceMappingURL=gl.js.map

@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Little Light Show General Ledger</title>
-    <link rel="stylesheet" href="../baseline.css" />
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <title>General Ledger</title>
+    <link
+      media="screen"
+      rel="stylesheet"
+      href="../baseline.css"
+    />
+    <link
+      media="print"
+      rel="stylesheet"
+      href="../print.css"
+    />
   </head>
-  <body class="dark">
-    <h1>General Ledger</h1>
+  <body class="body">
     <div class="gl"></div>
     <script type="module">
-      import { identify, init } from "../../bin/gl.js";
-      if (await identify()) init(document.querySelector(".gl"));
+      import { init } from "../../bin/gl.js";
+      init(
+        document.querySelector(".gl")
+      );
     </script>
   </body>
 </html>

@@ -1,26 +1,51 @@
-import { query as q } from "faunadb";
-import { createClient, CURRENT_USER } from "../globals.js";
+import { StorageModel } from "./StorageModel.js";
 
-const LEDGER_TABLE = "Todos";
+const LEDGER_TABLE = "general_ledger";
 
 export interface LedgerItem {
-  date: number;
+  comment: string;
   account: string;
   amount: number;
 }
 
 export interface Ledger {
+  id?: string;
+  date: number;
+  description?: string;
   items: Array<LedgerItem>;
 }
 
-export async function save(ledger: Ledger) {
-  if (!CURRENT_USER) throw "user must be signed in";
+export const ledgerModel =
+  new StorageModel<Ledger>({
+    tableName: LEDGER_TABLE,
+    offline: false,
+  });
 
-  const client = createClient();
+export async function removeItem(
+  id: string
+) {
+  return ledgerModel.removeItem(id);
+}
 
-  const result = (await client.query(
-    q.Create(q.Collection(LEDGER_TABLE), {
-      data: { ...ledger, user: CURRENT_USER, create_date: Date.now() },
-    })
-  )) as { data: any; ref: any };
+export async function getItem(
+  id: string
+) {
+  return ledgerModel.getItem(id);
+}
+
+export async function upsertItem(
+  data: Ledger
+) {
+  return ledgerModel.upsertItem(data);
+}
+
+export async function getItems() {
+  const items =
+    await ledgerModel.getItems();
+  return items.filter(
+    (ledger) =>
+      ledger.items &&
+      ledger.items[0] &&
+      ledger.items[0].account
+  );
 }

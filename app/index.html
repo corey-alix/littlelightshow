@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <title>
+      Little Light Show Dashboard
+    </title>
+    <link
+      rel="stylesheet"
+      href="/app/baseline.css"
+    />
+  </head>
+  <body class="body flex">
+    <div class="flex width-100">
+      <div
+        class="section-title rounded"
+      >
+        Invoices
+      </div>
+      <a
+        class="button"
+        data-href="createInvoice"
+        >Create an Invoice</a
+      >
+      <a
+        class="button"
+        data-href="allInvoices"
+        >List all Invoices</a
+      >
+    </div>
+    <div class="flex width-100">
+      <div
+        class="section-title rounded"
+      >
+        Inventory
+      </div>
+      <a
+        class="button"
+        data-href="createInventory"
+        >Create Inventory Item</a
+      >
+      <a
+        class="button"
+        data-href="allInventoryItems"
+        >List all Inventory</a
+      >
+    </div>
+    <div class="flex width-100">
+      <div
+        class="section-title rounded"
+      >
+        General Ledger
+      </div>
+      <a
+        class="button"
+        data-href="createLedger"
+        >Create General Ledger</a
+      >
+      <a
+        class="button"
+        data-href="allLedgers"
+        >List all Ledger Entries</a
+      >
+    </div>
+    <div class="grid-6 width-100">
+      <div
+        class="section-title rounded col-1-last"
+      >
+        Primary Contact Info
+      </div>
+      <input
+        class="rounded auto-label col-1-3"
+        data-bind="primaryContact.companyName"
+        placeholder="company name"
+      />
+      <input
+        class="rounded auto-label col-4-3"
+        data-bind="primaryContact.fullName"
+        placeholder="primary contact name"
+      />
+      <input
+        class="rounded auto-label col-1-3"
+        data-bind="primaryContact.addressLine1"
+        placeholder="address"
+      />
+      <input
+        class="rounded auto-label col-4-3"
+        data-bind="primaryContact.telephone"
+        placeholder="telephone"
+      />
+      <input
+        class="rounded auto-label col-1-3"
+        data-bind="primaryContact.addressLine2"
+        placeholder="address (line 2)"
+      />
+    </div>
+    <div class="section-title rounded">
+      Notes
+    </div>
+    <a class="button" data-href="todo"
+      >Todo</a
+    >
+    <a
+      class="button"
+      data-href="maptiler"
+      >Where Am I?</a
+    >
+    <div class="flex width-100">
+      <div
+        class="section-title rounded"
+      >
+        Admin
+      </div>
+      <a
+        class="button"
+        data-href="admin"
+        >Admin</a
+      >
+    </div>
+    <script type="module">
+      import { init } from "/bin/index.js";
+      init();
+    </script>
+  </body>
+</html>

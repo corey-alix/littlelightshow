@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <title>Inventory</title>
+    <link
+      media="screen"
+      rel="stylesheet"
+      href="../baseline.css"
+    />
+    <link
+      media="print"
+      rel="stylesheet"
+      href="../print.css"
+    />
+  </head>
+  <body class="body relative">
+    <div class="inventory"></div>
+    <script type="module">
+      import { init } from "/bin/inventory.js";
+      init(
+        document.querySelector(
+          ".inventory"
+        )
+      );
+    </script>
+  </body>
+</html>

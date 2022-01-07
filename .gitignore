@@ -2,3 +2,4 @@
 .netlify
 .faunarc
 node_modules
+temp.json

@@ -19,6 +19,19 @@ var __reExport = (target, module, desc) => {
 var __toModule = (module) => {
   return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
 };
+var __accessCheck = (obj, member, msg) => {
+  if (!member.has(obj))
+    throw TypeError("Cannot " + msg);
+};
+var __privateGet = (obj, member, getter) => {
+  __accessCheck(obj, member, "read from private field");
+  return getter ? getter.call(obj) : member.get(obj);
+};
+var __privateAdd = (obj, member, value) => {
+  if (member.has(obj))
+    throw TypeError("Cannot add the same private member more than once");
+  member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+};
 
 // node_modules/fn-annotate/index.js
 var require_fn_annotate = __commonJS({
@@ -594,9 +607,9 @@ var require_browser_ponyfill = __commonJS({
           exports2.DOMException.prototype = Object.create(Error.prototype);
           exports2.DOMException.prototype.constructor = exports2.DOMException;
         }
-        function fetch(input, init) {
+        function fetch(input, init2) {
           return new Promise(function(resolve, reject) {
-            var request = new Request(input, init);
+            var request = new Request(input, init2);
             if (request.signal && request.signal.aborted) {
               return reject(new exports2.DOMException("Aborted", "AbortError"));
             }
@@ -4698,74 +4711,122 @@ var require_faunadb = __commonJS({
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var accessKeys = {
-  FAUNADB_SERVER_SECRET: "",
-  FAUNADB_ADMIN_SECRET: "",
-  FAUNADB_DOMAIN: "db.us.fauna.com"
-};
-if (globalThis.process?.env) {
-  accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
-  accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
-} else if (localStorage) {
-  accessKeys.FAUNADB_SERVER_SECRET = localStorage.getItem("FAUNADB_SERVER_SECRET");
-  accessKeys.FAUNADB_ADMIN_SECRET = localStorage.getItem("FAUNADB_ADMIN_SECRET");
-  if (!accessKeys.FAUNADB_SERVER_SECRET) {
-    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
-    accessKeys.FAUNADB_SERVER_SECRET = secret;
-    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
-  }
-  if (!accessKeys.FAUNADB_SERVER_SECRET)
-    console.error("set FAUNADB_SERVER_SECRET in local storage");
-  if (!accessKeys.FAUNADB_ADMIN_SECRET)
-    console.error("set FAUNADB_ADMIN_SECRET in local storage");
+
+// app/fun/globalState.ts
+var globalState;
+function forceGlobalState() {
+  return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
 }
+function getGlobalState(key) {
+  const state = forceGlobalState();
+  const [head, ...tail] = key.split(".");
+  if (!tail.length)
+    return state[head];
+  let value = state[head];
+  if (!!value && typeof value !== "object")
+    throw `key does not define an object: ${head}`;
+  tail.every((k) => typeof value === "object" && (value = value[k]) && true);
+  return value;
+}
+
+// app/globals.ts
+var _accessKeys;
+var GlobalModel = class {
+  constructor() {
+    __privateAdd(this, _accessKeys, {
+      FAUNADB_SERVER_SECRET: localStorage.getItem("FAUNADB_SERVER_SECRET"),
+      FAUNADB_DOMAIN: "db.us.fauna.com",
+      MAPTILERKEY: localStorage.getItem("MAPTILER_SERVER_SECRET")
+    });
+    this.MAPTILERKEY = __privateGet(this, _accessKeys).MAPTILERKEY;
+    this.CURRENT_USER = localStorage.getItem("user");
+    this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
+    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 1e3;
+    this.primaryContact = getGlobalState("primaryContact") || {
+      companyName: "Little Light Show",
+      fullName: "Nathan Alix",
+      addressLine1: "4 Andrea Lane",
+      addressLine2: "Greenville, SC 29615",
+      telephone: ""
+    };
+    if (!__privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET) {
+      const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
+      __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET = secret;
+      localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+    }
+  }
+  createClient() {
+    return new import_faunadb.default.Client({
+      secret: __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET,
+      domain: __privateGet(this, _accessKeys).FAUNADB_DOMAIN
+    });
+  }
+};
+_accessKeys = new WeakMap();
+var globals = new GlobalModel();
+var createClient = () => globals.createClient();
+var isDebug = location.href.includes("localhost") || location.search.includes("debug");
 function isNetlifyBuildContext() {
   return 0 <= location.href.indexOf("netlify");
 }
-var domain = accessKeys.FAUNADB_DOMAIN;
-var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
-var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
-var CURRENT_USER = localStorage.getItem("user");
-
-// app/meta/tables.js
-var tables = {
-  lls_customers: {
-    telephone: { primary: true, type: "string" },
-    fullName: "Alice",
-    address: {
-      street: "87856 Mendota Court",
-      city: "Washington",
-      state: "DC",
-      zipCode: "20220"
-    }
-  },
-  lls_products: {
-    code: { primary: true, type: "string" },
-    description: "100CT White Mini"
-  }
-};
 
 // test/test.ts
 var import_faunadb2 = __toModule(require_faunadb());
 var q = import_faunadb2.default.query;
-function createDatabase() {
-  if (CONTEXT !== "dev")
-    return;
-  const client = new import_faunadb2.default.Client({
-    secret: FAUNADB_SERVER_SECRET,
-    domain
-  });
-  const tableNames = Object.keys(tables);
-  tableNames.forEach(async (tableName) => {
-    const response = await client.query(q.Create(q.Ref("classes"), { name: tableName }));
+async function loadLatestData(args) {
+  const client = createClient();
+  let response = await client.query(q.Map(q.Paginate(q.Filter(q.Match(q.Index(`${args.tableName}_updates`)), q.Lambda("item", q.And(q.ContainsField("update_date", q.Select(["data"], q.Var("item"))), q.GT(q.Select([
+    "data",
+    "update_date"
+  ], q.Var("item")), args.update_date)))), { size: 10 }), q.Lambda("item", q.Get(q.Select([1], q.Var("item"))))));
+  return response;
+}
+function init() {
+  const runButton = document.querySelector("#run");
+  runButton.addEventListener("click", () => {
+    run();
   });
 }
+async function run() {
+  const tableName = "Todos";
+  if (false) {
+    const response = await updateItemsWithoutUpdateInfo({
+      tableName
+    });
+    localStorage.setItem("test1.updateItemsWithoutCreateInfo", JSON.stringify(response));
+    return;
+  }
+  if (false) {
+    const response = await createUpdateStampIndexOnTable({
+      tableName
+    });
+    localStorage.setItem("test1.createUpdateStampIndexOnTable", JSON.stringify(response));
+  }
+  if (true) {
+    const response = await loadLatestData({
+      tableName,
+      update_date: 1639791009133
+    });
+    localStorage.setItem("test1.loadLatestData", JSON.stringify(response));
+    return;
+  }
+  if (false) {
+    const response = await injectDataWithTimestamp({
+      tableName,
+      data: {
+        value: "test1"
+      }
+    });
+    localStorage.setItem("test1.injectDataWithTimestamp", JSON.stringify(response));
+  }
+}
 export {
-  createDatabase
+  init
 };
 /*
 object-assign
 (c) Sindre Sorhus
 @license MIT
 */
+//# sourceMappingURL=test.js.map

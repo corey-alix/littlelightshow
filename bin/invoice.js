@@ -19,6 +19,19 @@ var __reExport = (target, module, desc) => {
 var __toModule = (module) => {
   return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
 };
+var __accessCheck = (obj, member, msg) => {
+  if (!member.has(obj))
+    throw TypeError("Cannot " + msg);
+};
+var __privateGet = (obj, member, getter) => {
+  __accessCheck(obj, member, "read from private field");
+  return getter ? getter.call(obj) : member.get(obj);
+};
+var __privateAdd = (obj, member, value) => {
+  if (member.has(obj))
+    throw TypeError("Cannot add the same private member more than once");
+  member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
+};
 
 // node_modules/fn-annotate/index.js
 var require_fn_annotate = __commonJS({
@@ -594,9 +607,9 @@ var require_browser_ponyfill = __commonJS({
           exports2.DOMException.prototype = Object.create(Error.prototype);
           exports2.DOMException.prototype.constructor = exports2.DOMException;
         }
-        function fetch(input, init2) {
+        function fetch(input, init3) {
           return new Promise(function(resolve, reject) {
-            var request = new Request(input, init2);
+            var request = new Request(input, init3);
             if (request.signal && request.signal.aborted) {
               return reject(new exports2.DOMException("Aborted", "AbortError"));
             }
@@ -936,12 +949,12 @@ var require_util = __commonJS({
     function checkInstanceHasProperty(obj, prop) {
       return typeof obj === "object" && obj !== null && Boolean(obj[prop]);
     }
-    function formatUrl(base, path, query2) {
-      query2 = typeof query2 === "object" ? querystringify(query2) : query2;
+    function formatUrl(base, path, query) {
+      query = typeof query === "object" ? querystringify(query) : query;
       return [
         base,
         path ? path.charAt(0) === "/" ? "" : "/" + path : "",
-        query2 ? query2.charAt(0) === "?" ? "" : "?" + query2 : ""
+        query ? query.charAt(0) === "?" ? "" : "?" + query : ""
       ].join("");
     }
     function querystringify(obj, prefix) {
@@ -2001,10 +2014,10 @@ var require_query = __commonJS({
         collection: wrap(collection)
       });
     }
-    function Paginate(set, opts) {
+    function Paginate(set2, opts) {
       arity.between(1, 2, arguments, Paginate.name);
       opts = util.defaults(opts, {});
-      return new Expr(objectAssign({ paginate: wrap(set) }, wrapValues(opts)));
+      return new Expr(objectAssign({ paginate: wrap(set2) }, wrapValues(opts)));
     }
     function Exists(ref, ts) {
       arity.between(1, 2, arguments, Exists.name);
@@ -2102,17 +2115,17 @@ var require_query = __commonJS({
       arity.min(1, arguments, Difference.name);
       return new Expr({ difference: wrap(varargs(arguments)) });
     }
-    function Distinct(set) {
+    function Distinct(set2) {
       arity.exact(1, arguments, Distinct.name);
-      return new Expr({ distinct: wrap(set) });
+      return new Expr({ distinct: wrap(set2) });
     }
     function Join(source, target) {
       arity.exact(2, arguments, Join.name);
       return new Expr({ join: wrap(source), with: wrap(target) });
     }
-    function Range(set, from, to) {
+    function Range(set2, from, to) {
       arity.exact(3, arguments, Range.name);
-      return new Expr({ range: wrap(set), from: wrap(from), to: wrap(to) });
+      return new Expr({ range: wrap(set2), from: wrap(from), to: wrap(to) });
     }
     function Login(ref, params2) {
       arity.exact(2, arguments, Login.name);
@@ -3081,9 +3094,9 @@ var require_json = __commonJS({
 var require_PageHelper = __commonJS({
   "node_modules/faunadb/src/PageHelper.js"(exports, module) {
     "use strict";
-    var query2 = require_query();
+    var query = require_query();
     var objectAssign = require_object_assign();
-    function PageHelper(client, set, params, options) {
+    function PageHelper(client, set2, params, options) {
       if (params === void 0) {
         params = {};
       }
@@ -3106,20 +3119,20 @@ var require_PageHelper = __commonJS({
       this.options = {};
       objectAssign(this.options, options);
       this.client = client;
-      this.set = set;
+      this.set = set2;
       this._faunaFunctions = [];
     }
     PageHelper.prototype.map = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q3) {
-        return query2.Map(q3, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query.Map(q4, lambda);
       });
       return rv;
     };
     PageHelper.prototype.filter = function(lambda) {
       var rv = this._clone();
-      rv._faunaFunctions.push(function(q3) {
-        return query2.Filter(q3, lambda);
+      rv._faunaFunctions.push(function(q4) {
+        return query.Filter(q4, lambda);
       });
       return rv;
     };
@@ -3188,13 +3201,13 @@ var require_PageHelper = __commonJS({
           cursorOpts.before = null;
         }
       }
-      var q3 = query2.Paginate(this.set, opts);
+      var q4 = query.Paginate(this.set, opts);
       if (this._faunaFunctions.length > 0) {
         this._faunaFunctions.forEach(function(lambda) {
-          q3 = lambda(q3);
+          q4 = lambda(q4);
         });
       }
-      return this.client.query(q3, this.options);
+      return this.client.query(q4, this.options);
     };
     PageHelper.prototype._clone = function() {
       return Object.create(PageHelper.prototype, {
@@ -3214,10 +3227,10 @@ var require_PageHelper = __commonJS({
 var require_RequestResult = __commonJS({
   "node_modules/faunadb/src/RequestResult.js"(exports, module) {
     "use strict";
-    function RequestResult(method, path, query2, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
+    function RequestResult(method, path, query, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
       this.method = method;
       this.path = path;
-      this.query = query2;
+      this.query = query;
       this.requestRaw = requestRaw;
       this.requestContent = requestContent;
       this.responseRaw = responseRaw;
@@ -4329,7 +4342,7 @@ var require_stream = __commonJS({
     var errors = require_errors();
     var json = require_json();
     var http = require_http3();
-    var q3 = require_query();
+    var q4 = require_query();
     var util = require_util();
     var DefaultEvents = ["start", "error", "version", "history_rewrite"];
     var DocumentStreamEvents = DefaultEvents.concat(["snapshot"]);
@@ -4339,14 +4352,14 @@ var require_stream = __commonJS({
       });
       this._client = client;
       this._onEvent = onEvent;
-      this._query = q3.wrap(expression);
+      this._query = q4.wrap(expression);
       this._urlParams = options.fields ? { fields: options.fields.join(",") } : null;
       this._abort = new AbortController();
       this._state = "idle";
     }
     StreamClient.prototype.snapshot = function() {
       var self2 = this;
-      self2._client.query(q3.Get(self2._query)).then(function(doc) {
+      self2._client.query(q4.Get(self2._query)).then(function(doc) {
         self2._onEvent({
           type: "snapshot",
           event: doc
@@ -4521,7 +4534,7 @@ var require_Client = __commonJS({
     var errors = require_errors();
     var http = require_http3();
     var json = require_json();
-    var query2 = require_query();
+    var query = require_query();
     var stream = require_stream();
     var util = require_util();
     var values = require_values();
@@ -4552,7 +4565,7 @@ var require_Client = __commonJS({
     }
     Client.apiVersion = packageJson.apiVersion;
     Client.prototype.query = function(expression, options) {
-      return this._execute("POST", "", query2.wrap(expression), null, options);
+      return this._execute("POST", "", query.wrap(expression), null, options);
     };
     Client.prototype.paginate = function(expression, params, options) {
       params = util.defaults(params, {});
@@ -4571,26 +4584,26 @@ var require_Client = __commonJS({
     Client.prototype.close = function(opts) {
       return this._http.close(opts);
     };
-    Client.prototype._execute = function(method, path, data, query3, options) {
-      query3 = util.defaults(query3, null);
+    Client.prototype._execute = function(method, path, data, query2, options) {
+      query2 = util.defaults(query2, null);
       if (path instanceof values.Ref || util.checkInstanceHasProperty(path, "_isFaunaRef")) {
         path = path.value;
       }
-      if (query3 !== null) {
-        query3 = util.removeUndefinedValues(query3);
+      if (query2 !== null) {
+        query2 = util.removeUndefinedValues(query2);
       }
       var startTime = Date.now();
       var self2 = this;
       var body = ["GET", "HEAD"].indexOf(method) >= 0 ? void 0 : JSON.stringify(data);
       return this._http.execute(Object.assign({}, options, {
         path,
-        query: query3,
+        query: query2,
         method,
         body
       })).then(function(response) {
         var endTime = Date.now();
         var responseObject = json.parseJSON(response.body);
-        var result = new RequestResult(method, path, query3, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
+        var result = new RequestResult(method, path, query2, body, data, response.body, responseObject, response.status, response.headers, startTime, endTime);
         self2._handleRequestResult(response, result, options);
         return responseObject["resource"];
       });
@@ -4635,18 +4648,18 @@ var require_clientLogger = __commonJS({
       };
     }
     function showRequestResult(requestResult) {
-      var query2 = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
+      var query = requestResult.query, method = requestResult.method, path = requestResult.path, requestContent = requestResult.requestContent, responseHeaders = requestResult.responseHeaders, responseContent = requestResult.responseContent, statusCode = requestResult.statusCode, timeTaken = requestResult.timeTaken;
       var out = "";
-      function log(str) {
+      function log2(str) {
         out = out + str;
       }
-      log("Fauna " + method + " /" + path + _queryString(query2) + "\n");
+      log2("Fauna " + method + " /" + path + _queryString(query) + "\n");
       if (requestContent != null) {
-        log("  Request JSON: " + _showJSON(requestContent) + "\n");
+        log2("  Request JSON: " + _showJSON(requestContent) + "\n");
       }
-      log("  Response headers: " + _showJSON(responseHeaders) + "\n");
-      log("  Response JSON: " + _showJSON(responseContent) + "\n");
-      log("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
+      log2("  Response headers: " + _showJSON(responseHeaders) + "\n");
+      log2("  Response JSON: " + _showJSON(responseContent) + "\n");
+      log2("  Response (" + statusCode + "): Network latency " + timeTaken + "ms\n");
       return out;
     }
     function _indent(str) {
@@ -4656,16 +4669,16 @@ var require_clientLogger = __commonJS({
     function _showJSON(object) {
       return _indent(json.toJSON(object, true));
     }
-    function _queryString(query2) {
-      if (query2 == null) {
+    function _queryString(query) {
+      if (query == null) {
         return "";
       }
-      var keys = Object.keys(query2);
+      var keys = Object.keys(query);
       if (keys.length === 0) {
         return "";
       }
       var pairs = keys.map(function(key) {
-        return key + "=" + query2[key];
+        return key + "=" + query[key];
       });
       return "?" + pairs.join("&");
     }
@@ -4679,7 +4692,7 @@ var require_clientLogger = __commonJS({
 // node_modules/faunadb/index.js
 var require_faunadb = __commonJS({
   "node_modules/faunadb/index.js"(exports, module) {
-    var query2 = require_query();
+    var query = require_query();
     var util = require_util();
     var parseJSON = require_json().parseJSON;
     module.exports = util.mergeObjects({
@@ -4690,258 +4703,486 @@ var require_faunadb = __commonJS({
       clientLogger: require_clientLogger(),
       errors: require_errors(),
       values: require_values(),
-      query: query2,
+      query,
       parseJSON
-    }, query2);
+    }, query);
   }
 });
 
-// app/EventBus.ts
-var EventBus = class {
-  constructor() {
-    this.handlers = {};
-  }
-  on(eventName, cb) {
-    if (!this.handlers[eventName])
-      this.handlers[eventName] = [];
-    this.handlers[eventName].push(cb);
-    return {
-      off: () => {
-        const i = this.handlers[eventName].indexOf(cb);
-        if (i >= 0)
-          this.handlers[eventName].splice(i, 1);
-      }
-    };
-  }
-  trigger(eventName, event) {
-    if (!this.handlers[eventName])
-      return;
-    this.handlers[eventName].forEach((cb) => cb(event));
-  }
-  destroy() {
-    this.handlers = {};
-  }
+// app/fun/sort.ts
+var sortOps = {
+  number: (a, b) => (a || 0) - (b || 0),
+  "-number": (a, b) => -((a || 0) - (b || 0)),
+  gl: (a, b) => a >= 0 ? a - b : b - a,
+  "abs(number)": (a, b) => Math.abs(a || 0) - Math.abs(b || 0),
+  "-abs(number)": (a, b) => -(Math.abs(a || 0) - Math.abs(b || 0)),
+  string: (a, b) => (a || "").localeCompare(b || ""),
+  date: (a, b) => (a || 0).valueOf() - (b || 0).valueOf(),
+  noop: () => 0
 };
-
-// app/InventoryManager.ts
-var InventoryManager = class {
-  constructor() {
-    this.inventory = JSON.parse(localStorage.getItem("inventory") || "{}");
-  }
-  getInventoryItemByCode(code) {
-    return this.inventory[code];
-  }
-  persistInventoryItem(inventoryItem) {
-    this.inventory[inventoryItem.code] = inventoryItem;
-  }
-  persistInventoryItems() {
-    localStorage.setItem("inventory", JSON.stringify(this.inventory));
-  }
+Array.prototype.sortBy = function(sortBy) {
+  return sort(this, sortBy);
 };
-var inventoryManager = new InventoryManager();
-
-// app/FormManager.ts
-function forceDatalist() {
-  let dataList = document.querySelector(`#inventory_list`);
-  if (dataList)
-    return dataList;
-  dataList = document.createElement("datalist");
-  dataList.id = "inventory_list";
-  Object.entries(inventoryManager.inventory).forEach(([key, value]) => {
-    const option = document.createElement("option");
-    option.value = key;
-    dataList.appendChild(option);
+function sort(items, sortBy) {
+  const keys = Object.keys(sortBy);
+  return [...items].sort((a, b) => {
+    let result = 0;
+    keys.some((k) => !!(result = sortOps[sortBy[k]](a[k], b[k])));
+    return result;
   });
-  document.body.appendChild(dataList);
-  return dataList;
 }
-var FormManager = class {
-  constructor(formDom) {
-    this.formDom = formDom;
-    this.channel = new EventBus();
-  }
-  get(name) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    return input.value;
-  }
-  set(name, value) {
-    const input = this.formDom.querySelector(`[name="${name}"]`);
-    if (!input)
-      throw `field not found: ${name}`;
-    if (typeof value === "number")
-      input.valueAsNumber = value;
-    else
-      input.value = value || "";
-  }
-  isValid() {
-    this.formDom.reportValidity();
-    return this.formDom.checkValidity();
-  }
-  trigger(eventName, event) {
-    this.channel.trigger(eventName, event);
-  }
-  on(eventName, cb) {
-    this.channel.on(eventName, cb);
-  }
-  createButton(options) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.classList.add("button");
-    button.innerText = options.title;
-    button.dataset.event = options.event;
-    button.addEventListener("click", () => {
-      this.trigger(options.event, { item: button });
-    });
-    return button;
-  }
-};
-var FormFactory = class {
-  domAsForm(dom2) {
-    if (!dom2)
-      throw "cannot create a form without a dom element";
-    const form = new FormManager(dom2);
-    dom2.addEventListener("change", () => {
-      form.trigger("change");
-    });
-    dom2.querySelectorAll("[data-event]").forEach((eventItem) => {
-      eventItem.addEventListener("click", () => {
-        const eventName = eventItem.dataset["event"];
-        if (!eventName)
-          throw "item must define a data-event";
-        form.trigger(eventName, { item: eventItem });
-      });
-    });
-    return form;
-  }
-  asForm(fieldInfos) {
-    const fieldNames = Object.keys(fieldInfos);
-    const form = document.createElement("div");
-    fieldNames.forEach((fieldName) => {
-      const fieldInfo = fieldInfos[fieldName];
-      const label = document.createElement("label");
-      label.classList.add("form-label");
-      label.innerText = fieldInfo.label || fieldName;
-      const input = document.createElement("input");
-      if (fieldInfo.readonly)
-        input.readOnly = true;
-      if (fieldInfo.required)
-        input.required = true;
-      label.appendChild(input);
-      input.name = input.id = fieldName;
-      input.classList.add("field", fieldName, fieldInfo.type || "text");
-      switch (fieldInfo.type) {
-        case "currency":
-          input.type = "number";
-          label.classList.add("align-right");
-          input.setAttribute("step", "0.01");
-          break;
-        case "quantity":
-          input.type = "number";
-          label.classList.add("align-right");
-          break;
-        default:
-          label.classList.add("align-left");
-      }
-      if (fieldInfo.value) {
-        const fieldValue = fieldInfo.value;
-        if (typeof fieldValue == "boolean")
-          input.checked = fieldValue;
-        else if (typeof fieldValue == "number") {
-          switch (fieldInfo.type) {
-            case "currency":
-              input.value = fieldValue.toFixed(2);
-              break;
-            default:
-              input.valueAsNumber = fieldValue;
-              break;
-          }
-        } else
-          input.value = fieldValue;
-      }
-      if (fieldInfo.lookup) {
-        input.setAttribute("list", forceDatalist().id);
-      }
-      form.appendChild(label);
-    });
-    return form;
-  }
-};
-
-// app/fun/dom.ts
-function moveChildren(items, report) {
-  while (items.firstChild)
-    report.appendChild(items.firstChild);
-}
-
-// app/services/invoices.ts
-var import_faunadb2 = __toModule(require_faunadb());
 
 // app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
-var TAXRATE = 0.06;
-var accessKeys = {
-  FAUNADB_SERVER_SECRET: "",
-  FAUNADB_ADMIN_SECRET: "",
-  FAUNADB_DOMAIN: "db.us.fauna.com"
-};
-if (globalThis.process?.env) {
-  accessKeys.FAUNADB_SERVER_SECRET = process.env.FAUNADB_SERVER_SECRET;
-  accessKeys.FAUNADB_ADMIN_SECRET = process.env.FAUNADB_ADMIN_SECRET;
-} else if (localStorage) {
-  accessKeys.FAUNADB_SERVER_SECRET = localStorage.getItem("FAUNADB_SERVER_SECRET");
-  accessKeys.FAUNADB_ADMIN_SECRET = localStorage.getItem("FAUNADB_ADMIN_SECRET");
-  if (!accessKeys.FAUNADB_SERVER_SECRET) {
-    const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
-    accessKeys.FAUNADB_SERVER_SECRET = secret;
-    localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
-  }
-  if (!accessKeys.FAUNADB_SERVER_SECRET)
-    console.error("set FAUNADB_SERVER_SECRET in local storage");
-  if (!accessKeys.FAUNADB_ADMIN_SECRET)
-    console.error("set FAUNADB_ADMIN_SECRET in local storage");
+
+// app/fun/globalState.ts
+var globalState;
+function forceGlobalState() {
+  return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
 }
+function setGlobalState(key, value) {
+  const state = forceGlobalState();
+  const [head, ...tail] = key.split(".");
+  if (!tail.length) {
+    state[key] = value;
+  } else {
+    let o = state[head] = state[head] || {};
+    tail.forEach((k) => o[k] = o[k] || {});
+    o[tail[tail.length - 1]] = value;
+  }
+  localStorage.setItem("__GLOBAL_STATE__", JSON.stringify(state));
+}
+function getGlobalState(key) {
+  const state = forceGlobalState();
+  const [head, ...tail] = key.split(".");
+  if (!tail.length)
+    return state[head];
+  let value = state[head];
+  if (!!value && typeof value !== "object")
+    throw `key does not define an object: ${head}`;
+  tail.every((k) => typeof value === "object" && (value = value[k]) && true);
+  return value;
+}
+
+// app/globals.ts
+var _accessKeys;
+var GlobalModel = class {
+  constructor() {
+    __privateAdd(this, _accessKeys, {
+      FAUNADB_SERVER_SECRET: localStorage.getItem("FAUNADB_SERVER_SECRET"),
+      FAUNADB_DOMAIN: "db.us.fauna.com",
+      MAPTILERKEY: localStorage.getItem("MAPTILER_SERVER_SECRET")
+    });
+    this.MAPTILERKEY = __privateGet(this, _accessKeys).MAPTILERKEY;
+    this.CURRENT_USER = localStorage.getItem("user");
+    this.TAXRATE = 0.01 * (getGlobalState("TAX_RATE") || 6);
+    this.BATCH_SIZE = getGlobalState("BATCH_SIZE") || 1e3;
+    this.primaryContact = getGlobalState("primaryContact") || {
+      companyName: "Little Light Show",
+      fullName: "Nathan Alix",
+      addressLine1: "4 Andrea Lane",
+      addressLine2: "Greenville, SC 29615",
+      telephone: ""
+    };
+    if (!__privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET) {
+      const secret = prompt("Provide the FAUNADB_SERVER_SECRET") || "";
+      __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET = secret;
+      localStorage.setItem("FAUNADB_SERVER_SECRET", secret);
+    }
+  }
+  createClient() {
+    return new import_faunadb.default.Client({
+      secret: __privateGet(this, _accessKeys).FAUNADB_SERVER_SECRET,
+      domain: __privateGet(this, _accessKeys).FAUNADB_DOMAIN
+    });
+  }
+};
+_accessKeys = new WeakMap();
+var globals = new GlobalModel();
+var createClient = () => globals.createClient();
+var isDebug = location.href.includes("localhost") || location.search.includes("debug");
+var isOffline = () => getGlobalState("work_offline") === true;
 function isNetlifyBuildContext() {
   return 0 <= location.href.indexOf("netlify");
 }
-var domain = accessKeys.FAUNADB_DOMAIN;
-var FAUNADB_SERVER_SECRET = accessKeys.FAUNADB_SERVER_SECRET;
-var FAUNADB_ADMIN_SECRET = accessKeys.FAUNADB_ADMIN_SECRET;
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
-var CURRENT_USER = localStorage.getItem("user");
-function createClient() {
-  return new import_faunadb.default.Client({ secret: FAUNADB_SERVER_SECRET, domain });
+
+// app/fun/on.ts
+function log(...message) {
+  if (!isDebug)
+    return;
+  console.log(...message);
+}
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  log("trigger", eventName);
+  domNode.dispatchEvent(new Event(eventName));
+}
+
+// app/router.ts
+var routes = {
+  home: () => "/index.html",
+  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
+  createInvoice: () => `/app/invoice/invoice.html`,
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
+  allInvoices: () => `/app/invoice/invoices.html`,
+  createInventory: () => `/app/inventory/index.html`,
+  inventory: (id) => `/app/inventory/index.html?id=${id}`,
+  allInventoryItems: () => `/app/inventory/index.html?id=all`,
+  allLedgers: () => `/app/gl/index.html?print=all`,
+  printLedger: (id) => `/app/gl/index.html?print=${id}`,
+  createLedger: () => "/app/gl/index.html",
+  editLedger: (id) => `/app/gl/index.html?id=${id}`,
+  dashboard: () => "/app/index.html",
+  admin: () => "/app/admin/index.html",
+  createTodo: () => "/app/todo/index.html",
+  todo: (id) => `/app/todo/index.html?id=${id}`,
+  maptiler: () => `/app/ux/maptiler/maptiler.html`,
+  gl: {
+    byAccount: (id) => `/app/gl/index.html?account=${id}`
+  }
+};
+
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return (value || 0).toFixed(2);
+}
+
+// app/fun/ticksInSeconds.ts
+function ticksInSeconds(ticks) {
+  return ticks / 1e3;
+}
+
+// app/services/ServiceCache.ts
+var MAX_AGE = getGlobalState("CACHE_MAX_AGE") || 0;
+var ServiceCache = class {
+  constructor(options) {
+    this.options = options;
+    options.maxAge = Math.max(options.maxAge || MAX_AGE, MAX_AGE);
+    this.table = options.table;
+    const raw = localStorage.getItem(`table_${this.table}`);
+    if (!raw) {
+      this.data = [];
+      this.lastWrite = 0;
+    } else {
+      const info = JSON.parse(raw);
+      this.lastWrite = info.lastWrite;
+      this.data = info.data;
+    }
+  }
+  lastWriteTime() {
+    return this.lastWrite;
+  }
+  renew() {
+    this.lastWrite = Date.now();
+    this.save();
+  }
+  save() {
+    localStorage.setItem(`table_${this.table}`, JSON.stringify({
+      lastWrite: this.lastWrite,
+      data: this.data
+    }));
+  }
+  deleteLineItem(id) {
+    const index = this.data.findIndex((i) => i.id === id);
+    if (-1 < index)
+      this.data.splice(index, 1);
+    this.save();
+  }
+  updateLineItem(lineItem) {
+    const index = this.data.findIndex((i) => i.id === lineItem.id);
+    if (-1 < index) {
+      this.data[index] = lineItem;
+    } else {
+      this.data.push(lineItem);
+    }
+    this.save();
+  }
+  expired() {
+    const age = ticksInSeconds(Date.now() - this.lastWrite);
+    return this.options.maxAge < age;
+  }
+  getById(id) {
+    return this.data.find((item) => item.id === id);
+  }
+  get() {
+    return this.data;
+  }
+};
+
+// app/services/StorageModel.ts
+var import_faunadb4 = __toModule(require_faunadb());
+
+// app/services/getDatabaseTime.ts
+var import_faunadb2 = __toModule(require_faunadb());
+async function getDatabaseTime() {
+  const client = createClient();
+  const response = await client.query(import_faunadb2.query.Now());
+  return new Date(response.value).valueOf();
+}
+
+// app/services/forceUpdatestampTable.ts
+var import_faunadb3 = __toModule(require_faunadb());
+async function forceUpdatestampTable(tableName) {
+  const client = createClient();
+  return await client.query(import_faunadb3.query.CreateCollection({
+    name: tableName
+  }));
+}
+async function forceUpdatestampIndex(tableName) {
+  const client = createClient();
+  const query = import_faunadb3.query.CreateIndex({
+    name: `${tableName}_updates`,
+    source: import_faunadb3.query.Collection(tableName),
+    values: [
+      {
+        field: ["data", "update_date"],
+        reverse: false
+      },
+      {
+        field: ["ref"]
+      }
+    ]
+  });
+  return await client.query(query);
+}
+
+// app/services/StorageModel.ts
+var { BATCH_SIZE, CURRENT_USER } = globals;
+var StorageModel = class {
+  constructor(options) {
+    this.options = options;
+    this.tableName = options.tableName;
+    this.cache = new ServiceCache({
+      table: options.tableName,
+      maxAge: options.maxAge
+    });
+  }
+  isOffline() {
+    return this.options.offline || isOffline();
+  }
+  async loadLatestData(args) {
+    const size = BATCH_SIZE;
+    const { upperBound, lowerBound } = args;
+    let after = null;
+    const client = createClient();
+    const result = [];
+    let maximum_query_count = 1;
+    while (maximum_query_count--) {
+      const response = await client.query(import_faunadb4.query.Map(import_faunadb4.query.Paginate(import_faunadb4.query.Filter(import_faunadb4.query.Match(import_faunadb4.query.Index(`${this.tableName}_updates`)), import_faunadb4.query.Lambda("item", import_faunadb4.query.And(import_faunadb4.query.LTE(lowerBound, import_faunadb4.query.Select([0], import_faunadb4.query.Var("item"))), import_faunadb4.query.LT(import_faunadb4.query.Select([0], import_faunadb4.query.Var("item")), upperBound)))), after ? {
+        size,
+        after
+      } : { size }), import_faunadb4.query.Lambda("item", import_faunadb4.query.Get(import_faunadb4.query.Select([1], import_faunadb4.query.Var("item"))))));
+      const dataToImport = response.data.map((item) => ({
+        ...item.data,
+        id: item.ref.value.id
+      }));
+      result.push(...dataToImport);
+      dataToImport.forEach((item) => {
+        if (!item.id)
+          throw `item must have an id`;
+        const currentItem = this.cache.getById(item.id);
+        if (currentItem && this.isUpdated(currentItem)) {
+        }
+        if (!!item.delete_date) {
+          this.cache.deleteLineItem(item.id);
+        } else {
+          this.cache.updateLineItem(item);
+        }
+      });
+      this.cache.renew();
+      dataToImport.length && setFutureSyncTime(this.tableName, dataToImport[dataToImport.length - 1].update_date);
+      after = response.after;
+      if (!after) {
+        setFutureSyncTime(this.tableName, upperBound);
+        break;
+      }
+    }
+    return result;
+  }
+  async synchronize() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.isOffline())
+      throw "cannot synchronize in offline mode";
+    const priorSyncTime = getPriorSyncTime(this.tableName);
+    const currentSyncTime = await getDatabaseTime();
+    const dataToExport = this.cache.get().filter((item) => item.update_date && item.update_date > priorSyncTime);
+    await retryOnInvalidRef(this.tableName, async () => {
+      await this.loadLatestData({
+        lowerBound: priorSyncTime,
+        upperBound: currentSyncTime
+      });
+    });
+    this.cache.get().filter((item) => !!item.delete_date).forEach(async (item) => {
+      if (!item.id)
+        throw "all items must have an id";
+      if (isOfflineId(item.id)) {
+        this.cache.deleteLineItem(item.id);
+      } else {
+        await this.removeItem(item.id);
+      }
+    });
+    dataToExport.forEach(async (item) => {
+      await this.upsertItem(item);
+    });
+    this.cache.renew();
+  }
+  async removeItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (isOfflineId(id)) {
+      this.cache.deleteLineItem(id);
+      return;
+    }
+    if (this.isOffline()) {
+      const item = this.cache.getById(id);
+      if (!item)
+        throw "cannot remove an item that is not already there";
+      item.delete_date = Date.now();
+      this.cache.updateLineItem(item);
+      return;
+    }
+    const client = createClient();
+    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), id), {
+      data: {
+        id,
+        user: CURRENT_USER,
+        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
+        delete_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+      }
+    }));
+    this.cache.deleteLineItem(id);
+  }
+  async getItem(id) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (!this.isOffline() && this.cache.expired()) {
+      await this.synchronize();
+    } else {
+      if (!!this.cache.getById(id)) {
+        this.cache.renew();
+      } else {
+        if (!this.isOffline())
+          await this.synchronize();
+      }
+    }
+    const result = this.cache.getById(id);
+    if (!result)
+      throw `unable to load item: ${this.tableName} ${id}`;
+    if (!!result.delete_date)
+      throw "item marked for deletion";
+    return result;
+  }
+  async upsertItem(data) {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    const client = createClient();
+    data.id = data.id || `${this.tableName}:${Date.now().toFixed()}`;
+    data.update_date = Date.now();
+    this.cache.updateLineItem(data);
+    if (this.isOffline()) {
+      return;
+    }
+    const offlineId = data.id && isOfflineId(data.id) ? data.id : "";
+    if (offlineId)
+      data.id = "";
+    if (!data.id) {
+      await retryOnInvalidRef(this.tableName, async () => {
+        const result = await client.query(import_faunadb4.query.Create(import_faunadb4.query.Collection(this.tableName), {
+          data: {
+            ...data,
+            user: CURRENT_USER,
+            create_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now()),
+            update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+          }
+        }));
+        {
+          offlineId && this.cache.deleteLineItem(offlineId);
+          data.id = result.ref.value.id;
+          this.cache.updateLineItem(data);
+        }
+      });
+      return;
+    }
+    await client.query(import_faunadb4.query.Replace(import_faunadb4.query.Ref(import_faunadb4.query.Collection(this.tableName), data.id), {
+      data: {
+        ...data,
+        user: CURRENT_USER,
+        update_date: import_faunadb4.query.ToMillis(import_faunadb4.query.Now())
+      }
+    }));
+    this.cache.updateLineItem(data);
+  }
+  isUpdated(data) {
+    return (data.update_date || 0) > this.cache.lastWriteTime();
+  }
+  async getItems() {
+    if (!CURRENT_USER)
+      throw "user must be signed in";
+    if (this.cache.expired() && !this.isOffline()) {
+      await this.synchronize();
+    } else {
+      this.cache.renew();
+    }
+    return this.cache.get().filter((item) => !item.delete_date);
+  }
+};
+function isOfflineId(itemId) {
+  return !!itemId && "9" < itemId[0];
+}
+function getPriorSyncTime(tableName) {
+  return getGlobalState(`timeOfLastSynchronization_${tableName}`) || 0;
+}
+function setFutureSyncTime(tableName, syncTime) {
+  setGlobalState(`timeOfLastSynchronization_${tableName}`, syncTime);
+}
+async function retryOnInvalidRef(tableName, op) {
+  try {
+    await op();
+  } catch (ex) {
+    const error = ex;
+    if (error.message !== "invalid ref")
+      throw ex;
+    try {
+      await forceUpdatestampTable(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    try {
+      await forceUpdatestampIndex(tableName);
+    } catch (ex2) {
+      if (ex2.message !== "instance already exists")
+        throw ex2;
+    }
+    await op();
+  }
 }
 
 // app/services/invoices.ts
+var { TAXRATE } = globals;
 var INVOICE_TABLE = "invoices";
-async function save(invoice) {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-  const client = createClient();
-  if (!invoice.id) {
-    const result = await client.query(import_faunadb2.query.Create(import_faunadb2.query.Collection(INVOICE_TABLE), {
-      data: { ...invoice, user: CURRENT_USER, create_date: Date.now() }
-    }));
-    invoice.id = result.ref.id;
-  } else {
-    const result = await client.query(import_faunadb2.query.Update(import_faunadb2.query.Ref(import_faunadb2.query.Collection(INVOICE_TABLE), invoice.id), {
-      data: { ...invoice, user: CURRENT_USER, update_date: Date.now() }
-    }));
-  }
+var invoiceModel = new StorageModel({
+  tableName: INVOICE_TABLE,
+  offline: false
+});
+async function removeItem(id) {
+  return invoiceModel.removeItem(id);
 }
-async function invoices() {
-  if (!CURRENT_USER)
-    throw "user must be signed in";
-  const client = createClient();
-  const result = await client.query(import_faunadb2.query.Map(import_faunadb2.query.Paginate(import_faunadb2.query.Documents(import_faunadb2.query.Collection(INVOICE_TABLE)), { size: 100 }), import_faunadb2.query.Lambda("ref", import_faunadb2.query.Get(import_faunadb2.query.Var("ref")))));
-  const invoices2 = result.data;
-  invoices2.reverse();
-  invoices2.forEach((invoice) => {
-    invoice.data.id = invoice.ref.value.id;
-  });
-  return invoices2.filter((invoice) => invoice.data.items).map((invoice) => invoice.data).map((invoice) => {
+async function getItem(id) {
+  return invoiceModel.getItem(id);
+}
+async function upsertItem(data) {
+  return invoiceModel.upsertItem(data);
+}
+async function getItems() {
+  const invoices = await invoiceModel.getItems();
+  let normalizedInvoices = invoices.map(normalizeInvoice);
+  const response = normalizedInvoices.filter((invoice) => invoice.items).map((invoice) => {
+    invoice.date = invoice.date || invoice.create_date;
     invoice.labor = (invoice.labor || 0) - 0;
     invoice.additional = (invoice.additional || 0) - 0;
     invoice.items.forEach((item) => {
@@ -4951,32 +5192,31 @@ async function invoices() {
       item.total = (item.total || 0) - 0;
     });
     return invoice;
-  });
+  }).sortBy({ date: "date" }).reverse();
+  return response;
 }
-
-// app/services/validateAccessToken.ts
-var import_faunadb3 = __toModule(require_faunadb());
-var { query } = import_faunadb3.default;
-var q2 = query;
-async function validate() {
-  const client = createClient();
-  return client.query(q2.Paginate(q2.Documents(q2.Collection("Todos"))));
-}
-
-// app/identify.ts
-async function identify() {
-  try {
-    await validate();
-  } catch (ex) {
-    localStorage.setItem("FAUNADB_SERVER_SECRET", "");
-    console.log(ex);
-    return false;
+function normalizeInvoice(invoice) {
+  let raw = invoice;
+  if (raw.data) {
+    raw.data.id = invoice.id;
+    raw.data.mops = invoice.mops || [];
+    invoice = raw = raw.data;
   }
-  if (!localStorage.getItem("user")) {
-    location.href = `/app/identity.html?target=${location.href}&context=${CONTEXT}`;
-    return false;
+  invoice.mops = invoice.mops || [];
+  invoice.items = invoice.items || [];
+  if (raw["paid"] && raw["mop"]) {
+    invoice.mops.push({
+      mop: raw["mop"],
+      paid: raw["paid"]
+    });
+    delete raw["paid"];
+    delete raw["mop"];
   }
-  return true;
+  if (!invoice.taxrate && TAXRATE) {
+    invoice.taxrate = TAXRATE;
+    invoice.items.forEach((i) => i.tax = parseFloat(asCurrency(i.total * invoice.taxrate)));
+  }
+  return raw;
 }
 
 // app/dom.ts
@@ -5053,35 +5293,282 @@ function dom(tag, args, ...children) {
   }
 }
 
-// app/templates/invoice-form.tsx
-function create(invoice) {
-  console.log({ invoice });
+// app/fun/asDateString.ts
+function asDateString(date = new Date()) {
+  return date.toISOString().split("T")[0];
+}
+
+// app/fun/dom.ts
+function moveChildren(items, report) {
+  while (items.firstChild)
+    report.appendChild(items.firstChild);
+}
+function moveChildrenBefore(items, report) {
+  while (items.firstChild)
+    report.before(items.firstChild);
+}
+
+// app/fun/hookupTriggers.ts
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    const eventName = eventItem.dataset["event"];
+    if (!eventName)
+      throw "item must define a data-event";
+    const isInput = isInputElement(eventItem);
+    const inputType = getInputType(eventItem);
+    const isButton = isButtonElement(eventItem, isInput);
+    const isCheckbox = isCheckboxInput(eventItem);
+    if (isButton)
+      on(eventItem, "click", () => {
+        trigger(domNode, eventName);
+      });
+    else if (isCheckbox)
+      on(eventItem, "click", () => {
+        const checked = eventItem.checked;
+        trigger(domNode, eventName + (checked ? ":yes" : ":no"));
+      });
+    else if (isInput)
+      on(eventItem, "change", () => {
+        trigger(domNode, eventName);
+      });
+    else
+      throw `data-event not supported for this item: ${eventItem.outerHTML}`;
+  });
+  domNode.querySelectorAll("[data-bind]").forEach((eventItem) => {
+    const bindTo = eventItem.dataset["bind"];
+    if (!bindTo)
+      throw "item must define a data-bind";
+    const valueInfo = getGlobalState(bindTo);
+    if (isCheckboxInput(eventItem)) {
+      eventItem.checked = valueInfo === true;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, eventItem.checked);
+      });
+    } else if (isNumericInputElement(eventItem)) {
+      const item = eventItem;
+      item.valueAsNumber = valueInfo || 0;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.valueAsNumber);
+      });
+    } else if (isInputElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
+    } else if (isTextAreaElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
+    } else {
+      throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
+    }
+  });
+  domNode.querySelectorAll("[data-href]").forEach((eventItem) => {
+    const href = eventItem.dataset["href"];
+    if (!href)
+      throw "item must define a data-href";
+    const url = routes[href] && routes[href]() || href;
+    eventItem.addEventListener("click", () => {
+      location.href = url;
+    });
+  });
+}
+function isCheckboxInput(eventItem) {
+  return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
+}
+function isButtonElement(eventItem, isInput) {
+  return eventItem.tagName === "BUTTON" || isInput && getInputType(eventItem) === "button";
+}
+function getInputType(eventItem) {
+  return isInputElement(eventItem) && eventItem.type;
+}
+function isTextAreaElement(eventItem) {
+  return eventItem.tagName === "TEXTAREA";
+}
+function isInputElement(eventItem) {
+  return eventItem.tagName === "INPUT";
+}
+function isNumericInputElement(item) {
+  return isInputElement(item) && getInputType(item) === "number";
+}
+
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  });
+}
+function formatUppercase(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").toUpperCase();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+function addFormatter(change, input) {
+  change();
+  input.addEventListener("change", change);
+}
+function formatTrim(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").trim();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+function getValueAsNumber(input) {
+  if (!input.value)
+    return 0;
+  return input.valueAsNumber;
+}
+
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
+}
+function extendTextInputBehaviors(form) {
+  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
+  textInput.forEach(selectOnFocus);
+  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
+  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
+}
+
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
+  tableName: INVENTORY_TABLE,
+  offline: false
+});
+async function forceDatalist() {
+  let dataList = document.querySelector(`#inventory_list`);
+  if (dataList)
+    return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = "inventory_list";
+  const items = await inventoryModel.getItems();
+  items.sortBy({ code: "string" }).forEach((item) => {
+    const option = document.createElement("option");
+    option.value = item.code;
+    dataList.appendChild(option);
+  });
+  document.body.appendChild(dataList);
+  return dataList;
+}
+
+// app/invoice/PaymentManager.ts
+var TABLE_NAME = "mops";
+var Manager = class {
+  constructor() {
+    this.data = JSON.parse(localStorage.getItem(TABLE_NAME) || "{}");
+  }
+  getItemByCode(code) {
+    return this.data[code];
+  }
+  persistItem(item) {
+    this.data[item.id] = item;
+  }
+  persistItems() {
+    localStorage.setItem(TABLE_NAME, JSON.stringify(this.data));
+  }
+};
+var manager = new Manager();
+manager.persistItem({ id: "CASH" });
+manager.persistItem({ id: "CHECK" });
+manager.persistItems();
+function forceDatalist2() {
+  let dataList = document.querySelector(`#${TABLE_NAME}_list`);
+  if (dataList)
+    return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = `${TABLE_NAME}_list`;
+  Object.entries(manager.data).forEach(([key, value]) => {
+    const option = document.createElement("option");
+    option.value = key;
+    dataList.appendChild(option);
+  });
+  document.body.appendChild(dataList);
+  return dataList;
+}
+
+// app/fun/asNumber.ts
+function asNumber(node) {
+  return node.valueAsNumber || 0;
+}
+
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
+}
+
+// app/invoice/templates/invoice-form.tsx
+var { primaryContact, TAXRATE: TAXRATE2 } = globals;
+var itemsToRemove = [];
+async function create(invoice) {
+  await forceDatalist();
   const form = /* @__PURE__ */ dom("form", {
     class: "grid-6",
     id: "invoice-form"
   }, /* @__PURE__ */ dom("h1", {
-    class: "col-1-6"
-  }, "Create an Invoice"), /* @__PURE__ */ dom("input", {
+    class: "col-1-last centered"
+  }, `Invoice Form for ${primaryContact.companyName}`), /* @__PURE__ */ dom("input", {
     class: "form-label hidden",
     readonly: true,
     type: "text",
     name: "id",
     value: invoice.id
   }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
+    class: "section-title col-1-last"
   }, "Client"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
-  }, "Client Name"), /* @__PURE__ */ dom("input", {
-    class: "col-1-6",
+    class: "form-label col-1-3"
+  }, "Client Name"), /* @__PURE__ */ dom("label", {
+    class: "form-label col-4-last"
+  }, "Date"), /* @__PURE__ */ dom("input", {
+    class: "col-1-3",
     type: "text",
     placeholder: "clientname",
     name: "clientname",
     required: true,
     value: invoice.clientname
+  }), /* @__PURE__ */ dom("input", {
+    class: "col-4-last",
+    type: "date",
+    placeholder: "Date",
+    name: "date",
+    required: true,
+    value: asDateString(new Date(invoice.date || Date.now()))
   }), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-3"
   }, "Telephone"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3"
+    class: "form-label col-4-last"
   }, "Email"), /* @__PURE__ */ dom("input", {
     type: "tel",
     class: "col-1-3",
@@ -5090,48 +5577,48 @@ function create(invoice) {
     value: invoice.telephone
   }), /* @__PURE__ */ dom("input", {
     type: "email",
-    class: "col-4-3",
+    class: "col-4-last",
     placeholder: "email",
     name: "email",
     value: invoice.email
   }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
+    class: "form-label col-1-last"
   }, "Bill To", /* @__PURE__ */ dom("textarea", {
     class: "address",
     placeholder: "billto",
     name: "billto"
   }, invoice.billto)), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
+    class: "form-label col-1-last"
   }, "Comments", /* @__PURE__ */ dom("textarea", {
     class: "comments",
     placeholder: "comments",
     name: "comments"
   }, invoice.comments)), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
+    class: "vspacer col-1-last"
   }), /* @__PURE__ */ dom("section", {
-    class: "line-items grid-6 col-1-6"
+    class: "line-items grid-6 col-1-last"
   }, /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
+    class: "section-title col-1-last"
   }, "Items")), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
+    class: "vspacer col-1-last"
   }), /* @__PURE__ */ dom("button", {
-    class: "button col-1-4",
+    class: "button col-1-3",
     "data-event": "add-another-item",
     type: "button"
   }, "Add item"), /* @__PURE__ */ dom("button", {
-    class: "button col-5-2",
+    class: "button col-4-last",
     "data-event": "remove-last-item",
     type: "button"
   }, "Remove Last Item"), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-6"
+    class: "vspacer col-1-last"
   }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-6"
+    class: "section-title col-1-last"
   }, "Summary"), /* @__PURE__ */ dom("label", {
     class: "form-label col-1-2 currency"
   }, "Labor"), /* @__PURE__ */ dom("label", {
     class: "form-label col-3-2 currency"
   }, "Other"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-5-2 currency"
+    class: "form-label col-5-last currency"
   }, "Total + Tax"), /* @__PURE__ */ dom("input", {
     type: "number",
     class: "currency col-1-2",
@@ -5148,82 +5635,194 @@ function create(invoice) {
   }), /* @__PURE__ */ dom("input", {
     readonly: true,
     type: "number",
-    class: "currency col-5-2 bold",
+    class: "currency col-5-last",
     id: "total_due",
     name: "total_due"
   }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1"
+    class: "col-1 vspacer-1"
+  }), /* @__PURE__ */ dom("div", {
+    class: "section-title col-1-last"
+  }, "Method of Payment"), /* @__PURE__ */ dom("div", {
+    class: "col-1-4"
+  }, "Payment Type"), /* @__PURE__ */ dom("div", {
+    class: "col-5-last currency"
+  }, "Amount"), /* @__PURE__ */ dom("div", {
+    id: "mop-line-item-end",
+    class: "hidden"
   }), /* @__PURE__ */ dom("button", {
-    class: "bold button col-1-3",
+    class: "button col-1-2 if-desktop",
+    "data-event": "add-method-of-payment",
+    type: "button"
+  }, "Add Payment"), /* @__PURE__ */ dom("div", {
+    class: "form-label col-5-last currency if-desktop"
+  }, "Balance Due"), /* @__PURE__ */ dom("input", {
+    readonly: true,
+    class: "currency col-5-last bold if-desktop",
+    type: "number",
+    id: "balance_due"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer-1 col-1-last flex"
+  }, /* @__PURE__ */ dom("button", {
+    class: "bold button",
     "data-event": "submit",
     type: "button"
   }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button col-4-2",
+    class: "button if-print-to-pdf",
     "data-event": "print",
     type: "button"
-  }, "Save and Print"), /* @__PURE__ */ dom("button", {
-    class: "button col-6",
+  }, "Print"), /* @__PURE__ */ dom("button", {
+    class: "button if-desktop",
     "data-event": "clear",
     type: "button"
   }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button col-1-6",
-    "data-event": "list-all-invoices",
+    class: "button if-desktop",
+    "data-event": "delete",
     type: "button"
-  }, "List All Invoices"));
+  }, "Delete")), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2"
+  }));
   const labor = form.querySelector("[name=labor]");
   const additional = form.querySelector("[name=additional]");
-  labor.addEventListener("change", () => form.dispatchEvent(new Event("change")));
-  additional.addEventListener("change", () => form.dispatchEvent(new Event("change")));
-  const lineItemsTarget = form.querySelector(".line-items");
-  const lineItems = invoice.items.map(renderInvoiceItem);
-  lineItems.forEach((item) => setupComputeOnLineItem(form, item));
-  lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
-  form.addEventListener("change", () => compute(form));
+  on(labor, "change", () => trigger(form, "change"));
+  on(additional, "change", () => trigger(form, "change"));
+  {
+    const lineItemsTarget = form.querySelector(".line-items");
+    const lineItems = invoice.items.map(renderInvoiceItem);
+    lineItems.forEach((item) => setupComputeOnLineItem(form, item));
+    lineItems.forEach((item) => moveChildren(item, lineItemsTarget));
+  }
+  {
+    const payementsTarget = form.querySelector("#mop-line-item-end");
+    const paymentItems = invoice.mops?.map(renderMopLineItem);
+    paymentItems?.forEach((item) => {
+    });
+    paymentItems?.forEach((item) => moveChildrenBefore(item, payementsTarget));
+  }
+  on(form, "change", () => compute(form));
+  extendNumericInputBehaviors(form);
+  extendTextInputBehaviors(form);
+  hookupTriggers(form);
+  hookupEvents(form);
+  if (!invoice.mops?.length) {
+    trigger(form, "add-method-of-payment");
+  }
   compute(form);
   return form;
+}
+function getFirstInput(itemPanel) {
+  return itemPanel.querySelector("input");
+}
+function addAnotherItem(formDom) {
+  const itemPanel = renderInvoiceItem({
+    quantity: 1,
+    item: "",
+    price: 0,
+    total: 0,
+    tax: 0
+  });
+  setupComputeOnLineItem(formDom, itemPanel);
+  const toFocus = getFirstInput(itemPanel);
+  const target = formDom.querySelector(".line-items") || formDom;
+  itemsToRemove.splice(0, itemsToRemove.length);
+  for (let i = 0; i < itemPanel.children.length; i++) {
+    itemsToRemove.push(itemPanel.children[i]);
+  }
+  extendNumericInputBehaviors(itemPanel);
+  moveChildren(itemPanel, target);
+  toFocus?.focus();
+}
+function hookupEvents(formDom) {
+  on(formDom, "list-all-invoices", () => {
+    gotoUrl(routes.allInvoices());
+  });
+  on(formDom, "remove-last-item", () => {
+    itemsToRemove.forEach((item) => item.remove());
+    trigger(formDom, "change");
+  });
+  on(formDom, "add-another-item", () => {
+    if (!formDom.reportValidity())
+      return;
+    addAnotherItem(formDom);
+    trigger(formDom, "change");
+  });
+  on(formDom, "add-method-of-payment", () => {
+    const target = formDom.querySelector("#mop-line-item-end") || formDom;
+    const mopLineItem = renderMopLineItem();
+    extendNumericInputBehaviors(mopLineItem);
+    const focus = getFirstInput(mopLineItem);
+    moveChildrenBefore(mopLineItem, target);
+    focus.focus();
+  });
+  on(formDom, "clear", () => {
+    gotoUrl(routes.createInvoice());
+  });
+}
+function renderMopLineItem(item) {
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("input", {
+    type: "select",
+    class: "col-1-4",
+    name: "method_of_payment",
+    value: item?.mop || "",
+    list: forceDatalist2().id
+  }), /* @__PURE__ */ dom("input", {
+    type: "number",
+    class: "col-5-last currency",
+    name: "amount_paid",
+    placeholder: "amount paid",
+    value: asCurrency(item?.paid || 0)
+  }));
 }
 function compute(form) {
   const labor = form.querySelector("[name=labor]");
   const additional = form.querySelector("[name=additional]");
   const total_due = form.querySelector("[name=total_due]");
+  const balance_due = form.querySelector("#balance_due");
   const totals = Array.from(form.querySelectorAll("input[name=total]")).map((input) => parseFloat(input.value || "0"));
   const total = totals.reduce((a, b) => a + b, 0);
-  const grandTotal = labor.valueAsNumber + additional.valueAsNumber + total * (1 + TAXRATE);
+  const tax = parseFloat(asCurrency(total * TAXRATE2));
+  const grandTotal = labor.valueAsNumber + additional.valueAsNumber + tax + total;
   total_due.value = grandTotal.toFixed(2);
+  const total_payments = sum(Array.from(form.querySelectorAll("input[name=amount_paid]")).map(asNumber));
+  balance_due.value = (grandTotal - total_payments).toFixed(2);
 }
 function renderInvoiceItem(item) {
   const form = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "form-label col-1-6"
+    class: "form-label col-1-last"
   }, "Item"), /* @__PURE__ */ dom("input", {
     name: "item",
-    class: "bold col-1-6",
+    class: "bold col-1-3 text trim",
     required: true,
+    autocomplete: "off",
     type: "text",
     value: item.item,
-    list: forceDatalist().id
+    list: "inventory_list"
+  }), /* @__PURE__ */ dom("input", {
+    name: "description",
+    class: "col-4-last text trim",
+    type: "text",
+    value: item.description || ""
   }), /* @__PURE__ */ dom("label", {
-    class: "form-label col-1 quantity"
+    class: "form-label col-1-2 quantity"
   }, "Quantity"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-2-2 currency"
+    class: "form-label col-3-2 currency"
   }, "Price"), /* @__PURE__ */ dom("label", {
-    class: "form-label col-4-3 currency"
+    class: "form-label col-5-last currency"
   }, "Total"), /* @__PURE__ */ dom("input", {
     name: "quantity",
     required: true,
-    class: "quantity col-1",
+    class: "quantity col-1-2",
     type: "number",
     value: item.quantity
   }), /* @__PURE__ */ dom("input", {
     name: "price",
     required: true,
-    class: "currency col-2-2",
+    class: "currency col-3-2",
     type: "number",
-    step: "0.01",
     value: item.price.toFixed(2)
   }), /* @__PURE__ */ dom("input", {
     readonly: true,
     name: "total",
-    class: "bold currency col-4-3",
+    class: "bold currency col-5-last",
     type: "number",
     value: item.total.toFixed(2)
   }));
@@ -5233,42 +5832,37 @@ function setupComputeOnLineItem(event, form) {
   const itemInput = form.querySelector("[name=item]");
   const quantityInput = form.querySelector("[name=quantity]");
   const priceInput = form.querySelector("[name=price]");
+  const descriptionInput = form.querySelector("[name=description]");
   const totalInput = form.querySelector("[name=total]");
   const computeTotal = () => {
-    const qty = parseFloat(quantityInput.value);
-    const price = parseFloat(priceInput.value);
+    const qty = getValueAsNumber(quantityInput);
+    const price = getValueAsNumber(priceInput);
     const value = qty * price;
-    console.log({ qty, price, value });
     totalInput.value = value.toFixed(2);
-    event.dispatchEvent(new Event("change"));
+    trigger(event, "change");
   };
-  quantityInput?.addEventListener("change", computeTotal);
-  priceInput?.addEventListener("change", computeTotal);
-  itemInput.addEventListener("change", () => {
-    const item = inventoryManager.getInventoryItemByCode(itemInput.value);
+  on(quantityInput, "change", computeTotal);
+  on(priceInput, "change", computeTotal);
+  on(itemInput, "change", async () => {
+    const item = await getInventoryItemByCode(itemInput.value);
     if (!item)
       return;
-    const price = parseFloat(priceInput.value);
+    const price = getValueAsNumber(priceInput);
     if (item.price !== price) {
       priceInput.value = item.price.toFixed(2);
-      priceInput.dispatchEvent(new Event("change"));
+      trigger(priceInput, "change");
     }
+    if (item.description)
+      descriptionInput.value = item.description;
   });
 }
-
-// app/templates/invoice-print.tsx
-function invoiceItem(item) {
-  console.log("invoiceItem", { item });
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
-    class: "tall col-1-3"
-  }, item.item), /* @__PURE__ */ dom("label", {
-    class: "tall col-4 align-right"
-  }, item.quantity.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "tall col-5 align-right"
-  }, item.price.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "tall col-6 align-right"
-  }, item.total.toFixed(2)));
+async function getInventoryItemByCode(code) {
+  const items = await inventoryModel.getItems();
+  return items.find((item) => item.code === code);
 }
+
+// app/invoice/templates/invoice-print.tsx
+var { primaryContact: primaryContact2, TAXRATE: TAXRATE3 } = globals;
 function create2(invoice) {
   const report = /* @__PURE__ */ dom("div", {
     class: "print page grid-6"
@@ -5282,15 +5876,15 @@ function create2(invoice) {
     class: "col-1-6 vspacer"
   }), /* @__PURE__ */ dom("label", {
     class: "col-1-2"
-  }, "Nathan Alix"), /* @__PURE__ */ dom("label", {
+  }, primaryContact2.fullName), /* @__PURE__ */ dom("label", {
     class: "col-5-2 align-right"
   }, invoice.id), /* @__PURE__ */ dom("label", {
     class: "col-1-2"
-  }, "4 Andrea Lane"), /* @__PURE__ */ dom("label", {
+  }, primaryContact2.addressLine1), /* @__PURE__ */ dom("label", {
     class: "col-5-2 align-right"
   }, new Date().toDateString()), /* @__PURE__ */ dom("label", {
     class: "col-1-2"
-  }, "Greenville, SC 29615"), /* @__PURE__ */ dom("div", {
+  }, primaryContact2.addressLine2), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-6"
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1"
@@ -5319,8 +5913,8 @@ function create2(invoice) {
     invoice.items.forEach((item) => {
       moveChildren(invoiceItem(item), report);
     });
-    const totalItems = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-    console.log(invoice.items, totalItems);
+    const totalItems = sum(invoice.items.map((i) => i.total));
+    const totalTax = sum(invoice.items.map((i) => i.tax));
     const summary = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
       class: "line col-1-6"
     }), /* @__PURE__ */ dom("div", {
@@ -5331,9 +5925,9 @@ function create2(invoice) {
       class: "col-6 align-right"
     }, totalItems.toFixed(2)), /* @__PURE__ */ dom("label", {
       class: "col-5"
-    }, "Tax (", 100 * TAXRATE + "", "%)"), /* @__PURE__ */ dom("label", {
+    }, "Tax (", 100 * TAXRATE3 + "", "%)"), /* @__PURE__ */ dom("label", {
       class: "col-6 align-right"
-    }, (totalItems * TAXRATE).toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
+    }, totalTax.toFixed(2)), invoice.labor && /* @__PURE__ */ dom("label", {
       class: "col-5"
     }, "Labor"), invoice.labor && /* @__PURE__ */ dom("label", {
       class: "col-6 align-right"
@@ -5345,106 +5939,368 @@ function create2(invoice) {
       class: "bold col-5"
     }, "Balance Due"), /* @__PURE__ */ dom("label", {
       class: "bold col-6 align-right"
-    }, ((invoice.labor || 0) + (invoice.additional || 0) + totalItems * (1 + TAXRATE)).toFixed(2)));
+    }, ((invoice.labor || 0) + (invoice.additional || 0) + totalItems + totalTax).toFixed(2)));
     moveChildren(summary, report);
   }
   return report;
 }
+function invoiceItem(item) {
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("label", {
+    class: "tall col-1-3"
+  }, item.item), /* @__PURE__ */ dom("label", {
+    class: "tall col-4 align-right"
+  }, item.quantity.toFixed(2)), /* @__PURE__ */ dom("label", {
+    class: "tall col-5 align-right"
+  }, item.price.toFixed(2)), /* @__PURE__ */ dom("label", {
+    class: "tall col-6 align-right"
+  }, item.total.toFixed(2)));
+}
 
-// app/templates/invoices-grid.tsx
-function totalInvoice(invoice) {
-  let total = invoice.items.reduce((a, b) => a + ((b.total || 0) - 0), 0);
-  return total * (1 + TAXRATE) + invoice.labor + invoice.additional;
+// app/fun/isZero.ts
+function isZero(value) {
+  if (value === "0.00")
+    return true;
+  if (value === "-0.00")
+    return true;
+  return false;
 }
-function renderInvoice(invoice) {
-  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
-    class: "col-1-4",
-    href: `invoice?id=${invoice.id}`
-  }, invoice.clientname), /* @__PURE__ */ dom("label", {
-    class: "col-5 align-right"
-  }, invoice.labor.toFixed(2)), /* @__PURE__ */ dom("label", {
-    class: "col-6 align-right"
-  }, totalInvoice(invoice).toFixed(2)));
+function noZero(value) {
+  return isZero(value) ? "" : value;
 }
-function create3(invoices2) {
-  const total = invoices2.map(totalInvoice).reduce((a, b) => a + b, 0);
-  const report = /* @__PURE__ */ dom("form", {
+
+// app/invoice/templates/invoices-grid.tsx
+function create3(invoices) {
+  const total = sum(invoices.map(totalInvoice));
+  const labor = sum(invoices.map((i) => i.labor));
+  const payments = sum(invoices.map(totalPayments));
+  const balanceDue = total - payments;
+  const target = invoices.length ? /* @__PURE__ */ dom("form", {
     class: "grid-6"
-  }, /* @__PURE__ */ dom("label", {
+  }, /* @__PURE__ */ dom("h1", {
+    class: "centered col-1-last"
+  }, `Invoices for ${globals.primaryContact.companyName}`), /* @__PURE__ */ dom("div", {
     class: "bold col-1-4"
-  }, "Client"), /* @__PURE__ */ dom("label", {
+  }, "Client"), /* @__PURE__ */ dom("div", {
     class: "bold col-5 align-right"
-  }, "Labor"), /* @__PURE__ */ dom("label", {
+  }, "Labor"), /* @__PURE__ */ dom("div", {
     class: "bold col-6 align-right"
   }, "Total"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
+    class: "bold col-7-last align-right"
+  }, "Balance Due"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-last"
+  })) : /* @__PURE__ */ dom("form", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("div", {
+    class: "col-1-last centered"
+  }, "No invoices defined"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-last"
   }));
-  invoices2.map(renderInvoice).forEach((item) => moveChildren(item, report));
-  moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-6"
+  invoices.map(renderInvoice).forEach((item) => moveChildren(item, target));
+  invoices.length && moveChildren(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "vspacer-1 col-1-last"
   }), /* @__PURE__ */ dom("div", {
-    class: "line col-1-6"
+    class: "line col-1-last"
   }), /* @__PURE__ */ dom("label", {
     class: "bold col-1-4"
   }, "Total"), /* @__PURE__ */ dom("label", {
-    class: "bold col-5-2 align-right"
-  }, total.toFixed(2)), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-6"
-  }), /* @__PURE__ */ dom("button", {
-    type: "button",
-    class: "button col-1-2",
-    "data-event": "create-invoice"
-  }, "Create Invoice")), report);
-  return report;
+    class: "bold col-5 currency"
+  }, asCurrency(labor)), /* @__PURE__ */ dom("label", {
+    class: "bold col-6 currency"
+  }, asCurrency(total)), /* @__PURE__ */ dom("label", {
+    class: "bold col-7-last currency"
+  }, asCurrency(balanceDue)), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-last"
+  })), target);
+  hookupTriggers(target);
+  return target;
+}
+function totalInvoice(invoice) {
+  const total = sum(invoice.items.map((i) => i.total));
+  const tax = sum(invoice.items.map((i) => i.tax));
+  return total + tax + invoice.labor + invoice.additional;
+}
+function renderInvoice(invoice) {
+  const invoiceTotal = totalInvoice(invoice);
+  return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("a", {
+    class: "col-1-4",
+    href: `${routes.invoice(invoice.id)}`
+  }, invoice.clientname), /* @__PURE__ */ dom("label", {
+    class: "col-5 currency"
+  }, asCurrency(invoice.labor)), /* @__PURE__ */ dom("label", {
+    class: "col-6 currency"
+  }, asCurrency(invoiceTotal)), /* @__PURE__ */ dom("label", {
+    class: "col-7 currency"
+  }, noZero(asCurrency(invoiceTotal - totalPayments(invoice)))));
+}
+function totalPayments(invoice) {
+  return sum(invoice.mops.map((i) => i.paid));
 }
 
-// app/invoice.ts
-var formManager = new FormFactory();
-var itemsToRemove = [];
-function addAnotherItem(form) {
-  const itemPanel = renderInvoiceItem({
-    quantity: 1,
-    item: "",
-    price: 0,
-    total: 0
-  });
-  setupComputeOnLineItem(form.formDom, itemPanel);
-  const toFocus = getFirstInput(itemPanel);
-  const target = form.formDom.querySelector(".line-items") || form.formDom;
-  itemsToRemove.splice(0, itemsToRemove.length);
-  for (let i = 0; i < itemPanel.children.length; i++) {
-    itemsToRemove.push(itemPanel.children[i]);
-  }
-  moveChildren(itemPanel, target);
-  toFocus?.focus();
+// app/fun/get.ts
+function isDefined(value) {
+  return typeof value !== "undefined";
 }
-function init() {
+function get(formDom, key) {
+  if (!isDefined(formDom[key]))
+    throw `form element not found: ${key}`;
+  return formDom[key].value;
+}
+function set(formDom, values) {
+  const keys = Object.keys(values);
+  keys.forEach((key) => {
+    if (!isDefined(formDom[key]))
+      throw `form element not found: ${key}`;
+    formDom[key].value = values[key];
+  });
+}
+
+// app/ux/Toaster.ts
+var DEFAULT_DELAY = 5e3;
+var Toaster = class {
+  toast(options) {
+    let target = document.querySelector("#toaster");
+    if (!target) {
+      target = document.createElement("div");
+      target.id = "toaster";
+      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
+      document.body.appendChild(target);
+    }
+    const message = document.createElement("div");
+    message.classList.add(options.mode || "error", "padding", "margin");
+    message.innerHTML = options.message;
+    message.addEventListener("click", () => message.remove());
+    setTimeout(() => message.remove(), DEFAULT_DELAY);
+    target.insertBefore(message, null);
+  }
+};
+
+// app/services/log.ts
+var TABLE_NAME2 = "log";
+var LogModel = class extends StorageModel {
+};
+var logStore = new LogModel({
+  tableName: TABLE_NAME2,
+  offline: false
+});
+
+// app/ux/toasterWriter.ts
+var toaster = new Toaster();
+function toast(message, options) {
+  if (!options)
+    options = { mode: "info" };
+  console.info(message, options);
+  toaster.toast({
+    message,
+    ...options
+  });
+}
+function reportError(message) {
+  toast(message + "", {
+    mode: "error"
+  });
+  logStore.upsertItem({ message }).catch((ex) => console.log(ex));
+}
+
+// app/fun/setMode.ts
+var modes = {
+  light_mode: "light",
+  dark_mode: "dark",
+  holiday_mode: "holiday"
+};
+function setMode(mode) {
+  if (!mode)
+    mode = localStorage.getItem("mode") || modes.light_mode;
+  localStorage.setItem("mode", mode);
+  document.body.classList.remove(...Object.values(modes));
+  document.body.classList.add(mode);
+  const isFontier = getGlobalState("textier") == true;
+  document.body.classList.toggle("textier", isFontier);
+}
+
+// app/services/validateAccessToken.ts
+var import_faunadb5 = __toModule(require_faunadb());
+async function validate() {
+  const client = createClient();
+  await client.ping();
+}
+
+// app/identify.ts
+async function identify() {
+  if (isOffline())
+    return false;
+  if (!localStorage.getItem("user")) {
+    gotoUrl(routes.identity({
+      target: location.href,
+      context: CONTEXT
+    }));
+    return false;
+  }
+  return true;
+  try {
+    await validate();
+  } catch (ex) {
+    reportError(ex);
+    return false;
+  }
+  return true;
+}
+
+// app/ux/injectLabels.ts
+function injectLabels(domNode) {
+  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
+  inputsToWrap.forEach((input) => {
+    const label = dom("label");
+    label.className = "border padding rounded wrap " + input.className;
+    label.innerText = input.placeholder;
+    input.parentElement.insertBefore(label, input);
+    label.appendChild(input);
+  });
+}
+
+// app/fun/isUndefined.ts
+function isUndefined(value) {
+  return typeof value === "undefined";
+}
+
+// app/fun/detect.ts
+var userAgent = navigator.userAgent.toLocaleUpperCase();
+var isChrome = userAgent.includes("CHROME");
+var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
+function removeCssRestrictors() {
+  if (isChrome) {
+    removeCssRule(".if-print-to-pdf");
+  }
+  if (!isMobile) {
+    removeCssRule(".if-desktop");
+  }
+}
+function removeCssRule(name) {
+  const sheets = document.styleSheets;
+  for (let sheetIndex = 0; sheetIndex < sheets.length; sheetIndex++) {
+    const sheet = sheets[sheetIndex];
+    try {
+      if (!sheet?.cssRules)
+        continue;
+    } catch (ex) {
+      continue;
+    }
+    for (let ruleIndex = 0; ruleIndex < sheet.cssRules.length; ruleIndex++) {
+      const rule = sheet.cssRules[ruleIndex];
+      if (rule.selectorText === name) {
+        sheet.deleteRule(ruleIndex);
+        return;
+      }
+    }
+  }
+}
+
+// app/index.ts
+var { primaryContact: primaryContact3 } = globals;
+var VERSION = "1.0.5";
+async function init() {
+  const domNode = document.body;
+  if (!isOffline()) {
+    await identify();
+    await registerServiceWorker();
+    setInitialState({
+      VERSION: "1.0.3"
+    });
+    setInitialState({
+      TAX_RATE: 6,
+      CACHE_MAX_AGE: 600,
+      BATCH_SIZE: 64,
+      work_offline: true,
+      VERSION
+    });
+    setInitialState({ primaryContact: primaryContact3 });
+    await upgradeFromCurrentVersion();
+  }
+  injectLabels(domNode);
+  extendNumericInputBehaviors(domNode);
+  hookupTriggers(domNode);
+  setMode();
+  removeCssRestrictors();
+}
+function setInitialState(data) {
+  Object.keys(data).forEach((key) => {
+    const value = getGlobalState(key);
+    if (isUndefined(value)) {
+      setGlobalState(key, data[key]);
+    }
+  });
+}
+async function upgradeFromCurrentVersion() {
+  const currentVersion = getGlobalState("VERSION");
+  switch (currentVersion) {
+    case "1.0.3":
+      await upgradeFrom103To105();
+      toast(`upgraded from ${currentVersion} to ${VERSION}`);
+      break;
+    case "1.0.4":
+      break;
+    case "1.0.5":
+      break;
+    default:
+      throw `unexpected version: ${currentVersion}`;
+  }
+}
+async function upgradeFrom103To105() {
+  inventoryModel.upgradeTo104();
+  await inventoryModel.synchronize();
+  setGlobalState("VERSION", VERSION);
+}
+async function registerServiceWorker() {
+  const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
+}
+
+// app/fun/getQueryParameter.ts
+function getQueryParameter(name) {
   const queryParams = new URLSearchParams(window.location.search);
-  if (queryParams.has("id")) {
-    renderInvoice2(queryParams.get("id"));
-  } else {
-    renderInvoice2();
+  return queryParams.get(name);
+}
+
+// app/invoice/invoice.ts
+var { TAXRATE: TAXRATE4 } = globals;
+async function init2(target = document.body) {
+  try {
+    await init();
+    const id = getQueryParameter("id");
+    if (!!id) {
+      await renderInvoice2(target, id);
+    } else {
+      await renderInvoice2(target);
+    }
+  } catch (ex) {
+    reportError(ex);
   }
 }
 async function renderInvoices(target) {
-  const invoices2 = await invoices();
-  const formDom = create3(invoices2);
-  const form = formManager.domAsForm(formDom);
-  target.appendChild(formDom);
-  form.on("create-invoice", () => {
-    location.href = "invoice.html";
-  });
+  try {
+    await init();
+    const invoices = await getItems();
+    const formDom = create3(invoices);
+    target.appendChild(formDom);
+    on(formDom, "create-invoice", () => {
+      try {
+        gotoUrl(routes.createInvoice());
+      } catch (ex) {
+        reportError(ex);
+      }
+    });
+  } catch (ex) {
+    reportError(ex);
+  }
 }
-async function renderInvoice2(invoiceId) {
+async function renderInvoice2(target, invoiceId) {
   let invoice;
   if (invoiceId) {
-    const invoices2 = await invoices();
-    invoice = invoices2.find((invoice2) => invoice2.id === invoiceId) || null;
+    invoice = await getItem(invoiceId);
     if (!invoice)
       throw "invoice not found";
   } else {
     invoice = {
-      id: 1e3 + invoices.length + 1 + "",
+      id: "",
+      date: Date.now(),
       clientname: "",
       billto: "",
       comments: "",
@@ -5452,64 +6308,55 @@ async function renderInvoice2(invoiceId) {
       telephone: "",
       items: [],
       labor: 0,
-      additional: 0
+      additional: 0,
+      mops: [],
+      taxrate: TAXRATE4
     };
   }
-  const template = create(invoice);
-  template.classList.add("hidden");
-  document.body.appendChild(template);
-  const formDom = document.querySelector("#invoice-form");
-  if (!formDom)
-    throw "a form must be defined with id of 'invoice-form'";
-  const form = formManager.domAsForm(formDom);
-  const target = formDom.querySelector(".line-items") || formDom;
-  form.on("list-all-invoices", () => {
-    window.location.href = "invoices.html";
-  });
-  form.on("print", async () => {
-    if (await tryToSaveInvoice(form)) {
+  const formDom = await create(invoice);
+  target.appendChild(formDom);
+  hookupEvents2(formDom);
+  trigger(formDom, "change");
+}
+function hookupEvents2(formDom) {
+  on(formDom, "print", async () => {
+    if (await tryToSaveInvoice(formDom)) {
       const requestModel = asModel(formDom);
-      print(requestModel);
+      print(formDom.parentElement || formDom, requestModel);
     }
   });
-  form.on("submit", async () => {
-    if (await tryToSaveInvoice(form))
-      form.trigger("list-all-invoices");
+  on(formDom, "delete", async () => {
+    if (await tryToDeleteInvoice(formDom))
+      trigger(formDom, "list-all-invoices");
   });
-  form.on("remove-last-item", () => {
-    itemsToRemove.forEach((item) => item.remove());
-    form.trigger("change");
+  on(formDom, "submit", async () => {
+    if (await tryToSaveInvoice(formDom)) {
+      toast("Invoice saved");
+    }
   });
-  form.on("add-another-item", () => {
-    if (!form.isValid())
-      return;
-    addAnotherItem(form);
-    form.trigger("change");
-  });
-  form.on("clear", () => {
-    location.href = "invoice.html";
-  });
-  template.classList.remove("hidden");
-  form.trigger("change");
 }
-async function tryToSaveInvoice(form) {
-  const { formDom } = form;
+async function tryToDeleteInvoice(formDom) {
+  const id = get(formDom, "id");
+  if (!id)
+    throw "unable to delete this invoice";
+  await removeItem(id);
+  return true;
+}
+async function tryToSaveInvoice(formDom) {
   if (!formDom.checkValidity()) {
     formDom.reportValidity();
     return false;
   }
-  formDom.querySelectorAll(".line-item").forEach((lineItemForm) => {
-    const [itemInput, priceInput] = ["#item", "#price"].map((id) => lineItemForm.querySelector(id));
-    inventoryManager.persistInventoryItem({
-      code: itemInput.value,
-      price: priceInput.valueAsNumber
-    });
-  });
-  inventoryManager.persistInventoryItems();
   const requestModel = asModel(formDom);
-  console.log({ requestModel });
-  await save(requestModel);
-  form.set("id", requestModel.id);
+  if (requestModel.id) {
+    const priorModel = await invoiceModel.getItem(requestModel.id);
+    if (deepEqual(requestModel, priorModel)) {
+      toast("No changes found");
+      return false;
+    }
+  }
+  await upsertItem(requestModel);
+  set(formDom, { id: requestModel.id });
   return true;
 }
 function asModel(formDom) {
@@ -5517,14 +6364,23 @@ function asModel(formDom) {
   const requestModel = {
     id: data.get("id"),
     clientname: data.get("clientname"),
+    date: new Date(data.get("date")).valueOf(),
     billto: data.get("billto"),
     telephone: data.get("telephone"),
     email: data.get("email"),
     comments: data.get("comments"),
     items: [],
     labor: Number.parseFloat(data.get("labor") || "0"),
-    additional: Number.parseFloat(data.get("additional") || "0")
+    additional: Number.parseFloat(data.get("additional") || "0"),
+    mops: [],
+    taxrate: TAXRATE4
   };
+  const mops = data.getAll("method_of_payment");
+  const payments = data.getAll("amount_paid");
+  requestModel.mops = mops.map((mop, i) => ({
+    mop,
+    paid: parseFloat(payments[i])
+  }));
   let currentItem = null;
   for (let [key, value] of data.entries()) {
     switch (key) {
@@ -5547,27 +6403,30 @@ function asModel(formDom) {
         if (!currentItem)
           throw "item expected";
         currentItem.total = parseFloat(value);
+        currentItem.tax = parseFloat(asCurrency(requestModel.taxrate * currentItem.total));
         break;
     }
   }
   return requestModel;
 }
-function print(invoice) {
-  document.body.classList.add("print");
-  const toPrint = create2(invoice);
-  document.body.innerHTML = "";
-  document.body.appendChild(toPrint);
-  window.document.title = invoice.clientname;
-  window.print();
+function print(target, invoice) {
+  try {
+    target.classList.add("print");
+    const toPrint = create2(invoice);
+    target.innerHTML = "";
+    target.appendChild(toPrint);
+    window.document.title = invoice.clientname;
+    window.print();
+  } catch (ex) {
+    reportError(ex);
+  }
 }
-function getFirstInput(itemPanel) {
-  return itemPanel.querySelector("input");
+function deepEqual(requestModel, priorModel) {
+  return JSON.stringify(requestModel) === JSON.stringify(priorModel);
 }
 export {
-  identify,
-  init,
+  init2 as init,
   print,
-  renderInvoice2 as renderInvoice,
   renderInvoices
 };
 /*
@@ -5575,3 +6434,4 @@ object-assign
 (c) Sindre Sorhus
 @license MIT
 */
+//# sourceMappingURL=invoice.js.map
