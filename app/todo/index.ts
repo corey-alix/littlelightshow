@@ -4,7 +4,10 @@ import { gotoUrl } from "../fun/gotoUrl";
 import { on, trigger } from "../fun/on";
 import { init as systemInit } from "../index";
 import { routes } from "../router";
-import { todoModel } from "../services/todo";
+import {
+  Todo,
+  todoModel,
+} from "../services/todo";
 import {
   reportError,
   toast,
@@ -44,7 +47,7 @@ export async function init(
     setFormValue(
       formDom,
       "todo-comment",
-      activeTodoItem.comment
+      activeTodoItem.comment || ""
     );
     setFormValue(
       formDom,
@@ -107,12 +110,12 @@ export async function init(
       id,
       date: new Date(date).valueOf(),
       comment,
-    };
+    } as Todo;
 
     await todoModel.upsertItem(item);
 
     toast("Saved");
-    gotoUrl(routes.todo(item.id));
+    gotoUrl(routes.todo(item.id!));
   });
 
   await render();

@@ -1,7 +1,9 @@
+import { routes } from "../router";
 import {
   getGlobalState,
   setGlobalState,
 } from "./globalState";
+import { gotoUrl } from "./gotoUrl";
 import { on, trigger } from "./on.js";
 
 export function hookupTriggers(
@@ -119,6 +121,28 @@ export function hookupTriggers(
       } else {
         throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
       }
+    });
+
+  domNode
+    .querySelectorAll("[data-href]")
+    .forEach((eventItem) => {
+      const href = (
+        eventItem as HTMLElement
+      ).dataset["href"];
+
+      if (!href)
+        throw "item must define a data-href";
+
+      const url =
+        (routes[href] &&
+          routes[href]()) ||
+        href;
+      eventItem.addEventListener(
+        "click",
+        () => {
+          location.href = url;
+        }
+      );
     });
 }
 

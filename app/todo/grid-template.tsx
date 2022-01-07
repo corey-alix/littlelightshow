@@ -19,7 +19,7 @@ function renderItem(
       <a
         class="col-1 date no-select"
         click={() =>
-          gotoUrl(routes.todo(item.id))
+          gotoUrl(routes.todo(item.id!))
         }
       >
         {date}

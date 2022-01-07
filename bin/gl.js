@@ -5289,6 +5289,30 @@ function setCurrency(input, value) {
   input.value = (value || 0).toFixed(2);
 }
 
+// app/router.ts
+var routes = {
+  home: () => "/index.html",
+  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
+  createInvoice: () => `/app/invoice/invoice.html`,
+  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
+  allInvoices: () => `/app/invoice/invoices.html`,
+  createInventory: () => `/app/inventory/index.html`,
+  inventory: (id) => `/app/inventory/index.html?id=${id}`,
+  allInventoryItems: () => `/app/inventory/index.html?id=all`,
+  allLedgers: () => `/app/gl/index.html?print=all`,
+  printLedger: (id) => `/app/gl/index.html?print=${id}`,
+  createLedger: () => "/app/gl/index.html",
+  editLedger: (id) => `/app/gl/index.html?id=${id}`,
+  dashboard: () => "/app/index.html",
+  admin: () => "/app/admin/index.html",
+  createTodo: () => "/app/todo/index.html",
+  todo: (id) => `/app/todo/index.html?id=${id}`,
+  maptiler: () => `/app/ux/maptiler/maptiler.html`,
+  gl: {
+    byAccount: (id) => `/app/gl/index.html?account=${id}`
+  }
+};
+
 // app/fun/on.ts
 function log(...message) {
   if (!isDebug)
@@ -5361,6 +5385,15 @@ function hookupTriggers(domNode) {
       throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
     }
   });
+  domNode.querySelectorAll("[data-href]").forEach((eventItem) => {
+    const href = eventItem.dataset["href"];
+    if (!href)
+      throw "item must define a data-href";
+    const url = routes[href] && routes[href]() || href;
+    eventItem.addEventListener("click", () => {
+      location.href = url;
+    });
+  });
 }
 function isCheckboxInput(eventItem) {
   return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
@@ -5380,30 +5413,6 @@ function isInputElement(eventItem) {
 function isNumericInputElement(item) {
   return isInputElement(item) && getInputType(item) === "number";
 }
-
-// app/router.ts
-var routes = {
-  home: () => "/index.html",
-  identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
-  createInvoice: () => `/app/invoice/invoice.html`,
-  invoice: (id) => `/app/invoice/invoice.html?id=${id}`,
-  allInvoices: () => `/app/invoice/invoices.html`,
-  createInventory: () => `/app/inventory/index.html`,
-  inventory: (id) => `/app/inventory/index.html?id=${id}`,
-  allInventoryItems: () => `/app/inventory/index.html?id=all`,
-  allLedgers: () => `/app/gl/index.html?print=all`,
-  printLedger: (id) => `/app/gl/index.html?print=${id}`,
-  createLedger: () => "/app/gl/index.html",
-  editLedger: (id) => `/app/gl/index.html?id=${id}`,
-  dashboard: () => "/app/index.html",
-  admin: () => "/app/admin/index.html",
-  createTodo: () => "/app/todo/index.html",
-  todo: (id) => `/app/todo/index.html?id=${id}`,
-  maptiler: () => `/test/playground/maptiler.html`,
-  gl: {
-    byAccount: (id) => `/app/gl/index.html?account=${id}`
-  }
-};
 
 // app/fun/isZero.ts
 function isZero(value) {

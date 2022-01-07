@@ -6,7 +6,9 @@ littlelightshow
 
 ## Change Log
 
-- 2022-01-05: introduce maptiler map with "where am i"
+- 2022-01-06: track my location
+- 2022-01-06: introduce data-href to work with routes
+- 2022-01-06: introduce maptiler map with "where am i"
 - 2022-01-05: add "print" style to debug print media
 - 2022-01-05: add TODO module
 - 2022-01-04: add Service Worker to cache web resources (html, js, css)

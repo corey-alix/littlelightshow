@@ -35,7 +35,7 @@ interface Geometry {
   coordinates: Array<number>;
 }
 
-import { globals } from "../../app/globals.js";
+import { globals } from "../../globals.js";
 
 const MAPTILERKEY = globals.MAPTILERKEY;
 
@@ -49,8 +49,8 @@ const maptilerEndpoints = {
     `https://api.maptiler.com/geocoding/${location.lon},${location.lat}.json?key=${MAPTILERKEY}`,
 };
 
-import { on } from "../../app/fun/on.js";
-import { init as systemInit } from "../../app/index.js";
+import { on } from "../../fun/on.js";
+import { init as systemInit } from "../../index.js";
 
 export async function run() {
   await systemInit();

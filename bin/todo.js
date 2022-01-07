@@ -4870,7 +4870,7 @@ var routes = {
   admin: () => "/app/admin/index.html",
   createTodo: () => "/app/todo/index.html",
   todo: (id) => `/app/todo/index.html?id=${id}`,
-  maptiler: () => `/test/playground/maptiler.html`,
+  maptiler: () => `/app/ux/maptiler/maptiler.html`,
   gl: {
     byAccount: (id) => `/app/gl/index.html?account=${id}`
   }
@@ -5012,6 +5012,15 @@ function hookupTriggers(domNode) {
     } else {
       throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
     }
+  });
+  domNode.querySelectorAll("[data-href]").forEach((eventItem) => {
+    const href = eventItem.dataset["href"];
+    if (!href)
+      throw "item must define a data-href";
+    const url = routes[href] && routes[href]() || href;
+    eventItem.addEventListener("click", () => {
+      location.href = url;
+    });
   });
 }
 function isCheckboxInput(eventItem) {
@@ -5617,7 +5626,7 @@ async function init2(todoWidget) {
   const id = getQueryParameter("id");
   const activeTodoItem = id && await todoModel.getItem(id);
   if (activeTodoItem) {
-    setFormValue(formDom, "todo-comment", activeTodoItem.comment);
+    setFormValue(formDom, "todo-comment", activeTodoItem.comment || "");
     setFormValue(formDom, "todo-date", asDateString(new Date(activeTodoItem.date)));
   }
   const render = async () => {

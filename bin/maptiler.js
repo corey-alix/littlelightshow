@@ -33,9 +33,9 @@ var __privateAdd = (obj, member, value) => {
   member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 };
 
-// ../../node_modules/fn-annotate/index.js
+// node_modules/fn-annotate/index.js
 var require_fn_annotate = __commonJS({
-  "../../node_modules/fn-annotate/index.js"(exports, module) {
+  "node_modules/fn-annotate/index.js"(exports, module) {
     "use strict";
     module.exports = annotate;
     function annotate(fn) {
@@ -71,9 +71,9 @@ var require_fn_annotate = __commonJS({
   }
 });
 
-// ../../node_modules/util-deprecate/browser.js
+// node_modules/util-deprecate/browser.js
 var require_browser = __commonJS({
-  "../../node_modules/util-deprecate/browser.js"(exports, module) {
+  "node_modules/util-deprecate/browser.js"(exports, module) {
     module.exports = deprecate;
     function deprecate(fn, msg) {
       if (config("noDeprecation")) {
@@ -110,9 +110,9 @@ var require_browser = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/package.json
+// node_modules/faunadb/package.json
 var require_package = __commonJS({
-  "../../node_modules/faunadb/package.json"(exports, module) {
+  "node_modules/faunadb/package.json"(exports, module) {
     module.exports = {
       name: "faunadb",
       version: "4.4.1",
@@ -212,21 +212,21 @@ var require_package = __commonJS({
   }
 });
 
-// (disabled):../../node_modules/faunadb/node_modules/chalk/source/index.js
+// (disabled):node_modules/faunadb/node_modules/chalk/source/index.js
 var require_source = __commonJS({
-  "(disabled):../../node_modules/faunadb/node_modules/chalk/source/index.js"() {
+  "(disabled):node_modules/faunadb/node_modules/chalk/source/index.js"() {
   }
 });
 
-// (disabled):../../node_modules/boxen/index.js
+// (disabled):node_modules/boxen/index.js
 var require_boxen = __commonJS({
-  "(disabled):../../node_modules/boxen/index.js"() {
+  "(disabled):node_modules/boxen/index.js"() {
   }
 });
 
-// ../../node_modules/cross-fetch/dist/browser-ponyfill.js
+// node_modules/cross-fetch/dist/browser-ponyfill.js
 var require_browser_ponyfill = __commonJS({
-  "../../node_modules/cross-fetch/dist/browser-ponyfill.js"(exports, module) {
+  "node_modules/cross-fetch/dist/browser-ponyfill.js"(exports, module) {
     var global2 = typeof self !== "undefined" ? self : exports;
     var __self__ = function() {
       function F() {
@@ -687,9 +687,9 @@ var require_browser_ponyfill = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/_util.js
+// node_modules/faunadb/src/_util.js
 var require_util = __commonJS({
-  "../../node_modules/faunadb/src/_util.js"(exports, module) {
+  "node_modules/faunadb/src/_util.js"(exports, module) {
     "use strict";
     var packageJson = require_package();
     var chalk = require_source();
@@ -1045,9 +1045,9 @@ Changelog: https://github.com/${packageJson.repository}/blob/main/CHANGELOG.md`,
   }
 });
 
-// ../../node_modules/faunadb/src/Expr.js
+// node_modules/faunadb/src/Expr.js
 var require_Expr = __commonJS({
-  "../../node_modules/faunadb/src/Expr.js"(exports, module) {
+  "node_modules/faunadb/src/Expr.js"(exports, module) {
     "use strict";
     var util = require_util();
     function Expr(obj) {
@@ -1212,9 +1212,9 @@ var require_Expr = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/errors.js
+// node_modules/faunadb/src/errors.js
 var require_errors = __commonJS({
-  "../../node_modules/faunadb/src/errors.js"(exports, module) {
+  "node_modules/faunadb/src/errors.js"(exports, module) {
     "use strict";
     var util = require_util();
     function FaunaError(name, message, description) {
@@ -1359,9 +1359,9 @@ ${documentationLink}`);
   }
 });
 
-// ../../node_modules/base64-js/index.js
+// node_modules/base64-js/index.js
 var require_base64_js = __commonJS({
-  "../../node_modules/base64-js/index.js"(exports) {
+  "node_modules/base64-js/index.js"(exports) {
     "use strict";
     exports.byteLength = byteLength;
     exports.toByteArray = toByteArray;
@@ -1457,15 +1457,15 @@ var require_base64_js = __commonJS({
   }
 });
 
-// (disabled):../../node_modules/util/util.js
+// (disabled):node_modules/util/util.js
 var require_util2 = __commonJS({
-  "(disabled):../../node_modules/util/util.js"() {
+  "(disabled):node_modules/util/util.js"() {
   }
 });
 
-// ../../node_modules/faunadb/src/values.js
+// node_modules/faunadb/src/values.js
 var require_values = __commonJS({
-  "../../node_modules/faunadb/src/values.js"(exports, module) {
+  "node_modules/faunadb/src/values.js"(exports, module) {
     "use strict";
     var base64 = require_base64_js();
     var deprecate = require_browser();
@@ -1673,9 +1673,9 @@ var require_values = __commonJS({
   }
 });
 
-// ../../node_modules/object-assign/index.js
+// node_modules/object-assign/index.js
 var require_object_assign = __commonJS({
-  "../../node_modules/object-assign/index.js"(exports, module) {
+  "node_modules/object-assign/index.js"(exports, module) {
     "use strict";
     var getOwnPropertySymbols = Object.getOwnPropertySymbols;
     var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -1743,9 +1743,9 @@ var require_object_assign = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/query.js
+// node_modules/faunadb/src/query.js
 var require_query = __commonJS({
-  "../../node_modules/faunadb/src/query.js"(exports, module) {
+  "node_modules/faunadb/src/query.js"(exports, module) {
     "use strict";
     var annotate = require_fn_annotate();
     var deprecate = require_browser();
@@ -3016,9 +3016,9 @@ var require_query = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/_json.js
+// node_modules/faunadb/src/_json.js
 var require_json = __commonJS({
-  "../../node_modules/faunadb/src/_json.js"(exports, module) {
+  "node_modules/faunadb/src/_json.js"(exports, module) {
     "use strict";
     var values = require_values();
     function toJSON(object, pretty) {
@@ -3090,9 +3090,9 @@ var require_json = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/PageHelper.js
+// node_modules/faunadb/src/PageHelper.js
 var require_PageHelper = __commonJS({
-  "../../node_modules/faunadb/src/PageHelper.js"(exports, module) {
+  "node_modules/faunadb/src/PageHelper.js"(exports, module) {
     "use strict";
     var query = require_query();
     var objectAssign = require_object_assign();
@@ -3223,9 +3223,9 @@ var require_PageHelper = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/RequestResult.js
+// node_modules/faunadb/src/RequestResult.js
 var require_RequestResult = __commonJS({
-  "../../node_modules/faunadb/src/RequestResult.js"(exports, module) {
+  "node_modules/faunadb/src/RequestResult.js"(exports, module) {
     "use strict";
     function RequestResult(method, path, query, requestRaw, requestContent, responseRaw, responseContent, statusCode, responseHeaders, startTime, endTime) {
       this.method = method;
@@ -3249,9 +3249,9 @@ var require_RequestResult = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/_http/errors.js
+// node_modules/faunadb/src/_http/errors.js
 var require_errors2 = __commonJS({
-  "../../node_modules/faunadb/src/_http/errors.js"(exports, module) {
+  "node_modules/faunadb/src/_http/errors.js"(exports, module) {
     "use strict";
     var util = require_util();
     function TimeoutError(message) {
@@ -3279,9 +3279,9 @@ var require_http2 = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/_http/http2Adapter.js
+// node_modules/faunadb/src/_http/http2Adapter.js
 var require_http2Adapter = __commonJS({
-  "../../node_modules/faunadb/src/_http/http2Adapter.js"(exports, module) {
+  "node_modules/faunadb/src/_http/http2Adapter.js"(exports, module) {
     "use strict";
     var http2 = require_http2();
     var errors = require_errors2();
@@ -3487,9 +3487,9 @@ var require_http2Adapter = __commonJS({
   }
 });
 
-// ../../node_modules/event-target-shim/dist/event-target-shim.js
+// node_modules/event-target-shim/dist/event-target-shim.js
 var require_event_target_shim = __commonJS({
-  "../../node_modules/event-target-shim/dist/event-target-shim.js"(exports, module) {
+  "node_modules/event-target-shim/dist/event-target-shim.js"(exports, module) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var privateData = new WeakMap();
@@ -3931,9 +3931,9 @@ var require_event_target_shim = __commonJS({
   }
 });
 
-// ../../node_modules/abort-controller/dist/abort-controller.js
+// node_modules/abort-controller/dist/abort-controller.js
 var require_abort_controller = __commonJS({
-  "../../node_modules/abort-controller/dist/abort-controller.js"(exports, module) {
+  "node_modules/abort-controller/dist/abort-controller.js"(exports, module) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var eventTargetShim = require_event_target_shim();
@@ -4012,9 +4012,9 @@ var require_abort_controller = __commonJS({
   }
 });
 
-// ../../node_modules/abort-controller/polyfill.js
+// node_modules/abort-controller/polyfill.js
 var require_polyfill = __commonJS({
-  "../../node_modules/abort-controller/polyfill.js"() {
+  "node_modules/abort-controller/polyfill.js"() {
     "use strict";
     var ac = require_abort_controller();
     var g = typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : void 0;
@@ -4041,9 +4041,9 @@ var require_http = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/_http/fetchAdapter.js
+// node_modules/faunadb/src/_http/fetchAdapter.js
 var require_fetchAdapter = __commonJS({
-  "../../node_modules/faunadb/src/_http/fetchAdapter.js"(exports, module) {
+  "node_modules/faunadb/src/_http/fetchAdapter.js"(exports, module) {
     "use strict";
     require_polyfill();
     var util = require_util();
@@ -4218,9 +4218,9 @@ var require_os = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/_http/index.js
+// node_modules/faunadb/src/_http/index.js
 var require_http3 = __commonJS({
-  "../../node_modules/faunadb/src/_http/index.js"(exports, module) {
+  "node_modules/faunadb/src/_http/index.js"(exports, module) {
     "use strict";
     var packageJson = require_package();
     var { getBrowserOsDetails } = require_util();
@@ -4333,9 +4333,9 @@ var require_http3 = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/stream.js
+// node_modules/faunadb/src/stream.js
 var require_stream = __commonJS({
-  "../../node_modules/faunadb/src/stream.js"(exports, module) {
+  "node_modules/faunadb/src/stream.js"(exports, module) {
     "use strict";
     require_polyfill();
     var RequestResult = require_RequestResult();
@@ -4524,9 +4524,9 @@ var require_stream = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/Client.js
+// node_modules/faunadb/src/Client.js
 var require_Client = __commonJS({
-  "../../node_modules/faunadb/src/Client.js"(exports, module) {
+  "node_modules/faunadb/src/Client.js"(exports, module) {
     "use strict";
     var packageJson = require_package();
     var PageHelper = require_PageHelper();
@@ -4637,9 +4637,9 @@ var require_Client = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/src/clientLogger.js
+// node_modules/faunadb/src/clientLogger.js
 var require_clientLogger = __commonJS({
-  "../../node_modules/faunadb/src/clientLogger.js"(exports, module) {
+  "node_modules/faunadb/src/clientLogger.js"(exports, module) {
     "use strict";
     var json = require_json();
     function logger(loggerFunction) {
@@ -4689,9 +4689,9 @@ var require_clientLogger = __commonJS({
   }
 });
 
-// ../../node_modules/faunadb/index.js
+// node_modules/faunadb/index.js
 var require_faunadb = __commonJS({
-  "../../node_modules/faunadb/index.js"(exports, module) {
+  "node_modules/faunadb/index.js"(exports, module) {
     var query = require_query();
     var util = require_util();
     var parseJSON = require_json().parseJSON;
@@ -4709,10 +4709,10 @@ var require_faunadb = __commonJS({
   }
 });
 
-// ../../app/globals.ts
+// app/globals.ts
 var import_faunadb = __toModule(require_faunadb());
 
-// ../../app/fun/globalState.ts
+// app/fun/globalState.ts
 var globalState;
 function forceGlobalState() {
   return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
@@ -4741,7 +4741,7 @@ function getGlobalState(key) {
   return value;
 }
 
-// ../../app/globals.ts
+// app/globals.ts
 var _accessKeys;
 var GlobalModel = class {
   constructor() {
@@ -4784,7 +4784,7 @@ function isNetlifyBuildContext() {
 }
 var CONTEXT = isNetlifyBuildContext() ? "NETLIFY" : "dev";
 
-// ../../app/fun/on.ts
+// app/fun/on.ts
 function log(...message) {
   if (!isDebug)
     return;
@@ -4798,7 +4798,7 @@ function trigger(domNode, eventName) {
   domNode.dispatchEvent(new Event(eventName));
 }
 
-// ../../app/fun/sort.ts
+// app/fun/sort.ts
 var sortOps = {
   number: (a, b) => (a || 0) - (b || 0),
   "-number": (a, b) => -((a || 0) - (b || 0)),
@@ -4821,7 +4821,7 @@ function sort(items, sortBy) {
   });
 }
 
-// ../../app/fun/setMode.ts
+// app/fun/setMode.ts
 var modes = {
   light_mode: "light",
   dark_mode: "dark",
@@ -4837,14 +4837,14 @@ function setMode(mode) {
   document.body.classList.toggle("textier", isFontier);
 }
 
-// ../../app/services/validateAccessToken.ts
+// app/services/validateAccessToken.ts
 var import_faunadb2 = __toModule(require_faunadb());
 async function validate() {
   const client = createClient();
   await client.ping();
 }
 
-// ../../app/router.ts
+// app/router.ts
 var routes = {
   home: () => "/index.html",
   identity: ({ context, target }) => `/app/identity.html?target=${target}&context=${context}`,
@@ -4862,13 +4862,13 @@ var routes = {
   admin: () => "/app/admin/index.html",
   createTodo: () => "/app/todo/index.html",
   todo: (id) => `/app/todo/index.html?id=${id}`,
-  maptiler: () => `/test/playground/maptiler.html`,
+  maptiler: () => `/app/ux/maptiler/maptiler.html`,
   gl: {
     byAccount: (id) => `/app/gl/index.html?account=${id}`
   }
 };
 
-// ../../app/ux/Toaster.ts
+// app/ux/Toaster.ts
 var DEFAULT_DELAY = 5e3;
 var Toaster = class {
   toast(options) {
@@ -4903,12 +4903,12 @@ function reportError(message) {
   });
 }
 
-// ../../app/fun/gotoUrl.ts
+// app/fun/gotoUrl.ts
 function gotoUrl(url) {
   location.replace(url);
 }
 
-// ../../app/identify.ts
+// app/identify.ts
 async function identify() {
   if (isOffline())
     return false;
@@ -4929,7 +4929,7 @@ async function identify() {
   return true;
 }
 
-// ../../app/fun/behavior/input.ts
+// app/fun/behavior/input.ts
 function selectOnFocus(element) {
   on(element, "focus", () => element.select());
 }
@@ -4944,7 +4944,7 @@ function formatAsCurrency(input) {
   });
 }
 
-// ../../app/fun/behavior/form.ts
+// app/fun/behavior/form.ts
 function extendNumericInputBehaviors(form) {
   const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
   numberInput.forEach(selectOnFocus);
@@ -4952,7 +4952,7 @@ function extendNumericInputBehaviors(form) {
   currencyInput.forEach(formatAsCurrency);
 }
 
-// ../../app/fun/hookupTriggers.ts
+// app/fun/hookupTriggers.ts
 function hookupTriggers(domNode) {
   domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
     const eventName = eventItem.dataset["event"];
@@ -5010,6 +5010,15 @@ function hookupTriggers(domNode) {
       throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
     }
   });
+  domNode.querySelectorAll("[data-href]").forEach((eventItem) => {
+    const href = eventItem.dataset["href"];
+    if (!href)
+      throw "item must define a data-href";
+    const url = routes[href] && routes[href]() || href;
+    eventItem.addEventListener("click", () => {
+      location.href = url;
+    });
+  });
 }
 function isCheckboxInput(eventItem) {
   return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
@@ -5030,7 +5039,7 @@ function isNumericInputElement(item) {
   return isInputElement(item) && getInputType(item) === "number";
 }
 
-// ../../app/dom.ts
+// app/dom.ts
 function asStyle(o) {
   if (typeof o === "string")
     return o;
@@ -5104,7 +5113,7 @@ function dom(tag, args, ...children) {
   }
 }
 
-// ../../app/ux/injectLabels.ts
+// app/ux/injectLabels.ts
 function injectLabels(domNode) {
   const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
   inputsToWrap.forEach((input) => {
@@ -5116,7 +5125,7 @@ function injectLabels(domNode) {
   });
 }
 
-// ../../app/services/forceUpdatestampTable.ts
+// app/services/forceUpdatestampTable.ts
 var import_faunadb3 = __toModule(require_faunadb());
 async function forceUpdatestampTable(tableName) {
   const client = createClient();
@@ -5142,12 +5151,12 @@ async function forceUpdatestampIndex(tableName) {
   return await client.query(query);
 }
 
-// ../../app/fun/ticksInSeconds.ts
+// app/fun/ticksInSeconds.ts
 function ticksInSeconds(ticks) {
   return ticks / 1e3;
 }
 
-// ../../app/services/ServiceCache.ts
+// app/services/ServiceCache.ts
 var MAX_AGE = getGlobalState("CACHE_MAX_AGE") || 0;
 var ServiceCache = class {
   constructor(options) {
@@ -5204,10 +5213,10 @@ var ServiceCache = class {
   }
 };
 
-// ../../app/services/StorageModel.ts
+// app/services/StorageModel.ts
 var import_faunadb5 = __toModule(require_faunadb());
 
-// ../../app/services/getDatabaseTime.ts
+// app/services/getDatabaseTime.ts
 var import_faunadb4 = __toModule(require_faunadb());
 async function getDatabaseTime() {
   const client = createClient();
@@ -5215,7 +5224,7 @@ async function getDatabaseTime() {
   return new Date(response.value).valueOf();
 }
 
-// ../../app/services/StorageModel.ts
+// app/services/StorageModel.ts
 var { BATCH_SIZE, CURRENT_USER } = globals;
 var StorageModel = class {
   constructor(options) {
@@ -5429,14 +5438,14 @@ async function retryOnInvalidRef(tableName, op) {
   }
 }
 
-// ../../app/services/invoices.ts
+// app/services/invoices.ts
 var INVOICE_TABLE = "invoices";
 var invoiceModel = new StorageModel({
   tableName: INVOICE_TABLE,
   offline: false
 });
 
-// ../../app/services/inventory.ts
+// app/services/inventory.ts
 var INVENTORY_TABLE = "inventory";
 var InventoryModel = class extends StorageModel {
   async upgradeTo104() {
@@ -5449,12 +5458,12 @@ var inventoryModel = new InventoryModel({
   offline: false
 });
 
-// ../../app/fun/isUndefined.ts
+// app/fun/isUndefined.ts
 function isUndefined(value) {
   return typeof value === "undefined";
 }
 
-// ../../app/fun/detect.ts
+// app/fun/detect.ts
 var userAgent = navigator.userAgent.toLocaleUpperCase();
 var isChrome = userAgent.includes("CHROME");
 var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
@@ -5486,7 +5495,7 @@ function removeCssRule(name) {
   }
 }
 
-// ../../app/index.ts
+// app/index.ts
 var { primaryContact } = globals;
 var VERSION = "1.0.5";
 async function init() {
@@ -5545,7 +5554,7 @@ async function registerServiceWorker() {
   const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 
-// maptiler.ts
+// app/ux/maptiler/index.ts
 var MAPTILERKEY = globals.MAPTILERKEY;
 var maptilerEndpoints = {
   street: `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILERKEY}`,
@@ -5621,3 +5630,4 @@ object-assign
 (c) Sindre Sorhus
 @license MIT
 */
+//# sourceMappingURL=maptiler.js.map
