@@ -36,6 +36,7 @@ interface Geometry {
 }
 
 import { globals } from "../../globals.js";
+import { locationModel } from "../../services/location.js";
 
 const MAPTILERKEY = globals.MAPTILERKEY;
 
@@ -51,6 +52,7 @@ const maptilerEndpoints = {
 
 import { on } from "../../fun/on.js";
 import { init as systemInit } from "../../index.js";
+import { reportError } from "../Toaster.js";
 
 export async function run() {
   await systemInit();
@@ -61,6 +63,8 @@ export async function run() {
 
   const whereAmI =
     await getCurrentLocation();
+
+  captureLocation(whereAmI);
   const map = new mapboxgl.Map({
     container: "map",
     style:
@@ -163,4 +167,17 @@ function reportAddress(
   }
   return location.features[0]
     .place_name;
+}
+function captureLocation(
+  whereAmI: Location
+) {
+  locationModel
+    .upsertItem({
+      date: new Date().valueOf(),
+      lat: whereAmI.lat,
+      lon: whereAmI.lon,
+    })
+    .catch((ex) => {
+      reportError(ex);
+    });
 }

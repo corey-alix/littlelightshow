@@ -29,8 +29,10 @@ export class ServiceCache<
       maxAge?: number;
     }
   ) {
-    options.maxAge =
-      options.maxAge || MAX_AGE;
+    options.maxAge = Math.max(
+      options.maxAge || MAX_AGE,
+      MAX_AGE
+    );
     this.table = options.table;
     const raw = localStorage.getItem(
       `table_${this.table}`

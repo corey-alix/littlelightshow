@@ -5195,7 +5195,7 @@ var MAX_AGE = getGlobalState("CACHE_MAX_AGE") || 0;
 var ServiceCache = class {
   constructor(options) {
     this.options = options;
-    options.maxAge = options.maxAge || MAX_AGE;
+    options.maxAge = Math.max(options.maxAge || MAX_AGE, MAX_AGE);
     this.table = options.table;
     const raw = localStorage.getItem(`table_${this.table}`);
     if (!raw) {
