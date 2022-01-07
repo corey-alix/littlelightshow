@@ -223,6 +223,7 @@ input.auto-label {
 }
 
 .body .button {
+  user-select: none;
   background: var(--button-bg-color);
   border-color: var(
     --button-border-color
