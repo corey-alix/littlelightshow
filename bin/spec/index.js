@@ -3318,7 +3318,7 @@ var EventBus = class {
   }
 };
 
-// test/index.ts
+// test/EventBus.ts
 describe("EventBus", () => {
   it("EventBus Tests", () => {
     const channel = new EventBus();
@@ -3330,6 +3330,12 @@ describe("EventBus", () => {
       increment: 0.1
     });
     assert.equal(eventCounter, 1.1);
+  });
+});
+
+// test/index.ts
+describe("Setup puppeteer for DOM tests or just run tests within device post-deploy", () => {
+  it("", () => {
   });
 });
 /*!

@@ -5313,7 +5313,128 @@ function moveChildrenBefore(items, report) {
     report.before(items.firstChild);
 }
 
+// app/fun/get.ts
+function isDefined(value) {
+  return typeof value !== "undefined";
+}
+function get(formDom, key) {
+  if (!isDefined(formDom[key]))
+    throw `form element not found: ${key}`;
+  return formDom[key].value;
+}
+function set(formDom, values) {
+  const keys = Object.keys(values);
+  keys.forEach((key) => {
+    if (!isDefined(formDom[key]))
+      throw `form element not found: ${key}`;
+    formDom[key].value = values[key];
+  });
+}
+
+// app/services/accesscontrol.ts
+var TABLE_NAME = "accesscontrol";
+var Permission = /* @__PURE__ */ ((Permission2) => {
+  Permission2[Permission2["none"] = 0] = "none";
+  Permission2[Permission2["canRead"] = 1] = "canRead";
+  Permission2[Permission2["canUpdate"] = 2] = "canUpdate";
+  Permission2[Permission2["canCreate"] = 4] = "canCreate";
+  Permission2[Permission2["canDelete"] = 8] = "canDelete";
+  Permission2[Permission2["full"] = 15] = "full";
+  return Permission2;
+})(Permission || {});
+var AccessControlModel = class extends StorageModel {
+};
+var accessControlStore = new AccessControlModel({
+  tableName: TABLE_NAME,
+  offline: false
+});
+
+// app/ux/Toaster.ts
+var DEFAULT_DELAY = 5e3;
+var Toaster = class {
+  toast(options) {
+    let target = document.querySelector("#toaster");
+    if (!target) {
+      target = document.createElement("div");
+      target.id = "toaster";
+      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
+      document.body.appendChild(target);
+    }
+    const message = document.createElement("div");
+    message.classList.add(options.mode || "error", "padding", "margin");
+    message.innerHTML = options.message;
+    message.addEventListener("click", () => message.remove());
+    setTimeout(() => message.remove(), DEFAULT_DELAY);
+    target.insertBefore(message, null);
+  }
+};
+
+// app/services/log.ts
+var TABLE_NAME2 = "log";
+var LogModel = class extends StorageModel {
+};
+var logStore = new LogModel({
+  tableName: TABLE_NAME2,
+  offline: false
+});
+
+// app/ux/toasterWriter.ts
+var toaster = new Toaster();
+function toast(message, options) {
+  if (!options)
+    options = { mode: "info" };
+  console.info(message, options);
+  toaster.toast({
+    message,
+    ...options
+  });
+}
+function reportError(message) {
+  toast(message + "", {
+    mode: "error"
+  });
+  logStore.upsertItem({ message }).catch((ex) => console.log(ex));
+}
+
+// app/fql/can.ts
+async function can(code) {
+  const accessControlItems = await accessControlStore.getItems();
+  const item = accessControlItems.find((i) => i.code === code);
+  if (!!item) {
+    if (!isDefined(item.permission)) {
+      debugger;
+      item.permission = Permission.full;
+      try {
+        await accessControlStore.upsertItem({ ...item });
+        return true;
+      } catch (ex) {
+        reportError(ex);
+        return false;
+      }
+    }
+    return item.permission > Permission.none;
+  }
+  try {
+    await accessControlStore.upsertItem({
+      code,
+      permission: Permission.full
+    });
+    return true;
+  } catch (ex) {
+    reportError(ex);
+    return false;
+  }
+}
+
 // app/fun/hookupTriggers.ts
+async function stripAccessControlItems(domNode) {
+  const itemsToRemove2 = Array.from(domNode.querySelectorAll("[data-can]"));
+  const canAccess = await Promise.all(itemsToRemove2.map(async (eventItem) => {
+    const canCode = eventItem.dataset["can"];
+    return await can(canCode);
+  }));
+  itemsToRemove2.forEach((item, i) => canAccess[i] || item.remove());
+}
 function hookupTriggers(domNode) {
   domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
     const eventName = eventItem.dataset["event"];
@@ -5483,10 +5604,10 @@ async function forceDatalist() {
 }
 
 // app/invoice/PaymentManager.ts
-var TABLE_NAME = "mops";
+var TABLE_NAME3 = "mops";
 var Manager = class {
   constructor() {
-    this.data = JSON.parse(localStorage.getItem(TABLE_NAME) || "{}");
+    this.data = JSON.parse(localStorage.getItem(TABLE_NAME3) || "{}");
   }
   getItemByCode(code) {
     return this.data[code];
@@ -5495,7 +5616,7 @@ var Manager = class {
     this.data[item.id] = item;
   }
   persistItems() {
-    localStorage.setItem(TABLE_NAME, JSON.stringify(this.data));
+    localStorage.setItem(TABLE_NAME3, JSON.stringify(this.data));
   }
 };
 var manager = new Manager();
@@ -5503,11 +5624,11 @@ manager.persistItem({ id: "CASH" });
 manager.persistItem({ id: "CHECK" });
 manager.persistItems();
 function forceDatalist2() {
-  let dataList = document.querySelector(`#${TABLE_NAME}_list`);
+  let dataList = document.querySelector(`#${TABLE_NAME3}_list`);
   if (dataList)
     return dataList;
   dataList = document.createElement("datalist");
-  dataList.id = `${TABLE_NAME}_list`;
+  dataList.id = `${TABLE_NAME3}_list`;
   Object.entries(manager.data).forEach(([key, value]) => {
     const option = document.createElement("option");
     option.value = key;
@@ -6044,71 +6165,6 @@ function totalPayments(invoice) {
   return sum(invoice.mops.map((i) => i.paid));
 }
 
-// app/fun/get.ts
-function isDefined(value) {
-  return typeof value !== "undefined";
-}
-function get(formDom, key) {
-  if (!isDefined(formDom[key]))
-    throw `form element not found: ${key}`;
-  return formDom[key].value;
-}
-function set(formDom, values) {
-  const keys = Object.keys(values);
-  keys.forEach((key) => {
-    if (!isDefined(formDom[key]))
-      throw `form element not found: ${key}`;
-    formDom[key].value = values[key];
-  });
-}
-
-// app/ux/Toaster.ts
-var DEFAULT_DELAY = 5e3;
-var Toaster = class {
-  toast(options) {
-    let target = document.querySelector("#toaster");
-    if (!target) {
-      target = document.createElement("div");
-      target.id = "toaster";
-      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
-      document.body.appendChild(target);
-    }
-    const message = document.createElement("div");
-    message.classList.add(options.mode || "error", "padding", "margin");
-    message.innerHTML = options.message;
-    message.addEventListener("click", () => message.remove());
-    setTimeout(() => message.remove(), DEFAULT_DELAY);
-    target.insertBefore(message, null);
-  }
-};
-
-// app/services/log.ts
-var TABLE_NAME2 = "log";
-var LogModel = class extends StorageModel {
-};
-var logStore = new LogModel({
-  tableName: TABLE_NAME2,
-  offline: false
-});
-
-// app/ux/toasterWriter.ts
-var toaster = new Toaster();
-function toast(message, options) {
-  if (!options)
-    options = { mode: "info" };
-  console.info(message, options);
-  toaster.toast({
-    message,
-    ...options
-  });
-}
-function reportError(message) {
-  toast(message + "", {
-    mode: "error"
-  });
-  logStore.upsertItem({ message }).catch((ex) => console.log(ex));
-}
-
 // app/fun/setMode.ts
 var modes = {
   light_mode: "light",
@@ -6207,6 +6263,7 @@ var { primaryContact: primaryContact3 } = globals;
 var VERSION = "1.0.5";
 async function init() {
   const domNode = document.body;
+  await stripAccessControlItems(domNode);
   if (!isOffline()) {
     await identify();
     await registerServiceWorker();

@@ -3,8 +3,34 @@ import {
   getGlobalState,
   setGlobalState,
 } from "./globalState";
-import { gotoUrl } from "./gotoUrl";
 import { on, trigger } from "./on.js";
+
+import { can } from "../fql/can.js";
+
+export async function stripAccessControlItems(
+  domNode: HTMLElement
+) {
+  const itemsToRemove = Array.from(
+    domNode.querySelectorAll(
+      "[data-can]"
+    )
+  );
+  const canAccess = await Promise.all(
+    itemsToRemove.map(
+      async (eventItem) => {
+        const canCode = (
+          eventItem as HTMLElement
+        ).dataset["can"]!;
+        return await can(canCode);
+      }
+    )
+  );
+
+  itemsToRemove.forEach(
+    (item, i) =>
+      canAccess[i] || item.remove()
+  );
+}
 
 export function hookupTriggers(
   domNode: HTMLElement

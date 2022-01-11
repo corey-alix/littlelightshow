@@ -6,6 +6,7 @@ littlelightshow
 
 ## Change Log
 
+- 2022-01-11: Introduce v1.0.6 branch
 - 2022-01-10: merge v1.0.5 -> v1.0.4
 - 2022-01-06: track my location
 - 2022-01-06: introduce data-href to work with routes
@@ -22,6 +23,10 @@ littlelightshow
 - 2021-12-22: use storage API for sale items and account codes (always offline)
 - 2021-12-22: error reporting via toaster
 - 2021-12-22: create storage API (persist local, sync remotely)
+
+## v1.0.6
+
+- introduce access control
 
 ## v1.0.5
 
@@ -50,6 +55,7 @@ littlelightshow
 - Invoice summary report should show dates if space permits
   The issue will be that date should be optional yet not in the last column
 - Use PWA tech for offline detection
+- How to determine user role to acquire access control items?
 
 ## Offline Support
 

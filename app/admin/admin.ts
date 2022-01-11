@@ -18,7 +18,7 @@ import { invoiceModel } from "../services/invoices.js";
 import {
   reportError,
   toast,
-} from "../ux/Toaster.js";
+} from "../ux/toasterWriter.js";
 import { inventoryModel } from "../services/inventory.js";
 import { getDatabaseTime } from "../services/getDatabaseTime.js";
 import { setGlobalState } from "../fun/globalState.js";
@@ -45,8 +45,8 @@ const starterAccounts = [
 ];
 
 export async function init() {
-  await systemInit();
   const domNode = document.body;
+  await systemInit();
 
   on(domNode, "font_mode:yes", () => {
     setGlobalState("textier", true);

@@ -4871,288 +4871,6 @@ var Toaster = class {
     target.insertBefore(message, null);
   }
 };
-var toaster = new Toaster();
-function toast(message, options) {
-  if (!options)
-    options = { mode: "info" };
-  console.info(message, options);
-  toaster.toast({
-    message,
-    ...options
-  });
-}
-function reportError(message) {
-  toast(message + "", {
-    mode: "error"
-  });
-}
-
-// app/fun/gotoUrl.ts
-function gotoUrl(url) {
-  location.replace(url);
-}
-
-// app/identify.ts
-async function identify() {
-  if (isOffline())
-    return false;
-  if (!localStorage.getItem("user")) {
-    gotoUrl(routes.identity({
-      target: location.href,
-      context: CONTEXT
-    }));
-    return false;
-  }
-  return true;
-  try {
-    await validate();
-  } catch (ex) {
-    reportError(ex);
-    return false;
-  }
-  return true;
-}
-
-// app/fun/on.ts
-function log(...message) {
-  if (!isDebug)
-    return;
-  console.log(...message);
-}
-function on(domNode, eventName, cb) {
-  domNode.addEventListener(eventName, cb);
-}
-function trigger(domNode, eventName) {
-  log("trigger", eventName);
-  domNode.dispatchEvent(new Event(eventName));
-}
-
-// app/fun/behavior/input.ts
-function selectOnFocus(element) {
-  on(element, "focus", () => element.select());
-}
-function formatAsCurrency(input) {
-  input.step = "0.01";
-  input.addEventListener("change", () => {
-    const textValue = input.value;
-    const numericValue = input.valueAsNumber?.toFixed(2);
-    if (textValue != numericValue) {
-      input.value = numericValue;
-    }
-  });
-}
-
-// app/fun/behavior/form.ts
-function extendNumericInputBehaviors(form) {
-  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
-  numberInput.forEach(selectOnFocus);
-  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
-  currencyInput.forEach(formatAsCurrency);
-}
-
-// app/fun/hookupTriggers.ts
-function hookupTriggers(domNode) {
-  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
-    const eventName = eventItem.dataset["event"];
-    if (!eventName)
-      throw "item must define a data-event";
-    const isInput = isInputElement(eventItem);
-    const inputType = getInputType(eventItem);
-    const isButton = isButtonElement(eventItem, isInput);
-    const isCheckbox = isCheckboxInput(eventItem);
-    if (isButton)
-      on(eventItem, "click", () => {
-        trigger(domNode, eventName);
-      });
-    else if (isCheckbox)
-      on(eventItem, "click", () => {
-        const checked = eventItem.checked;
-        trigger(domNode, eventName + (checked ? ":yes" : ":no"));
-      });
-    else if (isInput)
-      on(eventItem, "change", () => {
-        trigger(domNode, eventName);
-      });
-    else
-      throw `data-event not supported for this item: ${eventItem.outerHTML}`;
-  });
-  domNode.querySelectorAll("[data-bind]").forEach((eventItem) => {
-    const bindTo = eventItem.dataset["bind"];
-    if (!bindTo)
-      throw "item must define a data-bind";
-    const valueInfo = getGlobalState(bindTo);
-    if (isCheckboxInput(eventItem)) {
-      eventItem.checked = valueInfo === true;
-      on(eventItem, "change", () => {
-        setGlobalState(bindTo, eventItem.checked);
-      });
-    } else if (isNumericInputElement(eventItem)) {
-      const item = eventItem;
-      item.valueAsNumber = valueInfo || 0;
-      on(eventItem, "change", () => {
-        setGlobalState(bindTo, item.valueAsNumber);
-      });
-    } else if (isInputElement(eventItem)) {
-      const item = eventItem;
-      item.value = valueInfo || "";
-      on(eventItem, "change", () => {
-        setGlobalState(bindTo, item.value);
-      });
-    } else if (isTextAreaElement(eventItem)) {
-      const item = eventItem;
-      item.value = valueInfo || "";
-      on(eventItem, "change", () => {
-        setGlobalState(bindTo, item.value);
-      });
-    } else {
-      throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
-    }
-  });
-  domNode.querySelectorAll("[data-href]").forEach((eventItem) => {
-    const href = eventItem.dataset["href"];
-    if (!href)
-      throw "item must define a data-href";
-    const url = routes[href] && routes[href]() || href;
-    eventItem.addEventListener("click", () => {
-      location.href = url;
-    });
-  });
-}
-function isCheckboxInput(eventItem) {
-  return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
-}
-function isButtonElement(eventItem, isInput) {
-  return eventItem.tagName === "BUTTON" || isInput && getInputType(eventItem) === "button";
-}
-function getInputType(eventItem) {
-  return isInputElement(eventItem) && eventItem.type;
-}
-function isTextAreaElement(eventItem) {
-  return eventItem.tagName === "TEXTAREA";
-}
-function isInputElement(eventItem) {
-  return eventItem.tagName === "INPUT";
-}
-function isNumericInputElement(item) {
-  return isInputElement(item) && getInputType(item) === "number";
-}
-
-// app/dom.ts
-function asStyle(o) {
-  if (typeof o === "string")
-    return o;
-  return Object.keys(o).map((k) => `${k}:${o[k]}`).join(";");
-}
-function defaults(a, ...b) {
-  b.filter((b2) => !!b2).forEach((b2) => {
-    Object.keys(b2).filter((k) => a[k] === void 0).forEach((k) => a[k] = b2[k]);
-  });
-  return a;
-}
-var rules = {
-  style: asStyle
-};
-var default_args = {
-  button: {
-    type: "button"
-  }
-};
-function dom(tag, args, ...children) {
-  if (typeof tag === "string") {
-    let element = document.createElement(tag);
-    if (default_args[tag]) {
-      args = defaults(args ?? {}, default_args[tag]);
-    }
-    if (args) {
-      Object.keys(args).forEach((key) => {
-        let value = rules[key] ? rules[key](args[key]) : args[key];
-        if (typeof value === "string") {
-          element.setAttribute(key, value);
-        } else if (value instanceof Function) {
-          element.addEventListener(key, value);
-        } else {
-          element.setAttribute(key, value + "");
-        }
-      });
-    }
-    let addChildren = (children2) => {
-      children2 && children2.forEach((c) => {
-        if (typeof c === "string") {
-          element.appendChild(document.createTextNode(c));
-        } else if (c instanceof HTMLElement) {
-          element.appendChild(c);
-        } else if (c instanceof Array) {
-          addChildren(c);
-        } else {
-          console.log("addChildren cannot add to dom node", c);
-        }
-      });
-    };
-    children && addChildren(children);
-    return element;
-  }
-  {
-    let element = tag(args);
-    let addChildren = (children2) => {
-      children2 && children2.forEach((c) => {
-        if (typeof c === "string" || c instanceof HTMLElement) {
-          element.setContent(c);
-        } else if (c instanceof Array) {
-          addChildren(c);
-        } else if (typeof c === "object") {
-          element.addChild(c);
-        } else {
-          console.log("addChildren cannot add to widget", c);
-        }
-      });
-    };
-    children && addChildren(children);
-    return element;
-  }
-}
-
-// app/ux/injectLabels.ts
-function injectLabels(domNode) {
-  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
-  inputsToWrap.forEach((input) => {
-    const label = dom("label");
-    label.className = "border padding rounded wrap " + input.className;
-    label.innerText = input.placeholder;
-    input.parentElement.insertBefore(label, input);
-    label.appendChild(input);
-  });
-}
-
-// app/services/forceUpdatestampTable.ts
-var import_faunadb3 = __toModule(require_faunadb());
-async function forceUpdatestampTable(tableName) {
-  const client = createClient();
-  return await client.query(import_faunadb3.query.CreateCollection({
-    name: tableName
-  }));
-}
-async function forceUpdatestampIndex(tableName) {
-  const client = createClient();
-  const query = import_faunadb3.query.CreateIndex({
-    name: `${tableName}_updates`,
-    source: import_faunadb3.query.Collection(tableName),
-    values: [
-      {
-        field: ["data", "update_date"],
-        reverse: false
-      },
-      {
-        field: ["ref"]
-      }
-    ]
-  });
-  return await client.query(query);
-}
-
-// app/fun/asCurrency.ts
-function asCurrency(value) {
-  return (value || 0).toFixed(2);
-}
 
 // app/fun/ticksInSeconds.ts
 function ticksInSeconds(ticks) {
@@ -5220,11 +4938,37 @@ var ServiceCache = class {
 var import_faunadb5 = __toModule(require_faunadb());
 
 // app/services/getDatabaseTime.ts
-var import_faunadb4 = __toModule(require_faunadb());
+var import_faunadb3 = __toModule(require_faunadb());
 async function getDatabaseTime() {
   const client = createClient();
-  const response = await client.query(import_faunadb4.query.Now());
+  const response = await client.query(import_faunadb3.query.Now());
   return new Date(response.value).valueOf();
+}
+
+// app/services/forceUpdatestampTable.ts
+var import_faunadb4 = __toModule(require_faunadb());
+async function forceUpdatestampTable(tableName) {
+  const client = createClient();
+  return await client.query(import_faunadb4.query.CreateCollection({
+    name: tableName
+  }));
+}
+async function forceUpdatestampIndex(tableName) {
+  const client = createClient();
+  const query = import_faunadb4.query.CreateIndex({
+    name: `${tableName}_updates`,
+    source: import_faunadb4.query.Collection(tableName),
+    values: [
+      {
+        field: ["data", "update_date"],
+        reverse: false
+      },
+      {
+        field: ["ref"]
+      }
+    ]
+  });
+  return await client.query(query);
 }
 
 // app/services/StorageModel.ts
@@ -5263,7 +5007,6 @@ var StorageModel = class {
           throw `item must have an id`;
         const currentItem = this.cache.getById(item.id);
         if (currentItem && this.isUpdated(currentItem)) {
-          toast(`item changed remotely and locally: ${item.id}`);
         }
         if (!!item.delete_date) {
           this.cache.deleteLineItem(item.id);
@@ -5441,6 +5184,335 @@ async function retryOnInvalidRef(tableName, op) {
   }
 }
 
+// app/services/log.ts
+var TABLE_NAME = "log";
+var LogModel = class extends StorageModel {
+};
+var logStore = new LogModel({
+  tableName: TABLE_NAME,
+  offline: false
+});
+
+// app/ux/toasterWriter.ts
+var toaster = new Toaster();
+function toast(message, options) {
+  if (!options)
+    options = { mode: "info" };
+  console.info(message, options);
+  toaster.toast({
+    message,
+    ...options
+  });
+}
+function reportError(message) {
+  toast(message + "", {
+    mode: "error"
+  });
+  logStore.upsertItem({ message }).catch((ex) => console.log(ex));
+}
+
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
+}
+
+// app/identify.ts
+async function identify() {
+  if (isOffline())
+    return false;
+  if (!localStorage.getItem("user")) {
+    gotoUrl(routes.identity({
+      target: location.href,
+      context: CONTEXT
+    }));
+    return false;
+  }
+  return true;
+  try {
+    await validate();
+  } catch (ex) {
+    reportError(ex);
+    return false;
+  }
+  return true;
+}
+
+// app/fun/on.ts
+function log(...message) {
+  if (!isDebug)
+    return;
+  console.log(...message);
+}
+function on(domNode, eventName, cb) {
+  domNode.addEventListener(eventName, cb);
+}
+function trigger(domNode, eventName) {
+  log("trigger", eventName);
+  domNode.dispatchEvent(new Event(eventName));
+}
+
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  });
+}
+
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
+}
+
+// app/fun/get.ts
+function isDefined(value) {
+  return typeof value !== "undefined";
+}
+
+// app/services/accesscontrol.ts
+var TABLE_NAME2 = "accesscontrol";
+var Permission = /* @__PURE__ */ ((Permission2) => {
+  Permission2[Permission2["none"] = 0] = "none";
+  Permission2[Permission2["canRead"] = 1] = "canRead";
+  Permission2[Permission2["canUpdate"] = 2] = "canUpdate";
+  Permission2[Permission2["canCreate"] = 4] = "canCreate";
+  Permission2[Permission2["canDelete"] = 8] = "canDelete";
+  Permission2[Permission2["full"] = 15] = "full";
+  return Permission2;
+})(Permission || {});
+var AccessControlModel = class extends StorageModel {
+};
+var accessControlStore = new AccessControlModel({
+  tableName: TABLE_NAME2,
+  offline: false
+});
+
+// app/fql/can.ts
+async function can(code) {
+  const accessControlItems = await accessControlStore.getItems();
+  const item = accessControlItems.find((i) => i.code === code);
+  if (!!item) {
+    if (!isDefined(item.permission)) {
+      debugger;
+      item.permission = Permission.full;
+      try {
+        await accessControlStore.upsertItem({ ...item });
+        return true;
+      } catch (ex) {
+        reportError(ex);
+        return false;
+      }
+    }
+    return item.permission > Permission.none;
+  }
+  try {
+    await accessControlStore.upsertItem({
+      code,
+      permission: Permission.full
+    });
+    return true;
+  } catch (ex) {
+    reportError(ex);
+    return false;
+  }
+}
+
+// app/fun/hookupTriggers.ts
+async function stripAccessControlItems(domNode) {
+  const itemsToRemove = Array.from(domNode.querySelectorAll("[data-can]"));
+  const canAccess = await Promise.all(itemsToRemove.map(async (eventItem) => {
+    const canCode = eventItem.dataset["can"];
+    return await can(canCode);
+  }));
+  itemsToRemove.forEach((item, i) => canAccess[i] || item.remove());
+}
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    const eventName = eventItem.dataset["event"];
+    if (!eventName)
+      throw "item must define a data-event";
+    const isInput = isInputElement(eventItem);
+    const inputType = getInputType(eventItem);
+    const isButton = isButtonElement(eventItem, isInput);
+    const isCheckbox = isCheckboxInput(eventItem);
+    if (isButton)
+      on(eventItem, "click", () => {
+        trigger(domNode, eventName);
+      });
+    else if (isCheckbox)
+      on(eventItem, "click", () => {
+        const checked = eventItem.checked;
+        trigger(domNode, eventName + (checked ? ":yes" : ":no"));
+      });
+    else if (isInput)
+      on(eventItem, "change", () => {
+        trigger(domNode, eventName);
+      });
+    else
+      throw `data-event not supported for this item: ${eventItem.outerHTML}`;
+  });
+  domNode.querySelectorAll("[data-bind]").forEach((eventItem) => {
+    const bindTo = eventItem.dataset["bind"];
+    if (!bindTo)
+      throw "item must define a data-bind";
+    const valueInfo = getGlobalState(bindTo);
+    if (isCheckboxInput(eventItem)) {
+      eventItem.checked = valueInfo === true;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, eventItem.checked);
+      });
+    } else if (isNumericInputElement(eventItem)) {
+      const item = eventItem;
+      item.valueAsNumber = valueInfo || 0;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.valueAsNumber);
+      });
+    } else if (isInputElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
+    } else if (isTextAreaElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
+    } else {
+      throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
+    }
+  });
+  domNode.querySelectorAll("[data-href]").forEach((eventItem) => {
+    const href = eventItem.dataset["href"];
+    if (!href)
+      throw "item must define a data-href";
+    const url = routes[href] && routes[href]() || href;
+    eventItem.addEventListener("click", () => {
+      location.href = url;
+    });
+  });
+}
+function isCheckboxInput(eventItem) {
+  return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
+}
+function isButtonElement(eventItem, isInput) {
+  return eventItem.tagName === "BUTTON" || isInput && getInputType(eventItem) === "button";
+}
+function getInputType(eventItem) {
+  return isInputElement(eventItem) && eventItem.type;
+}
+function isTextAreaElement(eventItem) {
+  return eventItem.tagName === "TEXTAREA";
+}
+function isInputElement(eventItem) {
+  return eventItem.tagName === "INPUT";
+}
+function isNumericInputElement(item) {
+  return isInputElement(item) && getInputType(item) === "number";
+}
+
+// app/dom.ts
+function asStyle(o) {
+  if (typeof o === "string")
+    return o;
+  return Object.keys(o).map((k) => `${k}:${o[k]}`).join(";");
+}
+function defaults(a, ...b) {
+  b.filter((b2) => !!b2).forEach((b2) => {
+    Object.keys(b2).filter((k) => a[k] === void 0).forEach((k) => a[k] = b2[k]);
+  });
+  return a;
+}
+var rules = {
+  style: asStyle
+};
+var default_args = {
+  button: {
+    type: "button"
+  }
+};
+function dom(tag, args, ...children) {
+  if (typeof tag === "string") {
+    let element = document.createElement(tag);
+    if (default_args[tag]) {
+      args = defaults(args ?? {}, default_args[tag]);
+    }
+    if (args) {
+      Object.keys(args).forEach((key) => {
+        let value = rules[key] ? rules[key](args[key]) : args[key];
+        if (typeof value === "string") {
+          element.setAttribute(key, value);
+        } else if (value instanceof Function) {
+          element.addEventListener(key, value);
+        } else {
+          element.setAttribute(key, value + "");
+        }
+      });
+    }
+    let addChildren = (children2) => {
+      children2 && children2.forEach((c) => {
+        if (typeof c === "string") {
+          element.appendChild(document.createTextNode(c));
+        } else if (c instanceof HTMLElement) {
+          element.appendChild(c);
+        } else if (c instanceof Array) {
+          addChildren(c);
+        } else {
+          console.log("addChildren cannot add to dom node", c);
+        }
+      });
+    };
+    children && addChildren(children);
+    return element;
+  }
+  {
+    let element = tag(args);
+    let addChildren = (children2) => {
+      children2 && children2.forEach((c) => {
+        if (typeof c === "string" || c instanceof HTMLElement) {
+          element.setContent(c);
+        } else if (c instanceof Array) {
+          addChildren(c);
+        } else if (typeof c === "object") {
+          element.addChild(c);
+        } else {
+          console.log("addChildren cannot add to widget", c);
+        }
+      });
+    };
+    children && addChildren(children);
+    return element;
+  }
+}
+
+// app/ux/injectLabels.ts
+function injectLabels(domNode) {
+  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
+  inputsToWrap.forEach((input) => {
+    const label = dom("label");
+    label.className = "border padding rounded wrap " + input.className;
+    label.innerText = input.placeholder;
+    input.parentElement.insertBefore(label, input);
+    label.appendChild(input);
+  });
+}
+
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return (value || 0).toFixed(2);
+}
+
 // app/services/invoices.ts
 var { TAXRATE } = globals;
 var INVOICE_TABLE = "invoices";
@@ -5544,6 +5616,7 @@ var { primaryContact } = globals;
 var VERSION = "1.0.5";
 async function init() {
   const domNode = document.body;
+  await stripAccessControlItems(domNode);
   if (!isOffline()) {
     await identify();
     await registerServiceWorker();
@@ -5793,8 +5866,8 @@ var starterAccounts = [
   "Utilities"
 ];
 async function init2() {
-  await init();
   const domNode = document.body;
+  await init();
   on(domNode, "font_mode:yes", () => {
     setGlobalState("textier", true);
     setMode();

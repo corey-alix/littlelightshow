@@ -5300,7 +5300,68 @@ function extendTextInputBehaviors(form) {
   textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
 }
 
+// app/fun/get.ts
+function isDefined(value) {
+  return typeof value !== "undefined";
+}
+
+// app/services/accesscontrol.ts
+var TABLE_NAME2 = "accesscontrol";
+var Permission = /* @__PURE__ */ ((Permission2) => {
+  Permission2[Permission2["none"] = 0] = "none";
+  Permission2[Permission2["canRead"] = 1] = "canRead";
+  Permission2[Permission2["canUpdate"] = 2] = "canUpdate";
+  Permission2[Permission2["canCreate"] = 4] = "canCreate";
+  Permission2[Permission2["canDelete"] = 8] = "canDelete";
+  Permission2[Permission2["full"] = 15] = "full";
+  return Permission2;
+})(Permission || {});
+var AccessControlModel = class extends StorageModel {
+};
+var accessControlStore = new AccessControlModel({
+  tableName: TABLE_NAME2,
+  offline: false
+});
+
+// app/fql/can.ts
+async function can(code) {
+  const accessControlItems = await accessControlStore.getItems();
+  const item = accessControlItems.find((i) => i.code === code);
+  if (!!item) {
+    if (!isDefined(item.permission)) {
+      debugger;
+      item.permission = Permission.full;
+      try {
+        await accessControlStore.upsertItem({ ...item });
+        return true;
+      } catch (ex) {
+        reportError(ex);
+        return false;
+      }
+    }
+    return item.permission > Permission.none;
+  }
+  try {
+    await accessControlStore.upsertItem({
+      code,
+      permission: Permission.full
+    });
+    return true;
+  } catch (ex) {
+    reportError(ex);
+    return false;
+  }
+}
+
 // app/fun/hookupTriggers.ts
+async function stripAccessControlItems(domNode) {
+  const itemsToRemove = Array.from(domNode.querySelectorAll("[data-can]"));
+  const canAccess = await Promise.all(itemsToRemove.map(async (eventItem) => {
+    const canCode = eventItem.dataset["can"];
+    return await can(canCode);
+  }));
+  itemsToRemove.forEach((item, i) => canAccess[i] || item.remove());
+}
 function hookupTriggers(domNode) {
   domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
     const eventName = eventItem.dataset["event"];
@@ -5548,6 +5609,7 @@ var { primaryContact } = globals;
 var VERSION = "1.0.5";
 async function init() {
   const domNode = document.body;
+  await stripAccessControlItems(domNode);
   if (!isOffline()) {
     await identify();
     await registerServiceWorker();

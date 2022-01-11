@@ -11,7 +11,10 @@ import {
 } from "./fun/globalState";
 import { identify } from "./identify";
 import { extendNumericInputBehaviors } from "./fun/behavior/form";
-import { hookupTriggers } from "./fun/hookupTriggers";
+import {
+  hookupTriggers,
+  stripAccessControlItems,
+} from "./fun/hookupTriggers";
 import { injectLabels } from "./ux/injectLabels";
 import {
   forceUpdatestampIndex,
@@ -27,6 +30,9 @@ const VERSION = "1.0.5";
 
 export async function init() {
   const domNode = document.body;
+  await stripAccessControlItems(
+    domNode
+  );
 
   if (!isOffline()) {
     await identify();

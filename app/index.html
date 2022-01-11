@@ -22,11 +22,13 @@
       </div>
       <a
         class="button"
+        data-can="create-invoice"
         data-href="createInvoice"
         >Create an Invoice</a
       >
       <a
         class="button"
+        data-can="view-invoice"
         data-href="allInvoices"
         >List all Invoices</a
       >
@@ -39,11 +41,13 @@
       </div>
       <a
         class="button"
+        data-can="create-inventory"
         data-href="createInventory"
         >Create Inventory Item</a
       >
       <a
         class="button"
+        data-can="view-inventory"
         data-href="allInventoryItems"
         >List all Inventory</a
       >
@@ -56,16 +60,21 @@
       </div>
       <a
         class="button"
+        data-can="create-ledger"
         data-href="createLedger"
         >Create General Ledger</a
       >
       <a
         class="button"
+        data-can="view-ledger"
         data-href="allLedgers"
         >List all Ledger Entries</a
       >
     </div>
-    <div class="grid-6 width-100">
+    <div
+      data-can="edit-primary-contact"
+      class="grid-6 width-100"
+    >
       <div
         class="section-title rounded col-1-last"
       >
@@ -102,11 +111,13 @@
     </div>
     <a
       class="button"
+      data-can="create-todo"
       data-href="createTodo"
       >Todo</a
     >
     <a
       class="button"
+      data-can="view-map"
       data-href="maptiler"
       >Where Am I?</a
     >
@@ -118,6 +129,7 @@
       </div>
       <a
         class="button"
+        data-can="view-admin"
         data-href="admin"
         >Admin</a
       >
