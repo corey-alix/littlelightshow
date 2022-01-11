@@ -136,6 +136,7 @@ export async function create(
       <button
         class="button col-1-3"
         data-event="add-another-item"
+        data-can="update:invoice"
         type="button"
       >
         Add item
@@ -143,6 +144,7 @@ export async function create(
       <button
         class="button col-4-last"
         data-event="remove-last-item"
+        data-can="update:invoice"
         type="button"
       >
         Remove Last Item
@@ -201,6 +203,7 @@ export async function create(
       ></div>
       <button
         class="button col-1-2 if-desktop"
+        data-can="update:invoice"
         data-event="add-method-of-payment"
         type="button"
       >
@@ -219,6 +222,7 @@ export async function create(
         <button
           class="bold button"
           data-event="submit"
+          data-can="update:invoice"
           type="button"
         >
           Save
@@ -226,12 +230,14 @@ export async function create(
         <button
           class="button if-print-to-pdf"
           data-event="print"
+          data-can="read:invoice"
           type="button"
         >
           Print
         </button>
         <button
           class="button if-desktop"
+          data-can="create:invoice"
           data-event="clear"
           type="button"
         >
@@ -240,6 +246,7 @@ export async function create(
         <button
           class="button if-desktop"
           data-event="delete"
+          data-can="delete:invoice"
           type="button"
         >
           Delete

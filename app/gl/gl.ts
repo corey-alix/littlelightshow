@@ -6,6 +6,7 @@ import { getItem as loadLedger } from "../services/gl.js";
 import { reportError } from "../ux/toasterWriter";
 import { init as systemInit } from "../index.js";
 import { getQueryParameter } from "../fun/getQueryParameter.js";
+import { stripAccessControlItems } from "../fun/hookupTriggers.js";
 
 export async function init(
   domNode: HTMLElement
@@ -30,6 +31,9 @@ export async function init(
         case "all": {
           const ledger =
             await printLedger();
+          stripAccessControlItems(
+            ledger
+          );
           target.appendChild(ledger);
           break;
         }
@@ -37,6 +41,9 @@ export async function init(
           target.innerHTML = "";
           const ledger =
             await printLedger(printId);
+          stripAccessControlItems(
+            ledger
+          );
           target.appendChild(ledger);
         }
       }
@@ -50,9 +57,12 @@ export async function init(
       );
       if (!ledger)
         throw `cannot find ledger: ${id}`;
-      domNode.appendChild(
-        createLedgerForm(ledger)
-      );
+
+      const form =
+        createLedgerForm(ledger);
+
+      stripAccessControlItems(form);
+      domNode.appendChild(form);
       return;
     }
 
@@ -62,12 +72,14 @@ export async function init(
       const report = await printAccount(
         account
       );
+      stripAccessControlItems(report);
       domNode.appendChild(report);
       return;
     }
 
     {
       const ledger = createLedgerForm();
+      stripAccessControlItems(ledger);
       domNode.appendChild(ledger);
     }
   } catch (ex) {

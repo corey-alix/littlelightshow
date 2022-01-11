@@ -10,7 +10,10 @@ import {
   reportError,
   toast,
 } from "../ux/toasterWriter";
-import { hookupTriggers } from "../fun/hookupTriggers.js";
+import {
+  hookupTriggers,
+  stripAccessControlItems,
+} from "../fun/hookupTriggers.js";
 import {
   extendNumericInputBehaviors,
   extendTextInputBehaviors,
@@ -37,6 +40,8 @@ export async function init(
           code: "string",
         })
       );
+
+      stripAccessControlItems(report);
       target.appendChild(report);
       return;
     }
@@ -50,6 +55,7 @@ export async function init(
     const formDom = showInventoryItem(
       inventoryItem
     );
+    stripAccessControlItems(formDom);
     target.appendChild(formDom);
 
     on(formDom, "submit", async () => {

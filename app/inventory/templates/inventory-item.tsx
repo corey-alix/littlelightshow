@@ -77,18 +77,21 @@ export function create(
       <button
         class="bold button col-1"
         data-event="submit"
+        data-can="update:inventory"
       >
         Save
       </button>
       <button
         class="button col-b"
         data-event="clear"
+        data-can="create:inventory"
       >
         Clear
       </button>
       <button
         class="button col-a"
         data-event="delete"
+        data-can="delete:inventory"
       >
         Delete
       </button>

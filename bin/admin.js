@@ -5274,42 +5274,6 @@ function extendNumericInputBehaviors(form) {
   currencyInput.forEach(formatAsCurrency);
 }
 
-// app/data/accesscontrol.ts
-var accessControl = {
-  Y: {
-    admin: 0,
-    inventory: 4,
-    invoice: 15,
-    ledger: 1,
-    map: 1,
-    role: 2,
-    taxrate: 2,
-    "batch-size": 2,
-    "cache-age": 2,
-    "fauna-api": 2,
-    "maptiler-api": 2,
-    "primary-contact": 0,
-    "ux-theme": 2,
-    "work-offline": 2
-  },
-  Z: {
-    admin: 15,
-    inventory: 4,
-    invoice: 15,
-    ledger: 1,
-    map: 1,
-    role: 2,
-    taxrate: 2,
-    "batch-size": 2,
-    "cache-age": 2,
-    "fauna-api": 2,
-    "maptiler-api": 2,
-    "primary-contact": 15,
-    "ux-theme": 2,
-    "work-offline": 2
-  }
-};
-
 // app/services/accesscontrol.ts
 var TABLE_NAME2 = "accesscontrol";
 var Permission = /* @__PURE__ */ ((Permission2) => {
@@ -5327,6 +5291,77 @@ var accessControlStore = new AccessControlModel({
   tableName: TABLE_NAME2,
   offline: true
 });
+
+// app/data/accesscontrol.ts
+function combine(...roles) {
+  const result = {};
+  roles.forEach((r1) => Object.keys(r1).forEach((k) => result[k] = (result[k] || 0) | r1[k]));
+  return result;
+}
+var r = Permission.read;
+var u = Permission.update;
+var ru = Permission.read + Permission.update;
+var cru = Permission.read + Permission.create + Permission.update;
+var crud = Permission.read + Permission.delete + Permission.create + Permission.update;
+var none = {
+  admin: 0,
+  inventory: 0,
+  invoice: 0,
+  ledger: 0,
+  map: 0,
+  role: 0,
+  taxrate: 0,
+  todo: 0,
+  "batch-size": 0,
+  "cache-age": 0,
+  "fauna-api": 0,
+  "maptiler-api": 0,
+  "primary-contact": 0,
+  "ux-theme": 0,
+  "work-offline": 0
+};
+var user = combine(none, {
+  map: r,
+  "ux-theme": ru
+});
+var clerk = combine(user, {
+  inventory: r,
+  invoice: r,
+  ledger: cru,
+  taxrate: ru,
+  "work-offline": ru,
+  todo: cru
+});
+var zipTieTech = combine(user, {
+  inventory: cru,
+  invoice: cru,
+  map: ru,
+  taxrate: r,
+  "primary-contact": ru,
+  "ux-theme": ru,
+  "work-offline": ru
+});
+var admin = combine(user, {
+  admin: ru,
+  inventory: crud,
+  invoice: crud,
+  ledger: crud,
+  map: crud,
+  role: crud,
+  taxrate: crud,
+  "batch-size": crud,
+  "cache-age": crud,
+  "fauna-api": crud,
+  "maptiler-api": crud,
+  "primary-contact": crud,
+  "ux-theme": crud,
+  "work-offline": crud
+});
+var accessControl = {
+  X: zipTieTech,
+  Y: clerk,
+  Z: admin
+};
 
 // app/fql/can.ts
 var USER_ROLE = getGlobalState("USER_ROLE") || "public";

@@ -344,6 +344,7 @@ export function create(
         class="button col-1-2"
         type="button"
         data-event="add-row"
+        data-can="update:ledger"
       >
         Add Row
       </button>
@@ -351,6 +352,7 @@ export function create(
         class="button col-last-2"
         type="button"
         data-event="submit"
+        data-can="update:ledger"
       >
         Save
       </button>
@@ -358,6 +360,7 @@ export function create(
         class="button col-last-2 if-desktop"
         type="button"
         data-event="delete"
+        data-can="delete:ledger"
       >
         Delete
       </button>
