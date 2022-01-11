@@ -5,9 +5,10 @@ export function asCurrency(
 }
 
 export function asQuantity(
-  value: number
+  value: number,
+  fixed = 0
 ) {
   if (typeof value === "string")
     return value;
-  return (value || 0).toFixed(0);
+  return (value || 0).toFixed(fixed);
 }

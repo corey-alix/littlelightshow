@@ -5477,10 +5477,10 @@ function injectLabels(domNode) {
 function asCurrency(value) {
   return (value || 0).toFixed(2);
 }
-function asQuantity(value) {
+function asQuantity(value, fixed = 0) {
   if (typeof value === "string")
     return value;
-  return (value || 0).toFixed(0);
+  return (value || 0).toFixed(fixed);
 }
 
 // app/services/invoices.ts

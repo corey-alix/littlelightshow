@@ -5294,8 +5294,13 @@ function dom(tag, args, ...children) {
 }
 
 // app/fun/asDateString.ts
+var localTimeOffsetInMinutes = new Date().getTimezoneOffset();
+var localTimeOffsetInTicks = localTimeOffsetInMinutes * 60 * 1e3;
+function asLocalDate(date) {
+  return new Date(date.valueOf() - localTimeOffsetInTicks);
+}
 function asDateString(date = new Date()) {
-  return date.toISOString().split("T")[0];
+  return asLocalDate(date).toISOString().split("T")[0];
 }
 
 // app/fun/dom.ts

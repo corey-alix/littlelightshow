@@ -20,9 +20,9 @@ var __toModule = (module) => {
   return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
 };
 
-// node_modules/assertion-error/index.js
+// test/node_modules/assertion-error/index.js
 var require_assertion_error = __commonJS({
-  "node_modules/assertion-error/index.js"(exports, module) {
+  "test/node_modules/assertion-error/index.js"(exports, module) {
     function exclude() {
       var excludes = [].slice.call(arguments);
       function excludeProps(res, obj) {
@@ -71,9 +71,9 @@ var require_assertion_error = __commonJS({
   }
 });
 
-// node_modules/pathval/index.js
+// test/node_modules/pathval/index.js
 var require_pathval = __commonJS({
-  "node_modules/pathval/index.js"(exports, module) {
+  "test/node_modules/pathval/index.js"(exports, module) {
     "use strict";
     function hasProperty(obj, name) {
       if (typeof obj === "undefined" || obj === null) {
@@ -171,9 +171,9 @@ var require_pathval = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/flag.js
+// test/node_modules/chai/lib/chai/utils/flag.js
 var require_flag = __commonJS({
-  "node_modules/chai/lib/chai/utils/flag.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/flag.js"(exports, module) {
     module.exports = function flag(obj, key, value) {
       var flags = obj.__flags || (obj.__flags = Object.create(null));
       if (arguments.length === 3) {
@@ -185,9 +185,9 @@ var require_flag = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/test.js
+// test/node_modules/chai/lib/chai/utils/test.js
 var require_test = __commonJS({
-  "node_modules/chai/lib/chai/utils/test.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/test.js"(exports, module) {
     var flag = require_flag();
     module.exports = function test(obj, args) {
       var negate = flag(obj, "negate"), expr = args[0];
@@ -196,9 +196,9 @@ var require_test = __commonJS({
   }
 });
 
-// node_modules/type-detect/type-detect.js
+// test/node_modules/type-detect/type-detect.js
 var require_type_detect = __commonJS({
-  "node_modules/type-detect/type-detect.js"(exports, module) {
+  "test/node_modules/type-detect/type-detect.js"(exports, module) {
     (function(global2, factory) {
       typeof exports === "object" && typeof module !== "undefined" ? module.exports = factory() : typeof define === "function" && define.amd ? define(factory) : global2.typeDetect = factory();
     })(exports, function() {
@@ -315,9 +315,9 @@ var require_type_detect = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/expectTypes.js
+// test/node_modules/chai/lib/chai/utils/expectTypes.js
 var require_expectTypes = __commonJS({
-  "node_modules/chai/lib/chai/utils/expectTypes.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/expectTypes.js"(exports, module) {
     var AssertionError2 = require_assertion_error();
     var flag = require_flag();
     var type = require_type_detect();
@@ -345,18 +345,18 @@ var require_expectTypes = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/getActual.js
+// test/node_modules/chai/lib/chai/utils/getActual.js
 var require_getActual = __commonJS({
-  "node_modules/chai/lib/chai/utils/getActual.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/getActual.js"(exports, module) {
     module.exports = function getActual(obj, args) {
       return args.length > 4 ? args[4] : obj._obj;
     };
   }
 });
 
-// node_modules/get-func-name/index.js
+// test/node_modules/get-func-name/index.js
 var require_get_func_name = __commonJS({
-  "node_modules/get-func-name/index.js"(exports, module) {
+  "test/node_modules/get-func-name/index.js"(exports, module) {
     "use strict";
     var toString = Function.prototype.toString;
     var functionNameMatch = /\s*function(?:\s|\s*\/\*[^(?:*\/)]+\*\/\s*)*([^\s\(\/]+)/;
@@ -379,9 +379,9 @@ var require_get_func_name = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/getProperties.js
+// test/node_modules/chai/lib/chai/utils/getProperties.js
 var require_getProperties = __commonJS({
-  "node_modules/chai/lib/chai/utils/getProperties.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/getProperties.js"(exports, module) {
     module.exports = function getProperties(object) {
       var result = Object.getOwnPropertyNames(object);
       function addProperty(property) {
@@ -399,9 +399,9 @@ var require_getProperties = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/getEnumerableProperties.js
+// test/node_modules/chai/lib/chai/utils/getEnumerableProperties.js
 var require_getEnumerableProperties = __commonJS({
-  "node_modules/chai/lib/chai/utils/getEnumerableProperties.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/getEnumerableProperties.js"(exports, module) {
     module.exports = function getEnumerableProperties(object) {
       var result = [];
       for (var name in object) {
@@ -412,9 +412,9 @@ var require_getEnumerableProperties = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/config.js
+// test/node_modules/chai/lib/chai/config.js
 var require_config = __commonJS({
-  "node_modules/chai/lib/chai/config.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/config.js"(exports, module) {
     module.exports = {
       includeStack: false,
       showDiff: true,
@@ -425,9 +425,9 @@ var require_config = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/inspect.js
+// test/node_modules/chai/lib/chai/utils/inspect.js
 var require_inspect = __commonJS({
-  "node_modules/chai/lib/chai/utils/inspect.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/inspect.js"(exports, module) {
     var getName = require_get_func_name();
     var getProperties = require_getProperties();
     var getEnumerableProperties = require_getEnumerableProperties();
@@ -692,9 +692,9 @@ var require_inspect = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/objDisplay.js
+// test/node_modules/chai/lib/chai/utils/objDisplay.js
 var require_objDisplay = __commonJS({
-  "node_modules/chai/lib/chai/utils/objDisplay.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/objDisplay.js"(exports, module) {
     var inspect = require_inspect();
     var config2 = require_config();
     module.exports = function objDisplay(obj) {
@@ -717,9 +717,9 @@ var require_objDisplay = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/getMessage.js
+// test/node_modules/chai/lib/chai/utils/getMessage.js
 var require_getMessage = __commonJS({
-  "node_modules/chai/lib/chai/utils/getMessage.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/getMessage.js"(exports, module) {
     var flag = require_flag();
     var getActual = require_getActual();
     var objDisplay = require_objDisplay();
@@ -740,9 +740,9 @@ var require_getMessage = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/transferFlags.js
+// test/node_modules/chai/lib/chai/utils/transferFlags.js
 var require_transferFlags = __commonJS({
-  "node_modules/chai/lib/chai/utils/transferFlags.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/transferFlags.js"(exports, module) {
     module.exports = function transferFlags(assertion, object, includeAll) {
       var flags = assertion.__flags || (assertion.__flags = Object.create(null));
       if (!object.__flags) {
@@ -758,9 +758,9 @@ var require_transferFlags = __commonJS({
   }
 });
 
-// node_modules/deep-eql/index.js
+// test/node_modules/deep-eql/index.js
 var require_deep_eql = __commonJS({
-  "node_modules/deep-eql/index.js"(exports, module) {
+  "test/node_modules/deep-eql/index.js"(exports, module) {
     "use strict";
     var type = require_type_detect();
     function FakeMap() {
@@ -1014,9 +1014,9 @@ var require_deep_eql = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/isProxyEnabled.js
+// test/node_modules/chai/lib/chai/utils/isProxyEnabled.js
 var require_isProxyEnabled = __commonJS({
-  "node_modules/chai/lib/chai/utils/isProxyEnabled.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/isProxyEnabled.js"(exports, module) {
     var config2 = require_config();
     module.exports = function isProxyEnabled() {
       return config2.useProxy && typeof Proxy !== "undefined" && typeof Reflect !== "undefined";
@@ -1024,9 +1024,9 @@ var require_isProxyEnabled = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/addProperty.js
+// test/node_modules/chai/lib/chai/utils/addProperty.js
 var require_addProperty = __commonJS({
-  "node_modules/chai/lib/chai/utils/addProperty.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/addProperty.js"(exports, module) {
     var chai2 = require_chai();
     var flag = require_flag();
     var isProxyEnabled = require_isProxyEnabled();
@@ -1052,9 +1052,9 @@ var require_addProperty = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/addLengthGuard.js
+// test/node_modules/chai/lib/chai/utils/addLengthGuard.js
 var require_addLengthGuard = __commonJS({
-  "node_modules/chai/lib/chai/utils/addLengthGuard.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/addLengthGuard.js"(exports, module) {
     var fnLengthDesc = Object.getOwnPropertyDescriptor(function() {
     }, "length");
     module.exports = function addLengthGuard(fn, assertionName, isChainable) {
@@ -1073,9 +1073,9 @@ var require_addLengthGuard = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/proxify.js
+// test/node_modules/chai/lib/chai/utils/proxify.js
 var require_proxify = __commonJS({
-  "node_modules/chai/lib/chai/utils/proxify.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/proxify.js"(exports, module) {
     var config2 = require_config();
     var flag = require_flag();
     var getProperties = require_getProperties();
@@ -1141,9 +1141,9 @@ var require_proxify = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/addMethod.js
+// test/node_modules/chai/lib/chai/utils/addMethod.js
 var require_addMethod = __commonJS({
-  "node_modules/chai/lib/chai/utils/addMethod.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/addMethod.js"(exports, module) {
     var addLengthGuard = require_addLengthGuard();
     var chai2 = require_chai();
     var flag = require_flag();
@@ -1167,9 +1167,9 @@ var require_addMethod = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/overwriteProperty.js
+// test/node_modules/chai/lib/chai/utils/overwriteProperty.js
 var require_overwriteProperty = __commonJS({
-  "node_modules/chai/lib/chai/utils/overwriteProperty.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/overwriteProperty.js"(exports, module) {
     var chai2 = require_chai();
     var flag = require_flag();
     var isProxyEnabled = require_isProxyEnabled();
@@ -1201,9 +1201,9 @@ var require_overwriteProperty = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/overwriteMethod.js
+// test/node_modules/chai/lib/chai/utils/overwriteMethod.js
 var require_overwriteMethod = __commonJS({
-  "node_modules/chai/lib/chai/utils/overwriteMethod.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/overwriteMethod.js"(exports, module) {
     var addLengthGuard = require_addLengthGuard();
     var chai2 = require_chai();
     var flag = require_flag();
@@ -1236,9 +1236,9 @@ var require_overwriteMethod = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/addChainableMethod.js
+// test/node_modules/chai/lib/chai/utils/addChainableMethod.js
 var require_addChainableMethod = __commonJS({
-  "node_modules/chai/lib/chai/utils/addChainableMethod.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/addChainableMethod.js"(exports, module) {
     var addLengthGuard = require_addLengthGuard();
     var chai2 = require_chai();
     var flag = require_flag();
@@ -1308,9 +1308,9 @@ var require_addChainableMethod = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/overwriteChainableMethod.js
+// test/node_modules/chai/lib/chai/utils/overwriteChainableMethod.js
 var require_overwriteChainableMethod = __commonJS({
-  "node_modules/chai/lib/chai/utils/overwriteChainableMethod.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/overwriteChainableMethod.js"(exports, module) {
     var chai2 = require_chai();
     var transferFlags = require_transferFlags();
     module.exports = function overwriteChainableMethod(ctx, name, method, chainingBehavior) {
@@ -1339,9 +1339,9 @@ var require_overwriteChainableMethod = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/compareByInspect.js
+// test/node_modules/chai/lib/chai/utils/compareByInspect.js
 var require_compareByInspect = __commonJS({
-  "node_modules/chai/lib/chai/utils/compareByInspect.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/compareByInspect.js"(exports, module) {
     var inspect = require_inspect();
     module.exports = function compareByInspect(a, b) {
       return inspect(a) < inspect(b) ? -1 : 1;
@@ -1349,9 +1349,9 @@ var require_compareByInspect = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/getOwnEnumerablePropertySymbols.js
+// test/node_modules/chai/lib/chai/utils/getOwnEnumerablePropertySymbols.js
 var require_getOwnEnumerablePropertySymbols = __commonJS({
-  "node_modules/chai/lib/chai/utils/getOwnEnumerablePropertySymbols.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/getOwnEnumerablePropertySymbols.js"(exports, module) {
     module.exports = function getOwnEnumerablePropertySymbols(obj) {
       if (typeof Object.getOwnPropertySymbols !== "function")
         return [];
@@ -1362,9 +1362,9 @@ var require_getOwnEnumerablePropertySymbols = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/getOwnEnumerableProperties.js
+// test/node_modules/chai/lib/chai/utils/getOwnEnumerableProperties.js
 var require_getOwnEnumerableProperties = __commonJS({
-  "node_modules/chai/lib/chai/utils/getOwnEnumerableProperties.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/getOwnEnumerableProperties.js"(exports, module) {
     var getOwnEnumerablePropertySymbols = require_getOwnEnumerablePropertySymbols();
     module.exports = function getOwnEnumerableProperties(obj) {
       return Object.keys(obj).concat(getOwnEnumerablePropertySymbols(obj));
@@ -1372,9 +1372,9 @@ var require_getOwnEnumerableProperties = __commonJS({
   }
 });
 
-// node_modules/check-error/index.js
+// test/node_modules/check-error/index.js
 var require_check_error = __commonJS({
-  "node_modules/check-error/index.js"(exports, module) {
+  "test/node_modules/check-error/index.js"(exports, module) {
     "use strict";
     function compatibleInstance(thrown, errorLike) {
       return errorLike instanceof Error && thrown === errorLike;
@@ -1437,9 +1437,9 @@ var require_check_error = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/isNaN.js
+// test/node_modules/chai/lib/chai/utils/isNaN.js
 var require_isNaN = __commonJS({
-  "node_modules/chai/lib/chai/utils/isNaN.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/isNaN.js"(exports, module) {
     function isNaN(value) {
       return value !== value;
     }
@@ -1447,9 +1447,9 @@ var require_isNaN = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/getOperator.js
+// test/node_modules/chai/lib/chai/utils/getOperator.js
 var require_getOperator = __commonJS({
-  "node_modules/chai/lib/chai/utils/getOperator.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/utils/getOperator.js"(exports, module) {
     var type = require_type_detect();
     var flag = require_flag();
     function isObjectType(obj) {
@@ -1483,9 +1483,9 @@ var require_getOperator = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/utils/index.js
+// test/node_modules/chai/lib/chai/utils/index.js
 var require_utils = __commonJS({
-  "node_modules/chai/lib/chai/utils/index.js"(exports) {
+  "test/node_modules/chai/lib/chai/utils/index.js"(exports) {
     var pathval = require_pathval();
     exports.test = require_test();
     exports.type = require_type_detect();
@@ -1518,9 +1518,9 @@ var require_utils = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/assertion.js
+// test/node_modules/chai/lib/chai/assertion.js
 var require_assertion = __commonJS({
-  "node_modules/chai/lib/chai/assertion.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/assertion.js"(exports, module) {
     var config2 = require_config();
     module.exports = function(_chai, util2) {
       var AssertionError2 = _chai.AssertionError, flag = util2.flag;
@@ -1605,9 +1605,9 @@ var require_assertion = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/core/assertions.js
+// test/node_modules/chai/lib/chai/core/assertions.js
 var require_assertions = __commonJS({
-  "node_modules/chai/lib/chai/core/assertions.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/core/assertions.js"(exports, module) {
     module.exports = function(chai2, _) {
       var Assertion2 = chai2.Assertion, AssertionError2 = chai2.AssertionError, flag = _.flag;
       [
@@ -2504,9 +2504,9 @@ var require_assertions = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/interface/expect.js
+// test/node_modules/chai/lib/chai/interface/expect.js
 var require_expect = __commonJS({
-  "node_modules/chai/lib/chai/interface/expect.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/interface/expect.js"(exports, module) {
     module.exports = function(chai2, util2) {
       chai2.expect = function(val, message) {
         return new chai2.Assertion(val, message);
@@ -2527,9 +2527,9 @@ var require_expect = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/interface/should.js
+// test/node_modules/chai/lib/chai/interface/should.js
 var require_should = __commonJS({
-  "node_modules/chai/lib/chai/interface/should.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/interface/should.js"(exports, module) {
     module.exports = function(chai2, util2) {
       var Assertion2 = chai2.Assertion;
       function loadShould() {
@@ -2595,9 +2595,9 @@ var require_should = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai/interface/assert.js
+// test/node_modules/chai/lib/chai/interface/assert.js
 var require_assert = __commonJS({
-  "node_modules/chai/lib/chai/interface/assert.js"(exports, module) {
+  "test/node_modules/chai/lib/chai/interface/assert.js"(exports, module) {
     module.exports = function(chai2, util2) {
       var Assertion2 = chai2.Assertion, flag = util2.flag;
       var assert2 = chai2.assert = function(express, errmsg) {
@@ -3132,9 +3132,9 @@ var require_assert = __commonJS({
   }
 });
 
-// node_modules/chai/lib/chai.js
+// test/node_modules/chai/lib/chai.js
 var require_chai = __commonJS({
-  "node_modules/chai/lib/chai.js"(exports) {
+  "test/node_modules/chai/lib/chai.js"(exports) {
     var used = [];
     exports.version = "4.3.3";
     exports.AssertionError = require_assertion_error();
@@ -3162,19 +3162,14 @@ var require_chai = __commonJS({
   }
 });
 
-// node_modules/chai/index.js
+// test/node_modules/chai/index.js
 var require_chai2 = __commonJS({
-  "node_modules/chai/index.js"(exports, module) {
+  "test/node_modules/chai/index.js"(exports, module) {
     module.exports = require_chai();
   }
 });
 
-// ../app/fun/asCurrency.ts
-function asCurrency(value) {
-  return (value || 0).toFixed(2);
-}
-
-// node_modules/chai/index.mjs
+// test/node_modules/chai/index.mjs
 var import_index = __toModule(require_chai2());
 var expect = import_index.default.expect;
 var version = import_index.default.version;
@@ -3187,10 +3182,50 @@ var should = import_index.default.should;
 var assert = import_index.default.assert;
 var core = import_index.default.core;
 
-// index.ts
+// app/fun/asCurrency.ts
+function asCurrency(value) {
+  return (value || 0).toFixed(2);
+}
+function asQuantity(value, fixed = 0) {
+  if (typeof value === "string")
+    return value;
+  return (value || 0).toFixed(fixed);
+}
+
+// test/asCurrency.ts
 describe("asCurrency tests", () => {
   it("asCurrency tests", () => {
     assert.equal(asCurrency(1.234), "1.23");
+    assert.equal(asCurrency(0), "0.00");
+  });
+  it("asQuantity tests", () => {
+    assert.equal(asQuantity(1.234), "1");
+    assert.equal(asQuantity(1.9), "2", "round to nearest integer");
+    assert.equal(asQuantity(1.9, 1), "1.9", "round to nearest integer");
+  });
+});
+
+// app/fun/asDateString.ts
+var localTimeOffsetInMinutes = new Date().getTimezoneOffset();
+var localTimeOffsetInTicks = localTimeOffsetInMinutes * 60 * 1e3;
+function asLocalDate(date) {
+  return new Date(date.valueOf() - localTimeOffsetInTicks);
+}
+function asDateString(date = new Date()) {
+  return asLocalDate(date).toISOString().split("T")[0];
+}
+function asTimeString(date = new Date()) {
+  return asLocalDate(date).toISOString().split("T")[1].substring(0, 5);
+}
+
+// test/asDateString.ts
+describe("asDateString tests", () => {
+  it("asDateString tests", () => {
+    assert.equal(asDateString(new Date(2e3, 1, 1, 0, 0, 0)), "2000-02-01");
+    assert.equal(asDateString(new Date(2e3, 1, 1, 22)), "2000-02-01");
+  });
+  it("asTimeString tests", () => {
+    assert.equal(asTimeString(new Date(new Date(2e3, 1, 1, 6, 20, 30).valueOf())), "06:20");
   });
 });
 /*!
