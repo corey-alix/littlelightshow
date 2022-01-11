@@ -1440,10 +1440,10 @@ var require_check_error = __commonJS({
 // test/node_modules/chai/lib/chai/utils/isNaN.js
 var require_isNaN = __commonJS({
   "test/node_modules/chai/lib/chai/utils/isNaN.js"(exports, module) {
-    function isNaN(value) {
+    function isNaN2(value) {
       return value !== value;
     }
-    module.exports = Number.isNaN || isNaN;
+    module.exports = Number.isNaN || isNaN2;
   }
 });
 
@@ -3236,6 +3236,13 @@ function distinct(items) {
   ];
 }
 
+// test/distinctTests.ts
+describe("distinct tests", () => {
+  it("distinct tests", () => {
+    assert.sameOrderedMembers(distinct([2, 3, 1, 1, 3, 2]), [2, 3, 1]);
+  });
+});
+
 // app/fun/isUndefined.ts
 function isUndefined(value) {
   return typeof value === "undefined";
@@ -3244,10 +3251,27 @@ function isNull(value) {
   return value === null;
 }
 
-// test/index.ts
-describe("distinct tests", () => {
-  it("distinct tests", () => {
-    assert.sameOrderedMembers(distinct([2, 3, 1, 1, 3, 2]), [2, 3, 1]);
+// app/fun/isZero.ts
+function isZero(value) {
+  const numericValue = typeof value === "number" ? value : parseFloat(value);
+  if (isNaN(numericValue))
+    return false;
+  if (numericValue > 1e-7)
+    return false;
+  if (numericValue < -1e-7)
+    return false;
+  return true;
+}
+
+// test/isUndefinedTests.ts
+describe("isZero tests", () => {
+  it("isZero tests", () => {
+    assert.isTrue(isZero("-0"), "-0 is zero");
+    assert.isTrue(isZero("0"), "0");
+    assert.isTrue(isZero("0.0"), "0.0");
+    assert.isTrue(!isZero("0.0001"), "almost zero but not quite");
+    assert.isTrue(!isZero(""), "empty string is not zero");
+    assert.isTrue(!isZero(null), "null is not zero");
   });
 });
 describe("isUndefined tests", () => {
@@ -3264,6 +3288,48 @@ describe("isUndefined tests", () => {
     assert.equal(isUndefined(0), false);
     assert.equal(isUndefined(false), false);
     assert.equal(isUndefined(), true);
+  });
+});
+
+// app/fun/EventBus.ts
+var EventBus = class {
+  constructor() {
+    this.handlers = {};
+  }
+  on(eventName, cb) {
+    if (!this.handlers[eventName])
+      this.handlers[eventName] = [];
+    this.handlers[eventName].push(cb);
+    return {
+      off: () => {
+        const i = this.handlers[eventName].indexOf(cb);
+        if (i >= 0)
+          this.handlers[eventName].splice(i, 1);
+      }
+    };
+  }
+  trigger(eventName, event) {
+    if (!this.handlers[eventName])
+      return;
+    this.handlers[eventName].forEach((cb) => cb(event));
+  }
+  destroy() {
+    this.handlers = {};
+  }
+};
+
+// test/index.ts
+describe("EventBus", () => {
+  it("EventBus Tests", () => {
+    const channel = new EventBus();
+    let eventCounter = 0;
+    channel.on("topic-1", () => eventCounter++);
+    channel.on("topic-2", (data) => eventCounter += data.increment);
+    channel.trigger("topic-1");
+    channel.trigger("topic-2", {
+      increment: 0.1
+    });
+    assert.equal(eventCounter, 1.1);
   });
 });
 /*!

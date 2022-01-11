@@ -5963,11 +5963,14 @@ function invoiceItem(item) {
 
 // app/fun/isZero.ts
 function isZero(value) {
-  if (value === "0.00")
-    return true;
-  if (value === "-0.00")
-    return true;
-  return false;
+  const numericValue = typeof value === "number" ? value : parseFloat(value);
+  if (isNaN(numericValue))
+    return false;
+  if (numericValue > 1e-7)
+    return false;
+  if (numericValue < -1e-7)
+    return false;
+  return true;
 }
 function noZero(value) {
   return isZero(value) ? "" : value;

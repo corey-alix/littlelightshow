@@ -1,7 +1,15 @@
-export function isZero(value: string) {
-  if (value === "0.00") return true;
-  if (value === "-0.00") return true;
-  return false;
+export function isZero(
+  value: string | number
+) {
+  const numericValue =
+    typeof value === "number"
+      ? value
+      : parseFloat(value);
+  if (isNaN(numericValue)) return false;
+  if (numericValue > 1e-7) return false;
+  if (numericValue < -1e-7)
+    return false;
+  return true;
 }
 
 export function noZero(value: string) {
