@@ -5610,6 +5610,10 @@ var maptilerEndpoints = {
 };
 async function run() {
   await init();
+  if (!MAPTILERKEY) {
+    reportError(`Go to <a href="${routes.admin()}">admin screen</a> to provide a proper map tiler key`);
+    return;
+  }
   on(document.body, "nav-back", () => {
     window.history.back();
   });

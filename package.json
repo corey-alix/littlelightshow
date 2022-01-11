@@ -19,7 +19,9 @@
     "deploy": "git checkout v1.0.2 && git merge v1.0.3 && git push && git checkout v1.0.3",
     "dev": "npm-run-all -c -p build watch:lint",
     "watch:lint": "npm run lint -- -w",
-    "lint": "tsc"
+    "lint": "tsc",
+    "test": "mocha ./bin/spec/index.js",
+    "cicd": "npm-run-all lint test"
   },
   "repository": {
     "type": "git",
@@ -41,7 +43,9 @@
     }
   },
   "dependencies": {
+    "chai": "^4.3.4",
     "faunadb": "^4.4.1",
+    "mocha": "^9.1.3",
     "netlify": "^10.1.0"
   },
   "devDependencies": {

@@ -3,7 +3,6 @@ import {
   asCurrency,
   asQuantity,
 } from "../../fun/asCurrency.js";
-import { asNumber } from "../../fun/asNumber.js";
 import { moveChildrenBefore } from "../../fun/dom.js";
 import { noZero } from "../../fun/isZero.js";
 import { sum } from "../../fun/sum.js";

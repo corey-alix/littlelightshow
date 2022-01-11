@@ -52,9 +52,18 @@ import {
   getCurrentLocation,
   captureLocation,
 } from "./captureLocation";
+import { reportError } from "../toasterWriter";
+import { routes } from "../../router";
 
 export async function run() {
   await systemInit();
+
+  if (!MAPTILERKEY) {
+    reportError(
+      `Go to <a href="${routes.admin()}">admin screen</a> to provide a proper map tiler key`
+    );
+    return;
+  }
 
   on(document.body, "nav-back", () => {
     window.history.back();

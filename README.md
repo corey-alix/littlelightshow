@@ -6,6 +6,7 @@ littlelightshow
 
 ## Change Log
 
+- 2022-01-10: merge v1.0.5 -> v1.0.4
 - 2022-01-06: track my location
 - 2022-01-06: introduce data-href to work with routes
 - 2022-01-06: introduce maptiler map with "where am i"
@@ -24,12 +25,14 @@ littlelightshow
 
 ## v1.0.5
 
-- Add Map module
-- Add TODO module
-- Add PWA offline support
+- introduce mocha tests
+- EXPLORING: replace custom forms with form meta data
 
 ## v1.0.4
 
+- Add Map module
+- Add TODO module
+- Add PWA offline support
 - Add inventory module
 
 ## v1.0.3
