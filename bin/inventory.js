@@ -5957,6 +5957,7 @@ async function init2(target = document.body) {
       description: ""
     };
     const formDom = create2(inventoryItem);
+    stripAccessControlItems(formDom);
     target.appendChild(formDom);
     hookupTriggers(formDom);
     extendNumericInputBehaviors(formDom);

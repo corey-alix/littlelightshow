@@ -121,6 +121,7 @@ export async function init(
     const formDom = showInventoryItem(
       inventoryItem
     );
+    stripAccessControlItems(formDom);
     target.appendChild(formDom);
     hookupTriggers(formDom);
     extendNumericInputBehaviors(
