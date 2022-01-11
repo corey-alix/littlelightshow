@@ -3228,6 +3228,44 @@ describe("asDateString tests", () => {
     assert.equal(asTimeString(new Date(new Date(2e3, 1, 1, 6, 20, 30).valueOf())), "06:20");
   });
 });
+
+// app/fun/distinct.ts
+function distinct(items) {
+  return [
+    ...new Set(items)
+  ];
+}
+
+// app/fun/isUndefined.ts
+function isUndefined(value) {
+  return typeof value === "undefined";
+}
+function isNull(value) {
+  return value === null;
+}
+
+// test/index.ts
+describe("distinct tests", () => {
+  it("distinct tests", () => {
+    assert.sameOrderedMembers(distinct([2, 3, 1, 1, 3, 2]), [2, 3, 1]);
+  });
+});
+describe("isUndefined tests", () => {
+  it("isNull tests", () => {
+    assert.equal(isNull(globalThis["__%"]), false);
+    assert.equal(isNull(null), true);
+    assert.equal(isUndefined(0), false);
+    assert.equal(isNull(false), false);
+    assert.equal(isNull(), false);
+  });
+  it("isUndefined tests", () => {
+    assert.equal(isUndefined(globalThis["__%"]), true);
+    assert.equal(isUndefined(null), false);
+    assert.equal(isUndefined(0), false);
+    assert.equal(isUndefined(false), false);
+    assert.equal(isUndefined(), true);
+  });
+});
 /*!
  * ### ._obj
  *
