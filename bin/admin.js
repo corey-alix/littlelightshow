@@ -904,24 +904,24 @@ var require_util = __commonJS({
       var detectedEnv = runtimeEnvs.find((env) => env.check());
       return detectedEnv ? detectedEnv.name : "unknown";
     }
-    function defaults2(obj, def) {
+    function defaults3(obj, def) {
       if (obj === void 0) {
         return def;
       } else {
         return obj;
       }
     }
-    function applyDefaults(provided, defaults3) {
+    function applyDefaults(provided, defaults4) {
       var out = {};
       for (var providedKey in provided) {
-        if (!(providedKey in defaults3)) {
+        if (!(providedKey in defaults4)) {
           throw new Error("No such option " + providedKey);
         }
         out[providedKey] = provided[providedKey];
       }
-      for (var defaultsKey in defaults3) {
+      for (var defaultsKey in defaults4) {
         if (!(defaultsKey in out)) {
-          out[defaultsKey] = defaults3[defaultsKey];
+          out[defaultsKey] = defaults4[defaultsKey];
         }
       }
       return out;
@@ -1032,7 +1032,7 @@ Changelog: https://github.com/${packageJson.repository}/blob/main/CHANGELOG.md`,
       inherits,
       isNodeEnv,
       getEnvVariable,
-      defaults: defaults2,
+      defaults: defaults3,
       applyDefaults,
       removeNullAndUndefinedValues,
       removeUndefinedValues,
@@ -5274,19 +5274,50 @@ function extendNumericInputBehaviors(form) {
   currencyInput.forEach(formatAsCurrency);
 }
 
-// app/fun/get.ts
-function isDefined(value) {
-  return typeof value !== "undefined";
-}
+// app/data/accesscontrol.ts
+var accessControl = {
+  Y: {
+    admin: 0,
+    inventory: 4,
+    invoice: 15,
+    ledger: 1,
+    map: 1,
+    role: 2,
+    taxrate: 2,
+    "batch-size": 2,
+    "cache-age": 2,
+    "fauna-api": 2,
+    "maptiler-api": 2,
+    "primary-contact": 0,
+    "ux-theme": 2,
+    "work-offline": 2
+  },
+  Z: {
+    admin: 15,
+    inventory: 4,
+    invoice: 15,
+    ledger: 1,
+    map: 1,
+    role: 2,
+    taxrate: 2,
+    "batch-size": 2,
+    "cache-age": 2,
+    "fauna-api": 2,
+    "maptiler-api": 2,
+    "primary-contact": 15,
+    "ux-theme": 2,
+    "work-offline": 2
+  }
+};
 
 // app/services/accesscontrol.ts
 var TABLE_NAME2 = "accesscontrol";
 var Permission = /* @__PURE__ */ ((Permission2) => {
   Permission2[Permission2["none"] = 0] = "none";
-  Permission2[Permission2["canRead"] = 1] = "canRead";
-  Permission2[Permission2["canUpdate"] = 2] = "canUpdate";
-  Permission2[Permission2["canCreate"] = 4] = "canCreate";
-  Permission2[Permission2["canDelete"] = 8] = "canDelete";
+  Permission2[Permission2["read"] = 1] = "read";
+  Permission2[Permission2["update"] = 2] = "update";
+  Permission2[Permission2["create"] = 4] = "create";
+  Permission2[Permission2["delete"] = 8] = "delete";
   Permission2[Permission2["full"] = 15] = "full";
   return Permission2;
 })(Permission || {});
@@ -5294,33 +5325,54 @@ var AccessControlModel = class extends StorageModel {
 };
 var accessControlStore = new AccessControlModel({
   tableName: TABLE_NAME2,
-  offline: false
+  offline: true
 });
 
 // app/fql/can.ts
+var USER_ROLE = getGlobalState("USER_ROLE") || "public";
+var defaults = accessControl[USER_ROLE];
 async function can(code) {
   const accessControlItems = await accessControlStore.getItems();
-  const item = accessControlItems.find((i) => i.code === code);
+  const [noun, verb] = code.split(":").reverse();
+  let permission = Permission.full;
+  switch (verb) {
+    case "any":
+      break;
+    case "create":
+      permission = Permission.create;
+      break;
+    case "delete":
+      permission = Permission.delete;
+      break;
+    case "full":
+      permission = Permission.full;
+      break;
+    case "none":
+      permission = Permission.none;
+      break;
+    case "read":
+      permission = Permission.read;
+      break;
+    case "update":
+      permission = Permission.update;
+      break;
+  }
+  const item = accessControlItems.find((i) => i.code === noun && i.role === USER_ROLE);
   if (!!item) {
-    if (!isDefined(item.permission)) {
-      debugger;
-      item.permission = Permission.full;
-      try {
-        await accessControlStore.upsertItem({ ...item });
-        return true;
-      } catch (ex) {
-        reportError(ex);
-        return false;
-      }
-    }
-    return item.permission > Permission.none;
+    if (!verb || verb === "any")
+      return item.permission > Permission.none;
+    return permission == (item.permission & permission);
   }
   try {
+    let effectivePermission = defaults && defaults[noun];
+    if (typeof effectivePermission !== "number")
+      effectivePermission = permission;
     await accessControlStore.upsertItem({
-      code,
-      permission: Permission.full
+      code: noun,
+      permission: effectivePermission,
+      role: USER_ROLE
     });
-    return true;
+    return can(code);
   } catch (ex) {
     reportError(ex);
     return false;
@@ -5428,7 +5480,7 @@ function asStyle(o) {
     return o;
   return Object.keys(o).map((k) => `${k}:${o[k]}`).join(";");
 }
-function defaults(a, ...b) {
+function defaults2(a, ...b) {
   b.filter((b2) => !!b2).forEach((b2) => {
     Object.keys(b2).filter((k) => a[k] === void 0).forEach((k) => a[k] = b2[k]);
   });
@@ -5446,7 +5498,7 @@ function dom(tag, args, ...children) {
   if (typeof tag === "string") {
     let element = document.createElement(tag);
     if (default_args[tag]) {
-      args = defaults(args ?? {}, default_args[tag]);
+      args = defaults2(args ?? {}, default_args[tag]);
     }
     if (args) {
       Object.keys(args).forEach((key) => {

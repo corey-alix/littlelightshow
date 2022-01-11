@@ -13,7 +13,7 @@
   </head>
   <body class="body flex textier">
     <div
-      data-can="edit-ux-theme"
+      data-can="update:ux-theme"
       class="border padding rounded flex width-100"
     >
       <div
@@ -60,7 +60,7 @@
       </div>
       <label
         class="border padding rounded"
-        data-can="edit-taxrate"
+        data-can="update:taxrate"
         >Tax Rate<br />
         <input
           type="number"
@@ -89,7 +89,7 @@
 
       <button
         class="button"
-        data-can="edit-fauna-api"
+        data-can="update:fauna-api"
         data-event="set-fauna-api-key"
       >
         Set Fauna API key
@@ -97,7 +97,7 @@
 
       <button
         class="button"
-        data-can="edit-maptiler-api"
+        data-can="update:maptiler-api"
         data-event="set-maptiler-api-key"
       >
         Set MapTiler API Key
@@ -105,7 +105,7 @@
 
       <label
         class="border padding rounded"
-        data-can="edit-cache-age"
+        data-can="update:cache-age"
         >Max Cache Age (seconds)<br />
         <input
           type="number"
@@ -116,7 +116,7 @@
 
       <label
         class="border padding rounded"
-        data-can="edit-batch-size"
+        data-can="update:batch-size"
         >Max record count per request<br />
         <input
           type="number"
@@ -125,10 +125,20 @@
           data-bind="BATCH_SIZE"
       /></label>
 
+      <label
+        class="border padding rounded"
+        data-can="update:role"
+        >Enter user role<br />
+        <input
+          class="c4 rounded"
+          placeholder="role"
+          data-bind="USER_ROLE"
+      /></label>
+
       <br />
       <label
         class="border padding rounded"
-        data-can="work-offline"
+        data-can="update:work-offline"
         >Work Offline
         <input
           type="checkbox"

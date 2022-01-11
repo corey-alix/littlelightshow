@@ -14,7 +14,10 @@
     />
   </head>
   <body class="body flex">
-    <div class="flex width-100">
+    <div
+      data-can="invoice"
+      class="flex width-100"
+    >
       <div
         class="section-title rounded"
       >
@@ -22,18 +25,21 @@
       </div>
       <a
         class="button"
-        data-can="create-invoice"
+        data-can="create:invoice"
         data-href="createInvoice"
         >Create an Invoice</a
       >
       <a
         class="button"
-        data-can="view-invoice"
+        data-can="read:invoice"
         data-href="allInvoices"
         >List all Invoices</a
       >
     </div>
-    <div class="flex width-100">
+    <div
+      data-can="inventory"
+      class="flex width-100"
+    >
       <div
         class="section-title rounded"
       >
@@ -41,18 +47,21 @@
       </div>
       <a
         class="button"
-        data-can="create-inventory"
+        data-can="create:inventory"
         data-href="createInventory"
         >Create Inventory Item</a
       >
       <a
         class="button"
-        data-can="view-inventory"
+        data-can="read:inventory"
         data-href="allInventoryItems"
         >List all Inventory</a
       >
     </div>
-    <div class="flex width-100">
+    <div
+      data-can="ledger"
+      class="flex width-100"
+    >
       <div
         class="section-title rounded"
       >
@@ -60,19 +69,19 @@
       </div>
       <a
         class="button"
-        data-can="create-ledger"
+        data-can="create:ledger"
         data-href="createLedger"
         >Create General Ledger</a
       >
       <a
         class="button"
-        data-can="view-ledger"
+        data-can="read:ledger"
         data-href="allLedgers"
         >List all Ledger Entries</a
       >
     </div>
     <div
-      data-can="edit-primary-contact"
+      data-can="primary-contact"
       class="grid-6 width-100"
     >
       <div
@@ -106,22 +115,29 @@
         placeholder="address (line 2)"
       />
     </div>
-    <div class="section-title rounded">
-      Notes
+    <div class="flex">
+      <div
+        class="section-title rounded"
+      >
+        Notes
+      </div>
+      <a
+        class="button"
+        data-can="create:todo"
+        data-href="createTodo"
+        >Todo</a
+      >
+      <a
+        class="button"
+        data-can="read:map"
+        data-href="maptiler"
+        >Where Am I?</a
+      >
     </div>
-    <a
-      class="button"
-      data-can="create-todo"
-      data-href="createTodo"
-      >Todo</a
+    <div
+      class="flex width-100"
+      data-can="admin"
     >
-    <a
-      class="button"
-      data-can="view-map"
-      data-href="maptiler"
-      >Where Am I?</a
-    >
-    <div class="flex width-100">
       <div
         class="section-title rounded"
       >
@@ -129,7 +145,7 @@
       </div>
       <a
         class="button"
-        data-can="view-admin"
+        data-can="admin"
         data-href="admin"
         >Admin</a
       >
