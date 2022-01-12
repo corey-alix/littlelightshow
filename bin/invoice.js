@@ -4950,11 +4950,31 @@ async function forceUpdatestampIndex(tableName) {
   return await client.query(query);
 }
 
+// app/fun/get.ts
+function isDefined(value) {
+  return typeof value !== "undefined";
+}
+function get(formDom, key) {
+  if (!isDefined(formDom[key]))
+    throw `form element not found: ${key}`;
+  return formDom[key].value;
+}
+function set(formDom, values) {
+  const keys = Object.keys(values);
+  keys.forEach((key) => {
+    if (!isDefined(formDom[key]))
+      throw `form element not found: ${key}`;
+    formDom[key].value = values[key];
+  });
+}
+
 // app/services/StorageModel.ts
 var { BATCH_SIZE, CURRENT_USER } = globals;
 var StorageModel = class {
   constructor(options) {
     this.options = options;
+    if (!isDefined(options.cacheFirst))
+      options.cacheFirst = true;
     this.tableName = options.tableName;
     this.cache = new ServiceCache({
       table: options.tableName,
@@ -5124,7 +5144,15 @@ var StorageModel = class {
     if (!CURRENT_USER)
       throw "user must be signed in";
     if (this.cache.expired() && !this.isOffline()) {
-      await this.synchronize();
+      if (!this.options.cacheFirst) {
+        await this.synchronize();
+      } else {
+        this.synchronize().then(() => {
+          console.log(`${this.tableName} updated`);
+        }).catch((ex) => {
+          console.error(ex);
+        });
+      }
     } else {
       this.cache.renew();
     }
@@ -5945,24 +5973,6 @@ function renderInvoice(invoice) {
 }
 function totalPayments(invoice) {
   return sum(invoice.mops.map((i) => i.paid));
-}
-
-// app/fun/get.ts
-function isDefined(value) {
-  return typeof value !== "undefined";
-}
-function get(formDom, key) {
-  if (!isDefined(formDom[key]))
-    throw `form element not found: ${key}`;
-  return formDom[key].value;
-}
-function set(formDom, values) {
-  const keys = Object.keys(values);
-  keys.forEach((key) => {
-    if (!isDefined(formDom[key]))
-      throw `form element not found: ${key}`;
-    formDom[key].value = values[key];
-  });
 }
 
 // app/ux/Toaster.ts

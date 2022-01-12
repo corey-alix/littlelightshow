@@ -26,6 +26,7 @@ littlelightshow
 
 ## v1.0.6
 
+- use cache-first data storage, fetch updates in background
 - introduce access control
 
 ## v1.0.5

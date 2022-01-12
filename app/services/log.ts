@@ -1,5 +1,4 @@
-import { StorageModel } from "./StorageModel";
-
+import { StorageModel } from "./StorageModel.js";
 const TABLE_NAME = "log";
 
 export interface Log {

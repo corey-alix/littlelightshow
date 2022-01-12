@@ -11,12 +11,12 @@ import {
   getGlobalState,
   setGlobalState,
 } from "../fun/globalState";
-import { toast } from "../ux/toasterWriter";
 import { getDatabaseTime } from "./getDatabaseTime.js";
 import {
   forceUpdatestampIndex,
   forceUpdatestampTable,
 } from "./forceUpdatestampTable";
+import { isDefined } from "../fun/get";
 
 const { BATCH_SIZE, CURRENT_USER } =
   globals;
@@ -37,10 +37,13 @@ export class StorageModel<
   constructor(
     private options: {
       tableName: string;
-      maxAge?: number;
       offline: boolean;
+      maxAge?: number;
+      cacheFirst?: boolean;
     }
   ) {
+    if (!isDefined(options.cacheFirst))
+      options.cacheFirst = true;
     this.tableName = options.tableName;
     this.cache = new ServiceCache<
       T & SynchronizationAttributes
@@ -445,7 +448,20 @@ export class StorageModel<
       this.cache.expired() &&
       !this.isOffline()
     ) {
-      await this.synchronize();
+      if (!this.options.cacheFirst) {
+        await this.synchronize();
+      } else {
+        // start the sync but do not wait for it
+        this.synchronize()
+          .then(() => {
+            console.log(
+              `${this.tableName} updated`
+            );
+          })
+          .catch((ex) => {
+            console.error(ex);
+          });
+      }
     } else {
       this.cache.renew();
     }
