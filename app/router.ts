@@ -36,4 +36,6 @@ export const routes = {
     byAccount: (id: string) =>
       `/app/gl/index.html?account=${id}`,
   },
+  test: () =>
+    `/test/browser/index.html`,
 };

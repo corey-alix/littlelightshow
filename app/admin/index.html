@@ -19,7 +19,7 @@
       <div
         class="section-title rounded"
       >
-        UX Configuration
+        Change Theme
       </div>
       <button
         class="button"
@@ -42,7 +42,8 @@
         Light Mode
       </button>
       <label
-        >Larger Font
+        class="border padding rounded"
+        >Use a Larger Font
         <input
           type="checkbox"
           data-event="font_mode"
@@ -52,6 +53,7 @@
 
     <div
       class="border padding rounded flex width-100"
+      data-can="update:taxrate"
     >
       <div
         class="section-title rounded"
@@ -60,10 +62,10 @@
       </div>
       <label
         class="border padding rounded"
-        data-can="update:taxrate"
         >Tax Rate<br />
         <input
           type="number"
+          data-can="update:taxrate"
           class="c4 rounded currency"
           placeholder="Tax Rate (in %)"
           data-bind="TAX_RATE"
@@ -73,6 +75,7 @@
 
     <div
       class="border padding rounded flex width-100"
+      data-can="diagnostics"
     >
       <div
         class="section-title rounded"
@@ -85,6 +88,13 @@
         data-event="ping-local-storage"
       >
         Ping local storage
+      </button>
+
+      <button
+        data-href="test"
+        class="button"
+      >
+        Run Tests
       </button>
 
       <button
