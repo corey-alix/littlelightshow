@@ -79,6 +79,8 @@ async function upgradeFromCurrentVersion() {
       break; // nothing to do
     case "1.0.5":
       break; // nothing to do
+    case VERSION:
+      break; //nothing to do
     default:
       throw `unexpected version: ${currentVersion}`;
   }
