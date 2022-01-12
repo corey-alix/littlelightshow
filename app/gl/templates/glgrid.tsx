@@ -27,7 +27,6 @@ import {
 } from "../../ux/toasterWriter";
 import { gotoUrl } from "../../fun/gotoUrl.js";
 import { globals } from "../../globals.js";
-import { prepareForm } from "../../ux/prepareForm.js";
 
 function asModel(
   form: HTMLFormElement
@@ -247,7 +246,6 @@ function hookupHandlers(
 
   on(domNode, "add-row", () => {
     const row = createRow();
-    prepareForm(row);
     const focus = row.querySelector(
       "[name=account]"
     ) as HTMLElement;
@@ -464,7 +462,6 @@ export function create(
     );
   }
   hookupHandlers(ledger);
-  prepareForm(ledger);
   if (!ledgerModel)
     trigger(ledger, "add-row");
 

@@ -5436,310 +5436,6 @@ function gotoUrl(url) {
   location.replace(url);
 }
 
-// app/services/accesscontrol.ts
-var TABLE_NAME2 = "accesscontrol";
-var Permission = /* @__PURE__ */ ((Permission2) => {
-  Permission2[Permission2["none"] = 0] = "none";
-  Permission2[Permission2["read"] = 1] = "read";
-  Permission2[Permission2["update"] = 2] = "update";
-  Permission2[Permission2["create"] = 4] = "create";
-  Permission2[Permission2["delete"] = 8] = "delete";
-  Permission2[Permission2["full"] = 15] = "full";
-  return Permission2;
-})(Permission || {});
-var AccessControlModel = class extends StorageModel {
-};
-var accessControlStore = new AccessControlModel({
-  tableName: TABLE_NAME2,
-  offline: true
-});
-
-// app/data/accesscontrol.ts
-function combine(...roles) {
-  const result = {};
-  roles.forEach((r1) => Object.keys(r1).forEach((k) => result[k] = (result[k] || 0) | r1[k]));
-  return result;
-}
-var r = Permission.read;
-var u = Permission.update;
-var ru = Permission.read + Permission.update;
-var cru = Permission.read + Permission.create + Permission.update;
-var crud = Permission.read + Permission.delete + Permission.create + Permission.update;
-var none = {
-  admin: 0,
-  inventory: 0,
-  invoice: 0,
-  ledger: 0,
-  map: 0,
-  role: 0,
-  taxrate: 0,
-  todo: 0,
-  "batch-size": 0,
-  "cache-age": 0,
-  "fauna-api": 0,
-  "maptiler-api": 0,
-  "primary-contact": 0,
-  "ux-theme": 0,
-  "work-offline": 0
-};
-var user = combine(none, {
-  map: r,
-  "ux-theme": ru
-});
-var clerk = combine(user, {
-  inventory: r,
-  invoice: r,
-  ledger: cru,
-  taxrate: ru,
-  "work-offline": ru,
-  todo: cru
-});
-var zipTieTech = combine(user, {
-  inventory: cru,
-  invoice: cru,
-  map: ru,
-  taxrate: r,
-  "primary-contact": ru,
-  "ux-theme": ru,
-  "work-offline": ru
-});
-var admin = combine(user, {
-  admin: ru,
-  inventory: crud,
-  invoice: crud,
-  ledger: crud,
-  map: crud,
-  role: crud,
-  taxrate: crud,
-  "batch-size": crud,
-  "cache-age": crud,
-  "fauna-api": crud,
-  "maptiler-api": crud,
-  "primary-contact": crud,
-  "ux-theme": crud,
-  "work-offline": crud
-});
-var accessControl = {
-  X: zipTieTech,
-  Y: clerk,
-  Z: admin
-};
-
-// app/ux/Toaster.ts
-var DEFAULT_DELAY = 5e3;
-var Toaster = class {
-  toast(options) {
-    let target = document.querySelector("#toaster");
-    if (!target) {
-      target = document.createElement("div");
-      target.id = "toaster";
-      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
-      document.body.appendChild(target);
-    }
-    const message = document.createElement("div");
-    message.classList.add(options.mode || "error", "padding", "margin");
-    message.innerHTML = options.message;
-    message.addEventListener("click", () => message.remove());
-    setTimeout(() => message.remove(), DEFAULT_DELAY);
-    target.insertBefore(message, null);
-  }
-};
-
-// app/services/log.ts
-var TABLE_NAME3 = "log";
-var LogModel = class extends StorageModel {
-};
-var logStore = new LogModel({
-  tableName: TABLE_NAME3,
-  offline: false
-});
-
-// app/ux/toasterWriter.ts
-var toaster = new Toaster();
-function toast(message, options) {
-  if (!options)
-    options = { mode: "info" };
-  console.info(message, options);
-  toaster.toast({
-    message,
-    ...options
-  });
-}
-function reportError(message) {
-  toast(message + "", {
-    mode: "error"
-  });
-  logStore.upsertItem({ message }).catch((ex) => console.log(ex));
-}
-
-// app/fql/can.ts
-var USER_ROLE = getGlobalState("USER_ROLE") || "public";
-var defaults2 = accessControl[USER_ROLE];
-async function can(code) {
-  const accessControlItems = await accessControlStore.getItems();
-  const [noun, verb] = code.split(":").reverse();
-  let permission = Permission.full;
-  switch (verb) {
-    case "any":
-      break;
-    case "create":
-      permission = Permission.create;
-      break;
-    case "delete":
-      permission = Permission.delete;
-      break;
-    case "full":
-      permission = Permission.full;
-      break;
-    case "none":
-      permission = Permission.none;
-      break;
-    case "read":
-      permission = Permission.read;
-      break;
-    case "update":
-      permission = Permission.update;
-      break;
-  }
-  const item = accessControlItems.find((i) => i.code === noun && i.role === USER_ROLE);
-  if (!!item) {
-    if (!verb || verb === "any")
-      return item.permission > Permission.none;
-    return permission == (item.permission & permission);
-  }
-  try {
-    let effectivePermission = defaults2 && defaults2[noun];
-    if (typeof effectivePermission !== "number")
-      effectivePermission = permission;
-    await accessControlStore.upsertItem({
-      code: noun,
-      permission: effectivePermission,
-      role: USER_ROLE
-    });
-    return can(code);
-  } catch (ex) {
-    reportError(ex);
-    return false;
-  }
-}
-
-// app/fun/hookupTriggers.ts
-async function stripAccessControlItems(domNode) {
-  const itemsToRemove2 = Array.from(domNode.querySelectorAll("[data-can]"));
-  const canAccess = await Promise.all(itemsToRemove2.map(async (eventItem) => {
-    const canCode = eventItem.dataset["can"];
-    return await can(canCode);
-  }));
-  itemsToRemove2.forEach((item, i) => canAccess[i] || item.remove());
-}
-function hookupTriggers(domNode) {
-  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
-    const eventName = eventItem.dataset["event"];
-    if (!eventName)
-      throw "item must define a data-event";
-    const isInput = isInputElement(eventItem);
-    const inputType = getInputType(eventItem);
-    const isButton = isButtonElement(eventItem, isInput);
-    const isCheckbox = isCheckboxInput(eventItem);
-    if (isButton)
-      on(eventItem, "click", () => {
-        trigger(domNode, eventName);
-      });
-    else if (isCheckbox)
-      on(eventItem, "click", () => {
-        const checked = eventItem.checked;
-        trigger(domNode, eventName + (checked ? ":yes" : ":no"));
-      });
-    else if (isInput)
-      on(eventItem, "change", () => {
-        trigger(domNode, eventName);
-      });
-    else
-      throw `data-event not supported for this item: ${eventItem.outerHTML}`;
-  });
-  domNode.querySelectorAll("[data-bind]").forEach((eventItem) => {
-    const bindTo = eventItem.dataset["bind"];
-    if (!bindTo)
-      throw "item must define a data-bind";
-    const valueInfo = getGlobalState(bindTo);
-    if (isCheckboxInput(eventItem)) {
-      eventItem.checked = valueInfo === true;
-      on(eventItem, "change", () => {
-        setGlobalState(bindTo, eventItem.checked);
-      });
-    } else if (isNumericInputElement(eventItem)) {
-      const item = eventItem;
-      item.valueAsNumber = valueInfo || 0;
-      on(eventItem, "change", () => {
-        setGlobalState(bindTo, item.valueAsNumber);
-      });
-    } else if (isInputElement(eventItem)) {
-      const item = eventItem;
-      item.value = valueInfo || "";
-      on(eventItem, "change", () => {
-        setGlobalState(bindTo, item.value);
-      });
-    } else if (isTextAreaElement(eventItem)) {
-      const item = eventItem;
-      item.value = valueInfo || "";
-      on(eventItem, "change", () => {
-        setGlobalState(bindTo, item.value);
-      });
-    } else {
-      throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
-    }
-  });
-  domNode.querySelectorAll("[data-href]").forEach((eventItem) => {
-    const href = eventItem.dataset["href"];
-    if (!href)
-      throw "item must define a data-href";
-    const url = routes[href] && routes[href]() || href;
-    eventItem.addEventListener("click", () => {
-      location.href = url;
-    });
-  });
-}
-function isCheckboxInput(eventItem) {
-  return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
-}
-function isButtonElement(eventItem, isInput) {
-  return eventItem.tagName === "BUTTON" || isInput && getInputType(eventItem) === "button";
-}
-function getInputType(eventItem) {
-  return isInputElement(eventItem) && eventItem.type;
-}
-function isTextAreaElement(eventItem) {
-  return eventItem.tagName === "TEXTAREA";
-}
-function isInputElement(eventItem) {
-  return eventItem.tagName === "INPUT";
-}
-function isNumericInputElement(item) {
-  return isInputElement(item) && getInputType(item) === "number";
-}
-
-// app/fun/behavior/form.ts
-function extendNumericInputBehaviors(form) {
-  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
-  numberInput.forEach(selectOnFocus);
-  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
-  currencyInput.forEach(formatAsCurrency);
-}
-function extendTextInputBehaviors(form) {
-  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
-  textInput.forEach(selectOnFocus);
-  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
-  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
-}
-
-// app/ux/prepareForm.ts
-async function prepareForm(formDom) {
-  await stripAccessControlItems(formDom);
-  hookupTriggers(formDom);
-  extendNumericInputBehaviors(formDom);
-  extendTextInputBehaviors(formDom);
-}
-
 // app/invoice/templates/invoice-form.tsx
 var { primaryContact, TAXRATE: TAXRATE2 } = globals;
 var itemsToRemove = [];
@@ -5917,7 +5613,6 @@ async function create(invoice) {
     paymentItems?.forEach((item) => moveChildrenBefore(item, payementsTarget));
   }
   on(form, "change", () => compute(form));
-  prepareForm(form);
   hookupEvents(form);
   if (!invoice.mops?.length) {
     trigger(form, "add-method-of-payment");
@@ -5943,7 +5638,6 @@ function addAnotherItem(formDom) {
   for (let i = 0; i < itemPanel.children.length; i++) {
     itemsToRemove.push(itemPanel.children[i]);
   }
-  prepareForm(itemPanel);
   moveChildren(itemPanel, target);
   toFocus?.focus();
 }
@@ -5964,7 +5658,6 @@ function hookupEvents(formDom) {
   on(formDom, "add-method-of-payment", () => {
     const target = formDom.querySelector("#mop-line-item-end") || formDom;
     const mopLineItem = renderMopLineItem();
-    prepareForm(mopLineItem);
     const focus = getFirstInput(mopLineItem);
     moveChildrenBefore(mopLineItem, target);
     focus.focus();
@@ -6230,7 +5923,6 @@ function create3(invoices) {
   }, asCurrency(balanceDue)), /* @__PURE__ */ dom("div", {
     class: "vspacer-2 col-1-last"
   })), target);
-  hookupTriggers(target);
   return target;
 }
 function totalInvoice(invoice) {
@@ -6271,6 +5963,53 @@ function set(formDom, values) {
       throw `form element not found: ${key}`;
     formDom[key].value = values[key];
   });
+}
+
+// app/ux/Toaster.ts
+var DEFAULT_DELAY = 5e3;
+var Toaster = class {
+  toast(options) {
+    let target = document.querySelector("#toaster");
+    if (!target) {
+      target = document.createElement("div");
+      target.id = "toaster";
+      target.classList.add("toaster", "rounded-top", "fixed", "bottom", "right");
+      document.body.appendChild(target);
+    }
+    const message = document.createElement("div");
+    message.classList.add(options.mode || "error", "padding", "margin");
+    message.innerHTML = options.message;
+    message.addEventListener("click", () => message.remove());
+    setTimeout(() => message.remove(), DEFAULT_DELAY);
+    target.insertBefore(message, null);
+  }
+};
+
+// app/services/log.ts
+var TABLE_NAME2 = "log";
+var LogModel = class extends StorageModel {
+};
+var logStore = new LogModel({
+  tableName: TABLE_NAME2,
+  offline: false
+});
+
+// app/ux/toasterWriter.ts
+var toaster = new Toaster();
+function toast(message, options) {
+  if (!options)
+    options = { mode: "info" };
+  console.info(message, options);
+  toaster.toast({
+    message,
+    ...options
+  });
+}
+function reportError(message) {
+  toast(message + "", {
+    mode: "error"
+  });
+  logStore.upsertItem({ message }).catch((ex) => console.log(ex));
 }
 
 // app/fun/setMode.ts
@@ -6366,6 +6105,268 @@ function removeCssRule(name) {
   }
 }
 
+// app/services/accesscontrol.ts
+var TABLE_NAME3 = "accesscontrol";
+var Permission = /* @__PURE__ */ ((Permission2) => {
+  Permission2[Permission2["none"] = 0] = "none";
+  Permission2[Permission2["read"] = 1] = "read";
+  Permission2[Permission2["update"] = 2] = "update";
+  Permission2[Permission2["create"] = 4] = "create";
+  Permission2[Permission2["delete"] = 8] = "delete";
+  Permission2[Permission2["full"] = 15] = "full";
+  return Permission2;
+})(Permission || {});
+var AccessControlModel = class extends StorageModel {
+};
+var accessControlStore = new AccessControlModel({
+  tableName: TABLE_NAME3,
+  offline: true
+});
+
+// app/data/accesscontrol.ts
+function combine(...roles) {
+  const result = {};
+  roles.forEach((r1) => Object.keys(r1).forEach((k) => result[k] = (result[k] || 0) | r1[k]));
+  return result;
+}
+var r = Permission.read;
+var u = Permission.update;
+var ru = Permission.read + Permission.update;
+var cru = Permission.read + Permission.create + Permission.update;
+var crud = Permission.read + Permission.delete + Permission.create + Permission.update;
+var none = {
+  admin: 0,
+  inventory: 0,
+  invoice: 0,
+  ledger: 0,
+  map: 0,
+  role: 0,
+  taxrate: 0,
+  todo: 0,
+  "batch-size": 0,
+  "cache-age": 0,
+  "fauna-api": 0,
+  "maptiler-api": 0,
+  "primary-contact": 0,
+  "ux-theme": 0,
+  "work-offline": 0
+};
+var user = combine(none, {
+  map: r,
+  "ux-theme": ru
+});
+var clerk = combine(user, {
+  inventory: r,
+  invoice: r,
+  ledger: cru,
+  taxrate: ru,
+  "work-offline": ru,
+  todo: cru
+});
+var zipTieTech = combine(user, {
+  inventory: cru,
+  invoice: cru,
+  map: ru,
+  taxrate: r,
+  "primary-contact": ru,
+  "ux-theme": ru,
+  "work-offline": ru
+});
+var admin = combine(user, {
+  admin: ru,
+  inventory: crud,
+  invoice: crud,
+  ledger: crud,
+  map: crud,
+  role: crud,
+  taxrate: crud,
+  "batch-size": crud,
+  "cache-age": crud,
+  "fauna-api": crud,
+  "maptiler-api": crud,
+  "primary-contact": crud,
+  "ux-theme": crud,
+  "work-offline": crud
+});
+var accessControl = {
+  X: zipTieTech,
+  Y: clerk,
+  Z: admin
+};
+
+// app/fql/can.ts
+var USER_ROLE = getGlobalState("USER_ROLE") || "public";
+var defaults2 = accessControl[USER_ROLE];
+async function can(code) {
+  const accessControlItems = await accessControlStore.getItems();
+  const [noun, verb] = code.split(":").reverse();
+  let permission = Permission.full;
+  switch (verb) {
+    case "any":
+      break;
+    case "create":
+      permission = Permission.create;
+      break;
+    case "delete":
+      permission = Permission.delete;
+      break;
+    case "full":
+      permission = Permission.full;
+      break;
+    case "none":
+      permission = Permission.none;
+      break;
+    case "read":
+      permission = Permission.read;
+      break;
+    case "update":
+      permission = Permission.update;
+      break;
+  }
+  const item = accessControlItems.find((i) => i.code === noun && i.role === USER_ROLE);
+  if (!!item) {
+    if (!verb || verb === "any")
+      return item.permission > Permission.none;
+    return permission == (item.permission & permission);
+  }
+  try {
+    let effectivePermission = defaults2 && defaults2[noun];
+    if (typeof effectivePermission !== "number")
+      effectivePermission = permission;
+    await accessControlStore.upsertItem({
+      code: noun,
+      permission: effectivePermission,
+      role: USER_ROLE
+    });
+    return can(code);
+  } catch (ex) {
+    reportError(ex);
+    return false;
+  }
+}
+
+// app/fun/hookupTriggers.ts
+async function stripAccessControlItems(domNode) {
+  const itemsToRemove2 = Array.from(domNode.querySelectorAll("[data-can]"));
+  const canAccess = await Promise.all(itemsToRemove2.map(async (eventItem) => {
+    const canCode = eventItem.dataset["can"];
+    return await can(canCode);
+  }));
+  itemsToRemove2.forEach((item, i) => canAccess[i] || item.remove());
+}
+function hookupTriggers(domNode) {
+  domNode.querySelectorAll("[data-event]").forEach((eventItem) => {
+    const eventName = eventItem.dataset["event"];
+    if (!eventName)
+      throw "item must define a data-event";
+    const isInput = isInputElement(eventItem);
+    const inputType = getInputType(eventItem);
+    const isButton = isButtonElement(eventItem, isInput);
+    const isCheckbox = isCheckboxInput(eventItem);
+    if (isButton)
+      on(eventItem, "click", () => {
+        trigger(domNode, eventName);
+      });
+    else if (isCheckbox)
+      on(eventItem, "click", () => {
+        const checked = eventItem.checked;
+        trigger(domNode, eventName + (checked ? ":yes" : ":no"));
+      });
+    else if (isInput)
+      on(eventItem, "change", () => {
+        trigger(domNode, eventName);
+      });
+    else
+      throw `data-event not supported for this item: ${eventItem.outerHTML}`;
+  });
+  domNode.querySelectorAll("[data-bind]").forEach((eventItem) => {
+    const bindTo = eventItem.dataset["bind"];
+    if (!bindTo)
+      throw "item must define a data-bind";
+    const valueInfo = getGlobalState(bindTo);
+    if (isCheckboxInput(eventItem)) {
+      eventItem.checked = valueInfo === true;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, eventItem.checked);
+      });
+    } else if (isNumericInputElement(eventItem)) {
+      const item = eventItem;
+      item.valueAsNumber = valueInfo || 0;
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.valueAsNumber);
+      });
+    } else if (isInputElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
+    } else if (isTextAreaElement(eventItem)) {
+      const item = eventItem;
+      item.value = valueInfo || "";
+      on(eventItem, "change", () => {
+        setGlobalState(bindTo, item.value);
+      });
+    } else {
+      throw `unimplemented data-bind on element: ${eventItem.outerHTML}`;
+    }
+  });
+  domNode.querySelectorAll("[data-href]").forEach((eventItem) => {
+    const href = eventItem.dataset["href"];
+    if (!href)
+      throw "item must define a data-href";
+    const url = routes[href] && routes[href]() || href;
+    eventItem.addEventListener("click", () => {
+      location.href = url;
+    });
+  });
+}
+function isCheckboxInput(eventItem) {
+  return isInputElement(eventItem) && getInputType(eventItem) === "checkbox";
+}
+function isButtonElement(eventItem, isInput) {
+  return eventItem.tagName === "BUTTON" || isInput && getInputType(eventItem) === "button";
+}
+function getInputType(eventItem) {
+  return isInputElement(eventItem) && eventItem.type;
+}
+function isTextAreaElement(eventItem) {
+  return eventItem.tagName === "TEXTAREA";
+}
+function isInputElement(eventItem) {
+  return eventItem.tagName === "INPUT";
+}
+function isNumericInputElement(item) {
+  return isInputElement(item) && getInputType(item) === "number";
+}
+
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
+}
+function extendTextInputBehaviors(form) {
+  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
+  textInput.forEach(selectOnFocus);
+  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
+  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
+}
+
+// app/ux/prepareForm.ts
+async function prepareForm(formDom) {
+  if (formDom.classList.contains("prepared")) {
+    alert("already prepared");
+    return;
+  }
+  await stripAccessControlItems(formDom);
+  hookupTriggers(formDom);
+  extendNumericInputBehaviors(formDom);
+  extendTextInputBehaviors(formDom);
+  formDom.classList.add("prepared");
+}
+
 // app/index.ts
 var { primaryContact: primaryContact3 } = globals;
 var VERSION = "1.0.6";
@@ -6452,6 +6453,7 @@ async function renderInvoices(target) {
     await init();
     const invoices = await getItems();
     const formDom = create3(invoices);
+    prepareForm(formDom);
     target.appendChild(formDom);
     on(formDom, "create-invoice", () => {
       try {

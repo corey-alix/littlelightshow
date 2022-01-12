@@ -5683,10 +5683,15 @@ function extendTextInputBehaviors(form) {
 
 // app/ux/prepareForm.ts
 async function prepareForm(formDom) {
+  if (formDom.classList.contains("prepared")) {
+    alert("already prepared");
+    return;
+  }
   await stripAccessControlItems(formDom);
   hookupTriggers(formDom);
   extendNumericInputBehaviors(formDom);
   extendTextInputBehaviors(formDom);
+  formDom.classList.add("prepared");
 }
 
 // app/index.ts

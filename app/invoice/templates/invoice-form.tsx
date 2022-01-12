@@ -25,7 +25,6 @@ import { getValueAsNumber } from "../../fun/behavior/input.js";
 import { asNumber } from "../../fun/asNumber.js";
 import { sum } from "../../fun/sum.js";
 import { gotoUrl } from "../../fun/gotoUrl.js";
-import { prepareForm } from "../../ux/prepareForm.js";
 
 const { primaryContact, TAXRATE } =
   globals;
@@ -316,7 +315,6 @@ export async function create(
     compute(form)
   );
 
-  prepareForm(form);
   hookupEvents(form);
 
   if (!invoice.mops?.length) {
@@ -372,7 +370,6 @@ function addAnotherItem(
       ] as HTMLElement
     );
   }
-  prepareForm(itemPanel);
   moveChildren(itemPanel, target);
   toFocus?.focus();
 }
@@ -420,8 +417,6 @@ function hookupEvents(
         ) || formDom;
       const mopLineItem =
         renderMopLineItem();
-
-      prepareForm(mopLineItem);
 
       const focus = getFirstInput(
         mopLineItem

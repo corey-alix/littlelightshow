@@ -55,8 +55,6 @@ export async function can(
       i.role === USER_ROLE
   );
 
-  //if (noun === "primary-contact") debugger;
-
   if (!!item) {
     if (!verb || verb === "any")
       return (

@@ -54,8 +54,11 @@ export async function renderInvoices(
     await systemInit();
     const invoices =
       await getAllInvoices();
+
     const formDom =
       createGridTemplate(invoices);
+    prepareForm(formDom);
+
     target.appendChild(formDom);
     on(
       formDom,

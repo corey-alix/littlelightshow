@@ -5511,6 +5511,512 @@ function gotoUrl(url) {
   location.replace(url);
 }
 
+// app/gl/templates/glgrid.tsx
+function asModel(form) {
+  const result = {
+    id: "",
+    items: [],
+    date: new Date().valueOf()
+  };
+  const data = new FormData(form);
+  result.id = data.get("id") || "";
+  const batchDate = data.get("date");
+  result.date = new Date(batchDate).valueOf();
+  result.description = data.get("description") || "";
+  let currentItem;
+  for (let [key, value] of data.entries()) {
+    switch (key) {
+      case "account":
+        currentItem = {};
+        result.items.push(currentItem);
+        currentItem.account = value;
+        break;
+      case "debit":
+        currentItem.amount = (currentItem.amount || 0) + parseFloat(value || "0");
+        break;
+      case "credit":
+        currentItem.amount = (currentItem.amount || 0) - parseFloat(value || "0");
+        break;
+      case "comment":
+        currentItem.comment = value;
+        break;
+    }
+  }
+  result.items = result.items.filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment).sortBy({ account: "string" });
+  return result;
+}
+function hookupHandlers(domNode) {
+  const lineItems = domNode.querySelector("#end-of-line-items");
+  const summaryArea = domNode.querySelector("#summary-area");
+  const [
+    totalCredits,
+    totalDebits,
+    totalError
+  ] = [
+    "total_credit",
+    "total_debit",
+    "total_error"
+  ].map((name) => domNode.querySelector(`[name=${name}]`));
+  on(domNode, "change", () => {
+    const debits = Array.from(domNode.querySelectorAll("[name=debit]")).map(asNumber);
+    const credits = Array.from(domNode.querySelectorAll("[name=credit]")).map(asNumber);
+    const debitTotal = sum(debits);
+    const creditTotal = sum(credits);
+    setCurrency(totalDebits, debitTotal);
+    setCurrency(totalCredits, creditTotal);
+    setCurrency(totalError, debitTotal - creditTotal);
+    const ledger = asModel(domNode);
+    const summaryReport = create2([
+      ledger
+    ]);
+    summaryArea.innerText = "";
+    summaryArea.appendChild(summaryReport);
+  });
+  on(domNode, "print-all", async () => {
+    gotoUrl(routes.allLedgers());
+  });
+  on(domNode, "print", async () => {
+    if (!domNode.reportValidity())
+      return;
+    if (asNumber(domNode["total_error"]) !== 0) {
+      alert("Total error must be zero");
+      return;
+    }
+    const model = asModel(domNode);
+    await upsertItem(model);
+    gotoUrl(routes.printLedger(model.id));
+  });
+  on(domNode, "print-detail", async () => {
+    const ledgers = await getItems();
+    const report = create(ledgers);
+    document.body.innerHTML = "";
+    document.body.appendChild(report);
+  });
+  on(domNode, "print-summary", async () => {
+    const ledgers = await getItems();
+    const report = create2(ledgers);
+    document.body.innerHTML = "";
+    document.body.appendChild(report);
+  });
+  on(domNode, "clear", async () => {
+    gotoUrl(routes.createLedger());
+  });
+  on(domNode, "delete", async () => {
+    try {
+      const id = domNode["id"].value;
+      await removeItem(id);
+      gotoUrl(routes.allLedgers());
+    } catch (ex) {
+      reportError(ex);
+    }
+  });
+  on(domNode, "submit", async () => {
+    if (!domNode.reportValidity())
+      return;
+    if (asNumber(domNode["total_error"]) !== 0) {
+      alert("Total error must be zero");
+      return;
+    }
+    const model = asModel(domNode);
+    await upsertItem(model);
+    toast(`saved ${model.id}`);
+    gotoUrl(routes.editLedger(model.id));
+  });
+  on(domNode, "add-row", () => {
+    const row = createRow();
+    const focus = row.querySelector("[name=account]");
+    moveChildrenBefore(row, lineItems);
+    focus.focus();
+  });
+}
+function createRow() {
+  return /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("input", {
+    class: "col-1-2",
+    name: "account",
+    required: true,
+    type: "text",
+    placeholder: "account",
+    list: "listOfAccounts"
+  }), /* @__PURE__ */ dom("input", {
+    name: "debit",
+    class: "currency col-3-2",
+    type: "number",
+    placeholder: "debit"
+  }), /* @__PURE__ */ dom("input", {
+    name: "credit",
+    class: "currency col-5-last",
+    type: "number",
+    placeholder: "credit"
+  }), /* @__PURE__ */ dom("input", {
+    name: "comment",
+    class: "text col-1-last",
+    type: "text",
+    placeholder: "comment"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer-1 col-1-last"
+  }));
+}
+function create3(ledgerModel2) {
+  forceDatalist();
+  const ledger = /* @__PURE__ */ dom("form", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("h1", {
+    class: "centered col-1-last"
+  }, `Ledger Entry for ${globals.primaryContact.companyName}`), /* @__PURE__ */ dom("input", {
+    hidden: true,
+    name: "id",
+    value: ledgerModel2?.id || ""
+  }), /* @__PURE__ */ dom("div", {
+    class: "date col-1"
+  }, "Date"), /* @__PURE__ */ dom("input", {
+    class: "col-2-last",
+    name: "date",
+    required: true,
+    type: "date",
+    placeholder: "date",
+    value: ledgerModel2?.date || asDateString()
+  }), /* @__PURE__ */ dom("label", {
+    class: "col-1"
+  }, "Batch Summary"), /* @__PURE__ */ dom("textarea", {
+    name: "description",
+    class: "col-2-last comments",
+    placeholder: "Describe the context for these entries"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    class: "text col-1-2"
+  }, "Account"), /* @__PURE__ */ dom("div", {
+    class: "currency col-3-2"
+  }, "Debit (+)"), /* @__PURE__ */ dom("div", {
+    class: "currency col-5-last"
+  }, "Credit (-)"), /* @__PURE__ */ dom("div", {
+    class: "line col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    id: "end-of-line-items",
+    class: "hidden"
+  }), /* @__PURE__ */ dom("button", {
+    class: "button col-1-2",
+    type: "button",
+    "data-event": "add-row",
+    "data-can": "update:ledger"
+  }, "Add Row"), /* @__PURE__ */ dom("button", {
+    class: "button col-last-2",
+    type: "button",
+    "data-event": "submit",
+    "data-can": "update:ledger"
+  }, "Save"), /* @__PURE__ */ dom("button", {
+    class: "button col-last-2 if-desktop",
+    type: "button",
+    "data-event": "delete",
+    "data-can": "delete:ledger"
+  }, "Delete"), /* @__PURE__ */ dom("div", {
+    class: "vspacer col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    class: "currency col-2-2"
+  }, "Total Debit"), /* @__PURE__ */ dom("input", {
+    readonly: true,
+    type: "number",
+    class: "currency col-4-last",
+    name: "total_debit",
+    value: "0.00"
+  }), /* @__PURE__ */ dom("div", {
+    class: "currency col-2-2"
+  }, "Total Credit"), /* @__PURE__ */ dom("input", {
+    type: "number",
+    readonly: true,
+    class: "currency col-4-last",
+    name: "total_credit",
+    value: "0.00"
+  }), /* @__PURE__ */ dom("div", {
+    class: "currency col-2-2"
+  }, "Imbalance"), /* @__PURE__ */ dom("input", {
+    readonly: true,
+    type: "number",
+    class: "currency col-4-last",
+    name: "total_error",
+    value: "0.00"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-last vspacer-1"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-last flex"
+  }, /* @__PURE__ */ dom("button", {
+    class: "button col-1 if-desktop",
+    type: "button",
+    "data-event": "print"
+  }, "Print"), /* @__PURE__ */ dom("button", {
+    class: "button col-1 if-desktop",
+    type: "button",
+    "data-event": "clear"
+  }, "Clear"), /* @__PURE__ */ dom("button", {
+    class: "button col-1 if-desktop",
+    type: "button",
+    "data-event": "print-all"
+  }, "Show All")), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-last if-desktop"
+  }), /* @__PURE__ */ dom("div", {
+    class: "section-title col-1-last"
+  }, "Summary"), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    id: "summary-area",
+    class: "col-1-last"
+  }), /* @__PURE__ */ dom("div", {
+    class: "vspacer-2 col-1-last"
+  }));
+  if (ledgerModel2) {
+    const lineItems = ledger.querySelector("#end-of-line-items");
+    ledger["date"].value = asDateString(new Date(ledgerModel2.date || Date.now()));
+    ledger["description"].value = ledgerModel2.description;
+    ledgerModel2.items.forEach((item) => {
+      const row = createRow();
+      row["account"].value = item.account;
+      if (item.amount < 0) {
+        row["credit"].value = asCurrency(-item.amount);
+      } else {
+        row["debit"].value = asCurrency(item.amount);
+      }
+      row["comment"].value = item.comment;
+      moveChildrenBefore(row, lineItems);
+    });
+  }
+  hookupHandlers(ledger);
+  if (!ledgerModel2)
+    trigger(ledger, "add-row");
+  trigger(ledger, "change");
+  return ledger;
+}
+
+// app/gl/templates/print.tsx
+async function create4(id) {
+  const target = /* @__PURE__ */ dom("div", null);
+  let ledgers;
+  if (id) {
+    const ledger = await getItem(id);
+    if (!ledger)
+      throw `ledger not found: ${id}`;
+    ledgers = [ledger];
+  } else {
+    ledgers = await getItems();
+  }
+  target.appendChild(createBanner());
+  target.appendChild(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+    class: "vspacer-2"
+  }), /* @__PURE__ */ dom("div", {
+    class: "section-title if-desktop"
+  }, "Account Summary")));
+  if (ledgers.length) {
+    target.appendChild(create2(ledgers));
+    target.appendChild(/* @__PURE__ */ dom("div", {
+      class: "vspacer-2"
+    }));
+    target.appendChild(create(ledgers));
+  } else {
+    moveChildren(/* @__PURE__ */ dom("div", {
+      class: "grid-6"
+    }, /* @__PURE__ */ dom("div", {
+      class: "centered row-1-6"
+    }, "No ledgers have been defined"), /* @__PURE__ */ dom("div", {
+      class: "vspacer-2 row-1-6"
+    }), /* @__PURE__ */ dom("button", {
+      class: "button row-1",
+      "data-event": "create-ledger"
+    }, "Create General Ledger")), target);
+  }
+  on(target, "create-ledger", () => {
+    gotoUrl(routes.createLedger());
+  });
+  return target;
+}
+function createBanner() {
+  const { primaryContact: primaryContact2 } = globals;
+  return /* @__PURE__ */ dom("div", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("div", {
+    class: "col-1-last centered"
+  }, `General Ledger for ${primaryContact2.companyName}`), /* @__PURE__ */ dom("div", {
+    class: "line col-1-last if-desktop"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-1-3 if-desktop"
+  }, /* @__PURE__ */ dom("address", {
+    class: "col-1-5"
+  }, primaryContact2.fullName), /* @__PURE__ */ dom("address", {
+    class: "col-1-5"
+  }, primaryContact2.addressLine1), /* @__PURE__ */ dom("address", {
+    class: "col-1-5"
+  }, primaryContact2.addressLine2)), /* @__PURE__ */ dom("div", {
+    class: "col-4-last if-desktop"
+  }, /* @__PURE__ */ dom("div", {
+    class: "align-right col-6-last"
+  }, `Printed on ${asDateString()} @ ${asTimeString()}`)));
+}
+
+// app/fql/gl-by-account.ts
+async function execute(query) {
+  const items = await ledgerModel.getItems();
+  const lineItems = items.map((parent) => parent.items.map((child) => ({
+    parent,
+    child
+  }))).flat();
+  return lineItems.filter((item) => item.child.account === query.account);
+}
+
+// app/gl/templates/by-account.tsx
+async function create5(account) {
+  const items = await execute({
+    account
+  });
+  if (!items.length)
+    return /* @__PURE__ */ dom("div", null, "No items found");
+  let runningBalance = 0;
+  const rows = items.sort((a, b) => a.parent.date - b.parent.date || a.parent.id.localeCompare(b.parent.id)).map((item) => {
+    runningBalance += item.child.amount;
+    return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
+      class: "currency col-1"
+    }, asCurrency(item.child.amount)), /* @__PURE__ */ dom("div", {
+      class: "col-2"
+    }, item.child.comment), /* @__PURE__ */ dom("div", {
+      class: "col-3-4"
+    }, asDateString(new Date(item.parent.date))), /* @__PURE__ */ dom("div", {
+      class: "currency col-7"
+    }, noZero(asCurrency(runningBalance))), /* @__PURE__ */ dom("div", {
+      class: "col-2-5"
+    }, /* @__PURE__ */ dom("a", {
+      href: routes.editLedger(item.parent.id)
+    }, item.parent.description || "")));
+  });
+  const result = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("h1", null, `Ledger Entries for ${account}`), /* @__PURE__ */ dom("div", {
+    class: "grid-6"
+  }, /* @__PURE__ */ dom("div", {
+    class: "currency col-1"
+  }, "Amount"), /* @__PURE__ */ dom("div", {
+    class: "col-2-5"
+  }, "Comment"), /* @__PURE__ */ dom("div", {
+    class: "col-7 align-right"
+  }, "Balance"), /* @__PURE__ */ dom("div", {
+    class: "placeholder line-items"
+  }), /* @__PURE__ */ dom("div", {
+    class: "col-c align-right"
+  }, "Balance"), /* @__PURE__ */ dom("div", {
+    class: "col-a currency bold"
+  }, asCurrency(runningBalance))));
+  const placeholder = result.querySelector(".placeholder");
+  rows.forEach((item) => moveChildrenBefore(item, placeholder));
+  return result;
+}
+
+// app/fun/setMode.ts
+var modes = {
+  light_mode: "light",
+  dark_mode: "dark",
+  holiday_mode: "holiday"
+};
+function setMode(mode) {
+  if (!mode)
+    mode = localStorage.getItem("mode") || modes.light_mode;
+  localStorage.setItem("mode", mode);
+  document.body.classList.remove(...Object.values(modes));
+  document.body.classList.add(mode);
+  const isFontier = getGlobalState("textier") == true;
+  document.body.classList.toggle("textier", isFontier);
+}
+
+// app/services/validateAccessToken.ts
+var import_faunadb5 = __toModule(require_faunadb());
+async function validate() {
+  const client = createClient();
+  await client.ping();
+}
+
+// app/identify.ts
+async function identify() {
+  if (isOffline())
+    return false;
+  if (!localStorage.getItem("user")) {
+    gotoUrl(routes.identity({
+      target: location.href,
+      context: CONTEXT
+    }));
+    return false;
+  }
+  return true;
+  try {
+    await validate();
+  } catch (ex) {
+    reportError(ex);
+    return false;
+  }
+  return true;
+}
+
+// app/ux/injectLabels.ts
+function injectLabels(domNode) {
+  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
+  inputsToWrap.forEach((input) => {
+    const label = dom("label");
+    label.className = "border padding rounded wrap " + input.className;
+    label.innerText = input.placeholder;
+    input.parentElement.insertBefore(label, input);
+    label.appendChild(input);
+  });
+}
+
+// app/services/invoices.ts
+var INVOICE_TABLE = "invoices";
+var invoiceModel = new StorageModel({
+  tableName: INVOICE_TABLE,
+  offline: false
+});
+
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
+  tableName: INVENTORY_TABLE,
+  offline: false
+});
+
+// app/fun/isUndefined.ts
+function isUndefined(value) {
+  return typeof value === "undefined";
+}
+
+// app/fun/detect.ts
+var userAgent = navigator.userAgent.toLocaleUpperCase();
+var isChrome = userAgent.includes("CHROME");
+var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
+function removeCssRestrictors() {
+  if (isChrome) {
+    removeCssRule(".if-print-to-pdf");
+  }
+  if (!isMobile) {
+    removeCssRule(".if-desktop");
+  }
+}
+function removeCssRule(name) {
+  const sheets = document.styleSheets;
+  for (let sheetIndex = 0; sheetIndex < sheets.length; sheetIndex++) {
+    const sheet = sheets[sheetIndex];
+    try {
+      if (!sheet?.cssRules)
+        continue;
+    } catch (ex) {
+      continue;
+    }
+    for (let ruleIndex = 0; ruleIndex < sheet.cssRules.length; ruleIndex++) {
+      const rule = sheet.cssRules[ruleIndex];
+      if (rule.selectorText === name) {
+        sheet.deleteRule(ruleIndex);
+        return;
+      }
+    }
+  }
+}
+
 // app/services/accesscontrol.ts
 var TABLE_NAME2 = "accesscontrol";
 var Permission = /* @__PURE__ */ ((Permission2) => {
@@ -5799,519 +6305,15 @@ function extendTextInputBehaviors(form) {
 
 // app/ux/prepareForm.ts
 async function prepareForm(formDom) {
+  if (formDom.classList.contains("prepared")) {
+    alert("already prepared");
+    return;
+  }
   await stripAccessControlItems(formDom);
   hookupTriggers(formDom);
   extendNumericInputBehaviors(formDom);
   extendTextInputBehaviors(formDom);
-}
-
-// app/gl/templates/glgrid.tsx
-function asModel(form) {
-  const result = {
-    id: "",
-    items: [],
-    date: new Date().valueOf()
-  };
-  const data = new FormData(form);
-  result.id = data.get("id") || "";
-  const batchDate = data.get("date");
-  result.date = new Date(batchDate).valueOf();
-  result.description = data.get("description") || "";
-  let currentItem;
-  for (let [key, value] of data.entries()) {
-    switch (key) {
-      case "account":
-        currentItem = {};
-        result.items.push(currentItem);
-        currentItem.account = value;
-        break;
-      case "debit":
-        currentItem.amount = (currentItem.amount || 0) + parseFloat(value || "0");
-        break;
-      case "credit":
-        currentItem.amount = (currentItem.amount || 0) - parseFloat(value || "0");
-        break;
-      case "comment":
-        currentItem.comment = value;
-        break;
-    }
-  }
-  result.items = result.items.filter((i) => !isZero(i.amount.toFixed(2)) || !!i.comment).sortBy({ account: "string" });
-  return result;
-}
-function hookupHandlers(domNode) {
-  const lineItems = domNode.querySelector("#end-of-line-items");
-  const summaryArea = domNode.querySelector("#summary-area");
-  const [
-    totalCredits,
-    totalDebits,
-    totalError
-  ] = [
-    "total_credit",
-    "total_debit",
-    "total_error"
-  ].map((name) => domNode.querySelector(`[name=${name}]`));
-  on(domNode, "change", () => {
-    const debits = Array.from(domNode.querySelectorAll("[name=debit]")).map(asNumber);
-    const credits = Array.from(domNode.querySelectorAll("[name=credit]")).map(asNumber);
-    const debitTotal = sum(debits);
-    const creditTotal = sum(credits);
-    setCurrency(totalDebits, debitTotal);
-    setCurrency(totalCredits, creditTotal);
-    setCurrency(totalError, debitTotal - creditTotal);
-    const ledger = asModel(domNode);
-    const summaryReport = create2([
-      ledger
-    ]);
-    summaryArea.innerText = "";
-    summaryArea.appendChild(summaryReport);
-  });
-  on(domNode, "print-all", async () => {
-    gotoUrl(routes.allLedgers());
-  });
-  on(domNode, "print", async () => {
-    if (!domNode.reportValidity())
-      return;
-    if (asNumber(domNode["total_error"]) !== 0) {
-      alert("Total error must be zero");
-      return;
-    }
-    const model = asModel(domNode);
-    await upsertItem(model);
-    gotoUrl(routes.printLedger(model.id));
-  });
-  on(domNode, "print-detail", async () => {
-    const ledgers = await getItems();
-    const report = create(ledgers);
-    document.body.innerHTML = "";
-    document.body.appendChild(report);
-  });
-  on(domNode, "print-summary", async () => {
-    const ledgers = await getItems();
-    const report = create2(ledgers);
-    document.body.innerHTML = "";
-    document.body.appendChild(report);
-  });
-  on(domNode, "clear", async () => {
-    gotoUrl(routes.createLedger());
-  });
-  on(domNode, "delete", async () => {
-    try {
-      const id = domNode["id"].value;
-      await removeItem(id);
-      gotoUrl(routes.allLedgers());
-    } catch (ex) {
-      reportError(ex);
-    }
-  });
-  on(domNode, "submit", async () => {
-    if (!domNode.reportValidity())
-      return;
-    if (asNumber(domNode["total_error"]) !== 0) {
-      alert("Total error must be zero");
-      return;
-    }
-    const model = asModel(domNode);
-    await upsertItem(model);
-    toast(`saved ${model.id}`);
-    gotoUrl(routes.editLedger(model.id));
-  });
-  on(domNode, "add-row", () => {
-    const row = createRow();
-    prepareForm(row);
-    const focus = row.querySelector("[name=account]");
-    moveChildrenBefore(row, lineItems);
-    focus.focus();
-  });
-}
-function createRow() {
-  return /* @__PURE__ */ dom("form", null, /* @__PURE__ */ dom("input", {
-    class: "col-1-2",
-    name: "account",
-    required: true,
-    type: "text",
-    placeholder: "account",
-    list: "listOfAccounts"
-  }), /* @__PURE__ */ dom("input", {
-    name: "debit",
-    class: "currency col-3-2",
-    type: "number",
-    placeholder: "debit"
-  }), /* @__PURE__ */ dom("input", {
-    name: "credit",
-    class: "currency col-5-last",
-    type: "number",
-    placeholder: "credit"
-  }), /* @__PURE__ */ dom("input", {
-    name: "comment",
-    class: "text col-1-last",
-    type: "text",
-    placeholder: "comment"
-  }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-1 col-1-last"
-  }));
-}
-function create3(ledgerModel2) {
-  forceDatalist();
-  const ledger = /* @__PURE__ */ dom("form", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("h1", {
-    class: "centered col-1-last"
-  }, `Ledger Entry for ${globals.primaryContact.companyName}`), /* @__PURE__ */ dom("input", {
-    hidden: true,
-    name: "id",
-    value: ledgerModel2?.id || ""
-  }), /* @__PURE__ */ dom("div", {
-    class: "date col-1"
-  }, "Date"), /* @__PURE__ */ dom("input", {
-    class: "col-2-last",
-    name: "date",
-    required: true,
-    type: "date",
-    placeholder: "date",
-    value: ledgerModel2?.date || asDateString()
-  }), /* @__PURE__ */ dom("label", {
-    class: "col-1"
-  }, "Batch Summary"), /* @__PURE__ */ dom("textarea", {
-    name: "description",
-    class: "col-2-last comments",
-    placeholder: "Describe the context for these entries"
-  }), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-last"
-  }), /* @__PURE__ */ dom("div", {
-    class: "text col-1-2"
-  }, "Account"), /* @__PURE__ */ dom("div", {
-    class: "currency col-3-2"
-  }, "Debit (+)"), /* @__PURE__ */ dom("div", {
-    class: "currency col-5-last"
-  }, "Credit (-)"), /* @__PURE__ */ dom("div", {
-    class: "line col-1-last"
-  }), /* @__PURE__ */ dom("div", {
-    id: "end-of-line-items",
-    class: "hidden"
-  }), /* @__PURE__ */ dom("button", {
-    class: "button col-1-2",
-    type: "button",
-    "data-event": "add-row",
-    "data-can": "update:ledger"
-  }, "Add Row"), /* @__PURE__ */ dom("button", {
-    class: "button col-last-2",
-    type: "button",
-    "data-event": "submit",
-    "data-can": "update:ledger"
-  }, "Save"), /* @__PURE__ */ dom("button", {
-    class: "button col-last-2 if-desktop",
-    type: "button",
-    "data-event": "delete",
-    "data-can": "delete:ledger"
-  }, "Delete"), /* @__PURE__ */ dom("div", {
-    class: "vspacer col-1-last"
-  }), /* @__PURE__ */ dom("div", {
-    class: "currency col-2-2"
-  }, "Total Debit"), /* @__PURE__ */ dom("input", {
-    readonly: true,
-    type: "number",
-    class: "currency col-4-last",
-    name: "total_debit",
-    value: "0.00"
-  }), /* @__PURE__ */ dom("div", {
-    class: "currency col-2-2"
-  }, "Total Credit"), /* @__PURE__ */ dom("input", {
-    type: "number",
-    readonly: true,
-    class: "currency col-4-last",
-    name: "total_credit",
-    value: "0.00"
-  }), /* @__PURE__ */ dom("div", {
-    class: "currency col-2-2"
-  }, "Imbalance"), /* @__PURE__ */ dom("input", {
-    readonly: true,
-    type: "number",
-    class: "currency col-4-last",
-    name: "total_error",
-    value: "0.00"
-  }), /* @__PURE__ */ dom("div", {
-    class: "col-1-last vspacer-1"
-  }), /* @__PURE__ */ dom("div", {
-    class: "col-1-last flex"
-  }, /* @__PURE__ */ dom("button", {
-    class: "button col-1 if-desktop",
-    type: "button",
-    "data-event": "print"
-  }, "Print"), /* @__PURE__ */ dom("button", {
-    class: "button col-1 if-desktop",
-    type: "button",
-    "data-event": "clear"
-  }, "Clear"), /* @__PURE__ */ dom("button", {
-    class: "button col-1 if-desktop",
-    type: "button",
-    "data-event": "print-all"
-  }, "Show All")), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-last if-desktop"
-  }), /* @__PURE__ */ dom("div", {
-    class: "section-title col-1-last"
-  }, "Summary"), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-last"
-  }), /* @__PURE__ */ dom("div", {
-    id: "summary-area",
-    class: "col-1-last"
-  }), /* @__PURE__ */ dom("div", {
-    class: "vspacer-2 col-1-last"
-  }));
-  if (ledgerModel2) {
-    const lineItems = ledger.querySelector("#end-of-line-items");
-    ledger["date"].value = asDateString(new Date(ledgerModel2.date || Date.now()));
-    ledger["description"].value = ledgerModel2.description;
-    ledgerModel2.items.forEach((item) => {
-      const row = createRow();
-      row["account"].value = item.account;
-      if (item.amount < 0) {
-        row["credit"].value = asCurrency(-item.amount);
-      } else {
-        row["debit"].value = asCurrency(item.amount);
-      }
-      row["comment"].value = item.comment;
-      moveChildrenBefore(row, lineItems);
-    });
-  }
-  hookupHandlers(ledger);
-  prepareForm(ledger);
-  if (!ledgerModel2)
-    trigger(ledger, "add-row");
-  trigger(ledger, "change");
-  return ledger;
-}
-
-// app/gl/templates/print.tsx
-async function create4(id) {
-  const target = /* @__PURE__ */ dom("div", null);
-  let ledgers;
-  if (id) {
-    const ledger = await getItem(id);
-    if (!ledger)
-      throw `ledger not found: ${id}`;
-    ledgers = [ledger];
-  } else {
-    ledgers = await getItems();
-  }
-  target.appendChild(createBanner());
-  target.appendChild(/* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-    class: "vspacer-2"
-  }), /* @__PURE__ */ dom("div", {
-    class: "section-title if-desktop"
-  }, "Account Summary")));
-  if (ledgers.length) {
-    target.appendChild(create2(ledgers));
-    target.appendChild(/* @__PURE__ */ dom("div", {
-      class: "vspacer-2"
-    }));
-    target.appendChild(create(ledgers));
-  } else {
-    moveChildren(/* @__PURE__ */ dom("div", {
-      class: "grid-6"
-    }, /* @__PURE__ */ dom("div", {
-      class: "centered row-1-6"
-    }, "No ledgers have been defined"), /* @__PURE__ */ dom("div", {
-      class: "vspacer-2 row-1-6"
-    }), /* @__PURE__ */ dom("button", {
-      class: "button row-1",
-      "data-event": "create-ledger"
-    }, "Create General Ledger")), target);
-  }
-  on(target, "create-ledger", () => {
-    gotoUrl(routes.createLedger());
-  });
-  hookupTriggers(target);
-  return target;
-}
-function createBanner() {
-  const { primaryContact: primaryContact2 } = globals;
-  return /* @__PURE__ */ dom("div", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("div", {
-    class: "col-1-last centered"
-  }, `General Ledger for ${primaryContact2.companyName}`), /* @__PURE__ */ dom("div", {
-    class: "line col-1-last if-desktop"
-  }), /* @__PURE__ */ dom("div", {
-    class: "col-1-3 if-desktop"
-  }, /* @__PURE__ */ dom("address", {
-    class: "col-1-5"
-  }, primaryContact2.fullName), /* @__PURE__ */ dom("address", {
-    class: "col-1-5"
-  }, primaryContact2.addressLine1), /* @__PURE__ */ dom("address", {
-    class: "col-1-5"
-  }, primaryContact2.addressLine2)), /* @__PURE__ */ dom("div", {
-    class: "col-4-last if-desktop"
-  }, /* @__PURE__ */ dom("div", {
-    class: "align-right col-6-last"
-  }, `Printed on ${asDateString()} @ ${asTimeString()}`)));
-}
-
-// app/fql/gl-by-account.ts
-async function execute(query) {
-  const items = await ledgerModel.getItems();
-  const lineItems = items.map((parent) => parent.items.map((child) => ({
-    parent,
-    child
-  }))).flat();
-  return lineItems.filter((item) => item.child.account === query.account);
-}
-
-// app/gl/templates/by-account.tsx
-async function create5(account) {
-  const items = await execute({
-    account
-  });
-  if (!items.length)
-    return /* @__PURE__ */ dom("div", null, "No items found");
-  let runningBalance = 0;
-  const rows = items.sort((a, b) => a.parent.date - b.parent.date || a.parent.id.localeCompare(b.parent.id)).map((item) => {
-    runningBalance += item.child.amount;
-    return /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("div", {
-      class: "currency col-1"
-    }, asCurrency(item.child.amount)), /* @__PURE__ */ dom("div", {
-      class: "col-2"
-    }, item.child.comment), /* @__PURE__ */ dom("div", {
-      class: "col-3-4"
-    }, asDateString(new Date(item.parent.date))), /* @__PURE__ */ dom("div", {
-      class: "currency col-7"
-    }, noZero(asCurrency(runningBalance))), /* @__PURE__ */ dom("div", {
-      class: "col-2-5"
-    }, /* @__PURE__ */ dom("a", {
-      href: routes.editLedger(item.parent.id)
-    }, item.parent.description || "")));
-  });
-  const result = /* @__PURE__ */ dom("div", null, /* @__PURE__ */ dom("h1", null, `Ledger Entries for ${account}`), /* @__PURE__ */ dom("div", {
-    class: "grid-6"
-  }, /* @__PURE__ */ dom("div", {
-    class: "currency col-1"
-  }, "Amount"), /* @__PURE__ */ dom("div", {
-    class: "col-2-5"
-  }, "Comment"), /* @__PURE__ */ dom("div", {
-    class: "col-7 align-right"
-  }, "Balance"), /* @__PURE__ */ dom("div", {
-    class: "placeholder line-items"
-  }), /* @__PURE__ */ dom("div", {
-    class: "col-c align-right"
-  }, "Balance"), /* @__PURE__ */ dom("div", {
-    class: "col-a currency bold"
-  }, asCurrency(runningBalance))));
-  const placeholder = result.querySelector(".placeholder");
-  rows.forEach((item) => moveChildrenBefore(item, placeholder));
-  return result;
-}
-
-// app/fun/setMode.ts
-var modes = {
-  light_mode: "light",
-  dark_mode: "dark",
-  holiday_mode: "holiday"
-};
-function setMode(mode) {
-  if (!mode)
-    mode = localStorage.getItem("mode") || modes.light_mode;
-  localStorage.setItem("mode", mode);
-  document.body.classList.remove(...Object.values(modes));
-  document.body.classList.add(mode);
-  const isFontier = getGlobalState("textier") == true;
-  document.body.classList.toggle("textier", isFontier);
-}
-
-// app/services/validateAccessToken.ts
-var import_faunadb5 = __toModule(require_faunadb());
-async function validate() {
-  const client = createClient();
-  await client.ping();
-}
-
-// app/identify.ts
-async function identify() {
-  if (isOffline())
-    return false;
-  if (!localStorage.getItem("user")) {
-    gotoUrl(routes.identity({
-      target: location.href,
-      context: CONTEXT
-    }));
-    return false;
-  }
-  return true;
-  try {
-    await validate();
-  } catch (ex) {
-    reportError(ex);
-    return false;
-  }
-  return true;
-}
-
-// app/ux/injectLabels.ts
-function injectLabels(domNode) {
-  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
-  inputsToWrap.forEach((input) => {
-    const label = dom("label");
-    label.className = "border padding rounded wrap " + input.className;
-    label.innerText = input.placeholder;
-    input.parentElement.insertBefore(label, input);
-    label.appendChild(input);
-  });
-}
-
-// app/services/invoices.ts
-var INVOICE_TABLE = "invoices";
-var invoiceModel = new StorageModel({
-  tableName: INVOICE_TABLE,
-  offline: false
-});
-
-// app/services/inventory.ts
-var INVENTORY_TABLE = "inventory";
-var InventoryModel = class extends StorageModel {
-  async upgradeTo104() {
-    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
-    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
-  }
-};
-var inventoryModel = new InventoryModel({
-  tableName: INVENTORY_TABLE,
-  offline: false
-});
-
-// app/fun/isUndefined.ts
-function isUndefined(value) {
-  return typeof value === "undefined";
-}
-
-// app/fun/detect.ts
-var userAgent = navigator.userAgent.toLocaleUpperCase();
-var isChrome = userAgent.includes("CHROME");
-var isMobile = navigator.userAgent.match(/(iPad)|(iPhone)|(iPod)|(android)|(webOS)/i);
-function removeCssRestrictors() {
-  if (isChrome) {
-    removeCssRule(".if-print-to-pdf");
-  }
-  if (!isMobile) {
-    removeCssRule(".if-desktop");
-  }
-}
-function removeCssRule(name) {
-  const sheets = document.styleSheets;
-  for (let sheetIndex = 0; sheetIndex < sheets.length; sheetIndex++) {
-    const sheet = sheets[sheetIndex];
-    try {
-      if (!sheet?.cssRules)
-        continue;
-    } catch (ex) {
-      continue;
-    }
-    for (let ruleIndex = 0; ruleIndex < sheet.cssRules.length; ruleIndex++) {
-      const rule = sheet.cssRules[ruleIndex];
-      if (rule.selectorText === name) {
-        sheet.deleteRule(ruleIndex);
-        return;
-      }
-    }
-  }
+  formDom.classList.add("prepared");
 }
 
 // app/index.ts

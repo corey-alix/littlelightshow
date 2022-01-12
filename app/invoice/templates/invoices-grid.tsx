@@ -1,7 +1,6 @@
 import { dom } from "../../dom.js";
 import { asCurrency } from "../../fun/asCurrency.js";
 import { moveChildren } from "../../fun/dom.js";
-import { hookupTriggers } from "../../fun/hookupTriggers.js";
 import { noZero } from "../../fun/isZero.js";
 import { sum } from "../../fun/sum.js";
 import { globals } from "../../globals.js";
@@ -81,8 +80,6 @@ export function create(
       </div>,
       target
     );
-
-  hookupTriggers(target);
 
   return target;
 }

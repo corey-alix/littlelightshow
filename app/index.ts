@@ -10,7 +10,6 @@ import {
   setGlobalState,
 } from "./fun/globalState";
 import { identify } from "./identify";
-import { stripAccessControlItems } from "./fun/hookupTriggers";
 import { injectLabels } from "./ux/injectLabels";
 import {
   forceUpdatestampIndex,

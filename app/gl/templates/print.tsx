@@ -14,7 +14,6 @@ import {
 import { moveChildren } from "../../fun/dom.js";
 import { on } from "../../fun/on.js";
 import { routes } from "../../router.js";
-import { hookupTriggers } from "../../fun/hookupTriggers";
 import { gotoUrl } from "../../fun/gotoUrl.js";
 
 export async function create(
@@ -75,7 +74,6 @@ export async function create(
     gotoUrl(routes.createLedger());
   });
 
-  hookupTriggers(target);
   return target;
 }
 
