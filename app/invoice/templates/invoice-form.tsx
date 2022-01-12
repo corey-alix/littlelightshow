@@ -4,11 +4,6 @@ import {
   moveChildren,
   moveChildrenBefore,
 } from "../../fun/dom.js";
-import { hookupTriggers } from "../../fun/hookupTriggers.js";
-import {
-  extendNumericInputBehaviors,
-  extendTextInputBehaviors,
-} from "../../fun/behavior/form.js";
 import {
   on,
   trigger,
@@ -30,6 +25,7 @@ import { getValueAsNumber } from "../../fun/behavior/input.js";
 import { asNumber } from "../../fun/asNumber.js";
 import { sum } from "../../fun/sum.js";
 import { gotoUrl } from "../../fun/gotoUrl.js";
+import { prepareForm } from "../../ux/prepareForm.js";
 
 const { primaryContact, TAXRATE } =
   globals;
@@ -320,9 +316,7 @@ export async function create(
     compute(form)
   );
 
-  extendNumericInputBehaviors(form);
-  extendTextInputBehaviors(form);
-  hookupTriggers(form);
+  prepareForm(form);
   hookupEvents(form);
 
   if (!invoice.mops?.length) {
@@ -378,9 +372,7 @@ function addAnotherItem(
       ] as HTMLElement
     );
   }
-  extendNumericInputBehaviors(
-    itemPanel
-  );
+  prepareForm(itemPanel);
   moveChildren(itemPanel, target);
   toFocus?.focus();
 }
@@ -429,9 +421,7 @@ function hookupEvents(
       const mopLineItem =
         renderMopLineItem();
 
-      extendNumericInputBehaviors(
-        mopLineItem
-      );
+      prepareForm(mopLineItem);
 
       const focus = getFirstInput(
         mopLineItem

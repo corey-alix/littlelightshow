@@ -12,7 +12,6 @@ import { asDateString } from "../../fun/asDateString";
 import { sum } from "../../fun/sum";
 import { asNumber } from "../../fun/asNumber";
 import { setCurrency } from "../../fun/setCurrency";
-import { hookupTriggers } from "../../fun/hookupTriggers";
 import { routes } from "../../router.js";
 import {
   on,
@@ -22,13 +21,13 @@ import { create as printDetail } from "./printDetail";
 import { create as printSummary } from "./printSummary";
 import { isZero } from "../../fun/isZero";
 import { forceDatalist } from "../../services/accounts.js";
-import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
 import {
   reportError,
   toast,
 } from "../../ux/toasterWriter";
 import { gotoUrl } from "../../fun/gotoUrl.js";
 import { globals } from "../../globals.js";
+import { prepareForm } from "../../ux/prepareForm.js";
 
 function asModel(
   form: HTMLFormElement
@@ -248,7 +247,7 @@ function hookupHandlers(
 
   on(domNode, "add-row", () => {
     const row = createRow();
-    extendNumericInputBehaviors(row);
+    prepareForm(row);
     const focus = row.querySelector(
       "[name=account]"
     ) as HTMLElement;
@@ -464,9 +463,8 @@ export function create(
       }
     );
   }
-  hookupTriggers(ledger);
   hookupHandlers(ledger);
-  extendNumericInputBehaviors(ledger);
+  prepareForm(ledger);
   if (!ledgerModel)
     trigger(ledger, "add-row");
 

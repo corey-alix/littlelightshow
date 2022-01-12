@@ -10,20 +10,14 @@ import {
   reportError,
   toast,
 } from "../ux/toasterWriter";
-import {
-  hookupTriggers,
-  stripAccessControlItems,
-} from "../fun/hookupTriggers.js";
-import {
-  extendNumericInputBehaviors,
-  extendTextInputBehaviors,
-} from "../fun/behavior/form.js";
+import { stripAccessControlItems } from "../fun/hookupTriggers.js";
 import { invoiceModel } from "../services/invoices.js";
 import { isNull } from "../fun/isUndefined.js";
 import { routes } from "../router.js";
 import { globals } from "../globals.js";
 import { gotoUrl } from "../fun/gotoUrl.js";
 import { getQueryParameter } from "../fun/getQueryParameter.js";
+import { prepareForm } from "../ux/prepareForm";
 
 export async function init(
   target = document.body
@@ -41,7 +35,7 @@ export async function init(
         })
       );
 
-      stripAccessControlItems(report);
+      prepareForm(report);
       target.appendChild(report);
       return;
     }
@@ -55,7 +49,8 @@ export async function init(
     const formDom = showInventoryItem(
       inventoryItem
     );
-    stripAccessControlItems(formDom);
+
+    prepareForm(formDom);
     target.appendChild(formDom);
 
     on(formDom, "submit", async () => {
@@ -103,11 +98,6 @@ export async function init(
       );
     });
 
-    hookupTriggers(formDom);
-    extendNumericInputBehaviors(
-      formDom
-    );
-    extendTextInputBehaviors(formDom);
     return;
   }
   {
@@ -121,13 +111,8 @@ export async function init(
     const formDom = showInventoryItem(
       inventoryItem
     );
-    stripAccessControlItems(formDom);
+    prepareForm(formDom);
     target.appendChild(formDom);
-    hookupTriggers(formDom);
-    extendNumericInputBehaviors(
-      formDom
-    );
-    extendTextInputBehaviors(formDom);
 
     on(formDom, "submit", async () => {
       await saveChanges(

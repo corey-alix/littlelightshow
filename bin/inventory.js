@@ -5251,55 +5251,6 @@ function trigger(domNode, eventName) {
   domNode.dispatchEvent(new Event(eventName));
 }
 
-// app/fun/behavior/input.ts
-function selectOnFocus(element) {
-  on(element, "focus", () => element.select());
-}
-function formatAsCurrency(input) {
-  input.step = "0.01";
-  input.addEventListener("change", () => {
-    const textValue = input.value;
-    const numericValue = input.valueAsNumber?.toFixed(2);
-    if (textValue != numericValue) {
-      input.value = numericValue;
-    }
-  });
-}
-function formatUppercase(input) {
-  addFormatter(() => {
-    const textValue = (input.value || "").toUpperCase();
-    if (textValue != input.value) {
-      input.value = textValue;
-    }
-  }, input);
-}
-function addFormatter(change, input) {
-  change();
-  input.addEventListener("change", change);
-}
-function formatTrim(input) {
-  addFormatter(() => {
-    const textValue = (input.value || "").trim();
-    if (textValue != input.value) {
-      input.value = textValue;
-    }
-  }, input);
-}
-
-// app/fun/behavior/form.ts
-function extendNumericInputBehaviors(form) {
-  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
-  numberInput.forEach(selectOnFocus);
-  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
-  currencyInput.forEach(formatAsCurrency);
-}
-function extendTextInputBehaviors(form) {
-  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
-  textInput.forEach(selectOnFocus);
-  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
-  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
-}
-
 // app/services/accesscontrol.ts
 var TABLE_NAME2 = "accesscontrol";
 var Permission = /* @__PURE__ */ ((Permission2) => {
@@ -5691,6 +5642,63 @@ function removeCssRule(name) {
   }
 }
 
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  });
+}
+function formatUppercase(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").toUpperCase();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+function addFormatter(change, input) {
+  change();
+  input.addEventListener("change", change);
+}
+function formatTrim(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").trim();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
+}
+function extendTextInputBehaviors(form) {
+  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
+  textInput.forEach(selectOnFocus);
+  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
+  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
+}
+
+// app/ux/prepareForm.ts
+function prepareForm(formDom) {
+  stripAccessControlItems(formDom);
+  hookupTriggers(formDom);
+  extendNumericInputBehaviors(formDom);
+  extendTextInputBehaviors(formDom);
+}
+
 // app/index.ts
 var { primaryContact } = globals;
 var VERSION = "1.0.5";
@@ -5714,8 +5722,7 @@ async function init() {
     await upgradeFromCurrentVersion();
   }
   injectLabels(domNode);
-  extendNumericInputBehaviors(domNode);
-  hookupTriggers(domNode);
+  prepareForm(domNode);
   setMode();
   removeCssRestrictors();
 }
@@ -5909,7 +5916,7 @@ async function init2(target = document.body) {
       const report = create(inventoryItems.sortBy({
         code: "string"
       }));
-      stripAccessControlItems(report);
+      prepareForm(report);
       target.appendChild(report);
       return;
     }
@@ -5917,7 +5924,7 @@ async function init2(target = document.body) {
       ...await inventoryModel.getItem(id)
     };
     const formDom = create2(inventoryItem);
-    stripAccessControlItems(formDom);
+    prepareForm(formDom);
     target.appendChild(formDom);
     on(formDom, "submit", async () => {
       if (!formDom.checkValidity()) {
@@ -5943,9 +5950,6 @@ async function init2(target = document.body) {
     on(formDom, "show-all", () => {
       gotoUrl(routes.allInventoryItems());
     });
-    hookupTriggers(formDom);
-    extendNumericInputBehaviors(formDom);
-    extendTextInputBehaviors(formDom);
     return;
   }
   {
@@ -5957,11 +5961,8 @@ async function init2(target = document.body) {
       description: ""
     };
     const formDom = create2(inventoryItem);
-    stripAccessControlItems(formDom);
+    prepareForm(formDom);
     target.appendChild(formDom);
-    hookupTriggers(formDom);
-    extendNumericInputBehaviors(formDom);
-    extendTextInputBehaviors(formDom);
     on(formDom, "submit", async () => {
       await saveChanges(inventoryItem, formDom);
       gotoUrl(routes.inventory(inventoryItem.id));

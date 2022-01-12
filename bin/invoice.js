@@ -5313,8 +5313,128 @@ function moveChildrenBefore(items, report) {
     report.before(items.firstChild);
 }
 
+// app/services/inventory.ts
+var INVENTORY_TABLE = "inventory";
+var InventoryModel = class extends StorageModel {
+  async upgradeTo104() {
+    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
+    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
+  }
+};
+var inventoryModel = new InventoryModel({
+  tableName: INVENTORY_TABLE,
+  offline: false
+});
+async function forceDatalist() {
+  let dataList = document.querySelector(`#inventory_list`);
+  if (dataList)
+    return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = "inventory_list";
+  const items = await inventoryModel.getItems();
+  items.sortBy({ code: "string" }).forEach((item) => {
+    const option = document.createElement("option");
+    option.value = item.code;
+    dataList.appendChild(option);
+  });
+  document.body.appendChild(dataList);
+  return dataList;
+}
+
+// app/invoice/PaymentManager.ts
+var TABLE_NAME = "mops";
+var Manager = class {
+  constructor() {
+    this.data = JSON.parse(localStorage.getItem(TABLE_NAME) || "{}");
+  }
+  getItemByCode(code) {
+    return this.data[code];
+  }
+  persistItem(item) {
+    this.data[item.id] = item;
+  }
+  persistItems() {
+    localStorage.setItem(TABLE_NAME, JSON.stringify(this.data));
+  }
+};
+var manager = new Manager();
+manager.persistItem({ id: "CASH" });
+manager.persistItem({ id: "CHECK" });
+manager.persistItems();
+function forceDatalist2() {
+  let dataList = document.querySelector(`#${TABLE_NAME}_list`);
+  if (dataList)
+    return dataList;
+  dataList = document.createElement("datalist");
+  dataList.id = `${TABLE_NAME}_list`;
+  Object.entries(manager.data).forEach(([key, value]) => {
+    const option = document.createElement("option");
+    option.value = key;
+    dataList.appendChild(option);
+  });
+  document.body.appendChild(dataList);
+  return dataList;
+}
+
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  input.step = "0.01";
+  input.addEventListener("change", () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  });
+}
+function formatUppercase(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").toUpperCase();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+function addFormatter(change, input) {
+  change();
+  input.addEventListener("change", change);
+}
+function formatTrim(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").trim();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+function getValueAsNumber(input) {
+  if (!input.value)
+    return 0;
+  return input.valueAsNumber;
+}
+
+// app/fun/asNumber.ts
+function asNumber(node) {
+  return node.valueAsNumber || 0;
+}
+
+// app/fun/sum.ts
+function sum(values) {
+  if (!values.length)
+    return 0;
+  return values.reduce((a, b) => a + b, 0);
+}
+
+// app/fun/gotoUrl.ts
+function gotoUrl(url) {
+  location.replace(url);
+}
+
 // app/services/accesscontrol.ts
-var TABLE_NAME = "accesscontrol";
+var TABLE_NAME2 = "accesscontrol";
 var Permission = /* @__PURE__ */ ((Permission2) => {
   Permission2[Permission2["none"] = 0] = "none";
   Permission2[Permission2["read"] = 1] = "read";
@@ -5327,7 +5447,7 @@ var Permission = /* @__PURE__ */ ((Permission2) => {
 var AccessControlModel = class extends StorageModel {
 };
 var accessControlStore = new AccessControlModel({
-  tableName: TABLE_NAME,
+  tableName: TABLE_NAME2,
   offline: true
 });
 
@@ -5423,11 +5543,11 @@ var Toaster = class {
 };
 
 // app/services/log.ts
-var TABLE_NAME2 = "log";
+var TABLE_NAME3 = "log";
 var LogModel = class extends StorageModel {
 };
 var logStore = new LogModel({
-  tableName: TABLE_NAME2,
+  tableName: TABLE_NAME3,
   offline: false
 });
 
@@ -5595,46 +5715,6 @@ function isNumericInputElement(item) {
   return isInputElement(item) && getInputType(item) === "number";
 }
 
-// app/fun/behavior/input.ts
-function selectOnFocus(element) {
-  on(element, "focus", () => element.select());
-}
-function formatAsCurrency(input) {
-  input.step = "0.01";
-  input.addEventListener("change", () => {
-    const textValue = input.value;
-    const numericValue = input.valueAsNumber?.toFixed(2);
-    if (textValue != numericValue) {
-      input.value = numericValue;
-    }
-  });
-}
-function formatUppercase(input) {
-  addFormatter(() => {
-    const textValue = (input.value || "").toUpperCase();
-    if (textValue != input.value) {
-      input.value = textValue;
-    }
-  }, input);
-}
-function addFormatter(change, input) {
-  change();
-  input.addEventListener("change", change);
-}
-function formatTrim(input) {
-  addFormatter(() => {
-    const textValue = (input.value || "").trim();
-    if (textValue != input.value) {
-      input.value = textValue;
-    }
-  }, input);
-}
-function getValueAsNumber(input) {
-  if (!input.value)
-    return 0;
-  return input.valueAsNumber;
-}
-
 // app/fun/behavior/form.ts
 function extendNumericInputBehaviors(form) {
   const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
@@ -5649,84 +5729,12 @@ function extendTextInputBehaviors(form) {
   textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
 }
 
-// app/services/inventory.ts
-var INVENTORY_TABLE = "inventory";
-var InventoryModel = class extends StorageModel {
-  async upgradeTo104() {
-    const deleteTheseItems = this.cache.get().filter((i) => i.id && i.id === i.code).map((i) => i.id);
-    deleteTheseItems.forEach((id) => this.cache.deleteLineItem(id));
-  }
-};
-var inventoryModel = new InventoryModel({
-  tableName: INVENTORY_TABLE,
-  offline: false
-});
-async function forceDatalist() {
-  let dataList = document.querySelector(`#inventory_list`);
-  if (dataList)
-    return dataList;
-  dataList = document.createElement("datalist");
-  dataList.id = "inventory_list";
-  const items = await inventoryModel.getItems();
-  items.sortBy({ code: "string" }).forEach((item) => {
-    const option = document.createElement("option");
-    option.value = item.code;
-    dataList.appendChild(option);
-  });
-  document.body.appendChild(dataList);
-  return dataList;
-}
-
-// app/invoice/PaymentManager.ts
-var TABLE_NAME3 = "mops";
-var Manager = class {
-  constructor() {
-    this.data = JSON.parse(localStorage.getItem(TABLE_NAME3) || "{}");
-  }
-  getItemByCode(code) {
-    return this.data[code];
-  }
-  persistItem(item) {
-    this.data[item.id] = item;
-  }
-  persistItems() {
-    localStorage.setItem(TABLE_NAME3, JSON.stringify(this.data));
-  }
-};
-var manager = new Manager();
-manager.persistItem({ id: "CASH" });
-manager.persistItem({ id: "CHECK" });
-manager.persistItems();
-function forceDatalist2() {
-  let dataList = document.querySelector(`#${TABLE_NAME3}_list`);
-  if (dataList)
-    return dataList;
-  dataList = document.createElement("datalist");
-  dataList.id = `${TABLE_NAME3}_list`;
-  Object.entries(manager.data).forEach(([key, value]) => {
-    const option = document.createElement("option");
-    option.value = key;
-    dataList.appendChild(option);
-  });
-  document.body.appendChild(dataList);
-  return dataList;
-}
-
-// app/fun/asNumber.ts
-function asNumber(node) {
-  return node.valueAsNumber || 0;
-}
-
-// app/fun/sum.ts
-function sum(values) {
-  if (!values.length)
-    return 0;
-  return values.reduce((a, b) => a + b, 0);
-}
-
-// app/fun/gotoUrl.ts
-function gotoUrl(url) {
-  location.replace(url);
+// app/ux/prepareForm.ts
+function prepareForm(formDom) {
+  stripAccessControlItems(formDom);
+  hookupTriggers(formDom);
+  extendNumericInputBehaviors(formDom);
+  extendTextInputBehaviors(formDom);
 }
 
 // app/invoice/templates/invoice-form.tsx
@@ -5906,9 +5914,7 @@ async function create(invoice) {
     paymentItems?.forEach((item) => moveChildrenBefore(item, payementsTarget));
   }
   on(form, "change", () => compute(form));
-  extendNumericInputBehaviors(form);
-  extendTextInputBehaviors(form);
-  hookupTriggers(form);
+  prepareForm(form);
   hookupEvents(form);
   if (!invoice.mops?.length) {
     trigger(form, "add-method-of-payment");
@@ -5934,7 +5940,7 @@ function addAnotherItem(formDom) {
   for (let i = 0; i < itemPanel.children.length; i++) {
     itemsToRemove.push(itemPanel.children[i]);
   }
-  extendNumericInputBehaviors(itemPanel);
+  prepareForm(itemPanel);
   moveChildren(itemPanel, target);
   toFocus?.focus();
 }
@@ -5955,7 +5961,7 @@ function hookupEvents(formDom) {
   on(formDom, "add-method-of-payment", () => {
     const target = formDom.querySelector("#mop-line-item-end") || formDom;
     const mopLineItem = renderMopLineItem();
-    extendNumericInputBehaviors(mopLineItem);
+    prepareForm(mopLineItem);
     const focus = getFirstInput(mopLineItem);
     moveChildrenBefore(mopLineItem, target);
     focus.focus();
@@ -6380,8 +6386,7 @@ async function init() {
     await upgradeFromCurrentVersion();
   }
   injectLabels(domNode);
-  extendNumericInputBehaviors(domNode);
-  hookupTriggers(domNode);
+  prepareForm(domNode);
   setMode();
   removeCssRestrictors();
 }

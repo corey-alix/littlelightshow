@@ -10,11 +10,7 @@ import {
   setGlobalState,
 } from "./fun/globalState";
 import { identify } from "./identify";
-import { extendNumericInputBehaviors } from "./fun/behavior/form";
-import {
-  hookupTriggers,
-  stripAccessControlItems,
-} from "./fun/hookupTriggers";
+import { stripAccessControlItems } from "./fun/hookupTriggers";
 import { injectLabels } from "./ux/injectLabels";
 import {
   forceUpdatestampIndex,
@@ -25,6 +21,7 @@ import { inventoryModel } from "./services/inventory";
 import { toast } from "./ux/toasterWriter";
 import { isUndefined } from "./fun/isUndefined";
 import { removeCssRestrictors } from "./fun/detect.js";
+import { prepareForm } from "./ux/prepareForm.js";
 
 const VERSION = "1.0.5";
 
@@ -54,8 +51,7 @@ export async function init() {
   }
 
   injectLabels(domNode);
-  extendNumericInputBehaviors(domNode);
-  hookupTriggers(domNode);
+  prepareForm(domNode);
   setMode();
   removeCssRestrictors();
 }
