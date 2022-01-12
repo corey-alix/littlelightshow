@@ -10,7 +10,6 @@ import {
   reportError,
   toast,
 } from "../ux/toasterWriter";
-import { stripAccessControlItems } from "../fun/hookupTriggers.js";
 import { invoiceModel } from "../services/invoices.js";
 import { isNull } from "../fun/isUndefined.js";
 import { routes } from "../router.js";
@@ -35,7 +34,7 @@ export async function init(
         })
       );
 
-      prepareForm(report);
+      await prepareForm(report);
       target.appendChild(report);
       return;
     }
@@ -50,7 +49,7 @@ export async function init(
       inventoryItem
     );
 
-    prepareForm(formDom);
+    await prepareForm(formDom);
     target.appendChild(formDom);
 
     on(formDom, "submit", async () => {
@@ -111,7 +110,7 @@ export async function init(
     const formDom = showInventoryItem(
       inventoryItem
     );
-    prepareForm(formDom);
+    await prepareForm(formDom);
     target.appendChild(formDom);
 
     on(formDom, "submit", async () => {

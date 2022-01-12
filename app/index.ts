@@ -23,13 +23,10 @@ import { isUndefined } from "./fun/isUndefined";
 import { removeCssRestrictors } from "./fun/detect.js";
 import { prepareForm } from "./ux/prepareForm.js";
 
-const VERSION = "1.0.5";
+const VERSION = "1.0.6";
 
 export async function init() {
   const domNode = document.body;
-  await stripAccessControlItems(
-    domNode
-  );
 
   if (!isOffline()) {
     await identify();
@@ -50,8 +47,8 @@ export async function init() {
     await upgradeFromCurrentVersion();
   }
 
+  await prepareForm(domNode);
   injectLabels(domNode);
-  prepareForm(domNode);
   setMode();
   removeCssRestrictors();
 }

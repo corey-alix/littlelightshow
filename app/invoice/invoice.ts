@@ -29,7 +29,7 @@ import { asCurrency } from "../fun/asCurrency.js";
 import { gotoUrl } from "../fun/gotoUrl.js";
 import { init as systemInit } from "../index.js";
 import { getQueryParameter } from "../fun/getQueryParameter.js";
-import { stripAccessControlItems } from "../fun/hookupTriggers.js";
+import { prepareForm } from "../ux/prepareForm.js";
 
 export async function init(
   target = document.body
@@ -105,7 +105,7 @@ async function renderInvoice(
   }
   const formDom =
     await createFormTemplate(invoice);
-  stripAccessControlItems(formDom);
+  await prepareForm(formDom);
 
   target.appendChild(formDom);
 

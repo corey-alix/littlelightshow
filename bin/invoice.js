@@ -5733,8 +5733,8 @@ function extendTextInputBehaviors(form) {
 }
 
 // app/ux/prepareForm.ts
-function prepareForm(formDom) {
-  stripAccessControlItems(formDom);
+async function prepareForm(formDom) {
+  await stripAccessControlItems(formDom);
   hookupTriggers(formDom);
   extendNumericInputBehaviors(formDom);
   extendTextInputBehaviors(formDom);
@@ -6368,10 +6368,9 @@ function removeCssRule(name) {
 
 // app/index.ts
 var { primaryContact: primaryContact3 } = globals;
-var VERSION = "1.0.5";
+var VERSION = "1.0.6";
 async function init() {
   const domNode = document.body;
-  await stripAccessControlItems(domNode);
   if (!isOffline()) {
     await identify();
     await registerServiceWorker();
@@ -6388,8 +6387,8 @@ async function init() {
     setInitialState({ primaryContact: primaryContact3 });
     await upgradeFromCurrentVersion();
   }
+  await prepareForm(domNode);
   injectLabels(domNode);
-  prepareForm(domNode);
   setMode();
   removeCssRestrictors();
 }
@@ -6486,7 +6485,7 @@ async function renderInvoice2(target, invoiceId) {
     };
   }
   const formDom = await create(invoice);
-  stripAccessControlItems(formDom);
+  await prepareForm(formDom);
   target.appendChild(formDom);
   hookupEvents2(formDom);
   trigger(formDom, "change");

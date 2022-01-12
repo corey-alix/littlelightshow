@@ -7,10 +7,12 @@ import {
   extendTextInputBehaviors,
 } from "../fun/behavior/form.js";
 
-export function prepareForm(
+export async function prepareForm(
   formDom: HTMLElement
 ) {
-  stripAccessControlItems(formDom);
+  await stripAccessControlItems(
+    formDom
+  );
   hookupTriggers(formDom);
   extendNumericInputBehaviors(formDom);
   extendTextInputBehaviors(formDom);

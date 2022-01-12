@@ -18,7 +18,7 @@ import {
   setFormValue,
   getFormValue,
 } from "../fun/setFormValue";
-import { stripAccessControlItems } from "../fun/hookupTriggers";
+import { prepareForm } from "../ux/prepareForm";
 
 export async function init(
   todoWidget: HTMLElement
@@ -66,9 +66,7 @@ export async function init(
       ).sortBy({ date: "number" });
       const todoItemsGrid =
         createTodoGrid(todoItems);
-      stripAccessControlItems(
-        todoItemsGrid
-      );
+      await prepareForm(todoItemsGrid);
       todoItemsPlaceholder.innerText =
         "";
       todoItemsPlaceholder.appendChild(

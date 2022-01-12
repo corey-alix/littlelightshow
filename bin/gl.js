@@ -5798,8 +5798,8 @@ function extendTextInputBehaviors(form) {
 }
 
 // app/ux/prepareForm.ts
-function prepareForm(formDom) {
-  stripAccessControlItems(formDom);
+async function prepareForm(formDom) {
+  await stripAccessControlItems(formDom);
   hookupTriggers(formDom);
   extendNumericInputBehaviors(formDom);
   extendTextInputBehaviors(formDom);
@@ -6316,10 +6316,9 @@ function removeCssRule(name) {
 
 // app/index.ts
 var { primaryContact } = globals;
-var VERSION = "1.0.5";
+var VERSION = "1.0.6";
 async function init() {
   const domNode = document.body;
-  await stripAccessControlItems(domNode);
   if (!isOffline()) {
     await identify();
     await registerServiceWorker();
@@ -6336,8 +6335,8 @@ async function init() {
     setInitialState({ primaryContact });
     await upgradeFromCurrentVersion();
   }
+  await prepareForm(domNode);
   injectLabels(domNode);
-  prepareForm(domNode);
   setMode();
   removeCssRestrictors();
 }
@@ -6392,14 +6391,14 @@ async function init2(domNode) {
       switch (printId) {
         case "all": {
           const ledger = await create4();
-          stripAccessControlItems(ledger);
+          await prepareForm(ledger);
           target.appendChild(ledger);
           break;
         }
         default: {
           target.innerHTML = "";
           const ledger = await create4(printId);
-          stripAccessControlItems(ledger);
+          await prepareForm(ledger);
           target.appendChild(ledger);
         }
       }
@@ -6411,20 +6410,20 @@ async function init2(domNode) {
       if (!ledger)
         throw `cannot find ledger: ${id}`;
       const form = create3(ledger);
-      stripAccessControlItems(form);
+      await prepareForm(form);
       domNode.appendChild(form);
       return;
     }
     const account = getQueryParameter("account");
     if (!!account) {
       const report = await create5(account);
-      stripAccessControlItems(report);
+      await prepareForm(report);
       domNode.appendChild(report);
       return;
     }
     {
       const ledger = create3();
-      stripAccessControlItems(ledger);
+      await prepareForm(ledger);
       domNode.appendChild(ledger);
     }
   } catch (ex) {
