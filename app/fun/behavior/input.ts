@@ -13,18 +13,21 @@ export function selectOnFocus(
 export function formatAsCurrency(
   input: HTMLInputElement
 ) {
+  const doit = () => {
+    const textValue = input.value;
+    const numericValue =
+      input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  };
+
   input.step = "0.01";
   input.addEventListener(
     "change",
-    () => {
-      const textValue = input.value;
-      const numericValue =
-        input.valueAsNumber?.toFixed(2);
-      if (textValue != numericValue) {
-        input.value = numericValue;
-      }
-    }
+    doit
   );
+  doit();
 }
 
 export function formatUppercase(
