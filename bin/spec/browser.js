@@ -8038,7 +8038,81 @@ function moveChildrenAfter(items, report) {
   }
 }
 
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  const doit = () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  };
+  input.step = "0.01";
+  input.addEventListener("change", doit);
+  doit();
+}
+function formatUppercase(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").toUpperCase();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+function addFormatter(change, input) {
+  change();
+  input.addEventListener("change", change);
+}
+function formatTrim(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").trim();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+function getValueAsNumber(input) {
+  if (!input.value)
+    return 0;
+  return input.valueAsNumber;
+}
+
+// app/fun/behavior/form.ts
+function extendTextInputBehaviors(form) {
+  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
+  textInput.forEach(selectOnFocus);
+  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
+  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
+}
+
 // test/browser/tests.spec.ts
+function sleep(ms) {
+  return new Promise((good, bad) => {
+    setTimeout(() => good(), ms);
+  });
+}
+describe("tests fun/behavior/form", () => {
+  it("tests extendTextInputBehaviors", async () => {
+    const element = dom("form");
+    const input = dom("input", {
+      type: "text",
+      class: "trim uppercase"
+    });
+    document.body.appendChild(element);
+    element.appendChild(input);
+    input.value = " input value ";
+    extendTextInputBehaviors(element);
+    assert.equal(input.value, "INPUT VALUE");
+    await sleep(100);
+    input.focus();
+    assert.equal(input.selectionStart, 0, "start");
+    assert.equal(input.selectionEnd, 11, "end");
+    element.remove();
+  });
+});
 describe("tests on/trigger", () => {
   it("tests on/trigger", () => {
     const element = dom("div");
@@ -8078,6 +8152,55 @@ describe("tests moveChildren", () => {
     moveChildrenBefore(source, placeholder);
     assert.equal(child.parentElement, target);
     assert.equal(placeholder.previousElementSibling, child);
+  });
+});
+describe("tests fun/behavior/input", () => {
+  it("tests formatAsCurrency", () => {
+    const input = dom("input", {
+      type: "number"
+    });
+    input.value = "1";
+    formatAsCurrency(input);
+    assert.equal(input.value, "1.00");
+    input.valueAsNumber = 1.234;
+    trigger(input, "change");
+    assert.equal(input.value, "1.23");
+  });
+  it("tests formatTrim", () => {
+    const input = dom("input", {
+      type: "text"
+    });
+    input.value = " one ";
+    formatTrim(input);
+    assert.equal(input.value, "one");
+  });
+  it("tests formatUppercase", () => {
+    const input = dom("input", {
+      type: "text"
+    });
+    input.value = "one";
+    formatUppercase(input);
+    assert.equal(input.value, "ONE");
+  });
+  it("tests getValueAsNumber", () => {
+    const input = dom("input", {
+      type: "number"
+    });
+    input.value = "1.25";
+    const value = getValueAsNumber(input);
+    assert.equal(value, 1.25);
+  });
+  it("tests selectOnFocus", async () => {
+    const input = dom("input", {
+      type: "text"
+    });
+    document.body.appendChild(input);
+    input.value = "X";
+    selectOnFocus(input);
+    input.focus();
+    await sleep(10);
+    assert.equal(input.selectionEnd, 1);
+    input.remove();
   });
 });
 /*

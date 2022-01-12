@@ -5279,7 +5279,8 @@ var routes = {
   maptiler: () => `/app/ux/maptiler/maptiler.html`,
   gl: {
     byAccount: (id) => `/app/gl/index.html?account=${id}`
-  }
+  },
+  test: () => `/test/browser/index.html`
 };
 
 // app/fun/on.ts
@@ -5750,14 +5751,16 @@ function selectOnFocus(element) {
   on(element, "focus", () => element.select());
 }
 function formatAsCurrency(input) {
-  input.step = "0.01";
-  input.addEventListener("change", () => {
+  const doit = () => {
     const textValue = input.value;
     const numericValue = input.valueAsNumber?.toFixed(2);
     if (textValue != numericValue) {
       input.value = numericValue;
     }
-  });
+  };
+  input.step = "0.01";
+  input.addEventListener("change", doit);
+  doit();
 }
 function formatUppercase(input) {
   addFormatter(() => {
