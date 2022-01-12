@@ -13,7 +13,7 @@
       href="/app/baseline.css"
     />
   </head>
-  <body class="body flex">
+  <body class="body">
     <div
       data-can="invoice"
       class="flex width-100"
@@ -80,17 +80,20 @@
         >List all Ledger Entries</a
       >
     </div>
-    <div class="flex width-100">
+    <div
+      class="flex width-100"
+      data-can="todo|map"
+    >
       <div
         class="section-title rounded"
       >
-        Notes
+        Utilities
       </div>
       <a
         class="button"
-        data-can="create:todo"
+        data-can="read:todo"
         data-href="createTodo"
-        >Todo</a
+        >View Todo Items</a
       >
       <a
         class="button"
@@ -100,19 +103,19 @@
       >
     </div>
     <div
-      class="flex width-100"
+      class="grid-6 width-100"
       data-can="admin"
     >
       <div
-        class="section-title rounded"
+        class="section-title rounded col-1-last"
       >
-        Admin
+        Administration
       </div>
       <a
-        class="button"
+        class="button col-1"
         data-can="admin"
         data-href="admin"
-        >Admin</a
+        >Open Administration Form</a
       >
     </div>
     <script type="module">

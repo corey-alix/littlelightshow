@@ -6140,75 +6140,89 @@ function combine(...roles2) {
   return result;
 }
 var r = Permission.read;
-var u = Permission.update;
+var cu = Permission.create + Permission.update;
 var ru = Permission.read + Permission.update;
 var cru = Permission.read + Permission.create + Permission.update;
 var crud = Permission.read + Permission.delete + Permission.create + Permission.update;
-var none = {
+var empty = {
   admin: 0,
+  batchsize: 0,
+  cacheage: 0,
+  diagnostics: 0,
+  faunaapi: 0,
   inventory: 0,
   invoice: 0,
   ledger: 0,
   map: 0,
+  maptilerapi: 0,
+  primarycontact: 0,
   role: 0,
   taxrate: 0,
   todo: 0,
-  "batch-size": 0,
-  "cache-age": 0,
-  "fauna-api": 0,
-  "maptiler-api": 0,
-  "primary-contact": 0,
-  "ux-theme": 0,
-  "work-offline": 0
+  uxtheme: 0,
+  workoffline: 0
 };
-var user = combine(none, {
-  map: r,
-  "ux-theme": ru
+var user = combine(empty, {
+  admin: r,
+  diagnostics: r,
+  faunaapi: cu,
+  maptilerapi: cu,
+  role: cru,
+  uxtheme: ru
 });
 var clerk = combine(user, {
+  admin: r,
   inventory: r,
   invoice: r,
   ledger: cru,
   taxrate: ru,
-  "work-offline": ru,
-  todo: cru
+  todo: cru,
+  workoffline: ru
 });
 var zipTieTech = combine(user, {
+  admin: r,
   inventory: cru,
   invoice: cru,
   map: ru,
+  primarycontact: ru,
   taxrate: r,
-  "primary-contact": ru,
-  "ux-theme": ru,
-  "work-offline": ru
+  uxtheme: ru,
+  workoffline: ru
 });
-var admin = combine(user, {
-  admin: ru,
+var full = {
+  admin: crud,
+  batchsize: crud,
+  cacheage: crud,
+  diagnostics: crud,
+  faunaapi: crud,
   inventory: crud,
   invoice: crud,
   ledger: crud,
   map: crud,
+  maptilerapi: crud,
+  primarycontact: crud,
   role: crud,
   taxrate: crud,
-  "batch-size": crud,
-  "cache-age": crud,
-  "fauna-api": crud,
-  "maptiler-api": crud,
-  "primary-contact": crud,
-  "ux-theme": crud,
-  "work-offline": crud
-});
+  todo: crud,
+  uxtheme: crud,
+  workoffline: crud
+};
 var roles = {
+  V: empty,
+  W: user,
   X: zipTieTech,
   Y: clerk,
-  Z: admin
+  Z: full
 };
 
 // app/fql/can.ts
-var USER_ROLE = getGlobalState("USER_ROLE") || "public";
+var USER_ROLE = getGlobalState("USER_ROLE") || "V";
 var defaults2 = roles[USER_ROLE];
 async function can(code) {
   const accessControlItems = await accessControlStore.getItems();
+  return code.split("|").map((v) => v.trim()).filter((v) => !!v).some((code2) => canDo(code2, accessControlItems));
+}
+function canDo(code, accessControlItems) {
   const [noun, verb] = code.split(":").reverse();
   let permission = Permission.full;
   switch (verb) {
@@ -6233,26 +6247,23 @@ async function can(code) {
       permission = Permission.update;
       break;
   }
-  const item = accessControlItems.find((i) => i.code === noun && i.role === USER_ROLE);
-  if (!!item) {
-    if (!verb || verb === "any")
-      return item.permission > Permission.none;
-    return permission == (item.permission & permission);
+  let effectivePermission = defaults2 && defaults2[noun];
+  if (typeof effectivePermission !== "number") {
+    const item = accessControlItems.find((i) => i.code === noun && i.role === USER_ROLE);
+    if (!!item) {
+      effectivePermission = item.permission;
+    } else {
+      accessControlStore.upsertItem({
+        role: USER_ROLE,
+        code: noun,
+        permission: Permission.none
+      }).catch((ex) => reportError(ex));
+      return false;
+    }
   }
-  try {
-    let effectivePermission = defaults2 && defaults2[noun];
-    if (typeof effectivePermission !== "number")
-      effectivePermission = permission;
-    await accessControlStore.upsertItem({
-      code: noun,
-      permission: effectivePermission,
-      role: USER_ROLE
-    });
-    return can(code);
-  } catch (ex) {
-    reportError(ex);
-    return false;
-  }
+  if (!verb || verb === "any")
+    return effectivePermission > Permission.none;
+  return permission == (effectivePermission & permission);
 }
 
 // app/fun/hookupTriggers.ts
@@ -6393,7 +6404,8 @@ async function init() {
       CACHE_MAX_AGE: 600,
       BATCH_SIZE: 64,
       work_offline: true,
-      VERSION
+      VERSION,
+      USER_ROLE: "V"
     });
     setInitialState({ primaryContact: primaryContact3 });
     await upgradeFromCurrentVersion();

@@ -40,6 +40,7 @@ export async function init() {
       BATCH_SIZE: 64,
       work_offline: true,
       VERSION,
+      USER_ROLE: "V",
     });
     setInitialState({ primaryContact });
 

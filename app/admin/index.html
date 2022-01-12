@@ -11,9 +11,9 @@
       href="/app/baseline.css"
     />
   </head>
-  <body class="body flex">
+  <body class="body">
     <div
-      data-can="update:ux-theme"
+      data-can="update:uxtheme"
       class="border padding rounded flex width-100"
     >
       <div
@@ -52,7 +52,7 @@
     </div>
 
     <div
-      data-can="primary-contact"
+      data-can="primarycontact"
       class="border padding rounded grid-6 width-100"
     >
       <div
@@ -121,6 +121,7 @@
 
       <button
         class="button"
+        data-can="update:diagnostics"
         data-event="ping-local-storage"
       >
         Ping local storage
@@ -128,6 +129,7 @@
 
       <button
         data-href="test"
+        data-can="update:diagnostics"
         class="button"
       >
         Run Tests
@@ -135,23 +137,23 @@
 
       <button
         class="button"
-        data-can="update:fauna-api"
-        data-event="set-fauna-api-key"
+        data-can="update:faunaapi"
+        data-event="set-faunaapi-key"
       >
         Set Fauna API key
       </button>
 
       <button
         class="button"
-        data-can="update:maptiler-api"
-        data-event="set-maptiler-api-key"
+        data-can="update:maptilerapi"
+        data-event="set-maptilerapi-key"
       >
         Set MapTiler API Key
       </button>
 
       <label
         class="border padding rounded"
-        data-can="update:cache-age"
+        data-can="update:cacheage"
         >Max Cache Age (seconds)<br />
         <input
           type="number"
@@ -162,7 +164,7 @@
 
       <label
         class="border padding rounded"
-        data-can="update:batch-size"
+        data-can="update:batchsize"
         >Max record count per request<br />
         <input
           type="number"
@@ -184,7 +186,7 @@
       <br />
       <label
         class="border padding rounded"
-        data-can="update:work-offline"
+        data-can="update:workoffline"
         >Work Offline
         <input
           type="checkbox"

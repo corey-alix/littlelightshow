@@ -2,15 +2,15 @@ import { roles } from "../data/roles.js";
 
 import { getGlobalState } from "../fun/globalState";
 import {
+  AccessControl,
   accessControlStore,
   Permission,
 } from "../services/accesscontrol";
-import { reportError } from "../ux/toasterWriter";
+import { reportError } from "../ux/toasterWriter.js";
 
 const USER_ROLE =
-  getGlobalState<keyof typeof roles>(
-    "USER_ROLE"
-  ) || "public";
+  getGlobalState<string>("USER_ROLE") ||
+  "V";
 
 const defaults = roles[USER_ROLE];
 
@@ -20,9 +20,24 @@ export async function can(
   const accessControlItems =
     await accessControlStore.getItems();
 
+  return code
+    .split("|")
+    .map((v) => v.trim())
+    .filter((v) => !!v)
+    .some((code) =>
+      canDo(code, accessControlItems)
+    );
+}
+
+function canDo(
+  code: string,
+  accessControlItems: AccessControl[]
+) {
   const [noun, verb] = code
     .split(":")
     .reverse();
+
+  //if (noun === "diagnostics") debugger;
 
   let permission = Permission.full;
   switch (verb) {
@@ -48,43 +63,41 @@ export async function can(
       break;
   }
 
-  const item = accessControlItems.find(
-    (i) =>
-      i.code === noun &&
-      i.role === USER_ROLE
-  );
+  let effectivePermission =
+    defaults && defaults[noun];
 
-  if (!!item) {
-    if (!verb || verb === "any")
-      return (
-        item.permission >
-        Permission.none
+  if (
+    typeof effectivePermission !==
+    "number"
+  ) {
+    const item =
+      accessControlItems.find(
+        (i) =>
+          i.code === noun &&
+          i.role === USER_ROLE
       );
+    if (!!item) {
+      effectivePermission =
+        item.permission;
+    } else {
+      accessControlStore
+        .upsertItem({
+          role: USER_ROLE,
+          code: noun,
+          permission: Permission.none,
+        })
+        .catch((ex) => reportError(ex));
+      return false;
+    }
+  }
+
+  if (!verb || verb === "any")
     return (
-      permission ==
-      (item.permission & permission)
+      effectivePermission >
+      Permission.none
     );
-  }
-  try {
-    let effectivePermission =
-      defaults && defaults[noun];
-
-    if (
-      typeof effectivePermission !==
-      "number"
-    )
-      effectivePermission = permission;
-
-    await accessControlStore.upsertItem(
-      {
-        code: noun,
-        permission: effectivePermission,
-        role: USER_ROLE,
-      }
-    );
-    return can(code);
-  } catch (ex) {
-    reportError(ex);
-    return false;
-  }
+  return (
+    permission ==
+    (effectivePermission & permission)
+  );
 }

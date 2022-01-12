@@ -1,21 +1,22 @@
 import { Permission } from "../services/accesscontrol";
 
-type roles =
+type AccessId =
   | "admin"
-  | "batch-size"
-  | "cache-age"
-  | "fauna-api"
+  | "batchsize"
+  | "cacheage"
+  | "diagnostics"
+  | "faunaapi"
   | "inventory"
   | "invoice"
   | "ledger"
   | "map"
-  | "maptiler-api"
-  | "primary-contact"
+  | "maptilerapi"
+  | "primarycontact"
   | "role"
   | "taxrate"
   | "todo"
-  | "ux-theme"
-  | "work-offline";
+  | "uxtheme"
+  | "workoffline";
 
 type AccessControlItems = Record<
   string,
@@ -23,7 +24,7 @@ type AccessControlItems = Record<
 >;
 
 type AccessControlRole = Record<
-  roles,
+  AccessId,
   Permission
 >;
 
@@ -42,7 +43,8 @@ function combine(
 }
 
 const r = Permission.read;
-const u = Permission.update;
+const cu =
+  Permission.create + Permission.update;
 const ru =
   Permission.read + Permission.update;
 
@@ -57,68 +59,79 @@ const crud =
   Permission.create +
   Permission.update;
 
-const none: AccessControlRole = {
+const empty: AccessControlRole = {
   admin: 0,
+  batchsize: 0,
+  cacheage: 0,
+  diagnostics: 0,
+  faunaapi: 0,
   inventory: 0,
   invoice: 0,
   ledger: 0,
   map: 0,
+  maptilerapi: 0,
+  primarycontact: 0,
   role: 0,
   taxrate: 0,
   todo: 0,
-  "batch-size": 0,
-  "cache-age": 0,
-  "fauna-api": 0,
-  "maptiler-api": 0,
-  "primary-contact": 0,
-  "ux-theme": 0,
-  "work-offline": 0,
+  uxtheme: 0,
+  workoffline: 0,
 };
 
-const user = combine(none, {
-  map: r,
-  "ux-theme": ru,
+const user = combine(empty, {
+  admin: r,
+  diagnostics: r,
+  faunaapi: cu,
+  maptilerapi: cu,
+  role: cru,
+  uxtheme: ru,
 });
 
 const clerk = combine(user, {
+  admin: r,
   inventory: r,
   invoice: r,
   ledger: cru,
   taxrate: ru,
-  "work-offline": ru,
   todo: cru,
+  workoffline: ru,
 });
 
 const zipTieTech = combine(user, {
+  admin: r,
   inventory: cru,
   invoice: cru,
   map: ru,
+  primarycontact: ru,
   taxrate: r,
-  "primary-contact": ru,
-  "ux-theme": ru,
-  "work-offline": ru,
+  uxtheme: ru,
+  workoffline: ru,
 });
 
-const admin = combine(user, {
-  admin: ru,
+const full: AccessControlRole = {
+  admin: crud,
+  batchsize: crud,
+  cacheage: crud,
+  diagnostics: crud,
+  faunaapi: crud,
   inventory: crud,
   invoice: crud,
   ledger: crud,
   map: crud,
+  maptilerapi: crud,
+  primarycontact: crud,
   role: crud,
   taxrate: crud,
-  "batch-size": crud,
-  "cache-age": crud,
-  "fauna-api": crud,
-  "maptiler-api": crud,
-  "primary-contact": crud,
-  "ux-theme": crud,
-  "work-offline": crud,
-});
+  todo: crud,
+  uxtheme: crud,
+  workoffline: crud,
+};
 
 export const roles: AccessControlItems =
   {
+    V: empty,
+    W: user,
     X: zipTieTech,
     Y: clerk,
-    Z: admin,
+    Z: full,
   };

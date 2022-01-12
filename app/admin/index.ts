@@ -194,7 +194,7 @@ export async function init() {
 
   on(
     domNode,
-    "set-fauna-api-key",
+    "set-faunaapi-key",
     () => {
       prompt(
         "Enter Fauna API Key",
@@ -211,7 +211,7 @@ export async function init() {
 
   on(
     domNode,
-    "set-maptiler-api-key",
+    "set-maptilerapi-key",
     () => {
       prompt(
         "Enter MapTiler API Key",
