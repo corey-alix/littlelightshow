@@ -5459,10 +5459,10 @@ var accessControlStore = new AccessControlModel({
   offline: true
 });
 
-// app/data/accesscontrol.ts
-function combine(...roles) {
+// app/data/roles.ts
+function combine(...roles2) {
   const result = {};
-  roles.forEach((r1) => Object.keys(r1).forEach((k) => result[k] = (result[k] || 0) | r1[k]));
+  roles2.forEach((r1) => Object.keys(r1).forEach((k) => result[k] = (result[k] || 0) | r1[k]));
   return result;
 }
 var r = Permission.read;
@@ -5524,7 +5524,7 @@ var admin = combine(user, {
   "ux-theme": crud,
   "work-offline": crud
 });
-var accessControl = {
+var roles = {
   X: zipTieTech,
   Y: clerk,
   Z: admin
@@ -5532,7 +5532,7 @@ var accessControl = {
 
 // app/fql/can.ts
 var USER_ROLE = getGlobalState("USER_ROLE") || "public";
-var defaults2 = accessControl[USER_ROLE];
+var defaults2 = roles[USER_ROLE];
 async function can(code) {
   const accessControlItems = await accessControlStore.getItems();
   const [noun, verb] = code.split(":").reverse();
@@ -5978,7 +5978,7 @@ var accountModel = new StorageModel({
   offline: true
 });
 
-// app/admin/admin.ts
+// app/admin/index.ts
 var starterAccounts = [
   "AP",
   "AR",
