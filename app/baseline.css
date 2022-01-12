@@ -44,6 +44,10 @@ html {
   visibility: visible;
 }
 
+.body.holiday ::placeholder {
+  color: white;
+}
+
 .body {
   padding: 1rem;
   margin: 0;
@@ -93,6 +97,10 @@ input.auto-label {
 
 .max-height-200 {
   max-height: 200vh;
+}
+
+.no-border {
+  border-width: 0 !important;
 }
 
 .no-select {

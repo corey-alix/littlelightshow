@@ -11,7 +11,7 @@
       href="/app/baseline.css"
     />
   </head>
-  <body class="body flex textier">
+  <body class="body flex">
     <div
       data-can="update:ux-theme"
       class="border padding rounded flex width-100"
@@ -49,6 +49,42 @@
           data-event="font_mode"
           data-bind="larger-font"
       /></label>
+    </div>
+
+    <div
+      data-can="primary-contact"
+      class="border padding rounded grid-6 width-100"
+    >
+      <div
+        class="section-title rounded col-1-last"
+      >
+        Primary Contact Info
+      </div>
+      <input
+        class="no-border col-1-last"
+        data-bind="primaryContact.companyName"
+        placeholder="Company Name"
+      />
+      <input
+        class="no-border col-1-last"
+        data-bind="primaryContact.fullName"
+        placeholder="Primary Contact Name"
+      />
+      <input
+        class="no-border col-1-last"
+        data-bind="primaryContact.addressLine1"
+        placeholder="Address (line 1)"
+      />
+      <input
+        class="no-border col-1-last"
+        data-bind="primaryContact.addressLine2"
+        placeholder="Address (line 2)"
+      />
+      <input
+        class="no-border col-1-last"
+        data-bind="primaryContact.telephone"
+        placeholder="Telephone"
+      />
     </div>
 
     <div
