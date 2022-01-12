@@ -1,6 +1,5 @@
-import { accessControl as defaultValues } from "../data/accesscontrol.js";
+import { roles } from "../data/roles.js";
 
-import { isDefined } from "../fun/get";
 import { getGlobalState } from "../fun/globalState";
 import {
   accessControlStore,
@@ -9,11 +8,11 @@ import {
 import { reportError } from "../ux/toasterWriter";
 
 const USER_ROLE =
-  getGlobalState<string>("USER_ROLE") ||
-  "public";
+  getGlobalState<keyof typeof roles>(
+    "USER_ROLE"
+  ) || "public";
 
-const defaults =
-  defaultValues[USER_ROLE as "Z"];
+const defaults = roles[USER_ROLE];
 
 export async function can(
   code: string

@@ -116,7 +116,7 @@ const admin = combine(user, {
   "work-offline": crud,
 });
 
-export const accessControl: AccessControlItems =
+export const roles: AccessControlItems =
   {
     X: zipTieTech,
     Y: clerk,
