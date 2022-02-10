@@ -29,7 +29,7 @@ export function extendTextInputBehaviors(
 ) {
   const textInput = Array.from(
     form.querySelectorAll(
-      "input[type=text]"
+      "input[type=text],input[type=email],input[type=tel]"
     )
   ) as Array<HTMLInputElement>;
   textInput.forEach(selectOnFocus);

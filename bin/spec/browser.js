@@ -8082,7 +8082,7 @@ function getValueAsNumber(input) {
 
 // app/fun/behavior/form.ts
 function extendTextInputBehaviors(form) {
-  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
+  const textInput = Array.from(form.querySelectorAll("input[type=text],input[type=email],input[type=tel]"));
   textInput.forEach(selectOnFocus);
   textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
   textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);

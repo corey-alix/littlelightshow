@@ -6,6 +6,7 @@ import {
   extendNumericInputBehaviors,
   extendTextInputBehaviors,
 } from "../fun/behavior/form.js";
+import { injectLabels } from "./injectLabels.js";
 
 export async function prepareForm(
   formDom: HTMLElement
@@ -15,13 +16,13 @@ export async function prepareForm(
       "prepared"
     )
   ) {
-    alert("already prepared");
-    return;
+    throw "already prepared";
   }
 
   await stripAccessControlItems(
     formDom
   );
+  injectLabels(formDom);
   hookupTriggers(formDom);
   extendNumericInputBehaviors(formDom);
   extendTextInputBehaviors(formDom);

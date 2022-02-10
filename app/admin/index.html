@@ -12,6 +12,10 @@
     />
   </head>
   <body class="body">
+    <div data-can="!any:uxtheme">
+      You do not have uxtheme
+      permissions
+    </div>
     <div
       data-can="update:uxtheme"
       class="border padding rounded flex width-100"
@@ -51,6 +55,10 @@
       /></label>
     </div>
 
+    <div data-can="!any:primarycontact">
+      You do not have primarycontact
+      permissions
+    </div>
     <div
       data-can="primarycontact"
       class="border padding rounded grid-6 width-100"
@@ -107,6 +115,11 @@
           data-bind="TAX_RATE"
         />%</label
       >
+    </div>
+
+    <div data-can="!any:diagnostics">
+      You do not have diagnostics
+      permissions
     </div>
 
     <div

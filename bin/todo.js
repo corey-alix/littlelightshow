@@ -4719,12 +4719,26 @@ function asDateString(date = new Date()) {
   return asLocalDate(date).toISOString().split("T")[0];
 }
 
+// app/fun/get.ts
+function isDefined(value) {
+  return typeof value !== "undefined";
+}
+
 // app/fun/globalState.ts
 var globalState;
 function forceGlobalState() {
   return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
 }
-function setGlobalState(key, value) {
+function setGlobalState(p1, p2) {
+  if (typeof p1 === "string" && isDefined(p2)) {
+    return setStateValue(p1, p2);
+  } else {
+    if (isDefined(p2))
+      throw "unwanted parameter provided";
+    Object.keys(p1).forEach((k) => setStateValue(k, p1[k]));
+  }
+}
+function setStateValue(key, value) {
   const state = forceGlobalState();
   const [head, ...tail] = key.split(".");
   if (!tail.length) {
@@ -5001,11 +5015,6 @@ async function forceUpdatestampIndex(tableName) {
   return await client.query(query);
 }
 
-// app/fun/get.ts
-function isDefined(value) {
-  return typeof value !== "undefined";
-}
-
 // app/services/StorageModel.ts
 var { BATCH_SIZE, CURRENT_USER } = globals;
 var StorageModel = class {
@@ -5277,92 +5286,6 @@ async function identify() {
   return true;
 }
 
-// app/dom.ts
-function asStyle(o) {
-  if (typeof o === "string")
-    return o;
-  return Object.keys(o).map((k) => `${k}:${o[k]}`).join(";");
-}
-function defaults(a, ...b) {
-  b.filter((b2) => !!b2).forEach((b2) => {
-    Object.keys(b2).filter((k) => a[k] === void 0).forEach((k) => a[k] = b2[k]);
-  });
-  return a;
-}
-var rules = {
-  style: asStyle
-};
-var default_args = {
-  button: {
-    type: "button"
-  }
-};
-function dom(tag, args, ...children) {
-  if (typeof tag === "string") {
-    let element = document.createElement(tag);
-    if (default_args[tag]) {
-      args = defaults(args ?? {}, default_args[tag]);
-    }
-    if (args) {
-      Object.keys(args).forEach((key) => {
-        let value = rules[key] ? rules[key](args[key]) : args[key];
-        if (typeof value === "string") {
-          element.setAttribute(key, value);
-        } else if (value instanceof Function) {
-          element.addEventListener(key, value);
-        } else {
-          element.setAttribute(key, value + "");
-        }
-      });
-    }
-    let addChildren = (children2) => {
-      children2 && children2.forEach((c) => {
-        if (typeof c === "string") {
-          element.appendChild(document.createTextNode(c));
-        } else if (c instanceof HTMLElement) {
-          element.appendChild(c);
-        } else if (c instanceof Array) {
-          addChildren(c);
-        } else {
-          console.log("addChildren cannot add to dom node", c);
-        }
-      });
-    };
-    children && addChildren(children);
-    return element;
-  }
-  {
-    let element = tag(args);
-    let addChildren = (children2) => {
-      children2 && children2.forEach((c) => {
-        if (typeof c === "string" || c instanceof HTMLElement) {
-          element.setContent(c);
-        } else if (c instanceof Array) {
-          addChildren(c);
-        } else if (typeof c === "object") {
-          element.addChild(c);
-        } else {
-          console.log("addChildren cannot add to widget", c);
-        }
-      });
-    };
-    children && addChildren(children);
-    return element;
-  }
-}
-
-// app/ux/injectLabels.ts
-function injectLabels(domNode) {
-  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
-  inputsToWrap.forEach((input) => {
-    const label = dom("label");
-    label.className = "border padding rounded wrap " + input.className;
-    label.innerText = input.placeholder;
-    input.parentElement.insertBefore(label, input);
-    label.appendChild(input);
-  });
-}
-
 // app/services/invoices.ts
 var INVOICE_TABLE = "invoices";
 var invoiceModel = new StorageModel({
@@ -5522,7 +5445,7 @@ var roles = {
 
 // app/fql/can.ts
 var USER_ROLE = getGlobalState("USER_ROLE") || "V";
-var defaults2 = roles[USER_ROLE];
+var defaults = roles[USER_ROLE];
 async function can(code) {
   const accessControlItems = await accessControlStore.getItems();
   return code.split("|").map((v) => v.trim()).filter((v) => !!v).some((code2) => canDo(code2, accessControlItems));
@@ -5531,6 +5454,8 @@ function canDo(code, accessControlItems) {
   const [noun, verb] = code.split(":").reverse();
   let permission = Permission.full;
   switch (verb) {
+    case "!any":
+      break;
     case "any":
       break;
     case "create":
@@ -5552,7 +5477,7 @@ function canDo(code, accessControlItems) {
       permission = Permission.update;
       break;
   }
-  let effectivePermission = defaults2 && defaults2[noun];
+  let effectivePermission = defaults && defaults[noun];
   if (typeof effectivePermission !== "number") {
     const item = accessControlItems.find((i) => i.code === noun && i.role === USER_ROLE);
     if (!!item) {
@@ -5568,6 +5493,8 @@ function canDo(code, accessControlItems) {
   }
   if (!verb || verb === "any")
     return effectivePermission > Permission.none;
+  if (verb === "!any")
+    return effectivePermission === Permission.none;
   return permission == (effectivePermission & permission);
 }
 
@@ -5711,19 +5638,106 @@ function extendNumericInputBehaviors(form) {
   currencyInput.forEach(formatAsCurrency);
 }
 function extendTextInputBehaviors(form) {
-  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
+  const textInput = Array.from(form.querySelectorAll("input[type=text],input[type=email],input[type=tel]"));
   textInput.forEach(selectOnFocus);
   textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
   textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
 }
 
+// app/dom.ts
+function asStyle(o) {
+  if (typeof o === "string")
+    return o;
+  return Object.keys(o).map((k) => `${k}:${o[k]}`).join(";");
+}
+function defaults2(a, ...b) {
+  b.filter((b2) => !!b2).forEach((b2) => {
+    Object.keys(b2).filter((k) => a[k] === void 0).forEach((k) => a[k] = b2[k]);
+  });
+  return a;
+}
+var rules = {
+  style: asStyle
+};
+var default_args = {
+  button: {
+    type: "button"
+  }
+};
+function dom(tag, args, ...children) {
+  if (typeof tag === "string") {
+    let element = document.createElement(tag);
+    if (default_args[tag]) {
+      args = defaults2(args ?? {}, default_args[tag]);
+    }
+    if (args) {
+      Object.keys(args).forEach((key) => {
+        let value = rules[key] ? rules[key](args[key]) : args[key];
+        if (typeof value === "string") {
+          element.setAttribute(key, value);
+        } else if (value instanceof Function) {
+          element.addEventListener(key, value);
+        } else {
+          element.setAttribute(key, value + "");
+        }
+      });
+    }
+    let addChildren = (children2) => {
+      children2 && children2.forEach((c) => {
+        if (typeof c === "string") {
+          element.appendChild(document.createTextNode(c));
+        } else if (c instanceof HTMLElement) {
+          element.appendChild(c);
+        } else if (c instanceof Array) {
+          addChildren(c);
+        } else {
+          console.log("addChildren cannot add to dom node", c);
+        }
+      });
+    };
+    children && addChildren(children);
+    return element;
+  }
+  {
+    let element = tag(args);
+    let addChildren = (children2) => {
+      children2 && children2.forEach((c) => {
+        if (typeof c === "string" || c instanceof HTMLElement) {
+          element.setContent(c);
+        } else if (c instanceof Array) {
+          addChildren(c);
+        } else if (typeof c === "object") {
+          element.addChild(c);
+        } else {
+          console.log("addChildren cannot add to widget", c);
+        }
+      });
+    };
+    children && addChildren(children);
+    return element;
+  }
+}
+
+// app/ux/injectLabels.ts
+function injectLabels(domNode) {
+  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
+  inputsToWrap.forEach((input) => {
+    const label = dom("label", {
+      class: input.className
+    });
+    label.innerText = input.placeholder;
+    input.parentElement.insertBefore(label, input);
+    label.appendChild(input);
+  });
+}
+
 // app/ux/prepareForm.ts
 async function prepareForm(formDom) {
   if (formDom.classList.contains("prepared")) {
-    alert("already prepared");
-    return;
+    throw "already prepared";
   }
   await stripAccessControlItems(formDom);
+  injectLabels(formDom);
   hookupTriggers(formDom);
   extendNumericInputBehaviors(formDom);
   extendTextInputBehaviors(formDom);
@@ -5737,7 +5751,6 @@ async function init() {
   const domNode = document.body;
   if (!isOffline()) {
     await identify();
-    await registerServiceWorker();
     setInitialState({
       VERSION: "1.0.3"
     });
@@ -5753,7 +5766,6 @@ async function init() {
     await upgradeFromCurrentVersion();
   }
   await prepareForm(domNode);
-  injectLabels(domNode);
   setMode();
   removeCssRestrictors();
 }
@@ -5786,9 +5798,6 @@ async function upgradeFrom103To105() {
   inventoryModel.upgradeTo104();
   await inventoryModel.synchronize();
   setGlobalState("VERSION", VERSION);
-}
-async function registerServiceWorker() {
-  const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 
 // app/services/todo.ts

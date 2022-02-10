@@ -25,12 +25,11 @@ import { getValueAsNumber } from "../../fun/behavior/input.js";
 import { asNumber } from "../../fun/asNumber.js";
 import { sum } from "../../fun/sum.js";
 import { gotoUrl } from "../../fun/gotoUrl.js";
+import { setGlobalState } from "../../fun/globalState.js";
+import { prepareForm } from "../../ux/prepareForm.js";
 
 const { primaryContact, TAXRATE } =
   globals;
-
-const itemsToRemove =
-  [] as Array<HTMLElement>;
 
 export async function create(
   invoice: Invoice
@@ -55,25 +54,21 @@ export async function create(
       <div class="section-title col-1-last">
         Client
       </div>
-      <label class="form-label col-1-3">
-        Client Name
-      </label>
-      <label class="form-label col-4-last">
-        Date
-      </label>
       <input
-        class="col-1-3"
+        class="col-1-3 auto-label"
         type="text"
-        placeholder="clientname"
+        placeholder="Client Name"
         name="clientname"
+        data-bind="invoice.clientname"
         required
         value={invoice.clientname}
       />
       <input
-        class="col-4-last"
+        class="col-4-last auto-label"
         type="date"
         placeholder="Date"
         name="date"
+        data-bind="invoice.date"
         required
         value={asDateString(
           new Date(
@@ -81,24 +76,20 @@ export async function create(
           )
         )}
       />
-      <label class="form-label col-1-3">
-        Telephone
-      </label>
-      <label class="form-label col-4-last">
-        Email
-      </label>
       <input
         type="tel"
-        class="col-1-3"
-        placeholder="telephone"
+        class="col-1-3 auto-label"
+        placeholder="Telephone"
         name="telephone"
+        data-bind="invoice.telephone"
         value={invoice.telephone}
       />
       <input
         type="email"
-        class="col-4-last"
-        placeholder="email"
+        class="col-4-last auto-label"
+        placeholder="E-mail"
         name="email"
+        data-bind="invoice.email"
         value={invoice.email}
       />
       <label class="form-label col-1-last">
@@ -107,6 +98,7 @@ export async function create(
           class="address"
           placeholder="billto"
           name="billto"
+          data-bind="invoice.billto"
         >
           {invoice.billto}
         </textarea>
@@ -116,6 +108,7 @@ export async function create(
         <textarea
           class="comments"
           placeholder="comments"
+          data-bind="invoice.comments"
           name="comments"
         >
           {invoice.comments}
@@ -136,14 +129,6 @@ export async function create(
       >
         Add item
       </button>
-      <button
-        class="button col-4-last"
-        data-event="remove-last-item"
-        data-can="update:invoice"
-        type="button"
-      >
-        Remove Last Item
-      </button>
       <div class="vspacer col-1-last"></div>
       <div class="section-title col-1-last">
         Summary
@@ -162,6 +147,7 @@ export async function create(
         class="currency col-1-2"
         placeholder="labor"
         name="labor"
+        data-bind="invoice.labor"
         id="labor"
         value={invoice.labor.toFixed(2)}
       />
@@ -170,6 +156,7 @@ export async function create(
         class="currency col-3-2"
         placeholder="additional"
         name="additional"
+        data-bind="invoice.additional"
         value={invoice.additional.toFixed(
           2
         )}
@@ -345,6 +332,9 @@ function addAnotherItem(
     total: 0,
     tax: 0,
   });
+
+  prepareForm(itemPanel);
+
   setupComputeOnLineItem(
     formDom,
     itemPanel
@@ -355,21 +345,11 @@ function addAnotherItem(
     formDom.querySelector(
       ".line-items"
     ) || formDom;
-  itemsToRemove.splice(
-    0,
-    itemsToRemove.length
-  );
   for (
     let i = 0;
     i < itemPanel.children.length;
     i++
-  ) {
-    itemsToRemove.push(
-      itemPanel.children[
-        i
-      ] as HTMLElement
-    );
-  }
+  ) {}
   moveChildren(itemPanel, target);
   toFocus?.focus();
 }
@@ -382,17 +362,6 @@ function hookupEvents(
     "list-all-invoices",
     () => {
       gotoUrl(routes.allInvoices());
-    }
-  );
-
-  on(
-    formDom,
-    "remove-last-item",
-    () => {
-      itemsToRemove.forEach((item) =>
-        item.remove()
-      );
-      trigger(formDom, "change");
     }
   );
 
@@ -431,6 +400,14 @@ function hookupEvents(
   );
 
   on(formDom, "clear", () => {
+    setGlobalState({
+      "invoice.clientname": "",
+      "invoice.date": asDateString(),
+      "invoice.telephone": "",
+      "invoice.email": "",
+      "invoice.billto": "",
+      "invoice.comments": "",
+    });
     gotoUrl(routes.createInvoice());
   });
 }
@@ -522,12 +499,10 @@ function renderInvoiceItem(
 ) {
   const form: HTMLDivElement = (
     <div>
-      <label class="form-label col-1-last">
-        Item
-      </label>
       <input
         name="item"
-        class="bold col-1-3 text trim"
+        class="bold col-1-3 text trim auto-label"
+        placeholder="Item"
         required
         autocomplete="off"
         type="text"

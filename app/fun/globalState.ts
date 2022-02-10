@@ -1,3 +1,5 @@
+import { isDefined } from "./get";
+
 let globalState: Record<string, any>;
 function forceGlobalState() {
   return (globalState =
@@ -12,6 +14,31 @@ function forceGlobalState() {
 export function setGlobalState(
   key: string,
   value: any
+): void;
+export function setGlobalState(
+  key: Record<string, any>
+): void;
+export function setGlobalState(
+  p1: any,
+  p2?: any
+): void {
+  if (
+    typeof p1 === "string" &&
+    isDefined(p2)
+  ) {
+    return setStateValue(p1, p2);
+  } else {
+    if (isDefined(p2))
+      throw "unwanted parameter provided";
+    Object.keys(p1).forEach((k) =>
+      setStateValue(k, p1[k])
+    );
+  }
+}
+
+function setStateValue(
+  key: string,
+  value: string
 ) {
   const state = forceGlobalState();
   const [head, ...tail] =

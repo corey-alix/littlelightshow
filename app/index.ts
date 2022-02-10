@@ -10,7 +10,6 @@ import {
   setGlobalState,
 } from "./fun/globalState";
 import { identify } from "./identify";
-import { injectLabels } from "./ux/injectLabels";
 import {
   forceUpdatestampIndex,
   forceUpdatestampTable,
@@ -29,7 +28,7 @@ export async function init() {
 
   if (!isOffline()) {
     await identify();
-    await registerServiceWorker();
+    //await registerServiceWorker();
     setInitialState({
       VERSION: "1.0.3",
     });
@@ -48,7 +47,6 @@ export async function init() {
   }
 
   await prepareForm(domNode);
-  injectLabels(domNode);
   setMode();
   removeCssRestrictors();
 }

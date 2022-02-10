@@ -27,6 +27,7 @@ import {
 } from "../../ux/toasterWriter";
 import { gotoUrl } from "../../fun/gotoUrl.js";
 import { globals } from "../../globals.js";
+import { extendNumericInputBehaviors } from "../../fun/behavior/form.js";
 
 function asModel(
   form: HTMLFormElement
@@ -246,6 +247,7 @@ function hookupHandlers(
 
   on(domNode, "add-row", () => {
     const row = createRow();
+    extendNumericInputBehaviors(row);
     const focus = row.querySelector(
       "[name=account]"
     ) as HTMLElement;

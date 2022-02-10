@@ -41,6 +41,8 @@ function canDo(
 
   let permission = Permission.full;
   switch (verb) {
+    case "!any":
+      break;
     case "any":
       break;
     case "create":
@@ -96,6 +98,13 @@ function canDo(
       effectivePermission >
       Permission.none
     );
+
+  if (verb === "!any")
+    return (
+      effectivePermission ===
+      Permission.none
+    );
+
   return (
     permission ==
     (effectivePermission & permission)

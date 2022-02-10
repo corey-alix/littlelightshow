@@ -10,10 +10,9 @@ export function injectLabels(
   ) as Array<HTMLInputElement>;
 
   inputsToWrap.forEach((input) => {
-    const label = dom("label");
-    label.className =
-      "border padding rounded wrap " +
-      input.className;
+    const label = dom("label", {
+      class: input.className,
+    });
     label.innerText = input.placeholder;
     input.parentElement!.insertBefore(
       label,

@@ -4816,12 +4816,26 @@ function moveChildrenBefore(items, report) {
     report.before(items.firstChild);
 }
 
+// app/fun/get.ts
+function isDefined(value) {
+  return typeof value !== "undefined";
+}
+
 // app/fun/globalState.ts
 var globalState;
 function forceGlobalState() {
   return globalState = globalState || JSON.parse(localStorage.getItem("__GLOBAL_STATE__") || "{}");
 }
-function setGlobalState(key, value) {
+function setGlobalState(p1, p2) {
+  if (typeof p1 === "string" && isDefined(p2)) {
+    return setStateValue(p1, p2);
+  } else {
+    if (isDefined(p2))
+      throw "unwanted parameter provided";
+    Object.keys(p1).forEach((k) => setStateValue(k, p1[k]));
+  }
+}
+function setStateValue(key, value) {
   const state = forceGlobalState();
   const [head, ...tail] = key.split(".");
   if (!tail.length) {
@@ -4986,11 +5000,6 @@ async function forceUpdatestampIndex(tableName) {
     ]
   });
   return await client.query(query);
-}
-
-// app/fun/get.ts
-function isDefined(value) {
-  return typeof value !== "undefined";
 }
 
 // app/services/StorageModel.ts
@@ -5526,6 +5535,57 @@ function gotoUrl(url) {
   location.replace(url);
 }
 
+// app/fun/behavior/input.ts
+function selectOnFocus(element) {
+  on(element, "focus", () => element.select());
+}
+function formatAsCurrency(input) {
+  const doit = () => {
+    const textValue = input.value;
+    const numericValue = input.valueAsNumber?.toFixed(2);
+    if (textValue != numericValue) {
+      input.value = numericValue;
+    }
+  };
+  input.step = "0.01";
+  input.addEventListener("change", doit);
+  doit();
+}
+function formatUppercase(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").toUpperCase();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+function addFormatter(change, input) {
+  change();
+  input.addEventListener("change", change);
+}
+function formatTrim(input) {
+  addFormatter(() => {
+    const textValue = (input.value || "").trim();
+    if (textValue != input.value) {
+      input.value = textValue;
+    }
+  }, input);
+}
+
+// app/fun/behavior/form.ts
+function extendNumericInputBehaviors(form) {
+  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
+  numberInput.forEach(selectOnFocus);
+  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
+  currencyInput.forEach(formatAsCurrency);
+}
+function extendTextInputBehaviors(form) {
+  const textInput = Array.from(form.querySelectorAll("input[type=text],input[type=email],input[type=tel]"));
+  textInput.forEach(selectOnFocus);
+  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
+  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
+}
+
 // app/gl/templates/glgrid.tsx
 function asModel(form) {
   const result = {
@@ -5639,6 +5699,7 @@ function hookupHandlers(domNode) {
   });
   on(domNode, "add-row", () => {
     const row = createRow();
+    extendNumericInputBehaviors(row);
     const focus = row.querySelector("[name=account]");
     moveChildrenBefore(row, lineItems);
     focus.focus();
@@ -5963,18 +6024,6 @@ async function identify() {
   return true;
 }
 
-// app/ux/injectLabels.ts
-function injectLabels(domNode) {
-  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
-  inputsToWrap.forEach((input) => {
-    const label = dom("label");
-    label.className = "border padding rounded wrap " + input.className;
-    label.innerText = input.placeholder;
-    input.parentElement.insertBefore(label, input);
-    label.appendChild(input);
-  });
-}
-
 // app/services/invoices.ts
 var INVOICE_TABLE = "invoices";
 var invoiceModel = new StorageModel({
@@ -6143,6 +6192,8 @@ function canDo(code, accessControlItems) {
   const [noun, verb] = code.split(":").reverse();
   let permission = Permission.full;
   switch (verb) {
+    case "!any":
+      break;
     case "any":
       break;
     case "create":
@@ -6180,6 +6231,8 @@ function canDo(code, accessControlItems) {
   }
   if (!verb || verb === "any")
     return effectivePermission > Permission.none;
+  if (verb === "!any")
+    return effectivePermission === Permission.none;
   return permission == (effectivePermission & permission);
 }
 
@@ -6278,64 +6331,26 @@ function isNumericInputElement(item) {
   return isInputElement(item) && getInputType(item) === "number";
 }
 
-// app/fun/behavior/input.ts
-function selectOnFocus(element) {
-  on(element, "focus", () => element.select());
-}
-function formatAsCurrency(input) {
-  const doit = () => {
-    const textValue = input.value;
-    const numericValue = input.valueAsNumber?.toFixed(2);
-    if (textValue != numericValue) {
-      input.value = numericValue;
-    }
-  };
-  input.step = "0.01";
-  input.addEventListener("change", doit);
-  doit();
-}
-function formatUppercase(input) {
-  addFormatter(() => {
-    const textValue = (input.value || "").toUpperCase();
-    if (textValue != input.value) {
-      input.value = textValue;
-    }
-  }, input);
-}
-function addFormatter(change, input) {
-  change();
-  input.addEventListener("change", change);
-}
-function formatTrim(input) {
-  addFormatter(() => {
-    const textValue = (input.value || "").trim();
-    if (textValue != input.value) {
-      input.value = textValue;
-    }
-  }, input);
-}
-
-// app/fun/behavior/form.ts
-function extendNumericInputBehaviors(form) {
-  const numberInput = Array.from(form.querySelectorAll("input[type=number]"));
-  numberInput.forEach(selectOnFocus);
-  const currencyInput = numberInput.filter((i) => i.classList.contains("currency"));
-  currencyInput.forEach(formatAsCurrency);
-}
-function extendTextInputBehaviors(form) {
-  const textInput = Array.from(form.querySelectorAll("input[type=text]"));
-  textInput.forEach(selectOnFocus);
-  textInput.filter((i) => i.classList.contains("trim")).forEach(formatTrim);
-  textInput.filter((i) => i.classList.contains("uppercase")).forEach(formatUppercase);
+// app/ux/injectLabels.ts
+function injectLabels(domNode) {
+  const inputsToWrap = Array.from(domNode.querySelectorAll("input.auto-label"));
+  inputsToWrap.forEach((input) => {
+    const label = dom("label", {
+      class: input.className
+    });
+    label.innerText = input.placeholder;
+    input.parentElement.insertBefore(label, input);
+    label.appendChild(input);
+  });
 }
 
 // app/ux/prepareForm.ts
 async function prepareForm(formDom) {
   if (formDom.classList.contains("prepared")) {
-    alert("already prepared");
-    return;
+    throw "already prepared";
   }
   await stripAccessControlItems(formDom);
+  injectLabels(formDom);
   hookupTriggers(formDom);
   extendNumericInputBehaviors(formDom);
   extendTextInputBehaviors(formDom);
@@ -6349,7 +6364,6 @@ async function init() {
   const domNode = document.body;
   if (!isOffline()) {
     await identify();
-    await registerServiceWorker();
     setInitialState({
       VERSION: "1.0.3"
     });
@@ -6365,7 +6379,6 @@ async function init() {
     await upgradeFromCurrentVersion();
   }
   await prepareForm(domNode);
-  injectLabels(domNode);
   setMode();
   removeCssRestrictors();
 }
@@ -6398,9 +6411,6 @@ async function upgradeFrom103To105() {
   inventoryModel.upgradeTo104();
   await inventoryModel.synchronize();
   setGlobalState("VERSION", VERSION);
-}
-async function registerServiceWorker() {
-  const worker = await navigator.serviceWorker.register("/app/worker.js", { type: "module" });
 }
 
 // app/fun/getQueryParameter.ts
