@@ -4,6 +4,7 @@ littlelightshow
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/07115bde-5926-46c8-a1b4-7275dba80ae9/deploy-status)](https://app.netlify.com/sites/lightshow/deploys)
 
+This app requires a faunaDB key but you may find the application [here](https://lightshow.netlify.app/) on Netlify.
 ## Change Log
 
 - 2022-01-06: track my location
