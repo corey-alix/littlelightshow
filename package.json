@@ -46,6 +46,7 @@
     }
   },
   "dependencies": {
+    "@types/chai": "^4.3.4",
     "chai": "^4.3.4",
     "faunadb": "^4.4.1",
     "mocha": "^9.1.3",
